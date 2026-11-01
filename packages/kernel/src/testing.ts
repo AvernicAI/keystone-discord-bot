@@ -1,6 +1,7 @@
 import { InMemoryCooldownStore } from "./cooldowns";
 import { createSilentLogger } from "./logger";
 import type {
+  CommandCatalogEntry,
   CommandContext,
   HealthProbe,
   HealthReport,
@@ -20,6 +21,8 @@ export interface FakeInteractionInit {
   channelId?: string | null;
   options?: Record<string, string | number | boolean | null>;
   permissions?: string[];
+  subcommand?: string;
+  subcommandGroup?: string;
 }
 
 /**
@@ -34,6 +37,8 @@ export class FakeInteraction implements InteractionLike {
   readonly channelId: string | null;
   readonly userId: string;
   readonly options: Readonly<Record<string, string | number | boolean | null>>;
+  readonly subcommand?: string;
+  readonly subcommandGroup?: string;
   readonly permissions: readonly string[];
   readonly replies: ReplyInput[] = [];
 
@@ -47,6 +52,8 @@ export class FakeInteraction implements InteractionLike {
     this.channelId = init.channelId === undefined ? "99" : init.channelId;
     this.userId = init.userId ?? "42";
     this.options = { ...(init.options ?? {}) };
+    this.subcommand = init.subcommand;
+    this.subcommandGroup = init.subcommandGroup;
     this.permissions = init.permissions ?? [];
   }
 
@@ -134,6 +141,7 @@ export interface TestContextOptions {
   community?: import("./community").CommunityPort;
   invites?: import("./invites").InvitePort;
   ai?: import("./ai").AiPort;
+  catalog?: readonly CommandCatalogEntry[];
 }
 
 export type TestContext = CommandContext & { interaction: FakeInteraction };
@@ -146,6 +154,10 @@ export function createTestContext(options: TestContextOptions = {}): TestContext
     moduleId: options.moduleId ?? "test",
     guildId: interaction.guildId,
     userId: interaction.userId,
+    commandPath: [interaction.subcommandGroup, interaction.subcommand].filter(
+      (part): part is string => Boolean(part),
+    ),
+    catalog: options.catalog ?? [],
     settings: createTestSettings(options.settings),
     logger: options.logger ?? createSilentLogger(),
     now: options.now ?? (() => 1_700_000_000_000),

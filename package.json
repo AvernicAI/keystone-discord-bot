@@ -38,6 +38,8 @@
     "portability": "tsx scripts/portability.ts",
     "commands:sync": "tsx scripts/commands.ts",
     "commands:resync": "tsx scripts/commands.ts --clear",
+    "commands:catalog": "tsx scripts/commands-catalog.ts",
+    "commands:doctor": "tsx scripts/commands-doctor.ts",
     "benchmark:ai": "tsx scripts/benchmark-ai.ts",
     "pass:end": "node memory/tools/pass-end.mjs",
     "check": "pnpm typecheck && pnpm test && pnpm budget && pnpm audit:intents && pnpm audit:channels && pnpm memory:check"

@@ -66,6 +66,21 @@ function buildDeps(): DispatchDeps {
           await ctx.interaction.reply({ content: "ok" });
         },
       }),
+      defineCommand({
+        name: "hub",
+        description: "A subcommand hub",
+        subcommands: [
+          { name: "one", description: "First" },
+          { name: "two", description: "Second", options: [
+            { type: "string", name: "value", description: "A value" },
+          ] },
+        ],
+        async execute(ctx) {
+          await ctx.interaction.reply({
+            content: `${ctx.commandPath.join("/")}:${String(ctx.interaction.options.value ?? "")}`,
+          });
+        },
+      }),
     ],
   });
 
@@ -133,6 +148,25 @@ describe("dispatchCommand", () => {
     const interaction = new FakeInteraction({ commandName: "friendly" });
     const outcome = await dispatchCommand(deps, interaction);
     expect(outcome.message).toBe("That channel is already archived.");
+  });
+
+  it("dispatches a subcommand and exposes its path", async () => {
+    const deps = buildDeps();
+    const interaction = new FakeInteraction({
+      commandName: "hub",
+      subcommand: "two",
+      options: { value: "ok" },
+    });
+    await expect(dispatchCommand(deps, interaction)).resolves.toEqual({ status: "ok" });
+    expect(interaction.lastReply?.content).toBe("two:ok");
+  });
+
+  it("rejects a subcommand that the root does not declare", async () => {
+    const deps = buildDeps();
+    const interaction = new FakeInteraction({ commandName: "hub", subcommand: "nope" });
+    await expect(dispatchCommand(deps, interaction)).resolves.toEqual({
+      status: "unknown-command",
+    });
   });
 
   it("enforces a cooldown per user", async () => {

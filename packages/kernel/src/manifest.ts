@@ -1,5 +1,10 @@
 import type { ZodTypeAny } from "zod";
-import type { CommandDefinition } from "./types";
+import type {
+  CommandDefinition,
+  CommandGroupDefinition,
+  CommandOption,
+  SubcommandDefinition,
+} from "./types";
 
 export const MODULE_ID_PATTERN = /^[a-z][a-z0-9-]{1,31}$/;
 /** Discord's own rule for slash-command and option names. */
@@ -100,21 +105,91 @@ export function validateManifest(manifest: ModuleManifest): string[] {
     if (seen.has(command.name)) errors.push(`${label}: declared twice in this module`);
     seen.add(command.name);
 
-    const options = command.options ?? [];
-    if (options.length > 25) errors.push(`${label}: Discord allows at most 25 options`);
-    let sawOptional = false;
-    for (const option of options) {
-      if (!COMMAND_NAME_PATTERN.test(option.name)) errors.push(`${label}: invalid option name "${option.name}"`);
-      if (!option.description?.trim()) errors.push(`${label}: option "${option.name}" needs a description`);
-      if (option.required) {
-        if (sawOptional) {
-          errors.push(`${label}: required option "${option.name}" cannot follow an optional option`);
-        }
-      } else {
-        sawOptional = true;
-      }
+    if (command.subcommands?.length && command.groups?.length) {
+      errors.push(`${label}: use either subcommands or groups, not both`);
+    }
+    if ((command.subcommands?.length || command.groups?.length) && (command.options?.length ?? 0) > 0) {
+      errors.push(`${label}: a root with subcommands cannot also declare root options`);
+    }
+
+    validateOptions(label, command.options ?? [], errors);
+
+    const subcommandNames = new Set<string>();
+    const direct = command.subcommands ?? [];
+    if (direct.length > 25) errors.push(`${label}: Discord allows at most 25 subcommands`);
+    for (const subcommand of direct) {
+      validateSubcommand(label, subcommand, subcommandNames, errors);
+    }
+
+    const groups = command.groups ?? [];
+    if (groups.length > 25) errors.push(`${label}: Discord allows at most 25 subcommand groups`);
+    const groupNames = new Set<string>();
+    for (const group of groups) {
+      validateGroup(label, group, groupNames, subcommandNames, errors);
     }
   }
 
   return errors;
+}
+
+function validateOptions(label: string, options: readonly CommandOption[], errors: string[]): void {
+  if (options.length > 25) errors.push(`${label}: Discord allows at most 25 options`);
+  let sawOptional = false;
+  for (const option of options) {
+    if (!COMMAND_NAME_PATTERN.test(option.name)) {
+      errors.push(`${label}: invalid option name "${option.name}"`);
+    }
+    if (!option.description?.trim()) {
+      errors.push(`${label}: option "${option.name}" needs a description`);
+    }
+    if (option.required) {
+      if (sawOptional) {
+        errors.push(`${label}: required option "${option.name}" cannot follow an optional option`);
+      }
+    } else {
+      sawOptional = true;
+    }
+  }
+}
+
+function validateSubcommand(
+  rootLabel: string,
+  subcommand: SubcommandDefinition,
+  names: Set<string>,
+  errors: string[],
+): void {
+  const label = `${rootLabel} ${subcommand.name || "<unnamed>"}`;
+  if (!COMMAND_NAME_PATTERN.test(subcommand.name)) errors.push(`${label}: invalid subcommand name`);
+  if (!subcommand.description?.trim()) errors.push(`${label}: description is required`);
+  if (subcommand.description && subcommand.description.length > 100) {
+    errors.push(`${label}: description must be 100 characters or fewer`);
+  }
+  if (names.has(subcommand.name)) errors.push(`${label}: declared twice in this command`);
+  names.add(subcommand.name);
+  validateOptions(label, subcommand.options ?? [], errors);
+}
+
+function validateGroup(
+  rootLabel: string,
+  group: CommandGroupDefinition,
+  groupNames: Set<string>,
+  subcommandNames: Set<string>,
+  errors: string[],
+): void {
+  const label = `${rootLabel} ${group.name || "<unnamed>"}`;
+  if (!COMMAND_NAME_PATTERN.test(group.name)) errors.push(`${label}: invalid group name`);
+  if (!group.description?.trim()) errors.push(`${label}: group description is required`);
+  if (group.description && group.description.length > 100) {
+    errors.push(`${label}: group description must be 100 characters or fewer`);
+  }
+  if (groupNames.has(group.name)) errors.push(`${label}: group declared twice in this command`);
+  groupNames.add(group.name);
+  if (!Array.isArray(group.subcommands) || group.subcommands.length === 0) {
+    errors.push(`${label}: a group needs at least one subcommand`);
+    return;
+  }
+  if (group.subcommands.length > 25) errors.push(`${label}: Discord allows at most 25 subcommands`);
+  for (const subcommand of group.subcommands) {
+    validateSubcommand(`${rootLabel} ${group.name}`, subcommand, subcommandNames, errors);
+  }
 }

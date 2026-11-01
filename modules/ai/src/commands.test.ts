@@ -21,6 +21,7 @@ function context(options: Options, permissions: string[] = [], overrides: Record
     userId: "user-a",
     permissions,
     options,
+    subcommand: typeof options.action === "string" ? options.action : undefined,
   });
   const ctx = createTestContext({
     interaction,

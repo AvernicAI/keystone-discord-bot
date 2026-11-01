@@ -20,12 +20,12 @@ up-sell.
 
 | Command | Options | Guards | Behaviour |
 | --- | --- | --- | --- |
-| `/rank` | `action` (view, leaderboard, rewards, admin, balance, daily, pay, shop, buy, gamble, ledger, season), `user`, `amount`, `level`, `value`, `item`, `limit`, `days` | guild-only; `ManageGuild` for rewards/admin/season | Reads XP/rank, configures role rewards, administers levels, runs the ledger-backed currency (balance, daily, pay, shop/buy, gamble, ledger), and starts a season (archives, then clears the projection). |
-| `/ticket` | `action` (panel, open, claim, close, add, transcript, summary, stats), `subject`, `user`, `channel`, `ticket`, `title` | guild-only; `ManageGuild` for panel/transcript/summary/stats | Posts a panel, opens a private thread, claims/closes it, adds a participant, returns a transcript, calls the AI summary port and reports SLA stats. |
-| `/tools` | `action` (embed, tag, reminder, schedule, giveaway, giveaway-end, giveaway-reroll, poll, feed, stat, welcome, roles, starboard, starboard-override, voice, birthdays, birthday, suggestions, suggestion, suggestion-decide, sticky, responder, responders, responder-remove), `name`, `value`, `channel`, `target`, `role`, `user`, `duration`, `limit`, `url`, `match` | guild-only; `ManageGuild` for configuration and server-wide sends | One utility root for content, giveaways, feeds, stat channels, reaction-role buttons/selects, birthdays, suggestions, sticky messages, auto-responders and event configuration. |
+| `/rank` | subcommands `view`, `leaderboard`, `rewards`, `admin`, `balance`, `daily`, `pay`, `shop`, `buy`, `gamble`, `ledger`, `season`; options `user`, `amount`, `level`, `value`, `item`, `limit`, `days` | guild-only; `ManageGuild` for rewards/admin/season | Reads XP/rank, configures role rewards, administers levels, runs the ledger-backed currency (balance, daily, pay, shop/buy, gamble, ledger), and starts a season (archives, then clears the projection). |
+| `/ticket` | subcommands `panel`, `open`, `claim`, `close`, `add`, `transcript`, `summary`, `stats`; options `subject`, `user`, `channel`, `ticket`, `title` | guild-only; `ManageGuild` for panel/transcript/summary/stats | Posts a panel, opens a private thread, claims/closes it, adds a participant, returns a transcript, calls the AI summary port and reports SLA stats. |
+| `/tools` | subcommands `embed`, `tag`, `reminder`, `schedule`, `giveaway`, `giveaway-end`, `giveaway-reroll`, `poll`, `feed`, `stat`, `welcome`, `roles`, `starboard`, `starboard-override`, `voice`, `birthdays`, `birthday`, `suggestions`, `suggestion`, `suggestion-decide`, `sticky`, `responder`, `responders`, `responder-remove`; options `name`, `value`, `channel`, `target`, `role`, `user`, `duration`, `limit`, `url`, `match` | guild-only; `ManageGuild` for configuration and server-wide sends | One utility root for content, giveaways, feeds, stat channels, reaction-role buttons/selects, birthdays, suggestions, sticky messages, auto-responders and event configuration. |
 
-The three roots take the bot from 6 to **10 of Discord's 100** global commands.
-The P3 exit requires fewer than 20 roots; this is well inside it.
+The three roots are part of the current **12 roots / 77 subcommands**. The P3
+exit requires fewer than 20 roots; this is well inside it.
 
 ## Features and where they live
 

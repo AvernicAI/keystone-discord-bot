@@ -79,13 +79,26 @@ so the docs cannot silently drift from the code.
 
 ## What a hub command is
 
-Because of the [[Command-Budget]], features share root commands. A module may
-contribute a subcommand to `/config` without owning the root:
+Because of the [[Command-Budget]], features share root commands. A root is owned
+by exactly one module; its subcommands are declared on that module's command and
+run through the same guards and dispatch:
 
 ```ts
-// kernel-level: /config <module> <key> <value>
+export const tools = defineCommand({
+  name: "tools",
+  description: "Community utilities.",
+  subcommands: [
+    { name: "poll", description: "Post a poll.", options: [...] },
+    { name: "giveaway", description: "Start a giveaway.", options: [...] },
+  ],
+  async execute(ctx) {
+    const selected = ctx.commandPath[0]; // "poll" | "giveaway"
+    ...
+  },
+});
 ```
 
-The registry records ownership per root command. Only one module may own a root;
-others register subcommand handlers against it. This is the P1 extension point
-that keeps the budget at 100 while features grow.
+Subcommands do not spend another global slot. There is deliberately **no**
+cross-module registration into another module's root: that would make one root
+have several owners and hide which module answers a request. Put the command in
+the module that owns the domain, or add a new root with its module.

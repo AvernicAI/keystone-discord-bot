@@ -1,11 +1,14 @@
 import {
   ActionRowBuilder,
+  ApplicationCommandOptionType,
   ButtonBuilder,
   ButtonStyle,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
   SlashCommandBuilder,
+  SlashCommandSubcommandBuilder,
   type ChatInputCommandInteraction,
+  type CommandInteractionOption,
   type InteractionEditReplyOptions,
   type InteractionReplyOptions,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -23,6 +26,28 @@ import type {
  * like. Everything downstream speaks `InteractionLike`, which is why every
  * command can be tested with a plain object.
  */
+/**
+ * Discord nests a subcommand's arguments inside the subcommand option. A
+ * structural flat map is what the registry speaks, so walk the tree and keep
+ * only leaf values: `{ user: "…", reason: "…" }`, not `{ ban: null }`.
+ */
+function flattenOptions(
+  data: readonly CommandInteractionOption[],
+): Record<string, string | number | boolean | null> {
+  const flat: Record<string, string | number | boolean | null> = {};
+  for (const option of data) {
+    if (
+      option.type === ApplicationCommandOptionType.Subcommand ||
+      option.type === ApplicationCommandOptionType.SubcommandGroup
+    ) {
+      Object.assign(flat, flattenOptions(option.options ?? []));
+    } else {
+      flat[option.name] = (option.value ?? null) as string | number | boolean | null;
+    }
+  }
+  return flat;
+}
+
 export function asInteractionLike(interaction: ChatInputCommandInteraction): InteractionLike {
   return {
     id: interaction.id,
@@ -30,9 +55,9 @@ export function asInteractionLike(interaction: ChatInputCommandInteraction): Int
     guildId: interaction.guildId,
     channelId: interaction.channelId ?? null,
     userId: interaction.user.id,
-    options: Object.fromEntries(
-      interaction.options.data.map((option) => [option.name, option.value ?? null]),
-    ) as Record<string, string | number | boolean | null>,
+    options: flattenOptions(interaction.options.data),
+    subcommand: interaction.options.getSubcommand(false) ?? undefined,
+    subcommandGroup: interaction.options.getSubcommandGroup(false) ?? undefined,
     permissions: interaction.memberPermissions ? interaction.memberPermissions.toArray() : [],
     get replied() {
       return interaction.replied;
@@ -122,12 +147,39 @@ export function buildCommandJson(
     .setName(definition.name)
     .setDescription(definition.description);
 
-  for (const option of definition.options ?? []) addOption(builder, option);
+  if (definition.groups?.length) {
+    for (const group of definition.groups) {
+      builder.addSubcommandGroup((groupBuilder) => {
+        groupBuilder.setName(group.name).setDescription(group.description);
+        for (const subcommand of group.subcommands) {
+          groupBuilder.addSubcommand((subBuilder) => {
+            subBuilder.setName(subcommand.name).setDescription(subcommand.description);
+            for (const option of subcommand.options ?? []) addOption(subBuilder, option);
+            return subBuilder;
+          });
+        }
+        return groupBuilder;
+      });
+    }
+  } else if (definition.subcommands?.length) {
+    for (const subcommand of definition.subcommands) {
+      builder.addSubcommand((subBuilder) => {
+        subBuilder.setName(subcommand.name).setDescription(subcommand.description);
+        for (const option of subcommand.options ?? []) addOption(subBuilder, option);
+        return subBuilder;
+      });
+    }
+  } else {
+    for (const option of definition.options ?? []) addOption(builder, option);
+  }
 
   return builder.toJSON();
 }
 
-function addOption(builder: SlashCommandBuilder, option: CommandOption): void {
+function addOption(
+  builder: SlashCommandBuilder | SlashCommandSubcommandBuilder,
+  option: CommandOption,
+): void {
   const { name, description } = option;
   const required = option.required ?? false;
 

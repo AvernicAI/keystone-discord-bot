@@ -143,8 +143,9 @@ same interfaces. No module changes when a port changes.
 
 ### Command allocation
 
-Seven hubs plus four standalone roots = ~11 of Discord's 100 global commands.
-Subcommands are free inside a root.
+The target is 18 roots. Twelve are live today with 77 real subcommands; the
+remaining roots land with their modules, not as empty placeholders. Subcommands
+are free inside a root, so most growth should not spend another slot.
 
 | Root | Subcommands | Replaces |
 | --- | --- | --- |

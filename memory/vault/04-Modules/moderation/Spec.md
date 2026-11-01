@@ -12,12 +12,12 @@ reason, evidence and an appeal path. The default is dry-run.
 
 | Command | Options | Guards | Behaviour |
 | --- | --- | --- | --- |
-| `/mod` | `action` (ban, kick, timeout, warn, purge, lock, unlock, slowmode, case, note, history, links, filters, review), `user`, `reason`, `case`, `duration`, `limit`, `channel`, `dry_run` | guild-only, `ModerateMembers` | Executes one manual action or reads the case/review queue. `links` lists link findings, `filters` lists link/profanity/zalgo findings, and `review` closes the loop. Every enforced action opens a case before the external call. |
+| `/mod` | subcommands `ban`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `links`, `filters`, `review`; each declares only the options it needs (`user`, `reason`, `case`, `duration`, `limit`, `channel`, `dry_run`) | guild-only, `ModerateMembers` | Executes one manual action or reads the case/review queue. `links` lists link findings, `filters` lists link/profanity/zalgo findings, and `review` closes the loop. Every enforced action opens a case before the external call. |
 | `/appeal` | `case` (required), `message` | guild-only | Opens an appeal for the target's own case. Adds an `appealed` event; never edits history or reverses automatically. |
 | `/verify` | none | guild-only | Completes the join gate by removing the quarantine role. A command fallback for the verification button. |
 
-`/mod` is a hub: those fourteen actions cost **one** global command. The module
-spends 3 of Discord's 100.
+`/mod` is a hub: those fourteen subcommands cost **one** global root. The module
+spends 3 of Discord's 100 roots (`/mod`, `/appeal`, `/verify`).
 
 ## Settings
 
@@ -172,4 +172,4 @@ permission **before** the Discord call.
   stripped; ordinary member messages still reach the coordinator.
 - `packages/db/src/cases.test.ts` — PGlite case numbering, events, state and
   concurrent allocation.
-- `pnpm budget` — 11/100 with all shipped commands.
+- `pnpm budget` — 12/100 roots with all shipped commands (77 subcommands).

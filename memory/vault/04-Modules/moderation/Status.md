@@ -24,10 +24,10 @@ P2 core shipped in pass 05 (2026-11-01).
 ## Verified
 
 ```
-pnpm test                                  # 234 tests / 38 files, 38 suites
+pnpm test                                  # 253 tests / 40 files
 pnpm vitest run modules/moderation        # 24 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal, verify, native plan
 pnpm test -- packages/db/src/cases.test.ts # 2 PGlite case-store tests
-pnpm budget                                # 11/100, status OK
+pnpm budget                                # 12/100 roots · 77 subcommands, status OK
 pnpm build                                 # bot, worker, migrate artefacts
 ```
 

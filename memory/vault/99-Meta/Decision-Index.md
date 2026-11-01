@@ -24,6 +24,7 @@
 | ADR-0015 | [[ADR-0015-portability-bundles-and-receipts\|Portability bundles, narrow merge and receipts]] | accepted | 2026-10-31 |
 | ADR-0016 | [[ADR-0016-dashboard-foundation\|Dashboard foundation: framework-free HTTP over kernel ports]] | accepted | 2026-11-01 |
 | ADR-0017 | [[ADR-0017-invite-tracking\|Invite tracking: diff the cache, store the join]] | accepted | 2026-11-01 |
+| ADR-0018 | [[ADR-0018-real-subcommands\|Real Discord subcommands, one owning module per root]] | accepted | 2026-11-01 |
 
 ## Rules
 

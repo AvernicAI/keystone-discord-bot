@@ -17,6 +17,9 @@ export const DISCORD_LIMITS = {
 export interface CommandMeasurement {
   name: string;
   moduleId: string;
+  /** Direct subcommands plus subcommands inside groups. */
+  subcommands: number;
+  /** The largest option list on any single node, which is what Discord caps. */
   options: number;
   /** Serialised size of the command definition, as a proxy for Discord's payload cap. */
   payloadChars: number;
@@ -26,6 +29,8 @@ export type BudgetStatus = "ok" | "warn" | "fail";
 
 export interface BudgetReport {
   commands: number;
+  subcommands: number;
+  actions: number;
   limit: number;
   remaining: number;
   warnAt: number;
@@ -36,15 +41,25 @@ export interface BudgetReport {
 
 function measure(registered: RegisteredCommand): CommandMeasurement {
   const { definition, moduleId } = registered;
+  const subcommands = [
+    ...(definition.subcommands ?? []),
+    ...(definition.groups ?? []).flatMap((group) => group.subcommands),
+  ];
   const payload = JSON.stringify({
     name: definition.name,
     description: definition.description,
     options: definition.options ?? [],
+    subcommands: definition.subcommands ?? [],
+    groups: definition.groups ?? [],
   });
   return {
     name: definition.name,
     moduleId,
-    options: definition.options?.length ?? 0,
+    subcommands: subcommands.length,
+    options: Math.max(
+      definition.options?.length ?? 0,
+      ...subcommands.map((subcommand) => subcommand.options?.length ?? 0),
+    ),
     payloadChars: payload.length,
   };
 }
@@ -74,6 +89,7 @@ export function auditMeasurements(perCommand: readonly CommandMeasurement[]): Bu
   }
 
   const commands = perCommand.length;
+  const subcommands = perCommand.reduce((sum, command) => sum + command.subcommands, 0);
   const status: BudgetStatus =
     violations.length > 0
       ? "fail"
@@ -83,6 +99,8 @@ export function auditMeasurements(perCommand: readonly CommandMeasurement[]): Bu
 
   return {
     commands,
+    subcommands,
+    actions: commands + subcommands,
     limit: DISCORD_LIMITS.globalCommands,
     remaining: Math.max(0, DISCORD_LIMITS.globalCommands - commands),
     warnAt: DISCORD_LIMITS.warnAt,
@@ -108,15 +126,16 @@ export function formatBudgetReport(report: BudgetReport, sortByModule = true): s
 
   const lines = [
     "Command budget",
-    `  ${report.commands}/${report.limit} global commands used (${report.remaining} left)`,
+    `  ${report.commands}/${report.limit} global roots used (${report.remaining} left)`,
+    `  ${report.subcommands} subcommands · ${report.actions} total actions`,
     `  status: ${report.status.toUpperCase()}`,
     "",
-    `  ${"/command".padEnd(nameWidth)}  ${"module".padEnd(moduleWidth)}  opts  chars`,
+    `  ${"/command".padEnd(nameWidth)}  ${"module".padEnd(moduleWidth)}  subs  opts  chars`,
   ];
 
   for (const row of rows) {
     lines.push(
-      `  ${`/${row.name}`.padEnd(nameWidth)}  ${row.moduleId.padEnd(moduleWidth)}  ${String(row.options).padStart(4)}  ${String(row.payloadChars).padStart(5)}`,
+      `  ${`/${row.name}`.padEnd(nameWidth)}  ${row.moduleId.padEnd(moduleWidth)}  ${String(row.subcommands).padStart(4)}  ${String(row.options).padStart(4)}  ${String(row.payloadChars).padStart(5)}`,
     );
   }
 

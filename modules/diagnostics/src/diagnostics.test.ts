@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ModuleRegistry, auditBudget } from "@keystone/kernel";
 import { FakeInteraction, createTestContext } from "@keystone/testing";
 import { about } from "./commands/about";
+import { help } from "./commands/help";
 import { ping } from "./commands/ping";
 import { formatDuration } from "./format";
 import { diagnosticsModule } from "./manifest";
@@ -9,8 +10,9 @@ import { diagnosticsModule } from "./manifest";
 describe("diagnostics module", () => {
   it("registers and fits the command budget", () => {
     const registry = new ModuleRegistry().register(diagnosticsModule);
-    expect(registry.commandNames()).toEqual(["ping", "about"]);
+    expect(registry.commandNames()).toEqual(["ping", "about", "help"]);
     expect(auditBudget(registry).status).toBe("ok");
+    expect(registry.catalog().find((entry) => entry.name === "help")?.subcommands).toHaveLength(5);
   });
 
   it("declares settings defaults that satisfy its own schema", () => {
@@ -46,6 +48,48 @@ describe("/about", () => {
     const embed = interaction.lastReply?.embeds?.[0];
     expect(embed?.title).toBe("Keystone");
     expect(embed?.fields?.find((field) => field.name === "Enabled here")?.value).toBe("no");
+  });
+});
+
+describe("/help", () => {
+  it("renders the live catalog with roots and subcommands", async () => {
+    const registry = new ModuleRegistry().register(diagnosticsModule);
+    const interaction = new FakeInteraction({ commandName: "help", subcommand: "commands" });
+    const ctx = createTestContext({
+      interaction,
+      moduleId: "diagnostics",
+      catalog: registry.catalog(),
+    });
+
+    await help.execute(ctx);
+
+    const embed = interaction.lastReply?.embeds?.[0];
+    expect(embed?.title).toBe("Command catalog");
+    expect(embed?.fields?.map((field) => field.name)).toContain("/help · 5 subcommands");
+  });
+
+  it("searches roots and subcommands", async () => {
+    const registry = new ModuleRegistry().register(diagnosticsModule);
+    const interaction = new FakeInteraction({
+      commandName: "help",
+      subcommand: "search",
+      options: { query: "browse" },
+    });
+    const ctx = createTestContext({
+      interaction,
+      moduleId: "diagnostics",
+      catalog: registry.catalog(),
+    });
+
+    await help.execute(ctx);
+
+    expect(interaction.lastReply?.content).toContain("/help browse");
+  });
+
+  it("refuses clearly when dispatch did not inject a catalog", async () => {
+    const interaction = new FakeInteraction({ commandName: "help", subcommand: "commands" });
+    const ctx = createTestContext({ interaction, moduleId: "diagnostics" });
+    await expect(help.execute(ctx)).rejects.toThrow(/catalog is not wired/i);
   });
 });
 

@@ -168,7 +168,8 @@ export async function renderAll() {
       ),
     "",
     `Current phase: **${project.phase}**. ${project.metrics?.tests ?? "?"} tests reported; ` +
-      `${project.metrics?.commands ?? "?"}/${project.metrics?.commandLimit ?? 100} commands.`,
+      `${project.metrics?.commands ?? "?"}/${project.metrics?.commandLimit ?? 100} global roots` +
+      `${project.metrics?.subcommands ? " (" + project.metrics.subcommands + " subcommands)" : ""}.`,
     "",
   ].join("\n");
 

@@ -6,12 +6,13 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-01",
   "phase": "P7",
-  "lastPass": "journal/2026-11-01-pass-25.md",
+  "lastPass": "journal/2026-11-01-pass-26.md",
   "metrics": {
-    "commands": 11,
+    "commands": 12,
+    "subcommands": 77,
     "commandLimit": 100,
     "modules": 6,
-    "tests": 234
+    "tests": 253
   },
   "modules": [
     {
@@ -25,7 +26,8 @@
       "teachingPath": "vault/04-Modules/diagnostics/Teaching.md",
       "commands": [
         "ping",
-        "about"
+        "about",
+        "help"
       ],
       "intents": [
         "Guilds"
@@ -246,6 +248,12 @@
       "title": "Invite tracking: diff the cache, store the join",
       "status": "accepted",
       "path": "vault/03-Architecture/ADR/ADR-0017-invite-tracking.md"
+    },
+    {
+      "id": "ADR-0018",
+      "title": "Real Discord subcommands, one owning module per root",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0018-real-subcommands.md"
     }
   ],
   "openQuestions": [

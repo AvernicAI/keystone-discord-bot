@@ -8,8 +8,6 @@ import {
 import { InviteService } from "../invites";
 import { inviteSettingsSchema } from "../settings";
 
-const ACTIONS = ["leaderboard", "stats", "who"] as const;
-
 function option(ctx: CommandContext, key: string): string | undefined {
   const value = ctx.interaction.options[key];
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
@@ -18,16 +16,16 @@ function option(ctx: CommandContext, key: string): string | undefined {
 export const invites = defineCommand({
   name: "invites",
   description: "Invite leaderboard, your invite stats, and who invited a member.",
-  options: [
-    {
-      type: "string",
-      name: "action",
-      description: "What to look up",
-      required: true,
-      choices: ACTIONS.map((value) => ({ name: value, value })),
-    },
-    { type: "user", name: "user", description: "Member to inspect (defaults to you)" },
-    { type: "integer", name: "limit", description: "Leaderboard rows", minValue: 1, maxValue: 25 },
+  subcommands: [
+    { name: "leaderboard", description: "Show who has brought the most members in.", options: [
+      { type: "integer", name: "limit", description: "Leaderboard rows", minValue: 1, maxValue: 25 },
+    ] },
+    { name: "stats", description: "Show a member's join and retention totals.", options: [
+      { type: "user", name: "user", description: "Member to inspect (defaults to you)" },
+    ] },
+    { name: "who", description: "Show who invited a member and any advisory flags.", options: [
+      { type: "user", name: "user", description: "Member to inspect (defaults to you)" },
+    ] },
   ],
   guards: [requireGuild, cooldown(3_000)],
   async execute(ctx: CommandContext): Promise<void> {
@@ -40,7 +38,7 @@ export const invites = defineCommand({
       settings,
       ctx.now,
     );
-    const selected = option(ctx, "action");
+    const selected = ctx.commandPath[0] ?? option(ctx, "action");
 
     if (selected === "leaderboard") {
       const limit = typeof ctx.interaction.options.limit === "number"

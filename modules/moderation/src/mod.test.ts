@@ -89,6 +89,7 @@ function buildContext(options: OptionValues, userId = "mod-1") {
     userId,
     permissions: ["ModerateMembers"],
     options,
+    subcommand: typeof options.action === "string" ? options.action : undefined,
   });
   const ctx = createTestContext({
     interaction,
@@ -113,7 +114,8 @@ describe("moderation module", () => {
     const interaction = new FakeInteraction({
       commandName: "mod",
       permissions: ["SendMessages"],
-      options: { action: "ban", user: "target", reason: "raid" },
+      options: { user: "target", reason: "raid" },
+      subcommand: "ban",
     });
     const outcome = await dispatchCommand(
       {
@@ -162,7 +164,8 @@ describe("moderation module", () => {
       commandName: "mod",
       guildId: "guild-1",
       permissions: ["ModerateMembers"],
-      options: { action: "ban", user: "target-1", reason: "raid" },
+      options: { user: "target-1", reason: "raid" },
+      subcommand: "ban",
     });
     const ctx = createTestContext({
       interaction,

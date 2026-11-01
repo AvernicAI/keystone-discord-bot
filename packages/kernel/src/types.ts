@@ -86,6 +86,10 @@ export interface InteractionLike {
   readonly userId: string;
   /** Parsed slash-command option values; user/channel/role values are IDs. */
   readonly options: Readonly<Record<string, string | number | boolean | null>>;
+  /** The selected subcommand, when the root is a hub. */
+  readonly subcommand?: string;
+  /** The selected subcommand group, when the root uses Discord groups. */
+  readonly subcommandGroup?: string;
   /** Permission names the invoking member holds, e.g. `["ManageGuild"]`. */
   readonly permissions: readonly string[];
   readonly replied: boolean;
@@ -202,6 +206,10 @@ export interface CommandContext {
   readonly moduleId: string;
   readonly guildId: string | null;
   readonly userId: string;
+  /** `[group, subcommand]` or `[subcommand]`; empty for a root-only command. */
+  readonly commandPath: readonly string[];
+  /** Every registered root and subcommand, injected by dispatch for /help. */
+  readonly catalog: readonly CommandCatalogEntry[];
   readonly settings: ModuleSettings;
   readonly logger: Logger;
   /** Injected clock so cooldowns and latency are deterministic in tests. */
@@ -249,15 +257,61 @@ export interface CommandOption {
   autocomplete?: boolean;
 }
 
-export interface CommandDefinition {
+export interface CommandHelp {
+  /** Permissions the command needs, for discovery copy. Guards remain the source of truth. */
+  permissions?: string[];
+  /** Ready-to-paste examples. */
+  examples?: string[];
+  /** Optional grouping for /help browse. Defaults to the owning module name. */
+  category?: string;
+}
+
+export interface SubcommandDefinition {
   name: string;
   description: string;
   options?: CommandOption[];
+  help?: CommandHelp;
+}
+
+export interface CommandGroupDefinition {
+  name: string;
+  description: string;
+  subcommands: SubcommandDefinition[];
+}
+
+export interface CommandDefinition {
+  name: string;
+  description: string;
+  /** Root options. Discord forbids root options when subcommands exist. */
+  options?: CommandOption[];
+  /** One level of subcommands under the root. */
+  subcommands?: SubcommandDefinition[];
+  /** One level of groups, each containing subcommands. */
+  groups?: CommandGroupDefinition[];
   /** Guards run in order, before `execute`. First failure stops dispatch. */
   guards?: Guard[];
+  /** Root execute runs for every subcommand; `ctx.commandPath` says which one. */
   execute(ctx: CommandContext): Promise<void>;
   /** Teaching note surfaced in docs, never sent to Discord. */
   notes?: string;
+  help?: CommandHelp;
+}
+
+export interface CommandCatalogSubcommand {
+  readonly name: string;
+  readonly description: string;
+  readonly group?: string;
+  readonly options: readonly CommandOption[];
+  readonly help?: CommandHelp;
+}
+
+export interface CommandCatalogEntry {
+  readonly name: string;
+  readonly moduleId: string;
+  readonly description: string;
+  readonly options: readonly CommandOption[];
+  readonly subcommands: readonly CommandCatalogSubcommand[];
+  readonly help?: CommandHelp;
 }
 
 /** The accountability record shared by moderation, security and appeals. */

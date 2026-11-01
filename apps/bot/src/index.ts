@@ -11,6 +11,7 @@ import {
 } from "@keystone/kernel";
 import { loadEnv, requireToken } from "@keystone/config";
 import { asInteractionLike, buildCommandJson } from "./adapt";
+import { commandDrift, hasDrift, toCommandJson } from "./command-sync";
 import { createClient } from "./client";
 import { modules } from "./modules";
 import { createRuntime } from "./runtime";
@@ -95,14 +96,11 @@ async function main(): Promise<void> {
       // cycle and read the result back. `pnpm commands:resync` runs the same
       // cycle on demand after a payload-only change.
       const payload = registry.listCommands().map((c) => buildCommandJson(c.definition));
-      const expected = new Set(payload.map((command) => command.name));
       let synced = await ready.application.commands.fetch();
-      const syncedNames = new Set([...synced.values()].map((command) => command.name));
-      const missing = [...expected].filter((name) => !syncedNames.has(name));
-      const extra = [...syncedNames].filter((name) => !expected.has(name));
+      const drift = commandDrift(payload, [...synced.values()].map(toCommandJson));
 
-      if (missing.length > 0 || extra.length > 0) {
-        logger.warn("command set drift; clearing before re-register", { missing, extra });
+      if (hasDrift(drift)) {
+        logger.warn("command set drift; clearing before re-register", { ...drift });
         await ready.application.commands.set([]);
         await ready.application.commands.set(payload);
         synced = await ready.application.commands.fetch();
@@ -111,11 +109,9 @@ async function main(): Promise<void> {
         logger.info("commands current", { count: synced.size });
       }
 
-      const finalNames = new Set([...synced.values()].map((command) => command.name));
-      const stillMissing = [...expected].filter((name) => !finalNames.has(name));
-      const stillExtra = [...finalNames].filter((name) => !expected.has(name));
-      if (stillMissing.length > 0 || stillExtra.length > 0) {
-        logger.error("command sync mismatch", { missing: stillMissing, extra: stillExtra });
+      const finalDrift = commandDrift(payload, [...synced.values()].map(toCommandJson));
+      if (hasDrift(finalDrift)) {
+        logger.error("command sync mismatch", { ...finalDrift });
       }
       for (const guild of ready.guilds.cache.values()) {
         try {

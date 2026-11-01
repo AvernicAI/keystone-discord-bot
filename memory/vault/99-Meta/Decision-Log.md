@@ -113,7 +113,7 @@ including the small calls that did not deserve an ADR.
 | # | Decision | Where |
 | --- | --- | --- |
 | 66 | The link filter is a local host blocklist plus a punycode heuristic; no remote threat feed, network call or paid reputation service | [[04-Modules/moderation/Spec\|Moderation spec]] |
-| 67 | `/mod links` is an action under the existing root, not a new command; review uses the existing `/mod review case=N` path | [[04-Modules/moderation/Spec\|Moderation spec]] |
+| 67 | `/mod links` is a subcommand under the existing root, not a new command; review uses the existing `/mod review case=N` path | [[04-Modules/moderation/Spec\|Moderation spec]] |
 | 68 | The only bot-author exception in the security adapter is a `keystone-test:` marker in `DEV_GUILD_ID`, stripped before evaluation; production has no marker path | [[Live-Testing]] |
 | 69 | The first live proof used `alert` mode; `delete` shares the coordinator path but was not claimed as live-run in pass 23 | [[04-Modules/moderation/Status\|Moderation status]] |
 
@@ -123,7 +123,7 @@ including the small calls that did not deserve an ADR.
 | --- | --- | --- |
 | 70 | Banned words match on Unicode word edges, never as substrings; escaping happens before the regex is compiled | [[04-Modules/moderation/Spec\|Moderation spec]] |
 | 71 | Profanity and zalgo are separate modes with separate settings; combining marks are legitimate in many scripts | [[04-Modules/moderation/Spec\|Moderation spec]] |
-| 72 | `/mod filters` is an action under the existing root; `/mod links` remains the link-only view | [[04-Modules/moderation/Spec\|Moderation spec]] |
+| 72 | `/mod filters` is a subcommand under the existing root; `/mod links` remains the link-only view | [[04-Modules/moderation/Spec\|Moderation spec]] |
 | 73 | The default word list is empty and both rules are off; the operator owns the policy | [[04-Modules/moderation/Spec\|Moderation spec]] |
 | 74 | The link filter's delete branch was proven live with a temporary `dryRun: false` seed; the committed dev seed and production default stay `alert`/dry-run | [[04-Modules/moderation/Status\|Moderation status]] |
 
@@ -136,6 +136,16 @@ including the small calls that did not deserve an ADR.
 | 77 | The 60-second cooldown is per trigger and written only after a successful send; a failed send retries next time | [[04-Modules/community/Spec\|Community spec]] |
 | 78 | The `keystone-test:` marker now has one shared matcher; a fixture message reaches the auto-responder only, never XP/starboard/tickets | [[Live-Testing]] |
 | 79 | The profanity `delete` branch was proven live with a temporary `dryRun: false` seed; this closes the pass-24 claim gap, and the committed seed stays `alert` | [[04-Modules/moderation/Status\|Moderation status]] |
+
+## 2026-11-01 — P7 command tree
+
+| # | Decision | Where |
+| --- | --- | --- |
+| 80 | Hubs register real Discord subcommands instead of one flat `action` option; a subcommand spends no global slot | [[ADR-0018-real-subcommands]] |
+| 81 | One module owns a root; cross-module registration into another module's root is rejected | [[ADR-0018-real-subcommands]] |
+| 82 | `/help` reads the registry catalog injected by dispatch; `pnpm commands:catalog` renders the same data to machine JSON and vault Markdown | [[Command-Catalog]] |
+| 83 | Boot sync compares name, description and the full option tree; a name-only comparison would miss subcommand changes | [[ADR-0018-real-subcommands]] |
+| 84 | The adapter flattens Discord's nested subcommand options; a top-level-only map silently drops every argument | `apps/bot/src/adapt.ts` |
 
 ## How to add a decision
 

@@ -41,6 +41,27 @@ const demo = defineCommand({
   },
 });
 
+const hub = defineCommand({
+  name: "hub",
+  description: "A subcommand hub used by the prefix bridge test.",
+  subcommands: [
+    { name: "status", description: "Show status" },
+    {
+      name: "say",
+      description: "Echo text",
+      options: [
+        { type: "string", name: "name", description: "Text to echo" },
+        { type: "integer", name: "amount", description: "A number", minValue: 1, maxValue: 10 },
+      ],
+    },
+  ],
+  async execute(ctx: CommandContext) {
+    await ctx.interaction.reply({
+      content: `${ctx.commandPath.join("/")}:${String(ctx.interaction.options.name)}:${String(ctx.interaction.options.amount)}`,
+    });
+  },
+});
+
 describe("prefix parsing", () => {
   it("keeps quoted values together", () => {
     expect(tokenizePrefix('say name="hello world" amount=2')).toEqual([
@@ -69,6 +90,18 @@ describe("prefix parsing", () => {
 
   it("rejects an unknown option instead of guessing", () => {
     expect(() => parsePrefixArgs(demo, ["status", "colour=blue"])).toThrow(/Unknown option "colour"/);
+  });
+
+  it("resolves a true subcommand and parses its options", () => {
+    const parsed = parsePrefixArgs(hub, ["say", "name=hello", "amount=2"]);
+    expect(parsed.subcommand).toBe("say");
+    expect(parsed.subcommandGroup).toBeUndefined();
+    expect(parsed.options).toEqual({ name: "hello", amount: 2 });
+  });
+
+  it("requires a subcommand and names the valid choices", () => {
+    expect(() => parsePrefixArgs(hub, [])).toThrow(/Choose a subcommand/);
+    expect(() => parsePrefixArgs(hub, ["explode"])).toThrow(/status, say/);
   });
 });
 
@@ -166,5 +199,47 @@ describe("prefix bridge", () => {
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(send).not.toHaveBeenCalled();
     stop();
+  });
+
+  it("dispatches a true subcommand through the real pipeline", async () => {
+    const client = Object.assign(new EventEmitter(), {
+      user: { id: BOT },
+    }) as unknown as Client;
+    const registry = new ModuleRegistry().register({
+      id: "test",
+      name: "Test",
+      description: "Test module",
+      version: "0.1.0",
+      settingsSchema: z.object({}),
+      defaultSettings: {},
+      commands: [hub],
+    });
+    const settings = new SettingsService(new InMemorySettingsRepository(), registry);
+    registerPrefixCommands(
+      client,
+      {
+        registry,
+        settings,
+        logger: createSilentLogger(),
+        cooldowns: { hit: async () => ({ allowed: true, retryAfterMs: 0 }) },
+        queue: { enqueue: async () => "job", close: async () => undefined },
+        health: {
+          probe: async () => ({
+            database: { configured: false, reachable: false, migrated: false },
+            cache: { configured: false, reachable: false },
+          }),
+        },
+      },
+      { guildId: GUILD },
+    );
+
+    const { message, send } = fakeMessage('!hub say name="hello world" amount=2');
+    (client as unknown as EventEmitter).emit(Events.MessageCreate, message);
+
+    await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+    expect(send.mock.calls[0]?.[0]).toMatchObject({
+      content: "say:hello world:2",
+      allowedMentions: { parse: [] },
+    });
   });
 });

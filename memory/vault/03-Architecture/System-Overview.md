@@ -44,9 +44,10 @@ use, because it only ever sees the interface.
 
 1. discord.js emits `interactionCreate`.
 2. `adapt.asInteractionLike` narrows it to `commandName`, `guildId`, `channelId`,
-   `userId`, `interaction.id`, parsed `options`, `permissions` and the four reply
-   methods.
-3. `dispatchCommand` resolves the command and opens one tracing span.
+   `userId`, `interaction.id`, `subcommand` / `subcommandGroup`, the flattened
+   `options` tree, `permissions` and the four reply methods.
+3. `dispatchCommand` resolves the command, validates the selected path, exposes
+   it as `ctx.commandPath` and opens one tracing span.
 4. Guards run in order — guild, permissions, cooldown (via the injected store).
 5. `execute` runs with a settings handle bound to its module, plus the queue and
    health ports.

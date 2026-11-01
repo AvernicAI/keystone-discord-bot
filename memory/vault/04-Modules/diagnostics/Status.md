@@ -2,18 +2,21 @@
 
 ## Now
 
-P0 complete.
+P0 complete; `/help` added in pass 26.
 
 - Manifest registered in `packages/module-catalog/src/index.ts` and re-exported by `apps/bot/src/modules.ts`.
 - `/ping` replies with uptime; 3 s per-user cooldown.
 - `/about` replies with an ephemeral embed read from guild settings.
-- Six tests, no token required.
+- `/help` exposes `browse`, `commands`, `search`, `privacy` and `changelog` from
+  the live registry catalog. Live 2026-11-01: `!help commands`, `!help browse`
+  and `!help search query=ban` returned the catalog, module map and one hit.
+- Eight tests, no token required.
 
 ## Verified
 
 ```
-pnpm test -- modules   # registry, budget, defaults, /ping, /about, formatter
-pnpm budget            # 2/100, status OK
+pnpm test -- modules   # registry, budget, defaults, /ping, /about, /help, formatter
+pnpm budget            # 3/100 roots for this module, status OK
 ```
 
 ## Known limitations
@@ -30,7 +33,8 @@ pnpm budget            # 2/100, status OK
 - P1: read `enabled` in dispatch (module toggles are a kernel concern, not a
   per-command check).
 - P1: add gateway latency once `client.ws.ping` is passed through a kernel port.
-- P2: add `/help`, generated from the registry rather than hand-written.
+- P7: add schema-driven help panels if the embed field limit becomes tight.
+- P7: add context-menu entries once the context-menu budget is exercised.
 
 ## Teaching
 

@@ -19,7 +19,7 @@ https://github.com/RNGBubba/keystone-discord-bot
 | See the whole mission | [[Master-Plan]] · [[Parity-Matrix]] |
 | Check what is actually proven | [[01-Mission/Status\|Project status]] |
 | Understand the code | [[System-Overview]] · [[Module-Contract]] · [[Live-Testing]] |
-| Understand the 100-command wall | [[Command-Budget]] |
+| Understand the 100-command wall | [[Command-Budget]] · [[Command-Catalog]] |
 | Add a feature | [[04-Modules/diagnostics/Spec\|Diagnostics spec]] then copy the folder |
 | Know what is actually shipped | [[Feature-Status]] · [[Pass-Ledger]] |
 | Know what competitors do | [[02-Research/Competitors/MEE6\|MEE6]] · [[Dyno]] · [[Carl-bot]] · [[Competitive-2026]] |
@@ -55,6 +55,11 @@ https://github.com/RNGBubba/keystone-discord-bot
   `/tools responder-remove` configure it under the existing root. Live:  the `hello keystone` trigger replied, a second message inside 60 seconds did not,
   and a third after the window did. See
   [[04-Modules/community/Spec|Community spec]].
+- **Command tree** in repo (pass 26): real Discord subcommands replaced the flat
+  `action` option across every existing hub — 12 roots, 77 subcommands, 89
+  actions. `/help` is generated from the live registry; `pnpm commands:catalog`
+  writes [[Command-Catalog]] and `pnpm commands:doctor` checks the live shape.
+  A human slash invocation remains the one unobserved surface.
 - Phase **P6** foundation in repo: Discord OAuth2/PKCE, opaque Postgres-backed
   sessions, BigInt per-guild authorization with a bot-membership check, a
   server-rendered dashboard, `/api/v1` reads and schema-validated module settings
@@ -69,10 +74,11 @@ https://github.com/RNGBubba/keystone-discord-bot
   `pnpm commands:resync` cycle.
 - **No paid dependencies:** the project uses public GitHub, Discord, local
   Postgres/Redis/Ollama and free in-process test engines only.
-- **Live 2026-11-01:** AI Team#5758 logged in, cleared and re-registered all 11
-  commands (then fetched Discord's list to prove it), and qwen3:8b via Ollama
-  answered mentions in `#ai-chat`. A dev-only `!` bridge proved `!ping`, `!about`,
-  `!ai status`, `!mod history`, `!mod links`, `!mod filters`,
+- **Live 2026-11-01:** AI Team#5758 logged in, cleared and re-registered 12
+  roots with 77 subcommands (then fetched Discord's shape to prove it), and
+  qwen3:8b via Ollama answered mentions in `#ai-chat`. A dev-only `!` bridge
+  proved `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
+  query=ban`, `!ai status`, `!mod history`, `!mod links`, `!mod filters`,
   `!rank leaderboard`, `!invites leaderboard` and `!invites who` through the real
   dispatch pipeline. The content filters produced live link, delete, profanity
   and zalgo cases; `!mod filters` listed them, `!mod review` closed one, and
@@ -85,7 +91,7 @@ https://github.com/RNGBubba/keystone-discord-bot
 - Phase **P4** shipped the AI layer and the ledger-backed economy hardening.
 - Phase **P3** shipped the community suite: leveling, reaction roles, welcome,
   starboard, tickets, giveaways, temp voice, content and seasons.
-- 11 of Discord's 100 global commands used; 6 modules registered.
+- 12 of Discord's 100 global roots used, with 77 subcommands; 6 modules registered.
 - The full suite covers the 5,000-row portability round trip and the failure,
   rollback and deletion paths; `pnpm check` also runs the intent, channel and
   memory audits.

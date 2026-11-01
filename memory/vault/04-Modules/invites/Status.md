@@ -6,7 +6,7 @@ P7 invite tracking is complete in-repo. It is the sixth module and the first P7
 parity slice.
 
 - `/invites` is registered through the shared catalog with `leaderboard`, `stats`
-  and `who`; the command ledger is **11/100**.
+  and `who`; the command ledger is **12 roots / 77 subcommands**.
 - Attribution diffs cached invite counters after every join **when a baseline
   exists**, serialized per guild. A cold cache records the join without an
   inviter and seeds the cache; historical `uses` totals are never treated as new
@@ -42,7 +42,8 @@ pnpm vitest run packages/db/src/invite-store.test.ts
 - PGlite: SQL totals and ordering, idempotency, newest-join lookup, scoped
   reads, and survival across close/reopen.
 - Live 2026-11-01: AI Team#5758 started with `GuildInvites` + `GuildMembers`,
-  re-registered 11 commands after drift (Discord returned `invites`), and
+  re-registered 12 roots / 77 subcommands after drift (Discord returned
+  `invites`), and
   `!invites leaderboard` / `!invites who` ran through the real dispatch pipeline
   in `#ai-chat`. The `who` reply is visible; the leaderboard is an embed that the
   MCP text reader does not render.

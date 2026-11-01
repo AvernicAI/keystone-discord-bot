@@ -1,41 +1,38 @@
-import { defineCommand, UserError, type CommandContext } from "@keystone/kernel";
+import { defineCommand, UserError, type CommandContext, type CommandOption } from "@keystone/kernel";
 import { EconomyService, LevelingService } from "../progress";
 import { SeasonService } from "../extras";
 import { action, integer, port, requirePermission, settingsFor, text, userId } from "./helpers";
 
-const ACTIONS = [
-  "view",
-  "leaderboard",
-  "rewards",
-  "admin",
-  "balance",
-  "daily",
-  "pay",
-  "shop",
-  "buy",
-  "gamble",
-  "ledger",
-  "season",
-] as const;
+const OPTIONS = {
+  user: { type: "user", name: "user", description: "Member to look at or pay" },
+  amount: { type: "integer", name: "amount", description: "Coins to move or gamble", minValue: 1 },
+  level: { type: "integer", name: "level", description: "Level for admin changes", minValue: 0 },
+  value: { type: "string", name: "value", description: "Rewards, season key or status" },
+  item: { type: "string", name: "item", description: "Shop item id" },
+  limit: { type: "integer", name: "limit", description: "Rows to show", minValue: 1, maxValue: 25 },
+  days: { type: "integer", name: "days", description: "Season length in days", minValue: 1, maxValue: 365 },
+} satisfies Record<string, CommandOption>;
+
+function opts(...names: (keyof typeof OPTIONS)[]): CommandOption[] {
+  return names.map((name) => OPTIONS[name]);
+}
 
 export const rank = defineCommand({
   name: "rank",
   description: "View levels, leaderboards, rewards, currency, shop and transfers.",
-  options: [
-    {
-      type: "string",
-      name: "action",
-      description: "What to do",
-      required: true,
-      choices: ACTIONS.map((value) => ({ name: value, value })),
-    },
-    { type: "user", name: "user", description: "Member to look at or pay" },
-    { type: "integer", name: "amount", description: "Coins to move or gamble", minValue: 1 },
-    { type: "integer", name: "level", description: "Level for admin changes", minValue: 0 },
-    { type: "string", name: "value", description: "Rewards as level:roleId,level:roleId" },
-    { type: "string", name: "item", description: "Shop item id" },
-    { type: "integer", name: "limit", description: "Rows to show", minValue: 1, maxValue: 25 },
-    { type: "integer", name: "days", description: "Season length in days", minValue: 1, maxValue: 365 },
+  subcommands: [
+    { name: "view", description: "Show your or another member's level and XP.", options: opts("user") },
+    { name: "leaderboard", description: "Show the server XP leaderboard.", options: opts("limit") },
+    { name: "rewards", description: "List or set level role rewards.", options: opts("value") },
+    { name: "admin", description: "Set a member's level directly.", options: opts("user", "level") },
+    { name: "balance", description: "Show a member's currency balance.", options: opts("user") },
+    { name: "daily", description: "Claim your daily currency." },
+    { name: "pay", description: "Send currency to another member.", options: opts("user", "amount") },
+    { name: "shop", description: "List the server currency shop." },
+    { name: "buy", description: "Buy a shop item.", options: opts("item") },
+    { name: "gamble", description: "Gamble currency with a capped stake.", options: opts("amount") },
+    { name: "ledger", description: "Show your recent currency movements.", options: opts("limit") },
+    { name: "season", description: "Start a new XP season and archive the old one.", options: opts("value", "days") },
   ],
   guards: [
     (ctx) =>
@@ -49,7 +46,7 @@ export const rank = defineCommand({
     const leveling = new LevelingService(store, actions, settings, ctx.now);
     const economy = new EconomyService(store, actions, settings, ctx.now, Math.random, ctx.cooldowns);
     const guildId = ctx.guildId as string;
-    const selected = action(ctx);
+    const selected = ctx.commandPath[0] ?? action(ctx);
 
     if (selected === "view") {
       const target = userId(ctx, "user") ?? ctx.userId;

@@ -70,6 +70,70 @@ describe("ModuleRegistry", () => {
     expect(() => new ModuleRegistry().register(manifest)).toThrow(/defaultSettings/);
   });
 
+  it("registers a hub tree but counts only the root against Discord's limit", () => {
+    const manifest = makeModule({
+      commands: [
+        defineCommand({
+          name: "hub",
+          description: "A hub",
+          subcommands: [
+            { name: "one", description: "First action" },
+            { name: "two", description: "Second action", options: [
+              { type: "string", name: "value", description: "A value" },
+            ] },
+          ],
+          async execute() {
+            /* no-op */
+          },
+        }),
+      ],
+    });
+
+    const registry = new ModuleRegistry().register(manifest);
+    const report = auditBudget(registry);
+    expect(report.commands).toBe(1);
+    expect(report.subcommands).toBe(2);
+    expect(report.actions).toBe(3);
+    expect(registry.catalog()[0]?.subcommands.map((entry) => entry.name)).toEqual(["one", "two"]);
+    expect(registry.catalog()[0]?.subcommands[1]?.options.map((entry) => entry.name)).toEqual(["value"]);
+  });
+
+  it("rejects root options on a hub with subcommands", () => {
+    const manifest = makeModule({
+      commands: [
+        defineCommand({
+          name: "hub",
+          description: "A hub",
+          options: [{ type: "string", name: "action", description: "Old shape" }],
+          subcommands: [{ name: "one", description: "First action" }],
+          async execute() {
+            /* no-op */
+          },
+        }),
+      ],
+    });
+    expect(() => new ModuleRegistry().register(manifest)).toThrow(/cannot also declare root options/);
+  });
+
+  it("rejects duplicate subcommand names", () => {
+    const manifest = makeModule({
+      commands: [
+        defineCommand({
+          name: "hub",
+          description: "A hub",
+          subcommands: [
+            { name: "one", description: "First" },
+            { name: "one", description: "Again" },
+          ],
+          async execute() {
+            /* no-op */
+          },
+        }),
+      ],
+    });
+    expect(() => new ModuleRegistry().register(manifest)).toThrow(/declared twice/);
+  });
+
   it("rejects a required option that follows an optional one", () => {
     const manifest = makeModule({
       commands: [
@@ -176,7 +240,7 @@ describe("auditBudget", () => {
     // valid command cannot currently reach 8,000 chars. The check stays as a
     // guard for localisation, and this is how we prove it still fires.
     const report = auditMeasurements([
-      { name: "huge", moduleId: "demo", options: 25, payloadChars: 8_001 },
+      { name: "huge", moduleId: "demo", subcommands: 0, options: 25, payloadChars: 8_001 },
     ]);
     expect(report.status).toBe("fail");
     expect(report.violations.join(" ")).toContain("max 8000");
@@ -184,7 +248,7 @@ describe("auditBudget", () => {
 
   it("fails when a measured command has too many options", () => {
     const report = auditMeasurements([
-      { name: "wide", moduleId: "demo", options: 26, payloadChars: 100 },
+      { name: "wide", moduleId: "demo", subcommands: 0, options: 26, payloadChars: 100 },
     ]);
     expect(report.status).toBe("fail");
     expect(report.violations.join(" ")).toContain("max 25");

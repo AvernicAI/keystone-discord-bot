@@ -326,6 +326,19 @@
         "budget": "11/100",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-26",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Command tree: every existing hub now registers real Discord subcommands (12 roots, 77 subcommands), `/help` reads the live registry, the catalog is generated, and boot sync plus commands:doctor compare the full option shape instead of names alone.",
+      "journal": "journal/2026-11-01-pass-26.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "253",
+        "budget": "12/100 roots · 77 subcommands",
+        "memory": "current"
+      }
     }
   ]
 }

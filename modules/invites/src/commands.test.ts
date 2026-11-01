@@ -23,6 +23,7 @@ async function context(options: Record<string, string | number | boolean | null>
     guildId: "guild-a",
     userId: "member-1",
     options,
+    subcommand: typeof options.action === "string" ? options.action : undefined,
   });
   const ctx = createTestContext({
     interaction,

@@ -5,6 +5,7 @@ import {
   requirePermissions,
   type ActionRow,
   type CommandContext,
+  type CommandOption,
   type ModerationActions,
   type ModerationActionResult,
   type ModerationCase,
@@ -33,6 +34,20 @@ const ACTIONS = [
 
 const LINK_RULES = new Set(["automod.link"]);
 const FILTER_RULES = new Set(["automod.link", "automod.profanity", "automod.zalgo"]);
+
+const OPTIONS = {
+  user: { type: "user", name: "user", description: "Member to act on (or filter history)" },
+  reason: { type: "string", name: "reason", description: "Why; required for punitive actions" },
+  case: { type: "integer", name: "case", description: "Case number for case, note or review" },
+  duration: { type: "integer", name: "duration", description: "Timeout minutes or slowmode seconds" },
+  limit: { type: "integer", name: "limit", description: "Purge count, 1-100 (default 10)" },
+  channel: { type: "channel", name: "channel", description: "Channel for purge, lock or slowmode" },
+  dry_run: { type: "boolean", name: "dry_run", description: "Preview only; never overrides a safe default" },
+} satisfies Record<string, CommandOption>;
+
+function opts(...names: (keyof typeof OPTIONS)[]): CommandOption[] {
+  return names.map((name) => OPTIONS[name]);
+}
 
 type ModAction = (typeof ACTIONS)[number];
 
@@ -131,27 +146,27 @@ export const mod = defineCommand({
   name: "mod",
   description: "Moderate members, inspect cases and review the queue.",
   guards: [requireGuild, requirePermissions("ModerateMembers")],
-  options: [
-    {
-      type: "string",
-      name: "action",
-      description: "What to do",
-      required: true,
-      choices: ACTIONS.map((action) => ({ name: action, value: action })),
-    },
-    { type: "user", name: "user", description: "Member to act on (or filter history)" },
-    { type: "string", name: "reason", description: "Why; required for punitive actions" },
-    { type: "integer", name: "case", description: "Case number for case/note/review" },
-    { type: "integer", name: "duration", description: "Timeout minutes or slowmode seconds" },
-    { type: "integer", name: "limit", description: "Purge count, 1–100 (default 10)" },
-    { type: "channel", name: "channel", description: "Channel for purge, lock or slowmode" },
-    { type: "boolean", name: "dry_run", description: "Preview only; never overrides a safety default to unsafe" },
+  subcommands: [
+    { name: "ban", description: "Ban a member with a case and reason.", options: opts("user", "reason", "dry_run") },
+    { name: "kick", description: "Kick a member with a case and reason.", options: opts("user", "reason", "dry_run") },
+    { name: "timeout", description: "Time out a member for a number of minutes.", options: opts("user", "reason", "duration", "dry_run") },
+    { name: "warn", description: "Record a warning on a member's case history.", options: opts("user", "reason") },
+    { name: "purge", description: "Bulk-delete recent messages in a channel.", options: opts("channel", "limit", "reason", "dry_run") },
+    { name: "lock", description: "Lock a channel so members cannot post.", options: opts("channel", "reason", "dry_run") },
+    { name: "unlock", description: "Unlock a channel again.", options: opts("channel", "reason", "dry_run") },
+    { name: "slowmode", description: "Set channel slowmode in seconds.", options: opts("channel", "duration", "reason", "dry_run") },
+    { name: "case", description: "Show one case by number.", options: opts("case") },
+    { name: "note", description: "Append a moderator note to a case.", options: opts("case", "reason") },
+    { name: "history", description: "List recent cases, optionally for one member.", options: opts("user") },
+    { name: "links", description: "Review recent link-filter findings." },
+    { name: "filters", description: "Review link, profanity and zalgo findings." },
+    { name: "review", description: "Show the review queue or close one case.", options: opts("case") },
   ],
   async execute(ctx) {
     const ports = requireModeration(ctx);
     const guildId = ctx.guildId!;
     const settings = moderationSettingsSchema.parse(await ctx.settings.get(guildId)) as ModerationSettings;
-    const action = optionText(ctx, "action");
+    const action = ctx.commandPath[0] ?? optionText(ctx, "action");
     if (!isAction(action)) throw new UserError("Choose a valid action.");
     const dryRun = ctx.interaction.options.dry_run === false ? false : settings.dryRun;
 

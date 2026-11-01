@@ -3,8 +3,12 @@
 ## Why this exists
 
 An external Discord MCP, or any other bot, can post and read messages but cannot
-invoke an application command. Slash commands only arrive through an
-`InteractionCreate` payload that Discord sends to the app that owns them. That
+invoke an application command. The SaseQ `discord-mcp` tool list has no
+application-command method; its **Use Slash Command** install permission is a
+permission for that account inside the Discord client, not an API. A bot token
+cannot create another application's interaction. Slash commands only arrive
+through an `InteractionCreate` payload that Discord sends to the app that owns
+them. That
 made the first live run awkward: the bot could connect and register commands,
 but the harness could not press a button that was not there.
 
@@ -32,10 +36,10 @@ commands remain the only product surface, and the command budget is unchanged.
 ## Grammar
 
 ```text
-!command [action] [key=value ...]
+!command [subcommand] [key=value ...]
 ```
 
-- The first bare token may be the command's `action` choice.
+- The first bare token may be a subcommand (or a group then a subcommand).
 - Every other argument is named. Values with spaces use quotes.
 - User/channel/role values accept a mention or a raw id.
 - Integers, numbers, booleans, choices and min/max are validated against the
@@ -46,6 +50,9 @@ Examples that were actually run against AI Team:
 ```text
 !ping
 !about
+!help commands
+!help browse
+!help search query=ban
 !ai status
 !mod history
 !mod links
@@ -108,11 +115,13 @@ the live suppression/release check deterministic.
 
 - `InteractionCreate` handling, slash option parsing by Discord, autocomplete or
   ephemeral replies. Those need an interaction harness or a human click.
-- Profanity/zalgo `delete` mode: only link delete mode was exercised with the
-  temporary `dryRun: false` seed; the safe seed is `alert` and leaves messages in
-  place. The coordinator path is shared, but the live run does not claim it.
-- Application-command registration beyond the REST response already observed in
-  the ready log.
+- Profanity/zalgo `delete` mode in production: the live proof used a temporary
+  `dryRun: false` / `profanity: "delete"` seed in the dev guild; the committed
+  seed stays `alert`. The shared coordinator path is covered, but the default
+  configuration does not delete.
+- A real slash `InteractionCreate`: the REST shape and the adapter payload are
+  now checked (`commands:doctor` plus the nested-option test), but only a human
+  client can press the command.
 - Production behaviour of the dev seam, because it is not registered there.
 
 Episode: `ephemeral: true` is ignored by the message adapter. A prefix reply is

@@ -18,12 +18,13 @@ API tokens and webhooks are the remaining P6 work. P7 now has invite tracking as
 a sixth module (attribution, a joins/retention leaderboard and advisory
 suspicious-join flags), link/profanity/zalgo content filters, and an
 auto-responder for exact, contains and regex triggers. The command ledger is
-**11/100**, there are **6 modules**, and `pnpm check` covers **234 tests across
-38 files** without a Discord token, database or network. Live on 2026-11-01: the
-bot logged in, registered 11 commands through Discord, answered a Qwen3:8b
+**12/100 roots** with **77 real subcommands** and **89 actions**, there are **6
+modules**, and `pnpm check` covers **253 tests across 40 files** without a
+Discord token, database or network. Live on 2026-11-01: the bot logged in,
+registered 12 roots and 77 subcommands through Discord, answered a Qwen3:8b
 mention in `#ai-chat`, and ran real moderation, community, AI, invite and
-content-filter commands through a development message bridge. The dashboard was
-booted in memory mode and
+content-filter commands through a development message bridge, including
+`/help`’s generated catalog. The dashboard was booted in memory mode and
 exercised over real HTTP, including authenticated settings writes against a fake
 OAuth port; live Discord OAuth is not claimed. Slash `InteractionCreate` from a
 human client is still the next live check.
@@ -157,11 +158,13 @@ without a token or network.
 
 ### 7. Register or refresh Discord commands
 
-The bot writes commands at boot only when the server set has drifted, then reads
-them back and logs any mismatch. For a payload-only change (description, options)
-or a deliberate clean slate:
+The bot writes commands at boot only when the registered **name or option tree**
+has drifted, then reads them back and logs any mismatch. `pnpm commands:doctor`
+prints what Discord actually has without writing. For a payload-only change
+(description, options, subcommands) or a deliberate clean slate:
 
 ```bash
+pnpm commands:doctor    # read-only: registry vs live shape
 pnpm commands:sync      # atomic replace
 pnpm commands:resync    # clear, register, fetch back and verify
 ```
@@ -239,23 +242,30 @@ refusals. See [the community spec](memory/vault/04-Modules/community/Spec.md).
 
 ## Commands
 
-Discord's global limit is 100; Keystone uses **11**. Slash commands are the
-product surface. In development, `DEV_GUILD_ID` also enables the `!` bridge for
-message-only harnesses.
+Discord's global limit is 100 **roots**; Keystone uses **12** and exposes **77
+real subcommands** (89 total actions). A subcommand does not spend another global
+slot, which is why the picker now expands instead of showing one flat `action`
+option. Slash commands are the product surface. In development, `DEV_GUILD_ID`
+also enables the `!` bridge for message-only harnesses.
 
-| Command | Actions / options | What it does |
+`pnpm commands:catalog` regenerates the complete per-root list in
+[Command-Catalog.md](memory/vault/01-Mission/Command-Catalog.md); `/help` reads
+the same live registry.
+
+| Root | Subcommands | What it does |
 | --- | --- | --- |
 | `/ping` | — | Confirm the gateway is alive and show uptime |
 | `/about` | — | Version, module state, teaching link |
+| `/help` | `browse`, `commands`, `search`, `privacy`, `changelog` | Browse the generated catalog, search it, inspect retention and the latest pass |
 | `/setup` | — | Database, migrations, cache, intents and next-step report |
 | `/mod` | `ban`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `links`, `filters`, `review` | Moderation with cases, reasons, evidence, a content-filter review queue and a case queue |
-| `/appeal` | `case`, `message` | Open an appeal for your own case |
+| `/appeal` | — | Open an appeal for your own case (takes `case` or `message`) |
 | `/verify` | — | Complete the join gate and leave quarantine |
 | `/rank` | `view`, `leaderboard`, `rewards`, `admin`, `balance`, `daily`, `pay`, `shop`, `buy`, `gamble`, `ledger`, `season` | XP, levels, ledger-backed currency, shop and seasons |
 | `/ticket` | `panel`, `open`, `claim`, `close`, `add`, `transcript`, `summary`, `stats` | Thread tickets, claiming, transcripts, AI summary and SLA stats |
 | `/tools` | `embed`, `tag`, `reminder`, `schedule`, `giveaway`, `giveaway-end`, `giveaway-reroll`, `poll`, `feed`, `stat`, `welcome`, `roles`, `starboard`, `starboard-override`, `voice`, `birthdays`, `birthday`, `suggestions`, `suggestion`, `suggestion-decide`, `sticky`, `responder`, `responders`, `responder-remove` | Community utilities, panels and auto-responders |
 | `/ai` | `status`, `ask`, `chat`, `classify`, `docs-add`, `docs-list`, `docs-remove`, `deflect`, `explain`, `summary`, `budget` | Opt-in server-doc answers, advisory classification, explanations, summaries and hard caps |
-| `/invites` | `leaderboard`, `stats`, `who`, `user`, `limit` | Invite attribution, joins/retention totals and who invited a member |
+| `/invites` | `leaderboard`, `stats`, `who` | Invite attribution, joins/retention totals and who invited a member (`who` takes `user`) |
 
 `/ticket summary` and `/ai summary` require `ManageGuild`. `/ai docs-*` and
 `/ai budget` require `ManageGuild`; `/ai classify` and `/ai deflect` require
@@ -317,7 +327,11 @@ Everything below is free. No feature is moved behind a paywall.
 
 ### Platform and operations
 
-- Module registry with a CI-enforced 100-command budget (currently 11).
+- Module registry with a CI-enforced 100-root budget (currently 12 roots, 77
+  subcommands).
+- Real Discord subcommand tree: flat `action` options are gone from every
+  existing hub, `/help` is generated from the registry, boot sync compares the
+  full option tree, and `pnpm commands:doctor` prints the live shape.
 - Postgres schema and ordered migrations; Drizzle repositories.
 - Redis cooldowns and a BullMQ worker, with explicit in-memory fallbacks.
 - OpenTelemetry tracing, off by default.
@@ -402,13 +416,15 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
+| P7 Command tree | Done | 12 roots · 77 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
 | P7 Parity completion | **In progress** | Invite tracking, link/profanity/zalgo filters and auto-responders shipped; forms, events, expiry, modmail and UI/i18n open |
 
 Live evidence (2026-11-01): `AI Team#5758` connected, cleared and re-registered
-11 global commands (including `/invites`), and Qwen3:8b answered a mention in
-`#ai-chat`. A development `!` bridge ran `!ping`, `!about`, `!ai status`,
-`!mod history`, `!rank leaderboard`, `!invites leaderboard` and `!invites who`
-through the real dispatch pipeline. `/ticket stats` reached
+12 global roots with 77 subcommands (including `/help` and `/invites`), and
+Qwen3:8b answered a mention in `#ai-chat`. A development `!` bridge ran
+`!ping`, `!about`, `!help commands`, `!help browse`, `!help search query=ban`,
+`!ai status`, `!mod history`, `!rank leaderboard`, `!invites leaderboard` and
+`!invites who` through the real dispatch pipeline. `/ticket stats` reached
 the `ManageGuild` guard (the MCP bot is not an admin); that check exposed a real
 ordering bug, now fixed and unit-tested.
 
@@ -426,6 +442,16 @@ repeated the delete proof for profanity: with a temporary `dryRun: false` /
 stayed open in `!mod filters`. The safe seed is back in the repository. See
 [pass 23](memory/journal/2026-11-01-pass-23.md) and
 [pass 24](memory/journal/2026-11-01-pass-24.md).
+
+Command-tree live evidence (2026-11-01, pass 26): `pnpm commands:doctor` reported
+`AllinOne`, 2 guilds, **12 global roots and 77 live subcommands**, with no
+missing, extra or changed roots. The `!` bridge then returned the generated
+catalog for `!help commands`, the module map for `!help browse`, one search hit
+for `!help search query=ban`, a case list for `!mod history`, and the AI status
+embed for `!ai status`. See [pass 26](memory/journal/2026-11-01-pass-26.md). A
+human slash invocation is still the one unobserved surface: SaseQ's `discord-mcp`
+has no application-command tool, and the **Use Slash Command** install permission
+is a client permission, not an MCP API method.
 
 Auto-responder live evidence (2026-11-01, pass 25): the seeded guild trigger
 `hello keystone` replied to a marked MCP message with
@@ -461,7 +487,9 @@ Read [Module-Contract](memory/vault/03-Architecture/Module-Contract.md) and copy
 1. Create `modules/<feature>/` with the same package shape as `diagnostics`.
 2. Export a `defineModule({...})` manifest with `settingsSchema`,
    `defaultSettings`, commands, intents and `docsPath`.
-3. Add commands with `defineCommand({...})`. Declare options and guards; the
+3. Add commands with `defineCommand({...})`. Prefer real `subcommands` over a
+   flat `action` option: Discord's picker expands them, `/help` indexes them and
+   they do not spend another global root. Declare options and guards; the
    dispatcher runs guild, permission and cooldown checks for you.
 4. Put side effects behind a kernel port (`ModerationActions`, `CommunityActions`,
    `AiProvider`, `JobQueue`). Modules must not import discord.js, Drizzle,
@@ -474,6 +502,7 @@ Read [Module-Contract](memory/vault/03-Architecture/Module-Contract.md) and copy
 pnpm typecheck
 pnpm test
 pnpm budget
+pnpm commands:catalog   # regenerate memory/machine/commands.json + vault page
 pnpm memory:check
 pnpm check
 ```
@@ -490,8 +519,8 @@ module's existing defaults.
 If the feature needs a database table, add a migration in
 `packages/db/src/migrations` and a repository; if it needs a Discord permission,
 declare it on the manifest. If it needs a new root command, check the budget
-first: eleven roots are used, eighty-nine remain, and every root is a permanent
-public interface.
+first: twelve roots are used, eighty-eight remain, and every root is a permanent
+public interface. A subcommand under an existing hub costs no new root.
 
 ## How to have an agent read it easily
 
@@ -544,6 +573,9 @@ message bridge that feeds the same registry, guards, cooldowns and reply adapter
 ```text
 !ping
 !about
+!help commands
+!help browse
+!help search query=ban
 !ai status
 !mod history
 !mod links
@@ -559,12 +591,12 @@ auto-responder sees the content. See
 [Live-Testing](memory/vault/03-Architecture/Live-Testing.md).
 
 Discord replaces the whole global command set with one bulk overwrite. Keystone
-fetches the server set at ready and only clears + re-registers when the names
-drift; after any change it fetches again and logs missing/extra names. Use
-`pnpm commands:resync` when you want the explicit clear → register → verify
-cycle. Do not clear on every boot: Discord allows two bulk overwrites per ten
-minutes, and a clear followed by a rate-limited register leaves the app with no
-commands.
+fetches the server set at ready and clears + re-registers only when the **name or
+option tree** drifts; after any change it fetches again and logs
+missing/extra/changed roots. `pnpm commands:doctor` is the read-only check, and
+`pnpm commands:resync` is the explicit clear → register → verify cycle. Do not
+clear on every boot: Discord allows two bulk overwrites per ten minutes, and a
+clear followed by a rate-limited register leaves the app with no commands.
 
 ## Architecture
 

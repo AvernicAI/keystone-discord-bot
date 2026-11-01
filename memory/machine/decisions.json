@@ -137,6 +137,14 @@
       "date": "2026-11-01",
       "path": "vault/03-Architecture/ADR/ADR-0017-invite-tracking.md",
       "alternatives": true
+    },
+    {
+      "id": "ADR-0018",
+      "title": "Real Discord subcommands, one owning module per root",
+      "status": "accepted",
+      "date": "2026-11-01",
+      "path": "vault/03-Architecture/ADR/ADR-0018-real-subcommands.md",
+      "alternatives": true
     }
   ]
 }

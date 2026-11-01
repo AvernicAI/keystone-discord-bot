@@ -3,6 +3,7 @@ import {
   UserError,
   dispatchCommand,
   type CommandDefinition,
+  type CommandOption,
   type DispatchDeps,
   type InteractionLike,
   type Logger,
@@ -77,13 +78,15 @@ export function tokenizePrefix(input: string): string[] {
 
 export interface ParsedPrefix {
   readonly options: Record<string, string | number | boolean | null>;
+  readonly subcommand?: string;
+  readonly subcommandGroup?: string;
   /** Human-readable example, shown when parsing fails. */
   readonly usage: string;
 }
 
-export function prefixUsage(definition: CommandDefinition): string {
-  const parts = [`!${definition.name}`];
-  for (const option of definition.options ?? []) {
+function optionUsage(options: readonly CommandOption[]): string[] {
+  const parts: string[] = [];
+  for (const option of options) {
     const example =
       option.type === "user"
         ? "@member"
@@ -100,6 +103,39 @@ export function prefixUsage(definition: CommandDefinition): string {
                   : "value";
     parts.push(`${option.name}=${option.required ? `<${example}>` : `[${example}]`}`);
   }
+  return parts;
+}
+
+export function prefixUsage(
+  definition: CommandDefinition,
+  subcommand?: string,
+  group?: string,
+): string {
+  const parts = [`!${definition.name}`];
+  if (group) parts.push(group);
+  if (subcommand) parts.push(subcommand);
+
+  const node = group
+    ? definition.groups
+        ?.find((entry) => entry.name === group)
+        ?.subcommands.find((entry) => entry.name === subcommand)
+    : subcommand
+      ? definition.subcommands?.find((entry) => entry.name === subcommand)
+      : undefined;
+
+  if (node) {
+    parts.push(...optionUsage(node.options ?? []));
+    return parts.join(" ");
+  }
+  if (definition.groups?.length) {
+    parts.push("<group> <subcommand> [key=value ...]");
+    return parts.join(" ");
+  }
+  if (definition.subcommands?.length) {
+    parts.push(`<${definition.subcommands.map((entry) => entry.name).join("|")}> [key=value ...]`);
+    return parts.join(" ");
+  }
+  parts.push(...optionUsage(definition.options ?? []));
   return parts.join(" ");
 }
 
@@ -124,12 +160,53 @@ export function parsePrefixArgs(
   definition: CommandDefinition,
   tokens: readonly string[],
 ): ParsedPrefix {
-  const specs = definition.options ?? [];
+  let specs: readonly CommandOption[] = definition.options ?? [];
   const options: Record<string, string | number | boolean | null> = {};
-  const usage = prefixUsage(definition);
+  let usage = prefixUsage(definition);
+  let subcommand: string | undefined;
+  let subcommandGroup: string | undefined;
   let index = 0;
 
-  if (specs[0]?.name === "action" && tokens.length > 0 && !(tokens[0] as string).includes("=")) {
+  if (definition.groups?.length) {
+    const groupToken = tokens[index];
+    if (!groupToken || groupToken.includes("=")) {
+      throw new UserError(`Choose a subcommand group. Example: ${usage}`);
+    }
+    const group = definition.groups.find((entry) => entry.name === groupToken);
+    if (!group) {
+      throw new UserError(
+        `Unknown subcommand group "${groupToken}". Use one of: ${definition.groups.map((entry) => entry.name).join(", ")}.`,
+      );
+    }
+    const subToken = tokens[index + 1];
+    if (!subToken || subToken.includes("=")) {
+      throw new UserError(`Choose a subcommand for ${groupToken}. Example: ${usage}`);
+    }
+    const subcommandNode = group.subcommands.find((entry) => entry.name === subToken);
+    if (!subcommandNode) {
+      throw new UserError(
+        `Unknown subcommand "${subToken}". Use one of: ${group.subcommands.map((entry) => entry.name).join(", ")}.`,
+      );
+    }
+    subcommandGroup = groupToken;
+    subcommand = subToken;
+    specs = subcommandNode.options ?? [];
+    index += 2;
+  } else if (definition.subcommands?.length) {
+    const subToken = tokens[index];
+    if (!subToken || subToken.includes("=")) {
+      throw new UserError(`Choose a subcommand. Example: ${usage}`);
+    }
+    const subcommandNode = definition.subcommands.find((entry) => entry.name === subToken);
+    if (!subcommandNode) {
+      throw new UserError(
+        `Unknown subcommand "${subToken}". Use one of: ${definition.subcommands.map((entry) => entry.name).join(", ")}.`,
+      );
+    }
+    subcommand = subToken;
+    specs = subcommandNode.options ?? [];
+    index = 1;
+  } else if (specs[0]?.name === "action" && tokens.length > 0 && !(tokens[0] as string).includes("=")) {
     const action = tokens[0] as string;
     const allowed = (specs[0].choices ?? []).map((choice) => String(choice.value));
     if (allowed.length > 0 && !allowed.includes(action)) {
@@ -138,6 +215,8 @@ export function parsePrefixArgs(
     options.action = action;
     index = 1;
   }
+
+  usage = prefixUsage(definition, subcommand, subcommandGroup);
 
   for (; index < tokens.length; index += 1) {
     const token = tokens[index] as string;
@@ -207,7 +286,7 @@ export function parsePrefixArgs(
     }
   }
 
-  return { options, usage };
+  return { options, subcommand, subcommandGroup, usage };
 }
 
 function sendable(channel: Message["channel"]): TextBasedChannel & {
@@ -257,6 +336,8 @@ function asPrefixInteraction(
     channelId: message.channelId,
     userId: message.author.id,
     options: parsed.options,
+    subcommand: parsed.subcommand,
+    subcommandGroup: parsed.subcommandGroup,
     permissions: message.member?.permissions.toArray() ?? [],
     get replied() {
       return replied;

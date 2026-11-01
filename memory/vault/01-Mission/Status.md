@@ -44,6 +44,22 @@ got no reply; a third after the window replied again. See
 [[04-Modules/community/Spec|Community spec]] and
 [[04-Modules/community/Status|Community status]].
 
+**P7 command tree is in repo** (pass 26, 2026-11-01): the kernel now models
+real Discord subcommands and subcommand groups. Every existing hub exposes its
+working actions as subcommands — `/mod` 14, `/rank` 12, `/ticket` 8, `/tools` 24,
+`/ai` 11 and `/invites` 3 — for **12 roots · 77 subcommands · 89 actions**. The
+new `/help` root (`browse`, `commands`, `search`, `privacy`, `changelog`) reads
+the live registry, so its catalog cannot drift. `pnpm commands:catalog` generates
+`memory/machine/commands.json` and [[Command-Catalog]], and
+`pnpm commands:doctor` prints the live registration shape without writing. Two
+defects found during proof are fixed: the structural adapter now flattens nested
+subcommand options, and boot sync compares the whole option tree instead of names
+alone. Live: `pnpm commands:doctor` reported 12 roots / 77 subcommands with no
+drift; the `!` bridge returned `!help commands`, `!help browse`, `!help search
+query=ban`, `!mod history` and `!ai status` through the real gateway. See
+[[03-Architecture/Command-Budget|Command budget]] and
+[[03-Architecture/ADR/ADR-0003-command-budget]].
+
 **P6 authorization and settings-write foundation is in repo** (passes 17–18;
 server boundaries in pass 22, 2026-11-01): Discord OAuth2 code + PKCE, sealed
 state, opaque Postgres-backed sessions, BigInt guild authorization with a
@@ -76,9 +92,12 @@ guild and answered a qwen3:8b mention in `#ai-chat`. SaseQ's `discord-mcp` canno
 invoke slash commands, so a **dev-only `!` bridge** now feeds the real dispatch
 pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
 `!rank leaderboard` all returned live Discord messages/embeds. Pass 19 added
-`!invites leaderboard` and `!invites who`; the bot re-registered **11** commands
-and Discord's server set included `invites`. Pass 23 added `!mod links` and a
-live link-filter proof: three marked MCP messages produced a blocklisted
+`!invites leaderboard` and `!invites who`. Pass 26 re-registered **12 roots /
+77 subcommands** and added `!help commands`, `!help browse`, `!help search
+query=ban`, `!mod history` and `!ai status` to the live list; Discord's fetched
+shape matched the registry with no missing, extra or changed roots. Pass 23
+added `!mod links` and a live link-filter proof: three marked MCP messages
+produced a blocklisted
 subdomain case, an apex case and a punycode case; `!mod review case=2` marked one
 reviewed, and an ordinary `example.com` link produced no case. Pass 24 added
 `!mod filters` and profanity/zalgo, and closed the pending delete-mode gap: a
@@ -95,7 +114,8 @@ the 60-second cooldown got no reply, and a third after the window replied again.
 `!ticket stats`
 exposed a real ordering bug (guild stats required a ticket first), now fixed and
 tested. On ready the bot fetches Discord's command set and only clears and
-re-registers when the names drift; otherwise it logs that the set is current.
+re-registers when the **name or option tree** drifts; otherwise it logs that the
+set is current. `pnpm commands:doctor` is the read-only shape check and
 `pnpm commands:resync` is the explicit clear → register → verify cycle. Slash
 interaction handling from a human client is still unproven; obscured channels,
 live role grants, live Postgres and a MEE6 pull remain unverified. The P6 auth
@@ -107,10 +127,10 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 234 tests / 38 files · budget 11/100 · memory 1941/1941
+pnpm check        exit 0 · typecheck 0 · 253 tests / 40 files · budget 12/100 roots (77 subcommands) · memory 1986/1986
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 11 commands · qwen3:8b reply in #ai-chat
-live commands     2026-11-01 · !ping · !about · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who
+live              2026-11-01 · AI Team#5758 · 2 guilds · 12 roots / 77 subcommands · qwen3:8b reply in #ai-chat
+live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who
 live content filters 2026-11-01 · link delete returned 10008 Unknown Message; profanity delete removed the pineapple message and kept its case; safe seed produced link/profanity/zalgo cases; one reviewed; example.com not flagged
 live auto-responder 2026-11-01 · hello keystone replied, 60s cooldown suppressed the next reply, then released
 live failure      !ticket stats → ManageGuild guard (MCP bot is not admin); branch fixed and unit-tested
@@ -132,7 +152,7 @@ read that file.
 | 5 | Flags are advisory | `invites.test.ts`: one log embed, footer "Advisory only"; the port has no ban/kick/timeout method | In-memory + recorder |
 | 6 | Settings are the module's own schema | `inviteSettingsSchema`; the dashboard uses the same catalog, no web-only schema | Shared catalog |
 | 7 | The command fits the budget and declares its intents | `commands.test.ts`: one root, budget 1, `GuildInvites` required, `GuildMembers` fallback named by `/setup` | Registry |
-| 8 | The real surface runs | Live 2026-11-01: 11 commands registered including `invites`; `!invites leaderboard` and `!invites who` dispatched and replied in `#ai-chat` | Live gateway |
+| 8 | The real surface runs | Live 2026-11-01: 12 roots / 77 subcommands registered including `invites`; `!invites leaderboard` and `!invites who` dispatched and replied in `#ai-chat` | Live gateway |
 | 9 | A live member join was **not** performed | `Status.md` limitation; no second account was available | Not claimed |
 
 ## P7 auto-responder acceptance evidence
@@ -145,7 +165,7 @@ read that file.
 | 4 | Configuration is admin-only and input is validated | `modules/community/src/commands.test.ts`: `ManageGuild` guard, enable/list/remove, duplicate and invalid regex rejected | Command + service |
 | 5 | Records are guild-scoped and survive a restart | `packages/db/src/community.test.ts`: one record after close/reopen, zero in another guild | **PGlite** |
 | 6 | The dev marker cannot widen production | `apps/bot/src/community-events.test.ts`: bot message without marker and marker in another guild do nothing; fixture message never awards XP | Adapter test |
-| 7 | The feature costs no new root | `/tools` actions `responder`, `responders`, `responder-remove`; budget remains 11/100 | Static registry |
+| 7 | The feature costs no new root | `/tools` subcommands `responder`, `responders`, `responder-remove`; budget remains 12 roots / 77 subcommands | Static registry |
 | 8 | The real surface runs | Live 2026-11-01: marked MCP message `hello keystone` produced `Hi from Keystone's auto-responder.` | **Live gateway** |
 
 ## P7 content-filter acceptance evidence
@@ -158,7 +178,7 @@ read that file.
 | 4 | A finding is reviewable through the existing case queue | `mod.test.ts`: `/mod links` reads an `automod.link` case; live `!mod review case=2` changed #2 to `reviewed` | Command + **live gateway** |
 | 5 | Bot authors stay ignored outside the dev marker | `moderation-events.test.ts`: no marker → ignored; marker in another guild → ignored; marker stripped in `DEV_GUILD_ID` | Adapter test; production passes no option |
 | 6 | Evidence is the host and match, not the message | `security.test.ts` asserts `{ host, match }`; the case stores no content | Unit |
-| 7 | The feature costs no new root | `/mod links` and `/mod filters` are existing `/mod` actions; `pnpm budget` remains 11/100 | Static registry |
+| 7 | The feature costs no new root | `/mod links` and `/mod filters` are existing `/mod` subcommands; `pnpm budget` remains 12 roots / 77 subcommands | Static registry |
 | 8 | A live `delete`-mode deletion | Temporary `dryRun: false` seed; blocked message ID returned `10008: Unknown Message`; case #1 stayed open | **Live gateway + Discord API** |
 | 9 | A configured word is caught on word edges | `security.test.ts`: `ass` not `class`; phrase whitespace; live `pineapple` case #2 | Pure engine + **live gateway** |
 | 10 | Excessive combining marks are caught at the threshold | `security.test.ts`: threshold hit and below-threshold; live 16-mark case #3 | Pure engine + **live gateway** |

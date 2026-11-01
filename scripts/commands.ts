@@ -2,6 +2,7 @@ import "dotenv/config";
 import { ModuleRegistry } from "@keystone/kernel";
 import { modules } from "../apps/bot/src/modules";
 import { buildCommandJson } from "../apps/bot/src/adapt";
+import { commandDrift, hasDrift, type CommandJson } from "../apps/bot/src/command-sync";
 
 /**
  * Explicit slash-command sync.
@@ -55,7 +56,6 @@ async function discord(method: string, body?: unknown, attempts = 4): Promise<un
 
 const registry = new ModuleRegistry().registerAll(modules);
 const payload = registry.listCommands().map((command) => buildCommandJson(command.definition));
-const expected = new Set(payload.map((command) => command.name));
 
 if (clear) {
   const before = (await discord("GET")) as Array<{ name: string }>;
@@ -69,12 +69,12 @@ if (clear) {
   console.log(`registered ${payload.length}`);
 }
 
-const after = (await discord("GET")) as Array<{ name: string }>;
-const names = new Set(after.map((command) => command.name));
-const missing = [...expected].filter((name) => !names.has(name));
-const extra = [...names].filter((name) => !expected.has(name));
+const after = (await discord("GET")) as CommandJson[];
+const drift = commandDrift(payload as unknown as CommandJson[], after);
 console.log(`server now has ${after.length}: ${after.map((command) => command.name).join(", ")}`);
-if (missing.length > 0 || extra.length > 0) {
-  throw new Error(`command sync mismatch: missing ${missing.join(", ") || "none"}; extra ${extra.join(", ") || "none"}`);
+if (hasDrift(drift)) {
+  throw new Error(
+    `command sync mismatch: missing ${drift.missing.join(", ") || "none"}; extra ${drift.extra.join(", ") || "none"}; changed ${drift.changed.join(", ") || "none"}`,
+  );
 }
-console.log("command sync verified");
+console.log("command sync verified (names and subcommand shape)");

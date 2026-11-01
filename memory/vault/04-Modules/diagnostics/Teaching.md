@@ -5,8 +5,10 @@
 1. `modules/diagnostics/src/manifest.ts` — the entire contract in 20 lines.
 2. `modules/diagnostics/src/commands/ping.ts` — the smallest complete command.
 3. `modules/diagnostics/src/commands/about.ts` — settings, guards, embeds.
-4. `packages/kernel/src/dispatch.ts` — what the kernel does *for* those commands.
-5. `packages/kernel/src/testing.ts` — why the tests need no token.
+4. `modules/diagnostics/src/commands/help.ts` — reading a catalog injected by
+   dispatch, and why the page is generated.
+5. `packages/kernel/src/dispatch.ts` — what the kernel does *for* those commands.
+6. `packages/kernel/src/testing.ts` — why the tests need no token.
 
 ## The three ideas to take away
 
@@ -23,6 +25,11 @@ data that must satisfy `settingsSchema`, checked at boot. That is why a typo in 
 default fails the test suite instead of surprising a server owner.
 
 ## Exercise
+
+Read `/help` and `pnpm commands:catalog` together. The command does not know the
+catalog at import time; dispatch injects `ctx.catalog` from the registry, and the
+script writes the same data to Markdown and JSON. That is the whole trick behind
+"the docs cannot drift": there is one source and two renderers.
 
 Add a `/diagnostics whoami` command that replies ephemerally with the caller's
 user id, guild id and the guild's `detailed` setting.

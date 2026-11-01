@@ -1,4 +1,4 @@
-import { defineCommand, UserError, type CommandContext } from "@keystone/kernel";
+import { defineCommand, UserError, type CommandContext, type CommandOption } from "@keystone/kernel";
 import { ContentService } from "../content";
 import {
   BirthdayService,
@@ -18,57 +18,56 @@ import {
   userId,
 } from "./helpers";
 
+const OPTIONS = {
+  name: { type: "string", name: "name", description: "Name, title, question or id" },
+  value: { type: "string", name: "value", description: "Text, options, date, URL or status" },
+  channel: { type: "channel", name: "channel", description: "Target or source channel" },
+  target: { type: "channel", name: "target", description: "Override destination channel" },
+  role: { type: "role", name: "role", description: "Role for welcome or reaction roles" },
+  user: { type: "user", name: "user", description: "Target member" },
+  duration: { type: "integer", name: "duration", description: "Minutes from now", minValue: 1 },
+  limit: { type: "integer", name: "limit", description: "Winners, threshold or delay", minValue: 1 },
+  url: { type: "string", name: "url", description: "Feed URL" },
+  match: {
+    type: "string",
+    name: "match",
+    description: "Auto-responder match mode",
+    choices: ["exact", "contains", "regex"].map((value) => ({ name: value, value })),
+  },
+} satisfies Record<string, CommandOption>;
+
+function opts(...names: (keyof typeof OPTIONS)[]): CommandOption[] {
+  return names.map((name) => OPTIONS[name]);
+}
+
 export const tools = defineCommand({
   name: "tools",
   description: "Community utilities: birthdays, suggestions, content, roles, giveaways, feeds and auto-responders.",
-  options: [
-    {
-      type: "string",
-      name: "action",
-      description: "What to configure or send",
-      required: true,
-      choices: [
-        "embed",
-        "tag",
-        "reminder",
-        "schedule",
-        "giveaway",
-        "giveaway-end",
-        "giveaway-reroll",
-        "poll",
-        "feed",
-        "stat",
-        "welcome",
-        "roles",
-        "starboard",
-        "starboard-override",
-        "voice",
-        "birthdays",
-        "birthday",
-        "suggestions",
-        "suggestion",
-        "suggestion-decide",
-        "sticky",
-        "responder",
-        "responders",
-        "responder-remove",
-      ].map((value) => ({ name: value, value })),
-    },
-    { type: "string", name: "name", description: "Name, title, question or id" },
-    { type: "string", name: "value", description: "Text, options, date, URL or status" },
-    { type: "channel", name: "channel", description: "Target or source channel" },
-    { type: "channel", name: "target", description: "Override destination channel" },
-    { type: "role", name: "role", description: "Role for welcome or reaction roles" },
-    { type: "user", name: "user", description: "Target member" },
-    { type: "integer", name: "duration", description: "Minutes from now", minValue: 1 },
-    { type: "integer", name: "limit", description: "Winners, threshold or delay", minValue: 1 },
-    { type: "string", name: "url", description: "Feed URL" },
-    {
-      type: "string",
-      name: "match",
-      description: "Auto-responder match mode",
-      choices: ["exact", "contains", "regex"].map((value) => ({ name: value, value })),
-    },
+  subcommands: [
+    { name: "embed", description: "Send a simple embed to a channel.", options: opts("channel", "name", "value") },
+    { name: "tag", description: "Show a tag, or save one for this server.", options: opts("name", "value") },
+    { name: "reminder", description: "Set a reminder for yourself.", options: opts("value", "duration", "channel") },
+    { name: "schedule", description: "Schedule a message for a channel.", options: opts("value", "duration", "channel") },
+    { name: "giveaway", description: "Start a giveaway in a channel.", options: opts("value", "duration", "channel", "limit") },
+    { name: "giveaway-end", description: "End a giveaway now and pick winners.", options: opts("value") },
+    { name: "giveaway-reroll", description: "Reroll winners for a finished giveaway.", options: opts("value") },
+    { name: "poll", description: "Post a poll with pipe-separated options.", options: opts("name", "value", "channel") },
+    { name: "feed", description: "Subscribe a channel to an RSS feed.", options: opts("url", "channel") },
+    { name: "stat", description: "Create a member, online or booster stat channel.", options: opts("channel", "value") },
+    { name: "welcome", description: "Configure the welcome message and autorole.", options: opts("value", "channel", "role", "limit") },
+    { name: "roles", description: "Post a reaction-role or select-role panel.", options: opts("channel", "value", "role", "name", "limit") },
+    { name: "starboard", description: "Configure the starboard channel and threshold.", options: opts("channel", "limit") },
+    { name: "starboard-override", description: "Set a per-channel starboard threshold or turn it off.", options: opts("channel", "target", "value", "limit") },
+    { name: "voice", description: "Configure the temporary voice hub.", options: opts("channel", "value") },
+    { name: "birthdays", description: "Configure birthday announcements.", options: opts("channel", "role", "value") },
+    { name: "birthday", description: "Save or remove a member's birthday.", options: opts("user", "value") },
+    { name: "suggestions", description: "Configure the suggestions channel.", options: opts("channel") },
+    { name: "suggestion", description: "Submit a suggestion.", options: opts("value", "channel") },
+    { name: "suggestion-decide", description: "Approve or reject a suggestion.", options: opts("name", "value") },
+    { name: "sticky", description: "Configure a sticky message in a channel.", options: opts("channel", "value", "limit") },
+    { name: "responder", description: "Create or update an auto-responder trigger.", options: opts("name", "value", "match", "limit") },
+    { name: "responders", description: "List auto-responders, or enable and disable them.", options: opts("value") },
+    { name: "responder-remove", description: "Remove an auto-responder by id.", options: opts("name") },
   ],
   guards: [
     (ctx) =>
@@ -86,7 +85,7 @@ export const tools = defineCommand({
     const sticky = new StickyService(store, actions);
     const responders = new AutoResponderService(store, actions, settings, ctx.now);
     const guildId = ctx.guildId as string;
-    const selected = text(ctx, "action");
+    const selected = ctx.commandPath[0] ?? text(ctx, "action");
 
     if (selected === "embed") {
       requirePermission(ctx, "ManageGuild");

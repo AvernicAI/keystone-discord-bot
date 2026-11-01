@@ -20,6 +20,7 @@ function context(
     userId: "user-a",
     permissions,
     options,
+    subcommand: typeof options.action === "string" ? options.action : undefined,
   });
   const settings = communitySettingsSchema.parse({
     economy: {
@@ -208,9 +209,10 @@ describe("community commands", () => {
       guildId: "guild-a",
       userId: "user-a",
       permissions: ["ManageGuild"],
-      options: { action: "responders" },
+      options: {},
+      subcommand: "responders",
     });
-    await tools.execute({ ...add.ctx, interaction: listInteraction });
+    await tools.execute({ ...add.ctx, interaction: listInteraction, commandPath: ["responders"] });
     expect(listInteraction.lastReply?.content).toContain("hello there → General Kenobi!");
 
     for (let index = 0; index < 11; index += 1) {
@@ -228,9 +230,10 @@ describe("community commands", () => {
       guildId: "guild-a",
       userId: "user-a",
       permissions: ["ManageGuild"],
-      options: { action: "responders" },
+      options: {},
+      subcommand: "responders",
     });
-    await tools.execute({ ...add.ctx, interaction: cappedInteraction });
+    await tools.execute({ ...add.ctx, interaction: cappedInteraction, commandPath: ["responders"] });
     expect(cappedInteraction.lastReply?.content?.length ?? 0).toBeLessThanOrEqual(2_000);
     expect(cappedInteraction.lastReply?.content).toContain("showing 10 of 12");
 
@@ -239,9 +242,10 @@ describe("community commands", () => {
       guildId: "guild-a",
       userId: "user-a",
       permissions: ["ManageGuild"],
-      options: { action: "responder-remove", name: records[0]?.key ?? "" },
+      options: { name: records[0]?.key ?? "" },
+      subcommand: "responder-remove",
     });
-    await tools.execute({ ...add.ctx, interaction: removeInteraction });
+    await tools.execute({ ...add.ctx, interaction: removeInteraction, commandPath: ["responder-remove"] });
     expect(await add.store.getRecord("guild-a", "responder", records[0]?.key ?? "")).toBeUndefined();
 
     const denied = context({ action: "responder", name: "x", value: "y" });

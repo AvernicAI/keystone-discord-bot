@@ -31,7 +31,7 @@ export function requirePermissions(...required: string[]): Guard {
  */
 export function cooldown(ms: number): Guard {
   return async (ctx) => {
-    const key = `${ctx.moduleId}:${ctx.interaction.commandName}:${ctx.userId}`;
+    const key = `${ctx.moduleId}:${[ctx.interaction.commandName, ...ctx.commandPath].join(":")}:${ctx.userId}`;
     const result = await ctx.cooldowns.hit(key, ms, ctx.now());
     if (!result.allowed) {
       const seconds = Math.max(1, Math.ceil(result.retryAfterMs / 1000));

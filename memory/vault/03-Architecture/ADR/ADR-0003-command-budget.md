@@ -31,8 +31,10 @@ Features are expected to attach to hub commands (`/setup`, `/config`, `/mod`,
 - Command sprawl becomes a failing test instead of a code-review opinion.
 - Adding a root command requires updating this ledger and the spec, which forces
   the "could this be a subcommand?" conversation at the right time.
-- The registry needs a subcommand-contribution mechanism by P1 so modules can
-  extend a hub without owning it. Until then, hubs own their groups directly.
+- Each root has **one owning module**; its subcommands are declared there. A
+  cross-module contribution mechanism was considered and rejected in
+  [[ADR-0018-real-subcommands]] because several owners for one dispatch path
+  make guards and docs ambiguous.
 - A warning fires at 80 commands, leaving room for the hard conversation before
   the wall.
 

@@ -62,6 +62,19 @@ async function respond(ctx: CommandContext, payload: ReplyInput): Promise<void> 
  * one span, so a trace can show the command, the database call inside it and
  * the job it enqueued under a single trace id.
  */
+function validPath(
+  definition: import("./types").CommandDefinition,
+  group: string | undefined,
+  subcommand: string | undefined,
+): boolean {
+  if (!group && !subcommand) return true;
+  if (group) {
+    const found = definition.groups?.find((entry) => entry.name === group);
+    return Boolean(found?.subcommands.some((entry) => entry.name === subcommand));
+  }
+  return Boolean(definition.subcommands?.some((entry) => entry.name === subcommand));
+}
+
 export async function dispatchCommand(
   deps: DispatchDeps,
   interaction: InteractionLike,
@@ -71,13 +84,26 @@ export async function dispatchCommand(
     deps.logger.warn("unknown command", { command: interaction.commandName });
     return { status: "unknown-command" };
   }
+  if (!validPath(registered.definition, interaction.subcommandGroup, interaction.subcommand)) {
+    deps.logger.warn("unknown subcommand", {
+      command: interaction.commandName,
+      group: interaction.subcommandGroup,
+      subcommand: interaction.subcommand,
+    });
+    return { status: "unknown-command" };
+  }
 
+  const commandPath = [interaction.subcommandGroup, interaction.subcommand].filter(
+    (part): part is string => Boolean(part),
+  );
   const telemetry = deps.telemetry ?? noopTelemetry;
   const ctx: CommandContext = {
     interaction,
     moduleId: registered.moduleId,
     guildId: interaction.guildId,
     userId: interaction.userId,
+    commandPath,
+    catalog: deps.registry.catalog(),
     settings: deps.settings.forModule(registered.moduleId),
     logger: deps.logger.child(registered.moduleId),
     now: deps.now ?? Date.now,
@@ -91,7 +117,8 @@ export async function dispatchCommand(
   };
 
   try {
-    return await telemetry.withSpan(`command ${interaction.commandName}`, async () => {
+    const spanName = ["command", interaction.commandName, ...commandPath].join(" ");
+    return await telemetry.withSpan(spanName, async () => {
       for (const guard of registered.definition.guards ?? []) {
         const result = await guard(ctx);
         if (!result.ok) {

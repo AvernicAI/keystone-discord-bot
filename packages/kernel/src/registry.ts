@@ -2,6 +2,7 @@ import { validateManifest } from "./manifest";
 import type { ModuleManifest } from "./manifest";
 import type {
   CapabilityReport,
+  CommandCatalogEntry,
   CommandDefinition,
   IntentCapability,
   IntentProfile,
@@ -80,6 +81,37 @@ export class ModuleRegistry {
 
   get commandCount(): number {
     return this.#commands.size;
+  }
+
+  /**
+   * The flat discovery model `/help` and the generated catalog read. It is
+   * derived from the definitions, so it cannot drift from what Discord gets.
+   */
+  catalog(): CommandCatalogEntry[] {
+    return this.listCommands().map(({ definition, moduleId }) => ({
+      name: definition.name,
+      moduleId,
+      description: definition.description,
+      options: definition.options ?? [],
+      help: definition.help,
+      subcommands: [
+        ...(definition.subcommands ?? []).map((subcommand) => ({
+          name: subcommand.name,
+          description: subcommand.description,
+          options: subcommand.options ?? [],
+          help: subcommand.help,
+        })),
+        ...(definition.groups ?? []).flatMap((group) =>
+          group.subcommands.map((subcommand) => ({
+            name: subcommand.name,
+            description: subcommand.description,
+            group: group.name,
+            options: subcommand.options ?? [],
+            help: subcommand.help,
+          })),
+        ),
+      ],
+    }));
   }
 
   /** Union of every registered module's required gateway intents. */

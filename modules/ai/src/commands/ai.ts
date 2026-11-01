@@ -1,4 +1,4 @@
-import { UserError, defineCommand, type CommandContext } from "@keystone/kernel";
+import { UserError, defineCommand, type CommandContext, type CommandOption } from "@keystone/kernel";
 import type { AiAnswer, AiPort } from "@keystone/kernel";
 import { aiSettingsSchema } from "../settings";
 
@@ -72,35 +72,34 @@ async function transcriptFor(ctx: CommandContext, ticketId: string): Promise<str
     .slice(0, 6_000);
 }
 
+const OPTIONS = {
+  question: { type: "string", name: "question", description: "Question for the server docs" },
+  value: { type: "string", name: "value", description: "Answer, doc content, chat text or budget" },
+  name: { type: "string", name: "name", description: "Document name" },
+  case: { type: "integer", name: "case", description: "Case number to explain", minValue: 1 },
+  ticket: { type: "string", name: "ticket", description: "Ticket id to summarize" },
+  limit: { type: "integer", name: "limit", description: "Monthly request limit", minValue: 1 },
+} satisfies Record<string, CommandOption>;
+
+function opts(...names: (keyof typeof OPTIONS)[]): CommandOption[] {
+  return names.map((name) => OPTIONS[name]);
+}
+
 export const ai = defineCommand({
   name: "ai",
   description: "Ask server docs, deflect tickets and explain moderation. Off until enabled.",
-  options: [
-    {
-      type: "string" as const,
-      name: "action",
-      description: "What to do",
-      required: true,
-      choices: [
-        "status",
-        "ask",
-        "chat",
-        "classify",
-        "docs-add",
-        "docs-list",
-        "docs-remove",
-        "deflect",
-        "explain",
-        "summary",
-        "budget",
-      ].map((value) => ({ name: value, value })),
-    },
-    { type: "string" as const, name: "question", description: "Question for the server docs" },
-    { type: "string" as const, name: "value", description: "Answer, doc content, chat text or budget" },
-    { type: "string" as const, name: "name", description: "Document name" },
-    { type: "integer" as const, name: "case", description: "Case number to explain", minValue: 1 },
-    { type: "string" as const, name: "ticket", description: "Ticket id to summarize" },
-    { type: "integer" as const, name: "limit", description: "Monthly request limit", minValue: 1 },
+  subcommands: [
+    { name: "status", description: "Show AI features, usage and retained data." },
+    { name: "ask", description: "Answer a question from this server's docs.", options: opts("question") },
+    { name: "chat", description: "Ask the model directly in this channel.", options: opts("value") },
+    { name: "classify", description: "Label a message as advisory automation evidence.", options: opts("value") },
+    { name: "docs-add", description: "Index a server document for answers.", options: opts("name", "value") },
+    { name: "docs-list", description: "List indexed server documents." },
+    { name: "docs-remove", description: "Remove an indexed server document.", options: opts("name") },
+    { name: "deflect", description: "Suggest a reply to a support question.", options: opts("question") },
+    { name: "explain", description: "Explain why a moderation case happened.", options: opts("case") },
+    { name: "summary", description: "Summarize a ticket thread.", options: opts("ticket") },
+    { name: "budget", description: "Set the monthly AI budget and request cap.", options: opts("value", "limit") },
   ],
   guards: [
     (ctx: CommandContext) =>
@@ -110,7 +109,7 @@ export const ai = defineCommand({
   ],
   async execute(ctx: CommandContext): Promise<void> {
     const service = port(ctx);
-    const selected = text(ctx, "action");
+    const selected = ctx.commandPath[0] ?? text(ctx, "action");
     const guildId = ctx.guildId as string;
     const settings = await settingsFor(ctx);
 

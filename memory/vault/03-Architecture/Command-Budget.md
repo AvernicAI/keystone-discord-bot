@@ -9,29 +9,38 @@ refuses to boot when it fails.
 
 ## Current ledger
 
-```
-10 / 100 global commands used (90 left)
+```text
+12/100 global roots used (88 left)
+77 subcommands · 89 total actions
 status: OK
 
-/command   module        opts  chars
-/about     diagnostics      0    102
-/ai        ai               7   1087
-/appeal    moderation       2    253
-/mod       moderation       8   1203
-/ping      diagnostics      0     74
-/rank      community        8   1190
-/setup     setup            0    101
-/ticket    community        6    811
-/tools     community       10   1753
-/verify    moderation       0     91
+  /command  module       subs  opts  chars
+  /ai       ai             11     2   1954
+  /rank     community      12     2   2108
+  /ticket   community       8     2   1450
+  /tools    community      24     5   7224
+  /about    diagnostics     0     0    131
+  /help     diagnostics     5     1    816
+  /ping     diagnostics     0     0    103
+  /invites  invites         3     1    672
+  /appeal   moderation      0     2    282
+  /mod      moderation     14     4   3991
+  /verify   moderation      0     0    120
+  /setup    setup           0     0    130
 ```
 
 `pnpm budget` prints the live table. It is the source of truth; this page only
 explains the shape of the number, not the number itself.
 
-P4's economy work reuses `/rank`; `/ai` is its only new root, so the ledger moved
-from 9 to 10. A second economy root was rejected in [[ADR-0011-economy-ledger-and-double-spend]]
-because it would duplicate the hub and spend a command for no user benefit.
+A **root** is one of Discord's 100 global chat-input commands. A **subcommand**
+is free: it lives inside its root and does not consume another slot. Pass 26
+replaced the flat `action` option in every existing hub with real subcommands, so
+`/mod ban` and `/rank daily` are now visible in Discord's picker. The generated
+[[Command-Catalog]] is the complete per-root list.
+
+P4's economy work reused `/rank`; `/ai` was its only new root. A second economy
+root was rejected in [[ADR-0011-economy-ledger-and-double-spend]] because it
+would duplicate the hub and spend a command for no user benefit.
 
 ## How to spend a command
 
@@ -65,9 +74,11 @@ because it would duplicate the hub and spend a command for no user benefit.
 | `/tools` | embeds, giveaways, reminders, feeds | `/tools embed edit` |
 | `/help` | discovery, generated from the registry | `/help moderation` |
 
-Seven roots for a bot with forty features. With four standalone roots that is 11
-of 100; the remaining 89 are held for
-context menus, Activities, and features that genuinely need their own name.
+Twelve roots today for a bot with dozens of implemented actions. The remaining
+88 slots are held for context menus, Activities, and features that genuinely
+need their own name. `/help` and `/setup` are roots; `/config`, `/logging`,
+`/analytics`, `/export` and `/music` arrive with their modules, not as empty
+advertisements.
 
 ## Component budget (the other 100-limit)
 

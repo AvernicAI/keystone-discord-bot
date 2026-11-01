@@ -1,26 +1,31 @@
-import { defineCommand, UserError, type CommandContext } from "@keystone/kernel";
+import { defineCommand, UserError, type CommandContext, type CommandOption } from "@keystone/kernel";
 import { TicketService } from "../tickets";
-import { channelId, integer, port, requirePermission, settingsFor, text, userId } from "./helpers";
+import { channelId, port, requirePermission, settingsFor, text, userId } from "./helpers";
+
+const OPTIONS = {
+  subject: { type: "string", name: "subject", description: "Ticket subject" },
+  user: { type: "user", name: "user", description: "Member to add" },
+  channel: { type: "channel", name: "channel", description: "Panel or parent channel" },
+  ticket: { type: "string", name: "ticket", description: "Ticket id (defaults to this thread)" },
+  title: { type: "string", name: "title", description: "Panel title" },
+} satisfies Record<string, CommandOption>;
+
+function opts(...names: (keyof typeof OPTIONS)[]): CommandOption[] {
+  return names.map((name) => OPTIONS[name]);
+}
 
 export const ticket = defineCommand({
   name: "ticket",
   description: "Open, claim, close and analyse private support threads.",
-  options: [
-    {
-      type: "string",
-      name: "action",
-      description: "What to do",
-      required: true,
-      choices: ["panel", "open", "claim", "close", "add", "transcript", "summary", "stats"].map((value) => ({
-        name: value,
-        value,
-      })),
-    },
-    { type: "string", name: "subject", description: "Ticket subject" },
-    { type: "user", name: "user", description: "Member to add" },
-    { type: "channel", name: "channel", description: "Panel or parent channel" },
-    { type: "string", name: "ticket", description: "Ticket id (defaults to this thread)" },
-    { type: "string", name: "title", description: "Panel title" },
+  subcommands: [
+    { name: "panel", description: "Post a ticket panel in a channel.", options: opts("channel", "title") },
+    { name: "open", description: "Open a private support thread.", options: opts("subject") },
+    { name: "claim", description: "Claim a ticket for support.", options: opts("ticket") },
+    { name: "close", description: "Close a ticket and archive its thread.", options: opts("ticket") },
+    { name: "add", description: "Add a member to a ticket.", options: opts("user", "ticket") },
+    { name: "transcript", description: "Show a ticket transcript as text.", options: opts("ticket") },
+    { name: "summary", description: "Summarize a ticket with the AI port.", options: opts("ticket") },
+    { name: "stats", description: "Show guild-wide ticket counts and close time." },
   ],
   guards: [
     (ctx) =>
@@ -33,7 +38,7 @@ export const ticket = defineCommand({
     const settings = await settingsFor(ctx);
     const service = new TicketService(store, actions, settings, ctx.now);
     const guildId = ctx.guildId as string;
-    const selected = text(ctx, "action");
+    const selected = ctx.commandPath[0] ?? text(ctx, "action");
 
     if (selected === "panel") {
       requirePermission(ctx, "ManageGuild");

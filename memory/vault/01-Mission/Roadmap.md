@@ -141,8 +141,8 @@ and defer writes.
 **Shipped slices:** invite tracking as `modules/invites` (pass 19) — cached-counter
 attribution serialized per guild, durable `invite_joins`,
 `/invites leaderboard | stats | who`, and advisory account-age / no-avatar
-flags. Live: 11 commands registered and the `!invites` bridge ran in `#ai-chat`;
-a live member join remains unperformed. The link / phishing filter shipped in
+flags. Live: 12 roots / 77 subcommands registered and the `!invites` bridge ran in
+`#ai-chat`; a live member join remains unperformed. The link / phishing filter shipped in
 pass 23 — a local host blocklist plus punycode detection in `alert` or `delete`
 mode, `/mod links` as its review queue, and a live MCP proof of three findings
 and one review in `#ai-chat`. The profanity/zalgo filter shipped in pass 24 — an
@@ -153,7 +153,10 @@ proven live once with a temporary `dryRun: false` seed, and pass 25 repeated the
 delete proof for profanity. The auto-responder shipped in pass 25 — exact,
 contains and regex triggers stored as guild records, one reply per message and a
 per-trigger cooldown — and was proven live through the real gateway, including
-cooldown suppression and release. The rest of this phase is open.
+cooldown suppression and release. Pass 26 made the command tree real: every
+existing hub now registers Discord subcommands (12 roots, 77 subcommands), `/help`
+is generated from the registry, and boot sync plus `commands:doctor` compare the
+full option shape. The rest of this phase is open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.
@@ -161,7 +164,7 @@ cooldown suppression and release. The rest of this phase is open.
   analytics; plus goodbye messages, YouTube/Twitch/RSS feeds, temp ban/role
   expiry, join-gate expiry, panic mode and case export. Invites, the link,
   profanity and zalgo filters, and auto-responders are done (above).
-- `/config` and `/help` hubs; command-budget audit.
+- `/config` hub; `/help` shipped in pass 26; command-budget audit remains a gate.
 - Split `modules/community` into domain folders, then extract a module only if the
   "add a feature in an afternoon" test still fails.
 - `packages/i18n`: typed keys, per-guild locale, command localizations; no machine

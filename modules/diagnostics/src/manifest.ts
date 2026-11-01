@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { defineModule } from "@keystone/kernel";
 import { about } from "./commands/about";
+import { help } from "./commands/help";
 import { ping } from "./commands/ping";
 
 /**
@@ -22,6 +23,6 @@ export const diagnosticsModule = defineModule({
   defaultSettings: { enabled: true, detailed: false },
   intents: ["Guilds"],
   permissions: [],
-  commands: [ping, about],
+  commands: [ping, about, help],
   docsPath: "04-Modules/diagnostics/Spec.md",
 });

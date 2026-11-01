@@ -14,6 +14,7 @@ configured?" without a dashboard.
 | --- | --- | --- | --- |
 | `/ping` | none | 3 s cooldown per user | Replies with uptime |
 | `/about` | none | guild-only | Ephemeral embed with version, module state and a docs pointer |
+| `/help` | subcommands `browse`, `commands`, `search`, `privacy`, `changelog`; optional `module` filter or required `query` | none (works in DMs) | Reads the live registry catalog; never a hand-written list |
 
 ## Settings
 
@@ -42,7 +43,9 @@ None. Diagnostics must work on a server where the bot has no roles.
 
 ## Limits respected
 
-- 2 of Discord's 100 global commands.
+- 3 of Discord's 100 global command roots (`/ping`, `/about`, `/help`).
+- `/help` reads `ctx.catalog`, injected by dispatch from the same registry
+  Discord is registered from; it cannot advertise a missing command.
 - Zero components, so no V2 slot budget is spent.
 - No database access beyond the settings handle.
 
