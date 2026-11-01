@@ -274,6 +274,19 @@
         "budget": "11/100",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-22",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Dashboard server boundaries: ordered route table, per-area handlers, one session context, shared render/http modules and one settings-write CSRF gate.",
+      "journal": "journal/2026-11-01-pass-22.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "208",
+        "budget": "11/100",
+        "memory": "current"
+      }
     }
   ]
 }

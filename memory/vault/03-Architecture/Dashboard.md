@@ -49,8 +49,11 @@ HTML or JSON; no Discord token in either
 ```
 
 Both branches use the same `GuildAccessService.authorize()` result. There is no
-separate "write permission" cache and no web-only settings schema. The write
-branch additionally checks the session CSRF token before it parses the body.
+separate "write permission" cache and no web-only settings schema. Both settings
+writes go through one `requireSettingsWrite` gate: session -> guild
+authorization -> token read -> CSRF check. The API reads the token from its
+header; the HTML form reads it from its body, so parsing the form is part of the
+token-read callback.
 
 The guild list is fetched from Discord on each request, so a demotion or removal
 takes effect immediately. There is no browser-held permission cache. A
@@ -66,7 +69,15 @@ as well; the URL id alone is never enough.
 | `apps/web/src/auth.ts` | OAuth completion, opaque sessions, CSRF |
 | `apps/web/src/access.ts` | BigInt permissions and the bot-membership check |
 | `apps/web/src/overview.ts` | View composition, settings update and schema-error mapping; filters credential-shaped settings |
-| `apps/web/src/server.ts` | Routes, cookies, CSP, HTML escaping, JSON errors |
+| `apps/web/src/server.ts` | Error boundary, request context, route dispatch and the final method/404 fallback |
+| `apps/web/src/routes/index.ts` | Ordered route table, the shared guild/module patterns and matching |
+| `apps/web/src/routes/auth.ts` | Health, login, callback, logout and landing handlers |
+| `apps/web/src/routes/dashboard.ts` | Guild list, overview and settings editor/form handlers |
+| `apps/web/src/routes/api.ts` | `/api/v1` reads, settings `PATCH` and the API 404 |
+| `apps/web/src/request-context.ts` | Web dependencies, cookie parsing and the one session lookup per request |
+| `apps/web/src/authorization.ts` | Session check, guild authorization and the one settings-write/CSRF gate |
+| `apps/web/src/http.ts` | Response helpers, security headers, body parsing and JSON/form settings parsing |
+| `apps/web/src/render.ts` | Layout, escaping and every HTML page renderer |
 | `apps/web/src/runtime.ts` | Composition root: Postgres or memory, OAuth or degraded |
 | `packages/kernel/src/web.ts` | `SessionStore`, `DashboardStore`, `WebSession` |
 | `packages/db/src/web-session-store.ts` | Drizzle session adapter |
@@ -80,11 +91,12 @@ server or a browser.
 ## How to add a read route
 
 1. Decide which port it needs. Prefer an existing store; add a method to
-   `DashboardStore` rather than SQL in `server.ts`.
-2. Call `requireSession()` and, for anything guild-scoped,
-   `deps.access.authorize(accessToken, guildId)` before reading data.
+   `DashboardStore` rather than SQL in a route handler.
+2. Add the handler under `apps/web/src/routes/` and register its pattern in
+   `routes/index.ts`. Use `requireSession()` for a personal read and
+   `authorizeGuild()` for anything guild-scoped before reading data.
 3. Compose the response in `DashboardService` or a sibling service; keep
-   `server.ts` to routing, parsing and escaping.
+   `routes/` to request decisions and `render.ts` to escaping and HTML.
 4. Escape every Discord-supplied string in HTML. Never interpolate raw JSON into
    a `<script>` tag.
 5. Add a test in `apps/web/src/web.test.ts` that proves a cross-guild request is
@@ -94,11 +106,13 @@ server or a browser.
 
 ## How to add a write route
 
-1. Authorize first: `requireSession()` and
-   `deps.access.authorize(accessToken, guildId)` before reading the body. A
-   non-admin must not be able to probe validation behaviour.
-2. Check CSRF before a mutation: `auth.csrfValid(session, csrfHeader(req))` for
-   JSON, or the hidden `csrf` field for a form.
+1. Authorize first: call `requireSettingsWrite()` from
+   `apps/web/src/authorization.ts`. It performs session -> guild authorization ->
+   token read -> CSRF in that order, before any mutation. A non-admin must not
+   be able to probe validation behaviour.
+2. Let the gate read the token from the surface: `csrfHeader(ctx.req)` for JSON,
+   or parse the form in the callback and return its hidden `csrf` field. Do not
+   duplicate the session/access/CSRF sequence in a handler.
 3. Validate through the module's existing schema via `SettingsService.update`.
    Do not add a second schema, a web-only whitelist or a direct repository write.
 4. Keep the write guild-scoped: call `SettingsService.update(guild.id, ...)` with

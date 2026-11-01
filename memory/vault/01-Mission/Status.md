@@ -16,12 +16,15 @@ discord.js events. MEE6's invite tracker is partly premium-gated (its wiki says
 parts or the entirety may require Premium); neither Dyno nor Carl-bot documents
 it. Distinguish this from P6, which remains open below.
 
-**P6 authorization and settings-write foundation is in repo** (passes 17–18,
-2026-11-01): Discord OAuth2 code + PKCE, sealed state, opaque Postgres-backed
-sessions, BigInt guild authorization with a bot-token membership check, a
-server-rendered dashboard, `/api/v1` reads and schema-validated module settings
-writes from both the HTML form and `PATCH /api/v1`. The browser never receives a
-Discord token; the session stores one sealed access token and no refresh token.
+**P6 authorization and settings-write foundation is in repo** (passes 17–18;
+server boundaries in pass 22, 2026-11-01): Discord OAuth2 code + PKCE, sealed
+state, opaque Postgres-backed sessions, BigInt guild authorization with a
+bot-token membership check, a server-rendered dashboard, `/api/v1` reads and
+schema-validated module settings writes from both the HTML form and
+`PATCH /api/v1`. The web process is split into an ordered route table, per-area
+handlers, one request context, shared render/HTTP modules and one settings-write
+CSRF gate. The browser never receives a Discord token; the session stores one
+sealed access token and no refresh token.
 This is the read-only auth step plus a narrow write path, not the
 full P6 exit demo: field widgets, fleet actions and scoped API tokens are still
 open. See [[Dashboard]] and [[ADR-0016-dashboard-foundation]].
@@ -61,7 +64,7 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 208 tests / 35 files · budget 11/100 · memory 1874/1874
+pnpm check        exit 0 · typecheck 0 · 208 tests / 35 files · budget 11/100 · memory 1883/1883
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 11 commands · qwen3:8b reply in #ai-chat
 live commands     2026-11-01 · !ping · !about · !ai status · !mod history · !rank leaderboard · !invites leaderboard · !invites who

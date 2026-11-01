@@ -7,6 +7,7 @@
 
 | Pass | Date | Phase | Summary | Journal |
 | --- | --- | --- | --- | --- |
+| pass-22 | 2026-11-01 | P7 | Dashboard server boundaries: ordered route table, per-area handlers, one session context, shared render/http modules and one settings-write CSRF gate. | [journal](../../journal/2026-11-01-pass-22.md) |
 | pass-21 | 2026-11-01 | P7 | Invite gateway boundary: a gateway-independent tracker owns cache, queue and decisions; discord.js wiring is a translation layer with a direct serialization test. | [journal](../../journal/2026-11-01-pass-21.md) |
 | pass-20 | 2026-11-01 | P7 | Cold-cache invite attribution records no inviter; unused refresh-token storage removed; command-sync and MEE6 claims corrected. | [journal](../../journal/2026-11-01-pass-20.md) |
 | pass-19 | 2026-11-01 | P7 | Invite tracking: cached-counter attribution, durable invite_joins, /invites leaderboard\|stats\|who and advisory flags; live 11-command registration and dev-bridge run. | [journal](../../journal/2026-11-01-pass-19.md) |
