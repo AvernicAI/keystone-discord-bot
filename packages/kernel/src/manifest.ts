@@ -9,6 +9,12 @@ import type {
 export const MODULE_ID_PATTERN = /^[a-z][a-z0-9-]{1,31}$/;
 /** Discord's own rule for slash-command and option names. */
 export const COMMAND_NAME_PATTERN = /^[-_\p{L}\p{N}]{1,32}$/u;
+/**
+ * Context-menu names are display labels, not slash tokens: Discord allows
+ * spaces and capitals ("Explain with AI"). Keep the same length cap and a
+ * conservative character set so a menu cannot smuggle in formatting.
+ */
+export const CONTEXT_MENU_NAME_PATTERN = /^[\p{L}\p{N}][\p{L}\p{N} _-]{0,31}$/u;
 
 export interface ModuleManifest {
   /** Stable, unique, kebab-case. Used in settings keys, logs and docs paths. */
@@ -95,15 +101,31 @@ export function validateManifest(manifest: ModuleManifest): string[] {
 
   const seen = new Set<string>();
   for (const command of manifest.commands) {
-    const label = `/${command.name || "<unnamed>"}`;
-    if (!COMMAND_NAME_PATTERN.test(command.name)) errors.push(`${label}: invalid command name`);
+    const commandType = command.type ?? "chat-input";
+    const label =
+      commandType === "chat-input"
+        ? `/${command.name || "<unnamed>"}`
+        : `${commandType} menu "${command.name || "<unnamed>"}"`;
+    const namePattern =
+      commandType === "chat-input" ? COMMAND_NAME_PATTERN : CONTEXT_MENU_NAME_PATTERN;
+    if (!namePattern.test(command.name)) errors.push(`${label}: invalid command name`);
     if (!command.description?.trim()) errors.push(`${label}: description is required`);
     if (command.description && command.description.length > 100) {
       errors.push(`${label}: description must be 100 characters or fewer`);
     }
     if (typeof command.execute !== "function") errors.push(`${label}: execute must be a function`);
-    if (seen.has(command.name)) errors.push(`${label}: declared twice in this module`);
-    seen.add(command.name);
+    const commandKey = `${commandType}:${command.name}`;
+    if (seen.has(commandKey)) errors.push(`${label}: declared twice in this module`);
+    seen.add(commandKey);
+
+    if (commandType !== "chat-input") {
+      if ((command.options?.length ?? 0) > 0) {
+        errors.push(`${label}: a context-menu command cannot declare options`);
+      }
+      if ((command.subcommands?.length ?? 0) > 0 || (command.groups?.length ?? 0) > 0) {
+        errors.push(`${label}: a context-menu command cannot declare subcommands or groups`);
+      }
+    }
 
     if (command.subcommands?.length && command.groups?.length) {
       errors.push(`${label}: use either subcommands or groups, not both`);

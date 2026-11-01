@@ -5,23 +5,23 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**119 features** across 16 domains: **88 in repo**, **11 open**, **16 planned**. Live behaviour is marked separately; a green
+**123 features** across 16 domains: **92 in repo**, **11 open**, **16 planned**. Live behaviour is marked separately; a green
 box means the code and its tests exist, not that a live guild has run it.
 
 ## Domains
 
 | Domain | Features | In repo | Open | Planned |
 | --- | ---: | ---: | ---: | ---: |
-| Moderation | 11 | 9 | 2 | 0 |
+| Moderation | 13 | 11 | 2 | 0 |
 | Automod | 10 | 9 | 0 | 1 |
 | Security | 9 | 8 | 1 | 0 |
 | Leveling | 7 | 7 | 0 | 0 |
 | Economy | 6 | 5 | 0 | 0 |
-| Community | 11 | 9 | 2 | 0 |
+| Community | 12 | 10 | 2 | 0 |
 | Tickets | 7 | 6 | 1 | 0 |
 | Content | 7 | 6 | 0 | 0 |
 | Music | 4 | 1 | 1 | 0 |
-| AI | 6 | 5 | 1 | 0 |
+| AI | 7 | 6 | 1 | 0 |
 | Operations | 11 | 5 | 3 | 3 |
 | Portability | 12 | 12 | 0 | 0 |
 | Invites | 3 | 3 | 0 | 0 |
@@ -44,6 +44,8 @@ box means the code and its tests exist, not that a live guild has run it.
 | Dry-run default | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
 | Appeal from the DM | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
 | Case export | P7 | ◐ open | Export commands are part of the P5/P7 data-ownership work. · `modules/moderation/src/mod.test.ts` |
+| Report message menu | P7 | ✅ in repo | `modules/moderation/src/context.test.ts` · live unverified |
+| Case history menu | P7 | ✅ in repo | `modules/moderation/src/context.test.ts` · live unverified |
 
 ## Automod
 
@@ -112,6 +114,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Temp voice | P3 | ✅ in repo | `modules/community/src/extras.test.ts` · live unverified |
 | Stat channels | P3 | ✅ in repo | `modules/community/src/extras.test.ts` · live unverified |
 | Social feeds | P7 | ◐ open | RSS ships; YouTube/Twitch-specific feeds are named as open in the P3 status. · `modules/community/src/extras.test.ts` |
+| Rank card menu | P7 | ✅ in repo | `modules/community/src/context.test.ts` · live unverified |
 
 ## Tickets
 
@@ -153,6 +156,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Persona chat | P4 | ✅ in repo | `modules/ai/src/ai.test.ts`, `apps/bot/src/ai-events.test.ts` · live verified |
 | Server RAG | P4 | ◐ open | Portable exact index ships; pgvector ANN remains open. |
 | Mod explanations | P4 | ✅ in repo | `modules/ai/src/ai.test.ts` · live unverified |
+| Explain with AI menu | P7 | ✅ in repo | `modules/ai/src/context.test.ts` · live unverified |
 | Thread summaries | P4 | ✅ in repo | `modules/ai/src/ai.test.ts` · live unverified |
 | Cost caps | P4 | ✅ in repo | `modules/ai/src/ai.test.ts` · live unverified |
 | Zero retention | P4 | ✅ in repo | `modules/ai/src/ai.test.ts` · live unverified |

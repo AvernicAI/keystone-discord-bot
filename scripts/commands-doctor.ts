@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { ModuleRegistry } from "@keystone/kernel";
-import { buildCommandJson } from "../apps/bot/src/adapt";
+import { buildApplicationCommandJson } from "../apps/bot/src/adapt";
 import { commandDrift, hasDrift, type CommandJson } from "../apps/bot/src/command-sync";
 import { modules } from "../apps/bot/src/modules";
 
@@ -31,14 +31,17 @@ async function get<T>(path: string): Promise<T> {
 
 const registry = new ModuleRegistry().registerAll(modules);
 const catalog = registry.catalog();
-const payload = registry.listCommands().map((command) => buildCommandJson(command.definition));
+const payload = registry.listCommands().map((command) => buildApplicationCommandJson(command.definition));
 const app = await get<{ id: string; name: string; approximate_guild_count?: number }>(
   "/applications/@me",
 );
 const commands = await get<CommandJson[]>(`/applications/${app.id}/commands`);
 const guilds = await get<Array<{ id: string; name: string }>>("/users/@me/guilds");
 const drift = commandDrift(payload as unknown as CommandJson[], commands);
-const names = commands.map((command) => command.name).sort();
+const chatInput = commands.filter((command) => (command.type ?? 1) === 1);
+const userMenus = commands.filter((command) => command.type === 2);
+const messageMenus = commands.filter((command) => command.type === 3);
+const names = chatInput.map((command) => command.name).sort();
 const invite = `https://discord.com/oauth2/authorize?client_id=${app.id}&scope=bot%20applications.commands`;
 const countSubcommands = (list: readonly CommandJson[]): number =>
   list.reduce(
@@ -56,9 +59,19 @@ const countSubcommands = (list: readonly CommandJson[]): number =>
 
 console.log(`Application  ${app.name} (${app.id})`);
 console.log(`Guilds       ${guilds.length}: ${guilds.map((guild) => `${guild.name} (${guild.id})`).join(", ") || "none"}`);
-console.log(`Registry     ${registry.commandCount} roots · ${catalog.reduce((sum, entry) => sum + entry.subcommands.length, 0)} subcommands`);
-console.log(`Discord      ${names.length} global chat-input commands · ${countSubcommands(commands)} subcommands`);
+const catalogRoots = catalog.filter((entry) => (entry.type ?? "chat-input") === "chat-input");
+console.log(
+  `Registry     ${registry.commandCount} roots · ${catalogRoots.reduce((sum, entry) => sum + entry.subcommands.length, 0)} subcommands · ${registry.contextMenuCount} context menus`,
+);
+console.log(
+  `Discord      ${chatInput.length} global chat-input commands · ${countSubcommands(chatInput)} subcommands · ${userMenus.length} user menus · ${messageMenus.length} message menus`,
+);
 console.log(`Names        ${names.join(", ") || "none"}`);
+if (userMenus.length + messageMenus.length > 0) {
+  console.log(
+    `Menus        ${[...userMenus.map((menu) => `user:${menu.name}`), ...messageMenus.map((menu) => `message:${menu.name}`)].join(", ")}`,
+  );
+}
 if (drift.missing.length > 0) console.log(`Missing      ${drift.missing.join(", ")}`);
 if (drift.extra.length > 0) console.log(`Extra        ${drift.extra.join(", ")}`);
 if (drift.changed.length > 0) console.log(`Changed      ${drift.changed.join(", ")} (options or subcommand tree differs)`);

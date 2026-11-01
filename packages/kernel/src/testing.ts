@@ -16,6 +16,10 @@ import type {
 export interface FakeInteractionInit {
   id?: string;
   commandName?: string;
+  commandType?: import("./types").CommandType;
+  targetId?: string;
+  targetUserId?: string;
+  targetContent?: string;
   guildId?: string | null;
   userId?: string;
   channelId?: string | null;
@@ -33,6 +37,10 @@ export interface FakeInteractionInit {
 export class FakeInteraction implements InteractionLike {
   readonly id: string;
   readonly commandName: string;
+  readonly commandType?: import("./types").CommandType;
+  readonly targetId?: string;
+  readonly targetUserId?: string;
+  readonly targetContent?: string;
   readonly guildId: string | null;
   readonly channelId: string | null;
   readonly userId: string;
@@ -48,6 +56,10 @@ export class FakeInteraction implements InteractionLike {
   constructor(init: FakeInteractionInit = {}) {
     this.id = init.id ?? "interaction-1";
     this.commandName = init.commandName ?? "test";
+    this.commandType = init.commandType;
+    this.targetId = init.targetId;
+    this.targetUserId = init.targetUserId;
+    this.targetContent = init.targetContent;
     this.guildId = init.guildId === undefined ? "1" : init.guildId;
     this.channelId = init.channelId === undefined ? "99" : init.channelId;
     this.userId = init.userId ?? "42";

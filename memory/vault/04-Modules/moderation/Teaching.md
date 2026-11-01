@@ -111,6 +111,27 @@ The second likely mistake is treating a JSON evidence blob as an archive. Keep
 the trigger slice; do not start storing every message "just in case". The
 retention table and the data-ownership promise are part of the design.
 
+## Context menus are commands with a target
+
+A message context menu is not a new subsystem. It is an application command of
+type 3 that arrives with `targetId` (the message id), `targetMessage.author.id`
+and — only when the MessageContent intent is granted — the message text. The
+kernel models that as `commandType: "message"` plus `targetId`,
+`targetUserId` and `targetContent`; the registry keys commands by
+`type:name`, so a menu can share a display name with a slash root without
+colliding.
+
+Two design choices are worth copying. First, **Report message opens a case, it
+does not delete the message**. A right-click is easy to misclick, and the case
+is reviewable, appealable and durable; an accidental delete is not. Second,
+**Case history reuses the same permission and the same rows as `/mod history`**.
+If the menu had its own query or its own permission, the two surfaces would
+drift and a leak would be invisible to the slash tests.
+
+When MessageContent is off, do not guess. The report stores
+`(content unavailable; MessageContent intent is off)` and keeps the message id,
+which is the one fact a moderator can still act on.
+
 ## Stretch
 
 Replay the exact `security.test.ts` fixture through `registerModerationEvents`

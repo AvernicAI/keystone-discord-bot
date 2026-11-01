@@ -19,6 +19,18 @@ reason, evidence and an appeal path. The default is dry-run.
 `/mod` is a hub: those fourteen subcommands cost **one** global root. The module
 spends 3 of Discord's 100 roots (`/mod`, `/appeal`, `/verify`).
 
+### Context menus
+
+| Menu | Type | Guards | Behaviour |
+| --- | --- | --- | --- |
+| `Report message` | message | guild-only, 5 s cooldown | Opens a `report` case with `messageId`, `channelId` and a 500-character excerpt; never deletes or punishes |
+| `Case history` | user | guild-only, `ModerateMembers` | Lists the selected member's 10 newest cases through the same `CaseService.list` as `/mod history` |
+
+These are application commands of type 2/3. They cost no global root; Discord
+gives the module 2 of its 15 user and 15 message menu slots. Report message is
+intentionally a reviewable case rather than an auto-delete: a misclick must not
+destroy a message.
+
 ## Settings
 
 | Key | Default | Meaning |
@@ -168,8 +180,12 @@ permission **before** the Discord call.
 - `modules/moderation/src/mod.test.ts` — registry, permission guard, enforced
   action, zero-write dry-run, reason requirement, appeal ownership, verification,
   `/mod links` and `/mod filters` read paths.
+- `modules/moderation/src/context.test.ts` — Report message opens a real case
+  with the target message id and excerpt, refuses a self-report, records the
+  honest no-MessageContent placeholder, and Case history reads the same rows.
 - `apps/bot/src/moderation-events.test.ts` — the dev marker is guild-scoped and
   stripped; ordinary member messages still reach the coordinator.
 - `packages/db/src/cases.test.ts` — PGlite case numbering, events, state and
   concurrent allocation.
-- `pnpm budget` — 17/100 roots with all shipped commands (108 subcommands).
+- `pnpm budget` — 17/100 roots with all shipped commands (108 subcommands) and
+  4 context menus on their own 15 + 15 budget.

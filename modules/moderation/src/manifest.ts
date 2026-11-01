@@ -2,6 +2,8 @@ import { defineModule } from "@keystone/kernel";
 import { mod } from "./commands/mod";
 import { appeal } from "./commands/appeal";
 import { verify } from "./commands/verify";
+import { reportMessage } from "./commands/report-message";
+import { caseHistory } from "./commands/case-history";
 import { moderationDefaultSettings, moderationSettingsSchema } from "./settings";
 
 /**
@@ -18,7 +20,7 @@ export const moderationModule = defineModule({
   version: "0.2.0",
   settingsSchema: moderationSettingsSchema,
   defaultSettings: moderationDefaultSettings,
-  commands: [mod, appeal, verify],
+  commands: [mod, appeal, verify, reportMessage, caseHistory],
   intents: ["Guilds", "GuildMessages", "GuildModeration", "AutoModerationExecution"],
   optionalIntents: ["GuildMembers", "MessageContent"],
   intentFallbacks: {

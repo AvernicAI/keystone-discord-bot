@@ -14,6 +14,8 @@ const root = process.cwd();
 const registry = new ModuleRegistry().registerAll(modules);
 const report = auditBudget(registry);
 const catalog = registry.catalog();
+const chatInput = catalog.filter((entry) => (entry.type ?? "chat-input") === "chat-input");
+const contextMenus = catalog.filter((entry) => (entry.type ?? "chat-input") !== "chat-input");
 const updatedAt = new Date().toISOString().slice(0, 10);
 
 const data = {
@@ -23,8 +25,12 @@ const data = {
   roots: report.commands,
   subcommands: report.subcommands,
   actions: report.actions,
+  contextMenus: report.contextMenus,
+  userContextMenus: report.userContextMenus,
+  messageContextMenus: report.messageContextMenus,
+  contextMenuLimit: 15,
   limit: report.limit,
-  commands: catalog.map((entry) => ({
+  commands: chatInput.map((entry) => ({
     name: entry.name,
     moduleId: entry.moduleId,
     description: entry.description,
@@ -36,6 +42,12 @@ const data = {
       options: subcommand.options.map((option) => option.name),
     })),
   })),
+  menus: contextMenus.map((entry) => ({
+    name: entry.name,
+    type: entry.type,
+    moduleId: entry.moduleId,
+    description: entry.description,
+  })),
 };
 
 const markdown = [
@@ -46,19 +58,20 @@ const markdown = [
   "> Generated from the live `ModuleRegistry`. This is the list Discord receives.",
   "> Run `pnpm commands:catalog` after changing a command definition.",
   "",
-  `**${report.commands} roots · ${report.subcommands} subcommands · ${report.actions} total actions · ${report.commands}/${report.limit} global roots used.**`,
+  `**${report.commands} roots · ${report.subcommands} subcommands · ${report.actions} total actions · ${report.contextMenus} context menus · ${report.commands}/${report.limit} global roots used.**`,
   "",
   "A root is one of Discord's 100 global chat-input commands. Subcommands live",
   "inside that root and do not spend another slot. Type `/` in Discord, choose a",
-  "root, then choose a subcommand.",
+  "root, then choose a subcommand. Context menus have their own 15 + 15 budget",
+  "and appear under right-click → Apps.",
   "",
   "| Root | Module | Subcommands |",
   "| --- | --- | ---: |",
-  ...catalog.map(
+  ...chatInput.map(
     (entry) => `| \`/${entry.name}\` | \`${entry.moduleId}\` | ${entry.subcommands.length} |`,
   ),
   "",
-  ...catalog.flatMap((entry) => [
+  ...chatInput.flatMap((entry) => [
     `## \`/${entry.name}\``,
     "",
     entry.description,
@@ -78,6 +91,19 @@ const markdown = [
         ]
       : ["No subcommands; the root has its own options.", ""]),
   ]),
+  "## Context menus",
+  "",
+  ...(contextMenus.length > 0
+    ? [
+        "| Menu | Type | Module | Description |",
+        "| --- | --- | --- | --- |",
+        ...contextMenus.map(
+          (entry) =>
+            `| \`${entry.name}\` | ${entry.type === "user" ? "user" : "message"} | \`${entry.moduleId}\` | ${entry.description.replace(/\|/g, "\\|")} |`,
+        ),
+      ]
+    : ["No context menus are registered."]),
+  "",
   "## How to change this page",
   "",
   "1. Edit the command definition or manifest.",

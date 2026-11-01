@@ -89,6 +89,7 @@ function syntheticBanInteraction(): {
     channelId: "channel-1",
     user: { id: "mod-1" },
     memberPermissions: { toArray: () => ["ModerateMembers"] },
+    isChatInputCommand: () => true,
     replied: false,
     deferred: false,
     options: {

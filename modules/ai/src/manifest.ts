@@ -1,5 +1,6 @@
 import { defineModule } from "@keystone/kernel";
 import { ai } from "./commands/ai";
+import { explainMessage } from "./commands/explain-message";
 import { aiDefaultSettings, aiSettingsSchema } from "./settings";
 
 /**
@@ -16,7 +17,7 @@ export const aiModule = defineModule({
   version: "0.1.0",
   settingsSchema: aiSettingsSchema,
   defaultSettings: aiDefaultSettings,
-  commands: [ai],
+  commands: [ai, explainMessage],
   intents: ["Guilds", "GuildMessages"],
   optionalIntents: ["MessageContent"],
   intentFallbacks: {

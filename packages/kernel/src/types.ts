@@ -91,6 +91,14 @@ export interface InteractionLike {
   /** Discord interaction id; stable across retries and the economy idempotency key. */
   readonly id: string;
   readonly commandName: string;
+  /** Defaults to chat-input for every existing adapter and fixture. */
+  readonly commandType?: CommandType;
+  /** User id for a user menu; message id for a message menu. */
+  readonly targetId?: string;
+  /** Author of the target message, when the interaction carries one. */
+  readonly targetUserId?: string;
+  /** Target message content; empty when MessageContent is not granted. */
+  readonly targetContent?: string;
   readonly guildId: string | null;
   readonly channelId: string | null;
   readonly userId: string;
@@ -251,6 +259,12 @@ export interface CommandContext {
   readonly music?: import("./music").MusicPort;
 }
 
+/**
+ * Discord application command kinds. Chat-input commands are the 100-slot
+ * budget; user and message context menus live in their own 15 + 15 budgets.
+ */
+export type CommandType = "chat-input" | "user" | "message";
+
 export type GuardResult = { ok: true } | { ok: false; message: string };
 export type Guard = (ctx: CommandContext) => GuardResult | Promise<GuardResult>;
 
@@ -306,6 +320,8 @@ export interface CommandGroupDefinition {
 export interface CommandDefinition {
   name: string;
   description: string;
+  /** Chat-input root by default; user/message add a right-click menu. */
+  type?: CommandType;
   /** Root options. Discord forbids root options when subcommands exist. */
   options?: CommandOption[];
   /** One level of subcommands under the root. */
@@ -331,6 +347,8 @@ export interface CommandCatalogSubcommand {
 
 export interface CommandCatalogEntry {
   readonly name: string;
+  /** Absent in older fixtures, which means chat-input. */
+  readonly type?: CommandType;
   readonly moduleId: string;
   readonly description: string;
   readonly options: readonly CommandOption[];

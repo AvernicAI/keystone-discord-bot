@@ -5,11 +5,12 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**17 roots · 108 subcommands · 125 total actions · 17/100 global roots used.**
+**17 roots · 108 subcommands · 125 total actions · 4 context menus · 17/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
-root, then choose a subcommand.
+root, then choose a subcommand. Context menus have their own 15 + 15 budget
+and appear under right-click → Apps.
 
 | Root | Module | Subcommands |
 | --- | --- | ---: |
@@ -252,6 +253,15 @@ Save tracks in a durable queue and inspect playback readiness.
 | `/music skip` | Skip the current track; refuses when there is no player. | — |
 | `/music stop` | Stop playback; refuses when there is no player. | — |
 | `/music status` | Show module state, queue count and the exact playback blocker. | — |
+
+## Context menus
+
+| Menu | Type | Module | Description |
+| --- | --- | --- | --- |
+| `Report message` | message | `moderation` | Open a moderation case for the selected message. |
+| `Case history` | user | `moderation` | Show recent moderation cases for the selected member. |
+| `Rank card` | user | `community` | Show the selected member's level, XP and server rank. |
+| `Explain with AI` | message | `ai` | Explain why the selected message may be a moderation concern. |
 
 ## How to change this page
 

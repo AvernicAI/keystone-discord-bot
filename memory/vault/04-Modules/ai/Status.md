@@ -19,19 +19,28 @@ application-command invocation tool. The dev-only `!` bridge did execute real
 commands through the same dispatch pipeline. The pgvector extension benchmark is
 still partial.
 
+Pass 33 added **Explain with AI**, a message context menu (type 3) that calls the
+same `AiService.explain` and `replyAnswer` as `/ai explain`. It requires
+`ManageMessages`, honours the `explanations` switch, the guild cap and the
+zero-retention policy, and replies with the advisory banner. The menu adds no
+store and no case: it is a read of the selected message plus an explanation. It
+is registered in Discord (doctor reports `message:Explain with AI`); the MCP
+cannot right-click, so it is covered by a command test rather than a live click.
+
 ## Verified
 
 ```text
-pnpm check                            exit 0 · 171 tests / 28 files
+pnpm check                            exit 0 · 360 tests / 56 files
   modules/ai/src/provider.test.ts     4 tests (incl. think:false opt-in)
   apps/bot/src/ai-events.test.ts      4 tests (bot gate + dev guild seam)
   apps/bot/src/prefix.test.ts         8 tests (parse, dispatch, guild gate)
   modules/ai/src/ai.test.ts           7 tests
   modules/ai/src/commands.test.ts     7 tests
+  modules/ai/src/context.test.ts      3 tests (Explain with AI menu)
   modules/community/src/commands.test.ts 10 tests (incl. /ticket summary and stats)
   packages/db/src/ai.test.ts          2 tests
-pnpm budget                           10/100, status OK
-pnpm memory:check                     current (pass 15)
+pnpm budget                           17/100 roots · 108 subcommands · 4 context menus, status OK
+pnpm memory:check                     current (pass 33)
 ```
 
 Live smoke (2026-11-01, guild 1450130465146142785, channel
@@ -57,6 +66,7 @@ P4 feature proofs:
 | Mention-only chat | Service chat works; `chat: false` refuses with a feature-specific error; event ignores bots/DMs/non-mentions by construction; **live** Qwen3 reply observed through the dev MCP seam |
 | Advisory classification | Service returns an advisory label/evidence with no action; `/ai classify` is guarded by `ManageMessages` and uses the same cap path |
 | Mod explanations | `/ai explain` reads an existing case, returns a titled explanation and leaves the case state `open` |
+| Explain with AI menu | The message menu explains the selected message, refuses when `explanations` is off, and creates no case (3 tests) |
 | Thread summaries | `/ticket summary` calls the same `AiPort` and renders a summary with “A human decides any action” |
 | Kill switch | `/ai status` works while disabled and reports `Retention: none`; disabling does not unregister commands |
 | Isolation | Documents are guild-scoped; removing another guild's id is `false`; PGlite persists docs and usage counters |

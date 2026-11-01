@@ -10,7 +10,7 @@ import {
   type DispatchDeps,
 } from "@keystone/kernel";
 import { loadEnv, requireToken } from "@keystone/config";
-import { asInteractionLike, buildCommandJson } from "./adapt";
+import { asInteractionLike, buildApplicationCommandJson } from "./adapt";
 import { commandDrift, hasDrift, type CommandJson } from "./command-sync";
 import { createClient } from "./client";
 import { modules } from "./modules";
@@ -114,7 +114,7 @@ async function main(): Promise<void> {
       // the server set has drifted, however, do the explicit clear + register
       // cycle and read the result back. `pnpm commands:resync` runs the same
       // cycle on demand after a payload-only change.
-      const payload = registry.listCommands().map((c) => buildCommandJson(c.definition));
+      const payload = registry.listCommands().map((c) => buildApplicationCommandJson(c.definition));
       // Compare Discord's raw REST representation, not discord.js wrappers:
       // a wrapper may normalise fields and report drift forever after a
       // successful registration. `commands:doctor` reads the same endpoint.
@@ -173,7 +173,13 @@ async function main(): Promise<void> {
   });
 
   client.on(Events.InteractionCreate, (interaction) => {
-    if (!interaction.isChatInputCommand()) return;
+    if (
+      !interaction.isChatInputCommand() &&
+      !interaction.isUserContextMenuCommand() &&
+      !interaction.isMessageContextMenuCommand()
+    ) {
+      return;
+    }
     void dispatchCommand(dispatchDeps, asInteractionLike(interaction)).catch((error: unknown) => {
       logger.error("dispatch crashed", {
         error: error instanceof Error ? (error.stack ?? error.message) : String(error),

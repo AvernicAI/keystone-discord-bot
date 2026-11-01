@@ -12,6 +12,7 @@ refuses to boot when it fails.
 ```text
 17/100 global roots used (83 left)
 108 subcommands · 125 total actions
+4 context menus (2 user · 2 message; 15 each)
 status: OK
 
   /command    module       subs  opts  chars
@@ -32,6 +33,12 @@ status: OK
   /config     setup           4     3   1106
   /export     setup           6     3   1445
   /setup      setup           0     0    130
+
+  Context menus (separate 15 + 15 budget)
+  Explain with AI  ai           message
+  Rank card        community    user
+  Case history     moderation   user
+  Report message   moderation   message
 ```
 
 `pnpm budget` prints the live table. It is the source of truth; this page only
@@ -42,6 +49,13 @@ is free: it lives inside its root and does not consume another slot. Pass 26
 replaced the flat `action` option in every existing hub with real subcommands, so
 `/mod ban` and `/rank daily` are now visible in Discord's picker. The generated
 [[Command-Catalog]] is the complete per-root list.
+
+A **context menu** is an application command of type 2 (user) or 3 (message).
+Discord gives each type its own 15 slots, so a menu costs no chat-input root.
+Pass 33 added four: **Report message** and **Explain with AI** (message),
+**Case history** and **Rank card** (user). `pnpm budget` reports them separately
+and fails if either type exceeds 15; the kernel registry keys commands by
+`type:name`, so a menu may share a display name with another type.
 
 P4's economy work reused `/rank`; `/ai` was its only new root. A second economy
 root was rejected in [[ADR-0011-economy-ledger-and-double-spend]] because it
@@ -80,13 +94,14 @@ would duplicate the hub and spend a command for no user benefit.
 | `/help` | discovery, generated from the registry | `/help moderation` |
 
 Seventeen roots today for a bot with dozens of implemented actions. The remaining
-83 slots are held for context menus, Activities, and features that genuinely
-need their own name. `/help`, `/setup`, `/logging`, `/analytics`, `/config`,
-`/export` and `/music` are roots. `/config` landed in pass 30 with four
+83 slots are held for Activities and features that genuinely need their own name;
+context menus do not consume them. `/help`, `/setup`, `/logging`, `/analytics`,
+`/config`, `/export` and `/music` are roots. `/config` landed in pass 30 with four
 subcommands and no new settings store; `/export` landed in pass 31 with six
 subcommands and reuses the P5 portability service; `/music` landed in pass 32
 with eight subcommands over the existing `community_records` table, and its
-playback seam refuses because no voice/Lavalink client is installed.
+playback seam refuses because no voice/Lavalink client is installed. Pass 33
+added four context menus over existing services; none needed a root or a table.
 
 ## Component budget (the other 100-limit)
 

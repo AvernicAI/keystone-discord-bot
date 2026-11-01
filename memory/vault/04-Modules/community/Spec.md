@@ -27,6 +27,17 @@ up-sell.
 The three roots are part of the current **17 roots / 108 subcommands**. The P3
 exit requires fewer than 20 roots; this is well inside it.
 
+### Context menu
+
+| Menu | Type | Guards | Behaviour |
+| --- | --- | --- | --- |
+| `Rank card` | user | guild-only, 3 s cooldown | Reads the selected member's `LevelingService.rank` projection and replies with an embed: level, XP and server rank |
+
+The menu is an application command of type 2 and costs no root. It is called a
+card but is deliberately **not** a rendered PNG: this build has no image
+renderer, and a client-side placeholder would be fiction. It reads the same
+rows as `/rank view` and does not mutate XP or currency.
+
 ## Features and where they live
 
 | Feature | Behaviour | Service |
@@ -142,7 +153,7 @@ marker, then delete the projection. Modules never import a table; the module own
 
 ## Limits
 
-Commands: 3 global roots (10/100 total). Components: a select holds at most 25
+Commands: 3 global roots (17/100 total) plus one user context menu. Components: a select holds at most 25
 options and one action row; buttons are capped at five per row. Intents:
 `GuildMembers`, `GuildMessages`, `MessageContent`, `GuildMessageReactions`,
 `GuildVoiceStates`. `MessageContent` and `GuildMembers` are privileged and already

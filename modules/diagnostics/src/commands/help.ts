@@ -10,7 +10,8 @@ function catalog(ctx: CommandContext): readonly CommandCatalogEntry[] {
   if (ctx.catalog.length === 0) {
     throw new UserError("The command catalog is not wired in this process.");
   }
-  return ctx.catalog;
+  // Context menus are discovered by right-clicking, not by typing `/`.
+  return ctx.catalog.filter((entry) => (entry.type ?? "chat-input") === "chat-input");
 }
 
 function moduleGroups(entries: readonly CommandCatalogEntry[]): Map<string, CommandCatalogEntry[]> {
@@ -106,7 +107,7 @@ export const help = defineCommand({
         embeds: [
           {
             title: "Keystone commands",
-            description: `${visible.length} roots · ${subcommands} subcommands. Pick a root, then a subcommand. Use \`/help commands\` for the full list.`,
+            description: `${visible.length} roots · ${subcommands} subcommands. Pick a root, then a subcommand. Use \`/help commands\` for the full list.${ctx.catalog.some((entry) => (entry.type ?? "chat-input") !== "chat-input") ? " Context menus live under right-click → Apps." : ""}`,
             color: 0x5865f2,
             fields,
           },

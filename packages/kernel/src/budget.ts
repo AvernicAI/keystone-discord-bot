@@ -1,4 +1,5 @@
 import type { ModuleRegistry, RegisteredCommand } from "./registry";
+import type { CommandType } from "./types";
 
 /**
  * Discord's hard limits, mirrored here so a PR that busts them fails in CI
@@ -12,11 +13,16 @@ export const DISCORD_LIMITS = {
   commandPayloadChars: 8000,
   /** We want to hear about bloat long before we hit the wall. */
   warnAt: 80,
+  /** Context menus have their own 15 + 15 budgets, separate from the 100. */
+  userContextMenus: 15,
+  messageContextMenus: 15,
 } as const;
 
 export interface CommandMeasurement {
   name: string;
   moduleId: string;
+  /** Absent in older tests, which means chat-input. */
+  type?: CommandType;
   /** Direct subcommands plus subcommands inside groups. */
   subcommands: number;
   /** The largest option list on any single node, which is what Discord caps. */
@@ -28,9 +34,13 @@ export interface CommandMeasurement {
 export type BudgetStatus = "ok" | "warn" | "fail";
 
 export interface BudgetReport {
+  /** Chat-input roots; context menus are reported separately. */
   commands: number;
   subcommands: number;
   actions: number;
+  contextMenus: number;
+  userContextMenus: number;
+  messageContextMenus: number;
   limit: number;
   remaining: number;
   warnAt: number;
@@ -55,6 +65,7 @@ function measure(registered: RegisteredCommand): CommandMeasurement {
   return {
     name: definition.name,
     moduleId,
+    type: definition.type ?? "chat-input",
     subcommands: subcommands.length,
     options: Math.max(
       definition.options?.length ?? 0,
@@ -70,6 +81,9 @@ function measure(registered: RegisteredCommand): CommandMeasurement {
  */
 export function auditMeasurements(perCommand: readonly CommandMeasurement[]): BudgetReport {
   const violations: string[] = [];
+  const chatInput = perCommand.filter((command) => (command.type ?? "chat-input") === "chat-input");
+  const userContextMenus = perCommand.filter((command) => command.type === "user").length;
+  const messageContextMenus = perCommand.filter((command) => command.type === "message").length;
 
   for (const command of perCommand) {
     if (command.options > DISCORD_LIMITS.optionsPerCommand) {
@@ -82,14 +96,24 @@ export function auditMeasurements(perCommand: readonly CommandMeasurement[]): Bu
     }
   }
 
-  if (perCommand.length > DISCORD_LIMITS.globalCommands) {
+  if (chatInput.length > DISCORD_LIMITS.globalCommands) {
     violations.push(
-      `${perCommand.length} global commands registered (max ${DISCORD_LIMITS.globalCommands})`,
+      `${chatInput.length} global commands registered (max ${DISCORD_LIMITS.globalCommands})`,
+    );
+  }
+  if (userContextMenus > DISCORD_LIMITS.userContextMenus) {
+    violations.push(
+      `${userContextMenus} user context menus registered (max ${DISCORD_LIMITS.userContextMenus})`,
+    );
+  }
+  if (messageContextMenus > DISCORD_LIMITS.messageContextMenus) {
+    violations.push(
+      `${messageContextMenus} message context menus registered (max ${DISCORD_LIMITS.messageContextMenus})`,
     );
   }
 
-  const commands = perCommand.length;
-  const subcommands = perCommand.reduce((sum, command) => sum + command.subcommands, 0);
+  const commands = chatInput.length;
+  const subcommands = chatInput.reduce((sum, command) => sum + command.subcommands, 0);
   const status: BudgetStatus =
     violations.length > 0
       ? "fail"
@@ -101,6 +125,9 @@ export function auditMeasurements(perCommand: readonly CommandMeasurement[]): Bu
     commands,
     subcommands,
     actions: commands + subcommands,
+    contextMenus: userContextMenus + messageContextMenus,
+    userContextMenus,
+    messageContextMenus,
     limit: DISCORD_LIMITS.globalCommands,
     remaining: Math.max(0, DISCORD_LIMITS.globalCommands - commands),
     warnAt: DISCORD_LIMITS.warnAt,
@@ -116,11 +143,16 @@ export function auditBudget(registry: ModuleRegistry): BudgetReport {
 
 /** Human-readable ledger, printed by `pnpm budget` and at boot. */
 export function formatBudgetReport(report: BudgetReport, sortByModule = true): string {
-  const rows = [...report.perCommand].sort((a, b) =>
-    sortByModule
-      ? a.moduleId.localeCompare(b.moduleId) || a.name.localeCompare(b.name)
-      : b.payloadChars - a.payloadChars,
-  );
+  const rows = report.perCommand
+    .filter((row) => (row.type ?? "chat-input") === "chat-input")
+    .sort((a, b) =>
+      sortByModule
+        ? a.moduleId.localeCompare(b.moduleId) || a.name.localeCompare(b.name)
+        : b.payloadChars - a.payloadChars,
+    );
+  const contextRows = report.perCommand
+    .filter((row) => (row.type ?? "chat-input") !== "chat-input")
+    .sort((a, b) => a.moduleId.localeCompare(b.moduleId) || a.name.localeCompare(b.name));
   const nameWidth = Math.max(4, ...rows.map((r) => r.name.length + 1));
   const moduleWidth = Math.max(6, ...rows.map((r) => r.moduleId.length));
 
@@ -128,6 +160,7 @@ export function formatBudgetReport(report: BudgetReport, sortByModule = true): s
     "Command budget",
     `  ${report.commands}/${report.limit} global roots used (${report.remaining} left)`,
     `  ${report.subcommands} subcommands · ${report.actions} total actions`,
+    `  ${report.contextMenus} context menus (${report.userContextMenus} user · ${report.messageContextMenus} message; ${DISCORD_LIMITS.userContextMenus} each)`,
     `  status: ${report.status.toUpperCase()}`,
     "",
     `  ${"/command".padEnd(nameWidth)}  ${"module".padEnd(moduleWidth)}  subs  opts  chars`,
@@ -137,6 +170,13 @@ export function formatBudgetReport(report: BudgetReport, sortByModule = true): s
     lines.push(
       `  ${`/${row.name}`.padEnd(nameWidth)}  ${row.moduleId.padEnd(moduleWidth)}  ${String(row.subcommands).padStart(4)}  ${String(row.options).padStart(4)}  ${String(row.payloadChars).padStart(5)}`,
     );
+  }
+
+  if (contextRows.length > 0) {
+    lines.push("", "  Context menus (separate 15 + 15 budget)");
+    for (const row of contextRows) {
+      lines.push(`  ${row.name.padEnd(nameWidth)}  ${row.moduleId.padEnd(moduleWidth)}  ${row.type}`);
+    }
   }
 
   if (report.violations.length > 0) {

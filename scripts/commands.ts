@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { ModuleRegistry } from "@keystone/kernel";
 import { modules } from "../apps/bot/src/modules";
-import { buildCommandJson } from "../apps/bot/src/adapt";
+import { buildApplicationCommandJson } from "../apps/bot/src/adapt";
 import { commandDrift, hasDrift, type CommandJson } from "../apps/bot/src/command-sync";
 
 /**
@@ -55,7 +55,7 @@ async function discord(method: string, body?: unknown, attempts = 4): Promise<un
 }
 
 const registry = new ModuleRegistry().registerAll(modules);
-const payload = registry.listCommands().map((command) => buildCommandJson(command.definition));
+const payload = registry.listCommands().map((command) => buildApplicationCommandJson(command.definition));
 
 if (clear) {
   const before = (await discord("GET")) as Array<{ name: string }>;

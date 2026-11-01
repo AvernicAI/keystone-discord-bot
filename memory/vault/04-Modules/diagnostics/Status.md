@@ -10,6 +10,9 @@ P0 complete; `/help` added in pass 26.
 - `/help` exposes `browse`, `commands`, `search`, `privacy` and `changelog` from
   the live registry catalog. Live 2026-11-01: `!help commands`, `!help browse`
   and `!help search query=ban` returned the catalog, module map and one hit.
+- Since the context menus landed (pass 33), `/help` filters them out of the
+  text catalog — they are not slash roots — and adds one sentence pointing at
+  right-click → Apps. The generated catalog keeps a separate menu table.
 - Eight tests, no token required.
 
 ## Verified
@@ -34,7 +37,8 @@ pnpm budget            # 3/100 roots for this module, status OK
   per-command check).
 - P1: add gateway latency once `client.ws.ping` is passed through a kernel port.
 - P7: add schema-driven help panels if the embed field limit becomes tight.
-- P7: add context-menu entries once the context-menu budget is exercised.
+- P7: context-menu entries now live in moderation, community and AI; `/help`
+  points at them instead of inventing slash roots for them.
 
 ## Teaching
 

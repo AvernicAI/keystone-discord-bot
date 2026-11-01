@@ -126,3 +126,18 @@ the recorded owner and an empty room are both required.
 
 **Inject the clock.** Birthdays and seasons take `now` as a constructor function.
 Tests move the clock instead of sleeping, and a duplicate tick is provably inert.
+
+## A “card” without an image
+
+The plan called this menu **Rank card**, because that is what MEE6 ships. A real
+card is a PNG: canvas layout, fonts, avatars, caching. That is a native
+dependency and a separate rendering pipeline, and this pass had no install
+proof for it. Shipping a picture-shaped placeholder would be worse than the
+embed: users would believe the image was the feature.
+
+So the menu is honest. It stores no new data, calls the same
+`LevelingService.rank` as `/rank view`, and the footer says the numbers are
+stored XP rows. When a renderer is added later, the command boundary does not
+change: replace the embed builder with an `AttachmentBuilder` behind the same
+port. The test should assert the same `4 / 400` row is read, not a snapshot of
+pixels.

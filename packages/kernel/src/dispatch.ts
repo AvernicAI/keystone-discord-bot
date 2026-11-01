@@ -89,7 +89,7 @@ export async function dispatchCommand(
   deps: DispatchDeps,
   interaction: InteractionLike,
 ): Promise<DispatchOutcome> {
-  const registered = deps.registry.getCommand(interaction.commandName);
+  const registered = deps.registry.getCommand(interaction.commandName, interaction.commandType);
   if (!registered) {
     deps.logger.warn("unknown command", { command: interaction.commandName });
     return { status: "unknown-command" };

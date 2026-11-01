@@ -94,12 +94,20 @@ https://github.com/RNGBubba/keystone-discord-bot
   port with one explicit unavailable adapter: `play`, `skip` and `stop` refuse
   with the exact missing pieces instead of pretending audio. The queue is
   disabled by default. See [[04-Modules/music/Spec|Music spec]].
-- **Command tree** in repo (passes 26, 30, 31 and 32): real Discord subcommands
-  replaced the flat `action` option across every existing hub — 17 roots, 108
-  subcommands, 125 actions. `/help` is generated from the live registry;
-  `pnpm commands:catalog` writes [[Command-Catalog]] and
-  `pnpm commands:doctor` checks the live shape. A human slash invocation remains
-  the one unobserved surface.
+- **Context menus** in repo and registered (pass 33): four right-click commands
+  reuse the existing services — **Report message** (opens a real case with the
+  message id and a capped excerpt), **Case history** (same case rows as
+  `/mod history`, behind `ModerateMembers`), **Rank card** (same XP projection as
+  `/rank view`) and **Explain with AI** (same capped `AiService.explain` path).
+  The kernel models command type and audits the separate 15 + 15 menu budget;
+  Discord reports 2 user and 2 message menus. The MCP cannot right-click, so
+  invocation remains the unobserved surface and is covered by tests.
+- **Command tree** in repo (passes 26, 30, 31, 32 and 33): real Discord
+  subcommands replaced the flat `action` option across every existing hub — 17
+  roots, 108 subcommands, 125 actions, 4 context menus. `/help` is generated
+  from the live registry; `pnpm commands:catalog` writes [[Command-Catalog]] and
+  `pnpm commands:doctor` checks the live shape. A human slash or right-click
+  invocation remains the unobserved surface.
 - Phase **P6** foundation in repo: Discord OAuth2/PKCE, opaque Postgres-backed
   sessions, BigInt per-guild authorization with a bot-membership check, a
   server-rendered dashboard, `/api/v1` reads and schema-validated module settings
@@ -120,8 +128,9 @@ https://github.com/RNGBubba/keystone-discord-bot
   stopped, leaving one bot and one reply per command. The updated `.env` points
   at localhost Postgres/Redis, but neither service is installed here, so the live
   window remains memory mode.
-- **Live 2026-11-01:** AI Team#5758 logged in, re-registered 17 roots with 108
-  subcommands (then fetched Discord's shape to prove it), and
+- **Live 2026-11-01:** AI Team#5758 logged in, found four context menus missing,
+  re-registered 17 roots with 108 subcommands plus 2 user and 2 message menus
+  (then fetched Discord's shape to prove it), and
   qwen3:8b via Ollama answered mentions in `#ai-chat`. A dev-only `!` bridge
   proved `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
   query=ban`, `!ai status`, `!mod history`, `!mod links`, `!mod filters`,
@@ -143,7 +152,8 @@ https://github.com/RNGBubba/keystone-discord-bot
 - Phase **P4** shipped the AI layer and the ledger-backed economy hardening.
 - Phase **P3** shipped the community suite: leveling, reaction roles, welcome,
   starboard, tickets, giveaways, temp voice, content and seasons.
-- 17 of Discord's 100 global roots used, with 108 subcommands; 9 modules registered.
+- 17 of Discord's 100 global roots used, with 108 subcommands and 4 context menus
+  (separate 15 + 15 budget); 9 modules registered.
 - The full suite covers the 5,000-row portability round trip and the failure,
   rollback and deletion paths; `pnpm check` also runs the intent, channel and
   memory audits.

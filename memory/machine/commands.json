@@ -5,6 +5,10 @@
   "roots": 17,
   "subcommands": 108,
   "actions": 125,
+  "contextMenus": 4,
+  "userContextMenus": 2,
+  "messageContextMenus": 2,
+  "contextMenuLimit": 15,
   "limit": 100,
   "commands": [
     {
@@ -923,6 +927,32 @@
           "options": []
         }
       ]
+    }
+  ],
+  "menus": [
+    {
+      "name": "Report message",
+      "type": "message",
+      "moduleId": "moderation",
+      "description": "Open a moderation case for the selected message."
+    },
+    {
+      "name": "Case history",
+      "type": "user",
+      "moduleId": "moderation",
+      "description": "Show recent moderation cases for the selected member."
+    },
+    {
+      "name": "Rank card",
+      "type": "user",
+      "moduleId": "community",
+      "description": "Show the selected member's level, XP and server rank."
+    },
+    {
+      "name": "Explain with AI",
+      "type": "message",
+      "moduleId": "ai",
+      "description": "Explain why the selected message may be a moderation concern."
     }
   ]
 }

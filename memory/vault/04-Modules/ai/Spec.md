@@ -21,6 +21,18 @@ and recommend; it may never punish, delete, ban, or claim an action happened.
 global commands. No new privileged intent is introduced: `GuildMessages` and
 `MessageContent` are already required by the community/moderation pipeline.
 
+### Context menu
+
+| Menu | Type | Guards | Behaviour |
+| --- | --- | --- | --- |
+| `Explain with AI` | message | guild-only, `ManageMessages`, 3 s cooldown | Builds facts from the selected message and calls the same `AiService.explain` as `/ai explain`; advisory answer, no case, no action |
+
+The menu costs no root. It reads `targetMessage` only when Discord provides it;
+with MessageContent off it explains the id/channel/author with an explicit
+“(content unavailable)” line rather than inventing text. It honours
+`enabled` and `explanations` through the same service, so disabling the feature
+removes the menu's capability even though the registration remains.
+
 ## Features and where they live
 
 | Feature | Behaviour | Implementation |
@@ -108,8 +120,9 @@ settings, prompts, logs, or Discord messages: `AI_API_KEY`, `AI_BASE_URL`,
   2026-11-01 with qwen3:8b via Ollama. A hosted provider and a human author are
   still unverified.
 - Application-command execution is not exposed by SaseQ/discord-mcp; invoking
-  `/ping` or `/setup` still requires a human Discord client. The development `!`
-  bridge exercises the same dispatch pipeline, but it is not the slash path.
+  `/ping`, `/setup` or the **Explain with AI** right-click menu still requires a
+  human Discord client. The development `!` bridge exercises the same dispatch
+  pipeline, but it is not the slash or menu path.
 - pgvector ANN at 1M×1536 with p95 recall/latency is not proven. The local exact
   index was measured at 1M×32 (p95 136.96 ms, recall 1.0) as a reference only.
 - Autonomous AI moderation, AI punishment, prompt/completion retention, and AI

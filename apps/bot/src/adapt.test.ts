@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { ChatInputCommandInteraction } from "discord.js";
 import { defineCommand } from "@keystone/kernel";
-import { asInteractionLike, buildCommandJson } from "./adapt";
+import {
+  asInteractionLike,
+  buildApplicationCommandJson,
+  buildCommandJson,
+  buildContextMenuJson,
+} from "./adapt";
 
 interface JsonOption {
   name: string;
@@ -113,6 +118,95 @@ describe("buildCommandJson", () => {
   });
 });
 
+describe("context-menu payloads", () => {
+  it("emits type 2 and type 3 without a description", () => {
+    const user = buildApplicationCommandJson(
+      defineCommand({
+        name: "Rank card",
+        description: "Show a rank card",
+        type: "user",
+        execute: noop,
+      }),
+    );
+    const message = buildContextMenuJson(
+      defineCommand({
+        name: "Report message",
+        description: "Report a message",
+        type: "message",
+        execute: noop,
+      }),
+    );
+    expect(user).toMatchObject({ name: "Rank card", type: 2 });
+    expect(message).toMatchObject({ name: "Report message", type: 3 });
+    expect("description" in user).toBe(false);
+    expect("description" in message).toBe(false);
+  });
+
+  it("refuses to build a context payload for a chat-input definition", () => {
+    expect(() =>
+      buildContextMenuJson(
+        defineCommand({ name: "ping", description: "Ping", execute: noop }),
+      ),
+    ).toThrow(/not a context-menu/);
+  });
+});
+
+describe("asInteractionLike context menus", () => {
+  it("exposes the selected user", () => {
+    const interaction = {
+      id: "interaction-1",
+      commandName: "Rank card",
+      guildId: "guild-1",
+      channelId: "channel-1",
+      user: { id: "viewer" },
+      memberPermissions: { toArray: () => [] },
+      isChatInputCommand: () => false,
+      isUserContextMenuCommand: () => true,
+      isMessageContextMenuCommand: () => false,
+      targetId: "author-1",
+      replied: false,
+      deferred: false,
+      reply: noop,
+      deferReply: noop,
+      editReply: noop,
+      followUp: noop,
+    } as unknown as Parameters<typeof asInteractionLike>[0];
+
+    const like = asInteractionLike(interaction);
+    expect(like.commandType).toBe("user");
+    expect(like.targetId).toBe("author-1");
+    expect(like.options).toEqual({});
+  });
+
+  it("exposes the message author and content", () => {
+    const interaction = {
+      id: "interaction-2",
+      commandName: "Report message",
+      guildId: "guild-1",
+      channelId: "channel-1",
+      user: { id: "reporter" },
+      memberPermissions: { toArray: () => [] },
+      isChatInputCommand: () => false,
+      isUserContextMenuCommand: () => false,
+      isMessageContextMenuCommand: () => true,
+      targetId: "message-1",
+      targetMessage: { author: { id: "author-1" }, content: "spam" },
+      replied: false,
+      deferred: false,
+      reply: noop,
+      deferReply: noop,
+      editReply: noop,
+      followUp: noop,
+    } as unknown as Parameters<typeof asInteractionLike>[0];
+
+    const like = asInteractionLike(interaction);
+    expect(like.commandType).toBe("message");
+    expect(like.targetId).toBe("message-1");
+    expect(like.targetUserId).toBe("author-1");
+    expect(like.targetContent).toBe("spam");
+  });
+});
+
 describe("asInteractionLike", () => {
   it("flattens a subcommand's nested options into the structural map", () => {
     const interaction = {
@@ -122,6 +216,7 @@ describe("asInteractionLike", () => {
       channelId: "channel-1",
       user: { id: "user-1" },
       memberPermissions: { toArray: () => ["BanMembers"] },
+      isChatInputCommand: () => true,
       options: {
         data: [
           {
@@ -161,6 +256,7 @@ describe("asInteractionLike", () => {
       channelId: "channel-1",
       user: { id: "user-1" },
       memberPermissions: { toArray: () => ["ManageGuild"] },
+      isChatInputCommand: () => true,
       options: {
         data: [
           {

@@ -217,6 +217,44 @@
           ],
           "openReason": "Export commands are part of the P5/P7 data-ownership work.",
           "liveVerified": false
+        },
+        {
+          "id": "moderation.message-report",
+          "name": "Report message menu",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❔",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P7",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Message context menu opens a real case with the message id and a bounded excerpt; registered live, invocation is human-only.",
+          "evidence": [
+            "modules/moderation/src/context.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "moderation.case-history",
+          "name": "Case history menu",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❔",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P7",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "User context menu reads the same case rows as /mod history behind ModerateMembers.",
+          "evidence": [
+            "modules/moderation/src/context.test.ts"
+          ],
+          "liveVerified": false
         }
       ]
     },
@@ -1067,6 +1105,25 @@
           ],
           "openReason": "RSS ships; YouTube/Twitch-specific feeds are named as open in the P3 status.",
           "liveVerified": false
+        },
+        {
+          "id": "community.rank-card",
+          "name": "Rank card menu",
+          "competitors": {
+            "mee6": "✅",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P7",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "User context menu reads the same XP projection as /rank view; the card is an embed, not an image render.",
+          "evidence": [
+            "modules/community/src/context.test.ts"
+          ],
+          "liveVerified": false
         }
       ]
     },
@@ -1475,6 +1532,25 @@
           "note": "Why a rule fired",
           "evidence": [
             "modules/ai/src/ai.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "ai.message-explain",
+          "name": "Explain with AI menu",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "💰",
+            "wick-security": "❌"
+          },
+          "phase": "P7",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Message context menu explains a message through the same AiService.explain path and cap policy; advisory only.",
+          "evidence": [
+            "modules/ai/src/context.test.ts"
           ],
           "liveVerified": false
         },

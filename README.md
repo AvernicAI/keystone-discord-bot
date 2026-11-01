@@ -28,10 +28,11 @@ second store. `/export guild | user | import | delete | drift | rollback` puts
 the P5 portability service inside Discord: real JSON file attachments, a
 dry-run-first import, a confirmation-gated delete and live drift facts from the
 gateway cache. The command ledger is **17/100 roots** with **108 real
-subcommands** and **125 actions**, there are **9 modules**, and `pnpm check`
-covers **339 tests across 52 files** without a Discord token, database or
-network. Live on 2026-11-01: the bot logged in and Discord reports **17 roots /
-108 subcommands**, answered a Qwen3:8b mention in `#ai-chat`, and ran real
+subcommands**, **125 actions** and **4 context menus** (2 user, 2 message),
+there are **9 modules**, and `pnpm check` covers **360 tests across 56 files**
+without a Discord token, database or network. Live on 2026-11-01: the bot logged
+in and Discord reports **17 roots / 108 subcommands / 2 user menus / 2 message
+menus**, answered a Qwen3:8b mention in `#ai-chat`, and ran real
 moderation, community, AI, invite, logging, analytics, configuration, music and
 content-filter commands through a development message bridge, including
 `/help`’s generated catalog. The dashboard was booted in memory mode and
@@ -254,11 +255,13 @@ refusals. See [the community spec](memory/vault/04-Modules/community/Spec.md).
 
 ## Commands
 
-Discord's global limit is 100 **roots**; Keystone uses **16** and exposes **100
-real subcommands** (116 total actions). A subcommand does not spend another global
-slot, which is why the picker now expands instead of showing one flat `action`
-option. Slash commands are the product surface. In development, `DEV_GUILD_ID`
-also enables the `!` bridge for message-only harnesses.
+Discord's global limit is 100 **roots**; Keystone uses **17** and exposes **108
+real subcommands** (125 total actions), plus **4 context menus** on their own
+15 + 15 budget. A subcommand does not spend another global slot, which is why the
+picker now expands instead of showing one flat `action` option. Slash commands
+are the product surface; context menus appear under right-click → Apps. In
+development, `DEV_GUILD_ID` also enables the `!` bridge for message-only
+harnesses.
 
 `pnpm commands:catalog` regenerates the complete per-root list in
 [Command-Catalog.md](memory/vault/01-Mission/Command-Catalog.md); `/help` reads
@@ -283,6 +286,15 @@ the same live registry.
 | `/logging` | `setup`, `channel`, `events`, `status`, `retention`, `export`, `disable` | One audit channel for message, member and moderation events, with per-event toggles and retention pruning |
 | `/analytics` | `overview`, `members`, `messages`, `commands`, `tickets`, `export` | Read-only aggregates over the audit ledger, cases, invite joins, tickets and command usage; every view names its source rows |
 | `/music` | `play`, `queue`, `add`, `remove`, `clear`, `skip`, `stop`, `status` | A durable saved queue in `community_records`; `play`, `skip` and `stop` refuse with the exact missing backend because no voice/Lavalink client is installed |
+
+Four **context menus** (right-click → Apps) reuse the same services:
+
+| Menu | Type | What it does |
+| --- | --- | --- |
+| `Report message` | message | Opens a reviewable moderation case with the message id and a bounded excerpt |
+| `Case history` | user | Lists the selected member's recent cases; requires `ModerateMembers` |
+| `Rank card` | user | Shows level, XP and server rank from the same projection as `/rank view` |
+| `Explain with AI` | message | Advisory explanation from the same `AiService.explain` path as `/ai explain`; requires `ManageMessages` |
 
 `/analytics`, `/config` and `/export` require `ManageGuild`.
 `/music remove` and `/music clear` require `ManageGuild`; `/music status` works
@@ -348,7 +360,7 @@ Everything below is free. No feature is moved behind a paywall.
 ### Platform and operations
 
 - Module registry with a CI-enforced 100-root budget (currently 17 roots, 108
-  subcommands).
+  subcommands) and a separate 15 + 15 context-menu budget (currently 4 menus).
 - In-bot configuration: `/config list | get | set | export` reads and writes every
   registered module's settings through `SettingsService` and the owning Zod
   schema. No second store; a rejected value never persists.
@@ -360,6 +372,9 @@ Everything below is free. No feature is moved behind a paywall.
 - Real Discord subcommand tree: flat `action` options are gone from every
   existing hub, `/help` is generated from the registry, boot sync compares the
   full option tree, and `pnpm commands:doctor` prints the live shape.
+- Four context menus over existing services: `Report message`, `Case history`,
+  `Rank card` and `Explain with AI`. They share the adapter, guards, cooldowns
+  and dispatcher with slash commands; no menu has its own store.
 - Postgres schema and ordered migrations; Drizzle repositories.
 - Redis cooldowns and a BullMQ worker, with explicit in-memory fallbacks.
 - OpenTelemetry tracing, off by default.
@@ -431,9 +446,9 @@ Everything below is free. No feature is moved behind a paywall.
   view/templates, token refresh/revocation, scoped public API tokens,
   per-token rate limits, idempotency, webhooks and OpenAPI.
 - **P7:** invite tracking, audit logging, the link/profanity/zalgo filters,
-  auto-responders, guild analytics, `/config`, `/export` and the `/music` saved
-  queue are done; the rest is parity completion (forms, events, role
-  persistence, modmail), Components V2 UI and i18n.
+  auto-responders, guild analytics, `/config`, `/export`, the `/music` saved
+  queue and the four context menus are done; the rest is parity completion
+  (forms, events, role persistence, modmail), Components V2 UI and i18n.
 - **P8:** `/music` queue control ships disabled by default; bring-your-own
   Lavalink playback is the open piece (no bundled streamer).
 - **P9:** docs site, 14-lesson curriculum, release workflow, self-host kit.
@@ -455,6 +470,7 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
 | P7 Command tree | Done | 17 roots · 108 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
+| P7 Context menus | Done | 4 menus (2 user, 2 message) registered in Discord; report opens a real case, case history and rank card read existing rows, explain uses the capped AI path; invocation is human-only |
 | P7 Slash harness | Harness done | Synthetic nested `/mod ban` through the real adapter + dispatch; gateway `InteractionCreate` still human-only |
 | P7 Audit logging | Done | `/logging`; five event kinds, per-event toggles, append-only ledger, retention; message and moderation events live-proven |
 | P7 Analytics | Done | `/analytics`; six read-only views over audit, cases, invites, tickets and command usage; live counts cross-checked against the ledger |
@@ -466,7 +482,8 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 
 Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 17
 global roots with 108 subcommands (including `/analytics`, `/config`, `/export`,
-`/help`, `/invites`, `/logging` and `/music`) with no drift, and Qwen3:8b answered a mention in
+`/help`, `/invites`, `/logging` and `/music`) plus **2 user menus and 2 message
+menus** with no drift, and Qwen3:8b answered a mention in
 `#ai-chat`. A development `!`
 bridge ran `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
 query=ban`, `!ai status`, `!mod history`, `!rank leaderboard`, `!invites
@@ -580,6 +597,17 @@ after `enabled=false`, `!music add` was refused. The in-memory counts are the
 real queue length; the SQL row and its cap are covered by the PGlite test, not
 this live window. See [pass 32](memory/journal/2026-11-01-pass-32.md).
 
+Context-menu live evidence (2026-11-01, pass 33): one memory-mode process booted,
+found all four menus missing, cleared the global set once and registered **21
+application commands** (17 roots + 4 menus). `pnpm commands:doctor` then read
+Discord's own registry and reported **17 chat-input commands · 108 subcommands ·
+2 user menus · 2 message menus** with no missing, extra or changed entries.
+The MCP bot cannot right-click, so none of the four handlers was invoked live;
+`Report message` opening a real case, `Case history` reading the same rows,
+`Rank card` reading a seeded `4 / 400` level row and `Explain with AI` honouring
+the AI switch are covered by adapter and command tests. See
+[pass 33](memory/journal/2026-11-01-pass-33.md).
+
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and
 `/login` `503` with the OAuth-unconfigured message. The authenticated read and
@@ -591,7 +619,8 @@ A live Discord login and a Postgres session are not claimed.
 
 Still open and not claimed as done:
 
-- Slash `InteractionCreate` from a human client (the MCP cannot invoke it).
+- Slash `InteractionCreate` and a right-click context-menu invocation from a
+  human client (the MCP can neither invoke slash commands nor right-click).
 - A live member join/leave in the audit ledger, and a human author through the
   log filters.
 - Live Postgres, live role grants, live selects/voice/scheduler and a human
@@ -642,8 +671,10 @@ module's existing defaults.
 If the feature needs a database table, add a migration in
 `packages/db/src/migrations` and a repository; if it needs a Discord permission,
 declare it on the manifest. If it needs a new root command, check the budget
-first: fifteen roots are used, eighty-five remain, and every root is a permanent
-public interface. A subcommand under an existing hub costs no new root.
+first: seventeen roots are used, eighty-three remain, and every root is a
+permanent public interface. A subcommand under an existing hub costs no new
+root. A context menu costs one of the separate 15 user or 15 message slots, not
+a root.
 
 ## How to have an agent read it easily
 
@@ -743,7 +774,7 @@ packages/queue  BullMQ adapter + in-process driver for tests
 packages/telemetry  OpenTelemetry wrapper, off by default
 packages/config Zod-validated environment
 packages/testing token-free fixtures for module authors
-modules/        diagnostics, setup, moderation, community, ai, invites, logging, analytics
+modules/        diagnostics, setup, moderation, community, ai, invites, logging, analytics, music
 memory/         Obsidian vault + machine state + journal
 ```
 

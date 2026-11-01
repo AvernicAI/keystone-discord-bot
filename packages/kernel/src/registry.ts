@@ -4,6 +4,7 @@ import type {
   CapabilityReport,
   CommandCatalogEntry,
   CommandDefinition,
+  CommandType,
   IntentCapability,
   IntentProfile,
 } from "./types";
@@ -11,6 +12,11 @@ import type {
 export interface RegisteredCommand {
   moduleId: string;
   definition: CommandDefinition;
+}
+
+/** Chat-input and context menus may share a display name; the key includes type. */
+function commandKey(name: string, type: CommandType = "chat-input"): string {
+  return `${type}:${name}`;
 }
 
 /**
@@ -29,11 +35,11 @@ export class ModuleRegistry {
     }
 
     for (const command of manifest.commands) {
-      const owner = this.#commands.get(command.name);
+      const type = command.type ?? "chat-input";
+      const owner = this.#commands.get(commandKey(command.name, type));
       if (owner) {
-        errors.push(
-          `/${command.name} is already owned by "${owner.moduleId}" — Discord command names are global`,
-        );
+        const label = type === "chat-input" ? `/${command.name}` : `${type} menu "${command.name}"`;
+        errors.push(`${label} is already owned by "${owner.moduleId}" — command names are global per type`);
       }
     }
 
@@ -43,7 +49,10 @@ export class ModuleRegistry {
 
     this.#modules.set(manifest.id, manifest);
     for (const command of manifest.commands) {
-      this.#commands.set(command.name, { moduleId: manifest.id, definition: command });
+      this.#commands.set(commandKey(command.name, command.type ?? "chat-input"), {
+        moduleId: manifest.id,
+        definition: command,
+      });
     }
     return this;
   }
@@ -67,20 +76,34 @@ export class ModuleRegistry {
     return [...this.#modules.values()];
   }
 
-  getCommand(name: string): RegisteredCommand | undefined {
-    return this.#commands.get(name);
+  getCommand(name: string, type: CommandType = "chat-input"): RegisteredCommand | undefined {
+    return this.#commands.get(commandKey(name, type));
   }
 
+  /** Every registered application command, including context menus. */
   listCommands(): RegisteredCommand[] {
     return [...this.#commands.values()];
   }
 
+  /** Chat-input roots only; this is the surface `/` and `/help` describe. */
   commandNames(): string[] {
-    return [...this.#commands.keys()];
+    return this.listCommands()
+      .filter(({ definition }) => (definition.type ?? "chat-input") === "chat-input")
+      .map(({ definition }) => definition.name);
+  }
+
+  contextMenuNames(): string[] {
+    return this.listCommands()
+      .filter(({ definition }) => (definition.type ?? "chat-input") !== "chat-input")
+      .map(({ definition }) => definition.name);
   }
 
   get commandCount(): number {
-    return this.#commands.size;
+    return this.commandNames().length;
+  }
+
+  get contextMenuCount(): number {
+    return this.contextMenuNames().length;
   }
 
   /**
@@ -90,6 +113,7 @@ export class ModuleRegistry {
   catalog(): CommandCatalogEntry[] {
     return this.listCommands().map(({ definition, moduleId }) => ({
       name: definition.name,
+      type: definition.type ?? "chat-input",
       moduleId,
       description: definition.description,
       options: definition.options ?? [],

@@ -1,9 +1,11 @@
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
+  ApplicationCommandType,
   AttachmentBuilder,
   ButtonBuilder,
   ButtonStyle,
+  ContextMenuCommandBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
   SlashCommandBuilder,
@@ -12,7 +14,10 @@ import {
   type CommandInteractionOption,
   type InteractionEditReplyOptions,
   type InteractionReplyOptions,
+  type MessageContextMenuCommandInteraction,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
+  type RESTPostAPIContextMenuApplicationCommandsJSONBody,
+  type UserContextMenuCommandInteraction,
 } from "discord.js";
 import type {
   ActionRow,
@@ -53,16 +58,23 @@ function flattenOptions(
   return flat;
 }
 
-export function asInteractionLike(interaction: ChatInputCommandInteraction): InteractionLike {
-  return {
+type AnyCommandInteraction =
+  | ChatInputCommandInteraction
+  | UserContextMenuCommandInteraction
+  | MessageContextMenuCommandInteraction;
+
+/**
+ * One structural adapter for all three application-command kinds. A context
+ * menu has no options or subcommands; its target is exposed as `targetId` plus
+ * the message author/content when Discord provides them.
+ */
+export function asInteractionLike(interaction: AnyCommandInteraction): InteractionLike {
+  const base = {
     id: interaction.id,
     commandName: interaction.commandName,
     guildId: interaction.guildId,
     channelId: interaction.channelId ?? null,
     userId: interaction.user.id,
-    options: flattenOptions(interaction.options.data),
-    subcommand: interaction.options.getSubcommand(false) ?? undefined,
-    subcommandGroup: interaction.options.getSubcommandGroup(false) ?? undefined,
     permissions: interaction.memberPermissions ? interaction.memberPermissions.toArray() : [],
     get replied() {
       return interaction.replied;
@@ -70,11 +82,66 @@ export function asInteractionLike(interaction: ChatInputCommandInteraction): Int
     get deferred() {
       return interaction.deferred;
     },
-    reply: (input) => interaction.reply(toReplyOptions(input)),
-    deferReply: (input) => interaction.deferReply(input ?? {}),
-    editReply: (input) => interaction.editReply(toEditOptions(input)),
-    followUp: (input) => interaction.followUp(toReplyOptions(input)),
+    reply: (input: ReplyInput) => interaction.reply(toReplyOptions(input)),
+    deferReply: (input?: { ephemeral?: boolean }) => interaction.deferReply(input ?? {}),
+    editReply: (input: ReplyInput) => interaction.editReply(toEditOptions(input)),
+    followUp: (input: ReplyInput) => interaction.followUp(toReplyOptions(input)),
   };
+
+  if (interaction.isChatInputCommand()) {
+    return {
+      ...base,
+      commandType: "chat-input",
+      options: flattenOptions(interaction.options.data),
+      subcommand: interaction.options.getSubcommand(false) ?? undefined,
+      subcommandGroup: interaction.options.getSubcommandGroup(false) ?? undefined,
+    };
+  }
+
+  if (interaction.isUserContextMenuCommand()) {
+    return {
+      ...base,
+      commandType: "user",
+      options: {},
+      targetId: interaction.targetId,
+    };
+  }
+
+  return {
+    ...base,
+    commandType: "message",
+    options: {},
+    targetId: interaction.targetId,
+    targetUserId: interaction.targetMessage.author.id,
+    targetContent: interaction.targetMessage.content,
+  };
+}
+
+/**
+ * A context menu is only a name and a type to Discord; its description lives
+ * in the registry for docs and is deliberately not sent.
+ */
+export function buildContextMenuJson(
+  definition: CommandDefinition,
+): RESTPostAPIContextMenuApplicationCommandsJSONBody {
+  if (definition.type !== "user" && definition.type !== "message") {
+    throw new Error(`"${definition.name}" is not a context-menu command`);
+  }
+  const type =
+    definition.type === "user" ? ApplicationCommandType.User : ApplicationCommandType.Message;
+  return new ContextMenuCommandBuilder().setName(definition.name).setType(type).toJSON();
+}
+
+/**
+ * The registration payload chooses the right Discord shape from the definition.
+ * Keeping the branch here means the sync script and the bot cannot disagree.
+ */
+export function buildApplicationCommandJson(
+  definition: CommandDefinition,
+): RESTPostAPIChatInputApplicationCommandsJSONBody | RESTPostAPIContextMenuApplicationCommandsJSONBody {
+  return (definition.type ?? "chat-input") === "chat-input"
+    ? buildCommandJson(definition)
+    : buildContextMenuJson(definition);
 }
 
 /**

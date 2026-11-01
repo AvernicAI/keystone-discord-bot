@@ -2,6 +2,27 @@
 
 ## Now
 
+**P7 context menus are registered in Discord and unit-proven; invocation is
+human-only** (pass 33, 2026-11-01): the four right-click commands from the
+approved v1.0 plan now exist — **Report message** (message), **Case history**
+(user), **Rank card** (user) and **Explain with AI** (message). They cross the
+same `asInteractionLike` adapter, type-keyed registry, guards, cooldowns and
+`dispatchCommand` as slash commands. The kernel now models `CommandType`,
+validates menu names separately (`"Explain with AI"` is legal), rejects
+options/subcommands on a menu and audits Discord's separate 15 + 15 menu budget
+without spending a root. Report message opens a real case with the message id and
+a 500-character excerpt; Case history requires `ModerateMembers` and reads the
+same rows as `/mod history`; Rank card reads the same `LevelingService.rank`
+projection as `/rank view`; Explain with AI calls the same capped
+`AiService.explain` path and honours the `explanations` switch. One memory-mode
+boot found all four missing, cleared once and registered **21 application
+commands**. Discord's own registry now reports **17 chat-input commands · 108
+subcommands · 2 user menus · 2 message menus** with no drift. The MCP cannot
+right-click, so the handlers were not invoked live; adapter and command tests
+cover each path. See [[04-Modules/moderation/Status|Moderation status]],
+[[04-Modules/community/Status|Community status]] and
+[[04-Modules/ai/Status|AI status]].
+
 **P8 music is in repo and live-proven for the saved queue; playback is explicitly
 not shipped** (pass 32, 2026-11-01): `/music play | queue | add | remove | clear |
 skip | stop | status` is the ninth module and the last named v1.0 root. The saved
@@ -146,9 +167,11 @@ that point. Pass 29 added `/analytics` with six subcommands, pass 30 added
 `/config` with four, pass 31 added `/export` with six and pass 32 added `/music`
 with eight, so the current ledger is **17 roots · 108 subcommands · 125 actions**. After pass 30 the boot found
 `config` missing, cleared the global set once and re-registered it; pass 31's
-boot found only `export` missing and did the same. `commands:doctor` now
-reports 17 roots / 108 subcommands including `analytics`, `logging`, `config`,
-`export` and `music`. See
+boot found only `export` missing and did the same. Pass 33 now models context
+menus as application commands with their own type and budget, and its boot found
+all four menus missing and re-registered 21 commands. `commands:doctor` now
+reports 17 roots / 108 subcommands plus 2 user and 2 message menus, including
+`analytics`, `logging`, `config`, `export` and `music`. See
 [[03-Architecture/Command-Budget|Command budget]] and
 [[03-Architecture/ADR/ADR-0003-command-budget]].
 
@@ -164,11 +187,11 @@ connection — a human `InteractionCreate` remains unobserved. The pass also fou
 and stopped two live bot process trees that were double-posting replies; one
 instance now answers each command once.
 
-**Live environment check (re-probed pass 30):** `.env` still sets
+**Live environment check (re-probed pass 33):** `.env` still sets
 `DATABASE_URL` and `REDIS_URL` to localhost:5432/6379, but this machine has no
-Docker, no Postgres/Redis service and no listener on either port. A TCP probe on
-2026-11-01 returned `DATABASE_URL: localhost:5432 -> ECONNREFUSED (19ms)` and
-`REDIS_URL: localhost:6379 -> ECONNREFUSED (1ms)`. Booting without overrides
+Docker, no Postgres/Redis service and no listener on either port. TCP probes on
+2026-11-01 and again in pass 33 returned `ECONNREFUSED` for both
+`DATABASE_URL: localhost:5432` and `REDIS_URL: localhost:6379`. Booting without overrides
 reaches `settings: postgres` and then fails loudly with `REDIS_URL is set but
 Redis is unreachable: Reached the max retries per request limit (which is 2).`
 The live window therefore remains the explicitly logged memory mode
@@ -251,9 +274,10 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 339 tests / 52 files · budget 17/100 roots (108 subcommands) · memory current
+pnpm check        exit 0 · typecheck 0 · 360 tests / 56 files · budget 17/100 roots (108 subcommands · 4 context menus) · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 17 roots / 108 subcommands · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused
+live              2026-11-01 · AI Team#5758 · 2 guilds · 17 roots / 108 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused
+live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)
 live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set · !export guild · !export user · !export drift · !music status · !music add · !music queue · !music play · !music remove · !music skip
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
 live env blocker 2026-11-01 · DATABASE_URL localhost:5432 → ECONNREFUSED (4ms) · REDIS_URL localhost:6379 → ECONNREFUSED (1ms) · Docker/service absent
@@ -269,6 +293,23 @@ public            2026-11-01 · https://github.com/RNGBubba/keystone-discord-bot
 A local `.env` exists in the working tree. Smoke commands pin
 `DOTENV_CONFIG_PATH=.env.absent` so the result is deterministic and does not
 read that file.
+
+## P7 context-menu acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | The four menus exist with the right types | `context-menus.test.ts` asserts `contextMenuNames()` and type-keyed lookup; `commands:doctor` reads Discord and prints `2 user menus · 2 message menus` | Unit + **live Discord API** |
+| 2 | A menu cannot declare options or subcommands | `context-menus.test.ts` registration throws on both | Unit |
+| 3 | Menus have their own budget, not the 100 roots | `context-menus.test.ts` audits 1 root + 2 menus and 16 user menus; `pnpm budget` prints 17 roots, 4 menus | Unit + budget |
+| 4 | The adapter exposes a user target and a message target | `adapt.test.ts` maps `targetId` for a user menu and `targetId`/`targetUserId`/`targetContent` for a message menu | Unit |
+| 5 | Report message opens a real case with the message id | `context.test.ts` reads the case row back (`messageId: "message-1"`, `channelId: "channel-a"`, excerpt) | In-memory store |
+| 6 | Case history reads the same rows behind `ModerateMembers` | `context.test.ts` seeds a `warn` case and reads it through the menu; the manifest declares `requirePermissions("ModerateMembers")`, and the shared dispatch tests prove permission guards run before `execute` | Unit + dispatch |
+| 7 | Rank card reports a real XP row | `context.test.ts` seeds `4 / 400`, asserts `Level 4 · 400 XP · rank #1`, and reads the unchanged row afterwards | In-memory store |
+| 8 | Explain with AI uses the capped AI path and the switch | `context.test.ts` asserts the advisory text, a disabled `explanations` refusal and no case creation | Unit |
+| 9 | Nickname-style menu names are accepted; slash names stay strict | `manifest.ts` uses `CONTEXT_MENU_NAME_PATTERN` only for menus; existing command-name tests still pass | Unit |
+| 10 | The real bot registers them once | Live 2026-11-01: boot drift listed all four, one clear + re-register logged `count: 21`; doctor then reported no missing/extra/changed | **Live gateway + Discord API** |
+| 11 | The menus were invoked live | **Not performed and not claimed** — the MCP account cannot right-click; adapter and command tests cover the handlers | Not claimed |
+| 12 | The SQL side was exercised for menus | **Not performed** — the menus add no store; they read the existing case and XP services, whose SQL adapters are covered by their own PGlite tests | Not claimed |
 
 ## P8 music acceptance evidence
 

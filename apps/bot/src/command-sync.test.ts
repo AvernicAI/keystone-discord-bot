@@ -38,4 +38,21 @@ describe("commandDrift", () => {
     const drift = commandDrift([history], [{ name: "ping", description: "Ping" }]);
     expect(drift).toMatchObject({ missing: ["mod"], extra: ["ping"], changed: [] });
   });
+
+  it("sees a context-menu type change as a missing and extra menu", () => {
+    // Discord scopes names per type: changing the type is a different menu,
+    // not an edit, so the bulk overwrite must remove one and add the other.
+    const expected: CommandJson = { name: "Report message", type: 3 };
+    const server: CommandJson = { name: "Report message", type: 2 };
+    expect(commandDrift([expected], [server])).toEqual({
+      missing: ["Report message"],
+      extra: ["Report message"],
+      changed: [],
+    });
+  });
+
+  it("matches an identical context menu without a description", () => {
+    const menu: CommandJson = { name: "Rank card", type: 2 };
+    expect(hasDrift(commandDrift([menu], [{ ...menu }]))).toBe(false);
+  });
 });

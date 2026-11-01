@@ -33,7 +33,7 @@ function answerText(answer: AiAnswer): string {
   return `${answer.text.slice(0, 3_500)}${sources}\n\nAI can be wrong. A human decides any action.`;
 }
 
-async function replyAnswer(ctx: CommandContext, answer: AiAnswer, title: string): Promise<void> {
+export async function replyAnswer(ctx: CommandContext, answer: AiAnswer, title: string): Promise<void> {
   await ctx.interaction.reply({
     embeds: [
       {

@@ -18,8 +18,16 @@ interface OptionJson {
 
 export interface CommandJson {
   name: string;
-  description: string;
+  /** Chat-input commands have one; context menus do not. */
+  description?: string;
+  /** 1 chat-input (default), 2 user menu, 3 message menu. */
+  type?: number;
   options?: OptionJson[];
+}
+
+/** Discord scopes names per command type, so the key must include the type. */
+function commandKey(command: CommandJson): string {
+  return `${command.type ?? 1}:${command.name}`;
 }
 
 function optionShape(option: OptionJson): unknown {
@@ -42,7 +50,9 @@ function optionShape(option: OptionJson): unknown {
 export function commandShape(command: CommandJson): string {
   return JSON.stringify({
     name: command.name,
-    description: command.description,
+    /** Context menus carry no description; the type is the whole shape. */
+    type: command.type ?? 1,
+    description: command.description ?? "",
     options: (command.options ?? []).map(optionShape),
   });
 }
@@ -58,14 +68,21 @@ export function commandDrift(
   expected: readonly CommandJson[],
   server: readonly CommandJson[],
 ): CommandDrift {
-  const expectedByName = new Map(expected.map((command) => [command.name, commandShape(command)]));
-  const serverByName = new Map(server.map((command) => [command.name, commandShape(command)]));
+  const expectedByKey = new Map(expected.map((command) => [commandKey(command), command]));
+  const serverByKey = new Map(server.map((command) => [commandKey(command), command]));
   return {
-    missing: [...expectedByName.keys()].filter((name) => !serverByName.has(name)),
-    extra: [...serverByName.keys()].filter((name) => !expectedByName.has(name)),
-    changed: [...expectedByName.entries()]
-      .filter(([name, shape]) => serverByName.has(name) && serverByName.get(name) !== shape)
-      .map(([name]) => name),
+    missing: [...expectedByKey.keys()]
+      .filter((key) => !serverByKey.has(key))
+      .map((key) => expectedByKey.get(key)!.name),
+    extra: [...serverByKey.keys()]
+      .filter((key) => !expectedByKey.has(key))
+      .map((key) => serverByKey.get(key)!.name),
+    changed: [...expectedByKey.entries()]
+      .filter(([key, command]) => {
+        const live = serverByKey.get(key);
+        return live !== undefined && commandShape(live) !== commandShape(command);
+      })
+      .map(([, command]) => command.name),
   };
 }
 

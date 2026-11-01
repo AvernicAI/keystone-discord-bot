@@ -2,6 +2,7 @@ import { defineModule } from "@keystone/kernel";
 import { rank } from "./commands/rank";
 import { ticket } from "./commands/ticket";
 import { tools } from "./commands/tools";
+import { rankCard } from "./commands/rank-card";
 import { communityDefaultSettings, communitySettingsSchema } from "./settings";
 
 /**
@@ -20,7 +21,7 @@ export const communityModule = defineModule({
   version: "0.3.0",
   settingsSchema: communitySettingsSchema,
   defaultSettings: communityDefaultSettings,
-  commands: [rank, ticket, tools],
+  commands: [rank, ticket, tools, rankCard],
   intents: ["Guilds", "GuildMessages", "GuildMessageReactions", "GuildVoiceStates"],
   optionalIntents: ["GuildMembers", "MessageContent"],
   intentFallbacks: {

@@ -16,6 +16,10 @@ P2 core shipped in pass 05 (2026-11-01).
   Unicode word edges and counts combining marks against a configurable
   threshold. `/mod filters` is the content-filter review queue (link, profanity
   and zalgo).
+- The context menus (pass 33) add **Report message** (message) and **Case
+  history** (user) without a root. Report message opens a real case with the
+  message id, channel id and a 500-character excerpt; Case history requires
+  `ModerateMembers` and reads the same rows as `/mod history`.
 - `/appeal` and the case-button appeal path add events; `/verify` clears
   quarantine.
 - Native AutoMod rules are built and synced only when explicitly enabled.
@@ -24,10 +28,10 @@ P2 core shipped in pass 05 (2026-11-01).
 ## Verified
 
 ```
-pnpm test                                  # 339 tests / 52 files
-pnpm vitest run modules/moderation        # 24 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal, verify, native plan
+pnpm test                                  # 360 tests / 56 files
+pnpm vitest run modules/moderation        # 28 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal, verify, native plan, context menus
 pnpm test -- packages/db/src/cases.test.ts # 2 PGlite case-store tests
-pnpm budget                                # 17/100 roots · 108 subcommands, status OK
+pnpm budget                                # 17/100 roots · 108 subcommands · 4 context menus, status OK
 pnpm build                                 # bot, worker, migrate artefacts
 ```
 
@@ -63,6 +67,24 @@ P7 link-filter evidence (pass 23):
   `https://xn--pple-43d.test/login` produced #3 (punycode); and
   `https://example.com/docs` produced no #4. The process was in memory mode with
   the link filter seeded to `alert`.
+
+P7 context-menu evidence (pass 33):
+
+- `context.test.ts` runs `Report message` and reads the created case back from
+  `CaseService.list`: one `report` case with `actorId` = reporter, `targetId` =
+  author, `evidence.messageId = "message-1"`, `channelId = "channel-a"` and the
+  excerpt in `reason`. A self-report is refused, and an absent MessageContent
+  intent records the honest placeholder instead of inventing text.
+- The same file seeds a `warn` case and reads it through `Case history`; the
+  manifest marks the menu with `requirePermissions("ModerateMembers")`.
+- `packages/kernel/src/context-menus.test.ts` proves the registry separates
+  chat-input names from user/message names, counts the separate 15 + 15 budgets
+  and rejects options or subcommands on a menu.
+- **Live 2026-11-01:** one memory-mode boot found both menus missing, cleared
+  once and registered 21 application commands. `pnpm commands:doctor` read
+  Discord's registry and reported `user:Case history` and
+  `message:Report message` with no drift. The MCP cannot right-click, so the
+  handlers were **not invoked live**; this page does not claim they were.
 
 P7 profanity/zalgo evidence (pass 24):
 
@@ -141,6 +163,9 @@ No document claims a live Discord run for the unproven rows.
 - Live ban/kick/timeout/purge API calls, button interactions and join/audit
   gateway events remain unverified; message events now have live link/profanity
   delete and alert runs for link, profanity and zalgo.
+- The two context menus are registered but were not right-clicked live; their
+  handlers are covered by adapter and command tests. An `alert`-only view of a
+  case is not the same as a Discord client invocation.
 
 ## Next
 

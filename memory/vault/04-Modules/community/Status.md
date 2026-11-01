@@ -29,10 +29,18 @@ got no reply, and a third after the window replied again. The admin actions were
 not run live because the MCP bot lacks `ManageGuild`; they are covered by the
 command tests.
 
+P7 added a user context menu in pass 33. **Rank card** is an application command
+of type 2 that reads the same `LevelingService.rank` projection as `/rank view`
+and replies with an embed, not an image. This build has no image renderer, and
+the embed footer says `levels are stored XP rows, not an image render`. The menu
+is guild-only, has a 3-second cooldown and adds no store. Discord reports it
+registered; the MCP cannot right-click, so invocation is covered by the command
+test rather than a live click.
+
 ## Verified
 
 ```text
-pnpm check                            exit 0 · 339 tests / 52 files
+pnpm check                            exit 0 · 360 tests / 56 files
   responder.test.ts                   5 tests (auto-responder service)
   community.test.ts                  12 tests
   extras.test.ts                      7 tests
@@ -40,10 +48,11 @@ pnpm check                            exit 0 · 339 tests / 52 files
   economy.test.ts                     6 tests
   apps/bot/src/community-events.test.ts 3 tests (dev marker + responder)
   apps/bot/src/prefix.test.ts         8 tests (dev bridge)
+  context.test.ts                     2 tests (Rank card menu)
   packages/db/src/community.test.ts   5 tests (incl. responder reopen)
   packages/db/src/economy.test.ts     2 tests
-pnpm budget                           17/100 roots · 108 subcommands, status OK
-pnpm memory:check                     current (pass 31)
+pnpm budget                           17/100 roots · 108 subcommands · 4 context menus, status OK
+pnpm memory:check                     current (pass 33)
 ```
 
 Feature proofs (P3 plus the P4 economy hardening):
@@ -68,6 +77,7 @@ Feature proofs (P3 plus the P4 economy hardening):
 | Birthdays | `11-01` announces once for the year; duplicate tick sends zero; `02-30` rejected; removal stops announcements |
 | Suggestions | Submit, one vote per user, duplicate vote no-op, switch vote moves counts, decision once, decided votes rejected, disabled path rejected |
 | Giveaways | Duplicate entry is refused; early end is refused; due end picks a winner and DMs; second end is a no-op |
+| Rank card menu | Seeds `4 / 400`; the user menu reports `Level 4 · 400 XP · rank #1`, and the row is unchanged afterwards |
 | Temp voice | Hub creates the named room; owner leave with members stays; empty owner leave deletes and removes the record |
 | Tickets | Panel, thread ticket, one-open cap, claim, transcript message, close, stats and average close |
 | Live leaderboard | `!rank leaderboard` returned the real XP-leaderboard embed in `#ai-chat` |
