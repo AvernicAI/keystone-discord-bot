@@ -7,9 +7,11 @@
 2. `modules/invites/src/invites.ts` — `attributeInvite`, `suspiciousReasons` and
    `InviteService`. This is the whole policy, and it is pure or near-pure.
 3. `modules/invites/src/commands/invites.ts` — a read-only command with guards.
-4. `apps/bot/src/invite-events.ts` — the cache, the per-guild serialization and
-   the gateway translation.
-5. `packages/db/src/invite-store.ts` — SQL aggregation and the unique join key.
+4. `apps/bot/src/invite-tracker.ts` — the cache, the per-guild serialization and
+   the join/leave decisions. This is the gateway-independent state owner.
+5. `apps/bot/src/invite-events.ts` — the discord.js translation layer. If you
+   find yourself adding policy here, it belongs in the tracker or the module.
+6. `packages/db/src/invite-store.ts` — SQL aggregation and the unique join key.
 
 ## The idea to take away
 
@@ -41,8 +43,11 @@ window.
 
 Diffing invites on every `GuildMemberAdd` without a per-guild queue. It passes
 the single-join test and double-attributes as soon as two people join together.
-Write the two-join test first; the production fix (a promise chain per guild) is
-small, but only if you know why it is there.
+Write the two-join test first; the production fix (a promise chain per guild,
+own by `invite-tracker.ts`) is small, but only if you know why it is there.
+The second structural mistake is leaving the cache and the promise chain inside
+the event registration closure. That works until you need to test the queue or
+reuse it; keep state in the tracker and keep the gateway file to mapping.
 
 The second mistake is treating `invite.uses` as owned by Keystone. It is a
 Discord counter that also moves for invites created by other bots and for

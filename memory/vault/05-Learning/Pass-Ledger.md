@@ -7,6 +7,7 @@
 
 | Pass | Date | Phase | Summary | Journal |
 | --- | --- | --- | --- | --- |
+| pass-21 | 2026-11-01 | P7 | Invite gateway boundary: a gateway-independent tracker owns cache, queue and decisions; discord.js wiring is a translation layer with a direct serialization test. | [journal](../../journal/2026-11-01-pass-21.md) |
 | pass-20 | 2026-11-01 | P7 | Cold-cache invite attribution records no inviter; unused refresh-token storage removed; command-sync and MEE6 claims corrected. | [journal](../../journal/2026-11-01-pass-20.md) |
 | pass-19 | 2026-11-01 | P7 | Invite tracking: cached-counter attribution, durable invite_joins, /invites leaderboard\|stats\|who and advisory flags; live 11-command registration and dev-bridge run. | [journal](../../journal/2026-11-01-pass-19.md) |
 | pass-18 | 2026-11-01 | P6 | P6 settings writes: CSRF-protected dashboard form and PATCH API through SettingsService, module Zod validation, cross-guild/non-admin/bot-absent tests. | [journal](../../journal/2026-11-01-pass-18.md) |
@@ -28,4 +29,4 @@
 | pass-02 | 2026-11-01 | P1 | Master plan, parity matrix and roadmap approved; the rejected plan shapes recorded. | [journal](../../journal/2026-11-01-pass-02.md) |
 | pass-01 | 2026-10-31 | P0 | Kernel, module contract, reference module, memory system, CI and ADR baseline. | [journal](../../journal/2026-10-31-pass-01.md) |
 
-Current phase: **P7**. 207 tests reported; 11/100 commands.
+Current phase: **P7**. 208 tests reported; 11/100 commands.

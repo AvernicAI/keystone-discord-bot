@@ -27,9 +27,10 @@ that does not load every join into the bot process.
    finds the invite whose `uses` increased, breaks ties on the code, and returns
    `undefined` when nothing changed or the invite has no inviter. The gateway
    adapter only caches and fetches.
-2. **Joins are serialized per guild.** `apps/bot/src/invite-events.ts` keeps one
-   promise chain per guild, so a second join waits for the first diff and cache
-   update. Different guilds do not block each other.
+2. **Joins are serialized per guild.** `apps/bot/src/invite-tracker.ts` owns
+   one promise chain per guild, so a second join waits for the first diff and
+   cache update. Different guilds do not block each other. The discord.js file
+   (`invite-events.ts`) is a translation layer only; it does not own cache state.
 3. **The cache is process-local for now.** A restart between two joins can leave
    a join unattributed. The adapter treats a missing cache as “no baseline” and
    records the join without an inviter; it never diffs historical totals as if

@@ -11,6 +11,9 @@ parity slice.
   exists**, serialized per guild. A cold cache records the join without an
   inviter and seeds the cache; historical `uses` totals are never treated as new
   increments. A join row is unique on `(guild, user, joined_at)`.
+- The gateway side is split: `apps/bot/src/invite-tracker.ts` owns the cache,
+  the per-guild queue and the join/leave decisions; `invite-events.ts` only maps
+  discord.js events to that tracker.
 - Suspicious joins are advisory only: account-age and no-avatar flags, an
   optional log-channel embed, never an automatic action.
 - Postgres storage is a first-class adapter (`invite_joins`) with a PGlite test;
@@ -19,6 +22,7 @@ parity slice.
 ## Verified
 
 ```text
+pnpm vitest run apps/bot/src/invite-tracker.test.ts
 pnpm vitest run apps/bot/src/invite-events.test.ts
 pnpm vitest run modules/invites/src/invites.test.ts modules/invites/src/commands.test.ts
 pnpm vitest run packages/db/src/invite-store.test.ts
@@ -27,6 +31,8 @@ pnpm vitest run packages/db/src/invite-store.test.ts
 - Pure diff: increment, new code, unchanged, missing inviter, deterministic tie.
 - Adapter: a join before the first successful cache refresh records no inviter,
   even when an existing invite has a much larger historical `uses` total.
+- Tracker: two joins for one guild queue behind the first fetch; the second
+  join sees the first cache update and records the incremented invite.
 - Flags: new account + no avatar, established account, each check disabled.
 - Service: duplicate gateway delivery records once; leave reduces retained
   count; flagged join notifies exactly once; disabled module records nothing.
@@ -62,8 +68,8 @@ about without a gateway.
   misattributed; the next successful fetch seeds the cache. Durable per-invite
   counter snapshots are a later optimization.
 - The cold-cache path is covered by
-  `apps/bot/src/invite-events.test.ts`; the per-guild serialization is
-  code-inspected and does not yet have a dedicated adapter race test.
+  `apps/bot/src/invite-events.test.ts`; per-guild serialization is covered by
+  `apps/bot/src/invite-tracker.test.ts`. Neither test is a live gateway race.
 - If the bot lacks `ManageGuild`, joins are recorded without an inviter and one
   warning is logged per guild.
 - No backfill: joins before the first successful cache refresh stay

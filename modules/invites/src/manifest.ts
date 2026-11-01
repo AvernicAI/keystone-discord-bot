@@ -5,9 +5,10 @@ import { inviteDefaultSettings, inviteSettingsSchema } from "./settings";
 /**
  * Invite tracking.
  *
- * One read-only root covers the whole domain. The gateway half lives in
- * `apps/bot/src/invite-events.ts`: invite caches and member joins are platform
- * details, while attribution, flags and totals are this module's job.
+ * One read-only root covers the whole domain. The gateway half is split:
+ * `apps/bot/src/invite-tracker.ts` owns the cache, join queue and decisions,
+ * while `apps/bot/src/invite-events.ts` only translates discord.js events.
+ * Attribution, flags and totals remain this module's job.
  */
 export const invitesModule = defineModule({
   id: "invites",

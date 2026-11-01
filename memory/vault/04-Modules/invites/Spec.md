@@ -107,5 +107,6 @@ row; history is never deleted. Leaderboard totals are computed in SQL
 
 `modules/invites/src/invites.test.ts` (diff, flags, service, idempotency),
 `apps/bot/src/invite-events.test.ts` (cold-cache adapter path),
+`apps/bot/src/invite-tracker.test.ts` (per-guild join serialization),
 `modules/invites/src/commands.test.ts` (registry, budget, all three actions) and
 `packages/db/src/invite-store.test.ts` (SQL totals, leave marking, restart).

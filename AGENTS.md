@@ -124,8 +124,10 @@ by a rate-limited register leaves the app with no commands.
 - P7 invite tracking is in repo as the sixth module: `/invites` leaderboard,
   stats and who-invited-whom, backed by `invite_joins` and advisory fake-join
   flags. A cold cache records an unknown inviter; the adapter test covers it.
+  The gateway state (cache, per-guild join queue) lives in
+  `apps/bot/src/invite-tracker.ts`; `invite-events.ts` is only translation.
   The rest of P7 (forms, events, modmail, expiry jobs, UI/i18n) is open.
-- 6 modules, 11 global command roots, 207 tests in 34 files.
+- 6 modules, 11 global command roots, 208 tests in 35 files.
 - Live: AI Team#5758 connected; 11 commands registered; Qwen3:8b replied in
   `#ai-chat`; `!ping`, `!about`, `!ai status`, `!mod history`,
   `!rank leaderboard`, `!invites leaderboard` and `!invites who` ran through the

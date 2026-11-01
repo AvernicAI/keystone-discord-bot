@@ -17,7 +17,7 @@ from the dashboard and a `PATCH /api/v1` route. Fleet actions, templates, scoped
 API tokens and webhooks are the remaining P6 work. P7 invite tracking is now in
 repo as a sixth module: attribution, a joins/retention leaderboard and advisory
 suspicious-join flags. The command ledger is **11/100**, there are **6 modules**,
-and `pnpm check` covers **207 tests across 34 files** without a Discord token,
+and `pnpm check` covers **208 tests across 35 files** without a Discord token,
 database or network. Live on 2026-11-01: the bot logged in, registered 11 commands
 through Discord, answered a Qwen3:8b mention in `#ai-chat`, and ran real
 moderation, community, AI and invite commands through a development message
@@ -551,7 +551,9 @@ memory/         Obsidian vault + machine state + journal
 **Dependencies point inward.** A module may depend on the kernel. The kernel
 never imports discord.js, Drizzle, BullMQ or Redis. `apps/bot` is the only place
 that knows what a Discord interaction looks like; `packages/db` is the only
-place that knows Postgres. See [System-Overview](memory/vault/03-Architecture/System-Overview.md).
+place that knows Postgres. Gateway state gets its own owner where it has real
+logic: invite events are translated by `invite-events.ts` and the cache/queue
+live in `invite-tracker.ts`. See [System-Overview](memory/vault/03-Architecture/System-Overview.md).
 
 ## Contributing and licence
 

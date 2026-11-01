@@ -69,6 +69,7 @@ MCP cannot invoke slash commands, see [[Live-Testing]].
 | Moderation | `ModerationActions` + `CaseServicePort` | Discord actions + `DrizzleCaseStore` | action recorder + `InMemoryCaseStore` |
 | Community | `CommunityStore` + `CommunityActions` | Discord actions + `DrizzleCommunityStore` | in-memory store + recording actions |
 | AI | `AiProvider` + `AiStore` + `AiPort` | OpenAI-compatible provider + `DrizzleAiStore` | deterministic provider + `InMemoryAiStore` |
+| Invites | `InviteStore` + `InviteActions` | `DrizzleInviteStore` + Discord log action | `InMemoryInviteStore` + recorder |
 
 See [[ADR-0006-ports-and-adapters]] for why, and [[Redis]] for operations.
 
@@ -82,6 +83,12 @@ voice and button events call the P3 services; `/rank`, `/ticket` and `/tools`
 read the same `CommunityPort`. See [[ADR-0008-community-capability-port]].
 Select-menu values are reconciled server-side, and season reset archives the XP
 projection before clearing it. See [[ADR-0009-select-rows-and-season-archives]].
+
+Invite events have a two-file seam. `apps/bot/src/invite-events.ts` maps
+discord.js events and invite payloads only; `apps/bot/src/invite-tracker.ts` owns
+the per-guild cache, the join queue and the join/leave decisions. The tracker
+imports no discord.js, which is what makes the serialization test direct. See
+[[ADR-0017-invite-tracking]].
 
 Economy writes do not go through the command-level check. `EconomyService` calls
 `CommunityStore.transfer` or `spend`; the adapter takes a per-guild lock —

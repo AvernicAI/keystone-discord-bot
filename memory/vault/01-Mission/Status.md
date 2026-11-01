@@ -2,18 +2,19 @@
 
 ## Now
 
-**P7 invite tracking is in repo** (pass 19; cold-cache fix in pass 20,
-2026-11-01): the sixth module adds `/invites leaderboard | stats | who`,
+**P7 invite tracking is in repo** (pass 19; cold-cache fix in pass 20;
+gateway boundary in pass 21, 2026-11-01): the sixth module adds `/invites leaderboard | stats | who`,
 durable `invite_joins` attribution with a unique
 `(guild, user, joined_at)` key, SQL join/leave/retention totals, and advisory
 account-age / no-avatar flags that never punish. A cold cache now records no
 inviter and seeds the cache instead of diffing historical totals; the adapter
 regression test covers that path. The bot receives `GuildInvites` and requests
 `GuildMembers` optionally; a live join could not be performed because no second
-Discord account was available. MEE6's invite tracker is partly premium-gated
-(its wiki says parts or the entirety may require Premium); neither Dyno nor
-Carl-bot documents it. Distinguish this from P6, which
-remains open below.
+Discord account was available. The gateway half is split: `invite-tracker.ts`
+owns the cache and per-guild queue, and `invite-events.ts` only translates
+discord.js events. MEE6's invite tracker is partly premium-gated (its wiki says
+parts or the entirety may require Premium); neither Dyno nor Carl-bot documents
+it. Distinguish this from P6, which remains open below.
 
 **P6 authorization and settings-write foundation is in repo** (passes 17–18,
 2026-11-01): Discord OAuth2 code + PKCE, sealed state, opaque Postgres-backed
@@ -60,7 +61,7 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 207 tests / 34 files · budget 11/100 · memory 1863/1863
+pnpm check        exit 0 · typecheck 0 · 208 tests / 35 files · budget 11/100 · memory 1874/1874
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 11 commands · qwen3:8b reply in #ai-chat
 live commands     2026-11-01 · !ping · !about · !ai status · !mod history · !rank leaderboard · !invites leaderboard · !invites who
@@ -78,7 +79,7 @@ read that file.
 | --- | --- | --- | --- |
 | 1 | Attribution is a deterministic diff, not a guess | `invites.test.ts`: increment, new code, unchanged, missing inviter, code tie-break; `invite-events.test.ts`: a cold cache records no inviter | Pure functions + adapter |
 | 2 | A repeated gateway delivery cannot double-count | `invites.test.ts` and `invite-store.test.ts`: second identical join returns false; the unique key is `(guild, user, joined_at)` | In-memory + **PGlite** |
-| 3 | Concurrent joins are serialized per guild | `apps/bot/src/invite-events.ts`: one promise chain per guild; no queue is shared across guilds | Code inspection only; no dedicated adapter race test yet |
+| 3 | Concurrent joins are serialized per guild | `apps/bot/src/invite-tracker.ts`: one promise chain per guild, no queue shared across guilds; `invite-tracker.test.ts` holds the first fetch open and proves the second join waits | Tracker with a gated fetch; not a live gateway race |
 | 4 | Joins, leaves and retention are computed in SQL | `invite-store.test.ts`: two joins and one leave produce `{joins: 2, leaves: 1, retained: 1}` | **PGlite** |
 | 5 | Flags are advisory | `invites.test.ts`: one log embed, footer "Advisory only"; the port has no ban/kick/timeout method | In-memory + recorder |
 | 6 | Settings are the module's own schema | `inviteSettingsSchema`; the dashboard uses the same catalog, no web-only schema | Shared catalog |
