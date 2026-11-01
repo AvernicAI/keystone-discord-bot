@@ -40,6 +40,19 @@ export const envSchema = z.object({
   AI_EMBEDDING_MODEL: z.string().min(1).default("text-embedding-3-small"),
   AI_INPUT_USD_PER_MILLION: z.coerce.number().min(0).default(0.15),
   AI_OUTPUT_USD_PER_MILLION: z.coerce.number().min(0).default(0.6),
+  /**
+   * Qwen3 and other reasoning models can spend the entire output budget on a
+   * hidden reasoning stream and return empty content. Ollama honours
+   * `think: false`; other OpenAI-compatible providers reject the field, so it
+   * is opt-in.
+   */
+  AI_DISABLE_THINKING: booleanFlag.default(false),
+  /**
+   * Development-only test guild. It seeds AI chat in the in-memory settings
+   * store and enables `!` prefix commands plus bot-authored mention chat for
+   * this guild only. Ignored in production.
+   */
+  DEV_GUILD_ID: optionalString,
 });
 
 export type Env = z.infer<typeof envSchema>;

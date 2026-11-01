@@ -9,24 +9,28 @@ idempotency key; money mutations serialize per guild; and insufficient funds,
 self-pay, bot targets, caps and a claimed daily are explicit refusals. `/rank`,
 `/ticket` and `/tools` still own the command surface; the ledger is 10/100.
 
-Live Discord sends, gateway events, select interactions, thread/voice behavior,
-live role grants and the scheduler tick are still unverified without a token or
-staging guild. The Postgres guild lock is exercised on PGlite, not a Postgres
-server.
+Live verification on 2026-11-01 (pass 15): AI Team#5758 answered `!rank
+leaderboard` with the real XP-leaderboard embed and `!mod history` with the case
+list. `!ticket stats` reached the `ManageGuild` guard — the MCP harness bot does
+not hold that permission — and exposed a real ordering bug: guild-wide stats
+required a ticket id first. The stats branch now runs before the ticket lookup
+and is covered by a test. Select interactions, thread/voice behavior, live role
+grants and the scheduler tick are still unverified. The Postgres guild lock is
+exercised on PGlite, not a Postgres server.
 
 ## Verified
 
 ```text
-pnpm test                             129 tests / 23 files
+pnpm check                            exit 0 · 171 tests / 28 files
   community.test.ts                  12 tests
   extras.test.ts                      7 tests
-  commands.test.ts                    9 tests
+  commands.test.ts                   10 tests
   economy.test.ts                     6 tests
+  apps/bot/src/prefix.test.ts         8 tests (dev bridge)
   packages/db/src/community.test.ts   4 tests
   packages/db/src/economy.test.ts     2 tests
-pnpm typecheck                        exit 0
 pnpm budget                           10/100, status OK
-pnpm memory:check                     72/72
+pnpm memory:check                     current (pass 15)
 ```
 
 Feature proofs (P3 plus the P4 economy hardening):
@@ -53,6 +57,8 @@ Feature proofs (P3 plus the P4 economy hardening):
 | Giveaways | Duplicate entry is refused; early end is refused; due end picks a winner and DMs; second end is a no-op |
 | Temp voice | Hub creates the named room; owner leave with members stays; empty owner leave deletes and removes the record |
 | Tickets | Panel, thread ticket, one-open cap, claim, transcript message, close, stats and average close |
+| Live leaderboard | `!rank leaderboard` returned the real XP-leaderboard embed in `#ai-chat` |
+| Ticket stats placement | Guild stats renders without a ticket id; only the `ManageGuild` permission guard can stop it |
 | Embeds/tags | Valid embed sends; empty embed rejected; tag create/read |
 | Reminders/schedules | Nothing before due; one delivery each after due; second tick is inert |
 | Polls | One vote per member, totals counted |
@@ -72,10 +78,12 @@ duplicate/negative/safety cases. At P3 exit the command ledger was **9/100**; P4
 adds `/ai` and the economy hardening adds no root, so it is now 10/100. No
 feature is paid.
 
-Not green and not claimed: live Discord/gateway behavior remains untested here;
-goodbye messages, YouTube/Twitch-specific adapters and MEE6 import are still open
-(import is P5); durable queue delivery is in-process. The parity tally marks only
-verified buildable rows and leaves competitor ❔ cells untouched.
+Not green and not claimed: message/gateway behaviour is now partially proven
+(the leaderboard and ticket-stats guard ran live), but selects, threads, voice,
+live role grants and scheduled ticks are still untested here. Goodbye messages,
+YouTube/Twitch-specific adapters and MEE6 import are still open (import is P5);
+durable queue delivery is in-process. The parity tally marks only verified
+buildable rows and leaves competitor ❔ cells untouched.
 
 ## P4 economy exit
 

@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**113 features** across 16 domains: **60 in repo**, **9 open**, **40 planned**. Live behaviour is marked separately; a green
+**113 features** across 16 domains: **73 in repo**, **9 open**, **27 planned**. Live behaviour is marked separately; a green
 box means the code and its tests exist, not that a live guild has run it.
 
 ## Domains
@@ -14,8 +14,8 @@ box means the code and its tests exist, not that a live guild has run it.
 | --- | ---: | ---: | ---: | ---: |
 | Moderation | 11 | 9 | 2 | 0 |
 | Automod | 10 | 7 | 2 | 1 |
-| Security | 9 | 7 | 1 | 1 |
-| Leveling | 7 | 6 | 0 | 1 |
+| Security | 9 | 8 | 1 | 0 |
+| Leveling | 7 | 7 | 0 | 0 |
 | Economy | 6 | 5 | 0 | 0 |
 | Community | 11 | 9 | 2 | 0 |
 | Tickets | 7 | 6 | 1 | 0 |
@@ -23,7 +23,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Music | 4 | 0 | 0 | 2 |
 | AI | 6 | 5 | 1 | 0 |
 | Operations | 6 | 0 | 0 | 6 |
-| Portability | 11 | 0 | 0 | 11 |
+| Portability | 11 | 11 | 0 | 0 |
 | Invites | 3 | 0 | 0 | 3 |
 | Forms and applications | 3 | 0 | 0 | 3 |
 | Events and RSVP | 4 | 0 | 0 | 4 |
@@ -71,7 +71,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Join gate / verification | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 | Panic mode | P7 | ◐ open | Named as open in the moderation status; P7 parity completion owns it. · `modules/moderation/src/security.test.ts` |
 | Heat scoring | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
-| Backup / restore | P5 | ⏳ planned | Structure + optional messages |
+| Backup / restore | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live unverified |
 | Shared case file with mod | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 
 ## Leveling
@@ -83,7 +83,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Rank card | P3 | ✅ in repo | `modules/community/src/community.test.ts` · live unverified |
 | Leaderboard | P3 | ✅ in repo | `modules/community/src/community.test.ts` · live unverified |
 | XP multipliers | P3 | ✅ in repo | `modules/community/src/community.test.ts` · live unverified |
-| Import from MEE6 | P5 | ⏳ planned | **Our edge** |
+| Import from MEE6 | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
 | Seasonal reset | P3 | ✅ in repo | `modules/community/src/community.test.ts` · live unverified |
 
 ## Economy
@@ -150,7 +150,7 @@ box means the code and its tests exist, not that a live guild has run it.
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Persona chat | P4 | ✅ in repo | `modules/ai/src/ai.test.ts` · live unverified |
+| Persona chat | P4 | ✅ in repo | `modules/ai/src/ai.test.ts`, `apps/bot/src/ai-events.test.ts` · live verified |
 | Server RAG | P4 | ◐ open | Portable exact index ships; pgvector ANN remains open. |
 | Mod explanations | P4 | ✅ in repo | `modules/ai/src/ai.test.ts` · live unverified |
 | Thread summaries | P4 | ✅ in repo | `modules/ai/src/ai.test.ts` · live unverified |
@@ -172,17 +172,17 @@ box means the code and its tests exist, not that a live guild has run it.
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Full export bundle | P5 | ⏳ planned | Versioned JSON/NDJSON bundle with manifest and checksum. |
-| Restore and config hash | P5 | ⏳ planned | Restore into a clean guild; verify counts and a config hash. |
-| Dry-run import diff | P5 | ⏳ planned | Show create/update/skip before applying. |
-| Rollback window | P5 | ⏳ planned | Failed or regretted imports roll back inside 24 hours. |
-| Deletion receipt | P5 | ⏳ planned | Per-guild and per-user deletion with counts. |
-| MEE6 level import | P5 | ⏳ planned | Public leaderboard only; no credentials; rate-limited. |
-| Generic JSON/CSV import | P5 | ⏳ planned | userId + xp/level/cash/bank; merge modes. |
-| ProBot JSON transcript import | P5 | ⏳ planned | Parse structured ticket transcripts. |
-| Ticket Tool HTML archive | P5 | ⏳ planned | Archive the user-owned HTML transcript as a file. |
-| Drift detection | P5 | ⏳ planned | Compare desired config with live roles, channels and AutoMod. |
-| Guided migration guides | P5 | ⏳ planned | What transfers, what must be recreated, and why. |
+| Full export bundle | P5 | ✅ in repo | `packages/importer/src/importer.test.ts`, `packages/db/src/portability.test.ts` · live unverified |
+| Restore and config hash | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live unverified |
+| Dry-run import diff | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
+| Rollback window | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live unverified |
+| Deletion receipt | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live unverified |
+| MEE6 level import | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
+| Generic JSON/CSV import | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
+| ProBot JSON transcript import | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
+| Ticket Tool HTML archive | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
+| Drift detection | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live unverified |
+| Guided migration guides | P5 | ✅ in repo | `memory/vault/06-Operations/Migration-Guides.md` · live unverified |
 
 ## Invites
 

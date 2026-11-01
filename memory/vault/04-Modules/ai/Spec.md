@@ -90,6 +90,12 @@ settings, prompts, logs, or Discord messages: `AI_API_KEY`, `AI_BASE_URL`,
   completion.
 - Mention chat ignores bots, DMs and messages without a usable mention. A
   disabled/capped guild receives no chat reply.
+- Local E2E only: outside production, `DEV_GUILD_ID` allows bot authors to
+  trigger chat in that one guild so an MCP harness can exercise the real event.
+  Production passes nothing; the normal bot gate remains the default.
+- Qwen3 on Ollama needs `AI_DISABLE_THINKING=true` so the hidden reasoning stream
+  does not consume the entire output budget. The adapter sends Ollama's
+  `think:false` only when this option is on, because other providers reject it.
 - No AI test uses a token, a live guild or the network. The provider tests use a
   fake fetch; the service tests use a deterministic offline provider.
 - The operator can unconfigure the provider at any time; `/ai status` becomes
@@ -98,8 +104,12 @@ settings, prompts, logs, or Discord messages: `AI_API_KEY`, `AI_BASE_URL`,
 
 ## Open / non-goals
 
-- Live Discord mention events and real provider calls are unverified here; no
-  token or provider key exists in the test environment.
+- Live Discord mention events and a real local provider were observed on
+  2026-11-01 with qwen3:8b via Ollama. A hosted provider and a human author are
+  still unverified.
+- Application-command execution is not exposed by SaseQ/discord-mcp; invoking
+  `/ping` or `/setup` still requires a human Discord client. The development `!`
+  bridge exercises the same dispatch pipeline, but it is not the slash path.
 - pgvector ANN at 1M×1536 with p95 recall/latency is not proven. The local exact
   index was measured at 1M×32 (p95 136.96 ms, recall 1.0) as a reference only.
 - Autonomous AI moderation, AI punishment, prompt/completion retention, and AI

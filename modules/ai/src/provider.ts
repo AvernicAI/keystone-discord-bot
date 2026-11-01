@@ -89,6 +89,8 @@ export interface OpenAiProviderOptions {
   readonly embeddingModel?: string;
   readonly inputUsdPerMillion?: number;
   readonly outputUsdPerMillion?: number;
+  /** Ollama-specific: keep Qwen3's reasoning out of the token budget. */
+  readonly disableThinking?: boolean;
   readonly fetchImpl?: typeof fetch;
 }
 
@@ -122,6 +124,7 @@ export class OpenAiCompatibleProvider implements AiProvider {
       embeddingModel: options.embeddingModel ?? "text-embedding-3-small",
       inputUsdPerMillion: options.inputUsdPerMillion ?? 0.15,
       outputUsdPerMillion: options.outputUsdPerMillion ?? 0.6,
+      disableThinking: options.disableThinking ?? false,
       fetchImpl: options.fetchImpl ?? fetch,
     };
   }
@@ -140,6 +143,7 @@ export class OpenAiCompatibleProvider implements AiProvider {
           { role: "user", content: input.user },
         ],
         max_tokens: input.maxTokens,
+        ...(this.#options.disableThinking ? { think: false } : {}),
       }),
       signal: AbortSignal.timeout(30_000),
     });
@@ -195,6 +199,7 @@ export interface AiProviderConfig {
   readonly embeddingModel?: string;
   readonly inputUsdPerMillion?: number;
   readonly outputUsdPerMillion?: number;
+  readonly disableThinking?: boolean;
 }
 
 export function createAiProvider(config: AiProviderConfig): AiProvider {
@@ -206,5 +211,6 @@ export function createAiProvider(config: AiProviderConfig): AiProvider {
     embeddingModel: config.embeddingModel,
     inputUsdPerMillion: config.inputUsdPerMillion,
     outputUsdPerMillion: config.outputUsdPerMillion,
+    disableThinking: config.disableThinking,
   });
 }

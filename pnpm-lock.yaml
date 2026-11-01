@@ -176,6 +176,9 @@ importers:
       '@keystone/db':
         specifier: workspace:*
         version: link:packages/db
+      '@keystone/importer':
+        specifier: workspace:*
+        version: link:packages/importer
       '@keystone/kernel':
         specifier: workspace:*
         version: link:packages/kernel
@@ -350,6 +353,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@keystone/importer':
+        specifier: workspace:*
+        version: link:../importer
       '@keystone/kernel':
         specifier: workspace:*
         version: link:../kernel
@@ -363,6 +369,12 @@ importers:
       '@electric-sql/pglite':
         specifier: ^0.5.14
         version: 0.5.14
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+
+  packages/importer:
+    dependencies:
       zod:
         specifier: ^3.25.0
         version: 3.25.76

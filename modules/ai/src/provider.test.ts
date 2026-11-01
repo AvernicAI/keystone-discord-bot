@@ -73,6 +73,33 @@ describe("AI provider abstraction", () => {
     expect(calls[1]?.url).toBe("https://example.test/v1/embeddings");
   });
 
+  it("sends Ollama's think:false only when the operator opts in", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const fetchImpl = (async (
+      _input: Parameters<typeof fetch>[0],
+      init?: Parameters<typeof fetch>[1],
+    ) => {
+      bodies.push(JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>);
+      return new Response(
+        JSON.stringify({ choices: [{ message: { content: "ok" } }], usage: {} }),
+        { status: 200 },
+      );
+    }) as typeof fetch;
+
+    const quiet = new OpenAiCompatibleProvider({
+      apiKey: "ollama",
+      baseUrl: "http://127.0.0.1:11434/v1",
+      disableThinking: true,
+      fetchImpl,
+    });
+    await quiet.complete({ system: "s", user: "u", maxTokens: 10 });
+    expect(bodies[0]).toMatchObject({ think: false });
+
+    const standard = new OpenAiCompatibleProvider({ apiKey: "key", fetchImpl });
+    await standard.complete({ system: "s", user: "u", maxTokens: 10 });
+    expect(bodies[1]).not.toHaveProperty("think");
+  });
+
   it("surfaces a provider HTTP failure instead of inventing an answer", async () => {
     const provider = new OpenAiCompatibleProvider({
       apiKey: "test-key",

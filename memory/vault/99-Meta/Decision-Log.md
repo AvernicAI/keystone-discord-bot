@@ -67,6 +67,24 @@ including the small calls that did not deserve an ADR.
 | 43 | The economy reuses `/rank`; the command ledger stays 10/100 | [[03-Architecture/Command-Budget\|Command budget]] |
 | 44 | Automatic AI summaries on ticket close are not wired; P4 does not name them, so summaries stay on demand | [[ADR-0011-economy-ledger-and-double-spend]] |
 
+## 2026-11-01 — live verification (P5)
+
+| # | Decision | Where |
+| --- | --- | --- |
+| 45 | A dev-only `!` bridge feeds the real dispatch pipeline because a Discord MCP cannot invoke slash commands; it is never registered in production | [[Live-Testing]] |
+| 46 | The MCP bot may author messages only in `DEV_GUILD_ID`; production still ignores every bot author | `apps/bot/src/ai-events.ts` |
+| 47 | `/ticket stats` is guild-wide, so its branch runs before the ticket-id lookup instead of requiring a ticket thread | `modules/community/src/commands/ticket.ts` |
+| 48 | A failed live command is fixed at the source and covered by a test; the MCP's missing `ManageGuild` is recorded as a harness limitation, not patched around | [[04-Modules/community/Status\|Community status]] |
+
+## 2026-11-01 — public release (P5)
+
+| # | Decision | Where |
+| --- | --- | --- |
+| 49 | Licence is AGPL-3.0-or-later; a public repo without a licence is not open source | `LICENSE`, [[Open-Questions]] |
+| 50 | Commands clear only on first run/drift, not every boot; `pnpm commands:resync` is the explicit clean cycle | `apps/bot/src/index.ts`, `scripts/commands.ts` |
+| 51 | README is the user and agent entry point; `AGENTS.md` holds the short read order and non-negotiables | `README.md`, `AGENTS.md` |
+| 52 | The public repository is `RNGBubba/keystone-discord-bot`, named after the bot and the project | https://github.com/RNGBubba/keystone-discord-bot |
+
 ## How to add a decision
 
 1. If it changes the contract, write an ADR with **Alternatives**.

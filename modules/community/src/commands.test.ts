@@ -84,6 +84,13 @@ describe("community commands", () => {
     expect(actions.threads).toHaveLength(1);
   });
 
+  it("renders guild ticket statistics outside a ticket thread", async () => {
+    const { ctx, interaction } = context({ action: "stats" }, ["ManageGuild"]);
+    await ticket.execute(ctx);
+    expect(interaction.lastReply?.embeds?.[0]?.title).toBe("Ticket statistics");
+    expect(interaction.lastReply?.embeds?.[0]?.description).toContain("Open **0**");
+  });
+
   it("makes birthdays, suggestions, sticky, starboard overrides and select roles admin-reachable", async () => {
     const birthday = context({ action: "birthday", value: "11-01" });
     await tools.execute(birthday.ctx);

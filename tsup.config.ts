@@ -13,6 +13,7 @@ export default defineConfig({
     bot: "apps/bot/src/index.ts",
     worker: "apps/worker/src/index.ts",
     migrate: "scripts/migrate.ts",
+    portability: "scripts/portability.ts",
   },
   format: ["esm"],
   target: "node22",

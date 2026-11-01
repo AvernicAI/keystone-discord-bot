@@ -60,6 +60,22 @@ export const ticket = defineCommand({
       return;
     }
 
+    if (selected === "stats") {
+      requirePermission(ctx, "ManageGuild");
+      const stats = await service.stats(guildId);
+      await ctx.interaction.reply({
+        embeds: [
+          {
+            title: "Ticket statistics",
+            description: `Open **${stats.open}** · Claimed **${stats.claimed}** · Closed **${stats.closed}**\nAverage close: **${stats.averageCloseMinutes ?? "n/a"} minutes**`,
+            color: 0x5865f2,
+          },
+        ],
+        ephemeral: true,
+      });
+      return;
+    }
+
     const found = (await store.listTickets(guildId, { limit: 100 })).find(
       (entry) => entry.channelId === ctx.interaction.channelId,
     );
@@ -121,20 +137,6 @@ export const ticket = defineCommand({
       return;
     }
 
-    if (selected === "stats") {
-      requirePermission(ctx, "ManageGuild");
-      const stats = await service.stats(guildId);
-      await ctx.interaction.reply({
-        embeds: [
-          {
-            title: "Ticket statistics",
-            description: `Open **${stats.open}** · Claimed **${stats.claimed}** · Closed **${stats.closed}**\nAverage close: **${stats.averageCloseMinutes ?? "n/a"} minutes**`,
-            color: 0x5865f2,
-          },
-        ],
-        ephemeral: true,
-      });
-    }
   },
   notes: "Threads avoid the 50-channel cap; transcripts are records, not exported files.",
 });

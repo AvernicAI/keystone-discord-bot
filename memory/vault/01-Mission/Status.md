@@ -2,25 +2,55 @@
 
 ## Now
 
-**P4.5 is complete in-repo** (passes 10–12, 2026-10-31): channel obfuscation is a
-typed outcome at every fetch site, required vs optional intents have an
-`INTENT_PROFILE` and a `/setup` capability report, and memory v2 is
-machine-checked with generated vault pages. The P4 AI layer and ledger economy
-remain as shipped. Live gateway login, obfuscated channels, provider calls,
-Discord sends and role grants are still unverified. **P5 is next.** The baseline
-and P4.5 work are committed locally; there is no remote yet, so nothing is
-pushed.
+**P5 is complete in-repo** (pass 13, 2026-10-31): a versioned export bundle with
+checksum and counts, transactional restore with post-import verification, a
+24-hour rollback, deletion receipts, file level importers, transcript archives,
+a read-only drift report and migration guides. P4.5 platform hardening and the
+P4 AI/economy layers remain as shipped.
+
+**Live verification (pass 15, 2026-11-01):** AI Team#5758 logged into the test
+guild and answered a qwen3:8b mention in `#ai-chat`. SaseQ's `discord-mcp` cannot
+invoke slash commands, so a **dev-only `!` bridge** now feeds the real dispatch
+pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
+`!rank leaderboard` all returned live Discord messages/embeds. `!ticket stats`
+exposed a real ordering bug (guild stats required a ticket first), now fixed and
+tested. On ready the bot now clears application commands, re-registers the full
+set, and fetches Discord's list to log missing/extra names. Slash interaction
+handling from a human client is still unproven; obscured channels, live role
+grants, live Postgres and a MEE6 pull remain unverified. **P6 is next.** The
+baseline, P4.5 and P5 work are committed locally and published publicly at
+https://github.com/RNGBubba/keystone-discord-bot under AGPL-3.0-or-later; the
+public packaging pass also added the README and `AGENTS.md` read paths.
 
 ## Gate
 
 ```
-pnpm check        typecheck 0 · 138 tests / 24 files · budget 10/100 · memory 1616/1616
-pnpm build        exit 0 from a removed dist; bot, worker and migrate artefacts
+pnpm check        exit 0 · typecheck 0 · 171 tests / 28 files · budget 10/100 · memory 1731/1731
+pnpm build        exit 0 · bot, worker, migrate and portability artefacts
+live              2026-11-01 · AI Team#5758 · 2 guilds · 10 commands · qwen3:8b reply in #ai-chat
+live commands     2026-11-01 · !ping · !about · !ai status · !mod history · !rank leaderboard
+live failure      !ticket stats → ManageGuild guard (MCP bot is not admin); branch fixed and unit-tested
+public            2026-11-01 · https://github.com/RNGBubba/keystone-discord-bot · AGPL-3.0-or-later
 ```
 
 A local `.env` exists in the working tree. Smoke commands pin
 `DOTENV_CONFIG_PATH=.env.absent` so the result is deterministic and does not
 read that file.
+
+## P5 acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | A versioned bundle is verifiable before a write | `packages/importer/src/importer.test.ts`: round trip, canonical key order, edited checksum, unsupported version, count mismatch | Pure functions |
+| 2 | A 5,000-member guild exports, wipes and restores | `packages/db/src/portability.test.ts`: 5,002 levels, checksum equality after restore, `verified: true` | **PGlite**, not a Postgres server |
+| 3 | A failed restore leaves the old guild intact | Same suite: duplicate case number forced inside the transaction; rejection; pre/post checksum equal | **PGlite** transaction |
+| 4 | A 24-hour rollback restores the pre-import snapshot | Same suite: changed setting before import, rollback returns it, state `rolled-back` | **PGlite** |
+| 5 | Deletion leaves a receipt without content | Same suite: counts, deleted guild id, content hash, backups removed, guild rows gone | **PGlite** |
+| 6 | File importers are honest about source limits | `importer.test.ts`: MEE6 `players[]`, bad ids, duplicates, quoted CSV, level-derived XP, transcript HTML/JSON | Pure fixtures |
+| 7 | Merge is narrow and named | `importer.test.ts`: settings upsert, keep-higher and add-on-top; service adds the limitation warning | Pure functions |
+| 8 | Drift is report-only | `portability.test.ts`: missing channel, refused permission, missing AutoMod rule, `readOnly: true` | Snapshot + supplied live facts |
+| 9 | Operators have a safe surface | `scripts/portability.ts`: dry-run, `--yes`, `0600` export, receipts; [[Portability-Runbook]] | CLI smoke (usage); live Postgres not run |
+| 10 | The decision is recorded | [[ADR-0015-portability-bundles-and-receipts]], [[Portability]], [[Migration-Guides]] | Vault check |
 
 ## P4.5 acceptance evidence
 
@@ -31,7 +61,7 @@ read that file.
 | 3 | Core works without privileged intents | `INTENT_PROFILE=minimal` returns only non-privileged intents; `pnpm audit:intents` prints the disabled features | Registry + manifest tests |
 | 4 | `/setup` names disabled features | `modules/setup/src/setup.test.ts`: minimal profile shows `GuildMembers` consequence and the `INTENT_PROFILE=full` next step | Fake health probe, zero writes |
 | 5 | Optional intent contract is validated | `packages/kernel/src/registry.test.ts`: required/optional split, fallback join, duplicate rejection | Registry |
-| 6 | Memory cannot silently drift | `pnpm memory:check`: 113 features, 20 claims, 12 passes, 14 decisions, 4 generated pages, 244 wikilinks | Machine files + generated pages |
+| 6 | Memory cannot silently drift | `pnpm memory:check`: 113 features, 20 claims, 16 passes, 15 decisions, 4 generated pages, 286 wikilinks | Machine files + generated pages |
 | 7 | The plan is recorded | [[ADR-0012-required-and-optional-intents]], [[ADR-0013-roadmap-v2-portability-first]], [[ADR-0014-memory-v2-machine-truth]] | Vault check |
 
 ## P3 acceptance evidence
@@ -62,7 +92,7 @@ remain open.
 | 3 | Zero prompt/completion retention | Same suite: usage has only six counter fields; migration 0005 has no prompt/completion columns | In-memory + **PGlite** |
 | 4 | Server RAG over admin docs | `ai.test.ts`: docs chunked, embedded, retrieved, source cited; guild scoping/removal; `/ai docs-add` command path | Deterministic embeddings; exact index |
 | 5 | Ticket deflection | `ai.test.ts`: no match returns human hand-off with zero provider calls; match answers with source | Service; no live ticket |
-| 6 | Mention-only chat + moderation explanations | `ai.test.ts` chat/feature refusal; `commands.test.ts` explain leaves case state `open`; event ignores bots/DMs/non-mentions by construction | Service + command; event typechecked only |
+| 6 | Mention-only chat + moderation explanations | `ai.test.ts` chat/feature refusal; `commands.test.ts` explain leaves case state `open`; event ignores bots/DMs/non-mentions by construction | Service + command; **live** mention reply via the dev guild seam |
 | 7 | Thread summaries | `modules/community/src/commands.test.ts` `/ticket summary` calls the AI port and labels the result advisory | Command recorder; no live thread |
 | 8 | Disable/kill switch breaks no command | `commands.test.ts`: `/ai status` works with `enabled: false`; one root remains registered | Registry + command |
 | 9 | Cap and budget records | migration 0005, `DrizzleAiStore`, `packages/db/src/ai.test.ts`: scoped docs and atomic monthly increments | PGlite, not a Postgres server |
@@ -116,7 +146,7 @@ remain open.
 | Scripted raid containment | Yes, policy engine + recorder | Replay in a staging guild |
 | Case numbering/events | Yes, PGlite | Same against Postgres |
 | Real ban/kick/timeout/purge/lock | No | Staging guild with the bot's permissions |
-| Gateway joins/messages/audit events | No | Live guild with privileged intents |
+| Gateway joins/messages/audit events | Messages yes; joins/audit no | Message event observed live; replay joins/audit in staging |
 | Native AutoMod sync | Plan tested, adapter not run | Enable sync in staging |
 | XP/currency idempotency | Yes, in-memory + PGlite | Same against a Postgres server |
 | Economy double-spend | Yes, in-memory queue + PGlite guild lock | Two bot shards against one Postgres server |
@@ -126,13 +156,19 @@ remain open.
 | P3 Discord sends/threads/voice | No | Staging guild with permissions |
 | Channel obfuscation classification | Yes, fixtures | A staging guild after 2026-11-16 |
 | Intent profile and `/setup` report | Yes, registry + fake health | A live login with the matching Portal intents |
+| Export/restore/rollback/deletion | Yes, PGlite with 5,002 levels | Same against a Postgres server |
+| MEE6 and generic file import | Yes, fixtures | A real MEE6 export and a real Postgres server |
+| Transcript archive | Yes, HTML/JSON fixtures | A real Ticket Tool/ProBot file |
+| Drift report | Yes, supplied live facts | A live guild via the P6 collector |
+| CLI against a real database | No | `pnpm portability export` with compose Postgres |
 | AI provider request/cost | Yes, fake fetch | Real configured provider |
 | AI hard cap and zero retention | Yes, service + PGlite | Same against Postgres |
 | Exact server-doc retrieval | Yes, deterministic embeddings | Production embeddings + pgvector ANN |
-| AI mention event / live sends | No | Staging guild with `MessageContent` |
+| AI mention event / live sends | Yes, Qwen3:8b reply in `#ai-chat` | Repeat with a human author; slash-command replies still unobserved |
 | 1M×1536 pgvector p95/recall | No | Postgres+pgvector research benchmark |
 | Container build | No | `docker compose up` on a machine with a daemon |
-| Live gateway login | No | Set `DISCORD_TOKEN` and invite the bot |
+| Live gateway login | Yes, 2026-11-01 as AI Team#5758 | Repeat on the production shard after P10 |
+| Slash-command execution | No | A human client, or a harness with interaction support |
 
 No document claims a live-server or live-gateway run for a row marked "not
 proven". The join-gate expiry job, temporary-ban/temp-role expiry, case export
@@ -141,7 +177,8 @@ here.
 
 ## Next
 
-P5 — portability and migration: the versioned export bundle, dry-run restore,
-MEE6 and file importers, drift detection and the migration guides. The dashboard
-(P6) waits for that data model. Before launch, close the pgvector ANN gate and
-run the live provider/Discord smoke in staging.
+P6 — dashboard, API and fleet: OAuth2/PKCE with exact redirect URIs, encrypted
+server-side Discord tokens, per-guild authorization, schema-driven settings,
+fleet view, scoped API tokens and the drift/import/export surfaces the bundle
+now makes possible. Before launch, close the pgvector ANN gate and run the live
+provider/Discord/Postgres smoke in staging.

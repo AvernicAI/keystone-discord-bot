@@ -1,10 +1,14 @@
 # Open questions
 
-Nothing below P7 is blocked by these. The repo ships without a `LICENSE` file
-until Q-1 is answered, deliberately — a licence is the owner's call, not a
-default.
+Q-1 is answered: **AGPL-3.0-or-later**, with the standard `LICENSE` file. The
+remaining questions below are not blocking P6.
 
-## Q-1 — Licence: AGPL-3.0 or MIT?
+## Q-1 — Licence: AGPL-3.0 or MIT? — **answered 2026-11-01**
+
+**Chosen: AGPL-3.0-or-later.** The public repo is a service-shaped bot, and the
+project's documented recommendation was to keep hosted modifications open. MIT
+remains the fallback if adoption matters more than that protection; changing it
+is a one-file, owner-level decision.
 
 - **AGPL-3.0 (recommended).** Anyone running a modified Keystone as a service must
   publish their changes. Protects a hosted tier from being cloned. Cost: some

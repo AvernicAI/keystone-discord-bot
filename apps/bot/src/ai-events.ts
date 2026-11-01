@@ -9,9 +9,26 @@ import { UserError, type AiPort, type Logger } from "@keystone/kernel";
  * messages without a usable mention, and replies without mentioning the author
  * back.
  */
-export function registerAiEvents(client: Client, ai: AiPort, logger: Logger): () => void {
+export interface AiEventOptions {
+  /**
+   * Development-only: allow bot authors in this one guild so a Discord MCP or
+   * E2E harness can exercise the real event path. Production passes nothing.
+   */
+  readonly allowBotsInGuildId?: string;
+}
+
+export function registerAiEvents(
+  client: Client,
+  ai: AiPort,
+  logger: Logger,
+  options: AiEventOptions = {},
+): () => void {
   const onMessage = (message: Message): void => {
-    if (message.author.bot || !message.guildId || !client.user) return;
+    const developmentBot =
+      Boolean(options.allowBotsInGuildId) &&
+      message.author.bot &&
+      message.guildId === options.allowBotsInGuildId;
+    if ((message.author.bot && !developmentBot) || !message.guildId || !client.user) return;
     if (!message.mentions.has(client.user)) return;
     const question = message.content
       .replace(new RegExp(`<@!?${client.user.id}>`, "g"), "")

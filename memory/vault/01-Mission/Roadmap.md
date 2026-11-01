@@ -56,27 +56,46 @@ six research pages; memory v2 and generated status pages.
 `pnpm check` green at close. Live obfuscated channels and a live gateway login
 remain unproven here.
 
-## Next
-
-### P5 — Portability and migration
+### P5 — Portability and migration (done 2026-10-31)
 
 **Goal:** own the data-ownership wedge honestly.
 
-- `packages/importer`: versioned export bundle, manifest/checksum, dry-run diff,
-  merge modes, idempotent apply, 24-hour rollback, import and deletion receipts.
-- Sources: MEE6 levels via the public leaderboard; generic JSON/CSV; Lurkr,
-  Polaris, Arcane and XP Bot files; ProBot JSON and Ticket Tool HTML transcripts;
-  our own bundle for full-fidelity restore.
-- Drift detection: desired config vs live roles, channels, permissions and
-  AutoMod; report only.
-- Migration guides for Dyno, Carl-bot and Wick, which have no usable egress.
+**Done:**
 
-**Exit demo:** seed a 5,000-member guild, export, wipe, restore; config hash and
-counts match. Import a MEE6-format fixture and a generic CSV; a failed import
-rolls back; deletion produces a receipt.
+- `packages/importer`: versioned `keystone.export` v1 bundle, canonical SHA-256
+  checksum and counts; dry-run diff; transactional full restore; narrow settings
+  + levels merge; 24-hour rollback; import and deletion receipts.
+- Sources: saved MEE6 leaderboard JSON; generic JSON/CSV; Lurkr, Polaris, Arcane
+  and XP Bot files; ProBot JSON and Ticket Tool HTML transcript archives; our own
+  bundle for full-fidelity restore. No scraping and no vendor credentials.
+- `packages/db` portability store (PGlite-tested), `pnpm portability` CLI and
+  migration guides for Dyno, Carl-bot and Wick.
+- Drift report over settings ids vs supplied live facts; report only.
 
-**Kill signal:** if MEE6 import is blocked, drop the one-click claim and keep
-file-based import plus guides. Never scrape.
+**Exit evidence:** `packages/db/src/portability.test.ts` proves a 5,000-row
+round trip, checksum equality, a failed restore that leaves the guild intact, a
+24-hour rollback, deletion receipt and drift. `packages/importer/src/importer.test.ts`
+covers tampering, versions, MEE6, CSV, transcripts and merge modes.
+
+**Live Discord runs:** pass 14 (2026-11-01) logged in as AI Team#5758,
+registered 10 commands, and got qwen3:8b replies in `#ai-chat`. Pass 15 added a
+dev-only `!` bridge because SaseQ's MCP cannot invoke slash commands; `!ping`,
+`!about`, `!ai status`, `!mod history` and `!rank leaderboard` then ran through
+the real registry, guards and reply adapter. The ready path now clears global
+commands, re-registers them and fetches the server-side list to prove the sync.
+The slash `InteractionCreate` path still needs a human client.
+
+**Public release (pass 16):** the repo is public at
+https://github.com/RNGBubba/keystone-discord-bot under AGPL-3.0-or-later. The
+README covers setup, commands, features, agent onboarding and the Obsidian vault;
+`AGENTS.md` is the short read order for contributors and agents.
+
+**Honest limits:** MEE6 live fetch is not wired (file only); drift's live facts
+come from a JSON file until P6; messages and attachments cannot be exported;
+merge does not combine history. No live Postgres, slash-command run or human
+mention was performed.
+
+## Next
 
 ### P6 — Dashboard, API and fleet
 

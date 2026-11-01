@@ -21,6 +21,7 @@
 | ADR-0012 | [[ADR-0012-required-and-optional-intents\|Required and optional intents, and a single channel resolver]] | accepted | 2026-10-31 |
 | ADR-0013 | [[ADR-0013-roadmap-v2-portability-first\|Roadmap v2: portability first, dashboard second]] | accepted | 2026-10-31 |
 | ADR-0014 | [[ADR-0014-memory-v2-machine-truth\|Memory v2: machine truth, generated Markdown]] | accepted | 2026-10-31 |
+| ADR-0015 | [[ADR-0015-portability-bundles-and-receipts\|Portability bundles, narrow merge and receipts]] | accepted | 2026-10-31 |
 
 ## Rules
 

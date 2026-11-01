@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-31",
+  "updatedAt": "2026-11-01",
   "passes": [
     {
       "id": "pass-01",
@@ -154,6 +154,58 @@
       "checks": {
         "typecheck": "pass",
         "tests": "pending full gate",
+        "budget": "10/100",
+        "memory": "current"
+      }
+    },
+    {
+      "id": "pass-13",
+      "date": "2026-10-31",
+      "phase": "P5",
+      "summary": "Portability: export bundle, transactional restore, rollback, deletion receipts, level/transcript importers and drift report.",
+      "journal": "journal/2026-10-31-pass-13.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "157",
+        "budget": "10/100",
+        "memory": "1698/1698"
+      }
+    },
+    {
+      "id": "pass-14",
+      "date": "2026-11-01",
+      "phase": "P5",
+      "summary": "First live run: AI Team#5758 online, 10 commands registered, Qwen3:8b mention replies in #ai-chat; dev-only test seam and think:false adapter.",
+      "journal": "journal/2026-11-01-pass-14.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "161",
+        "budget": "10/100",
+        "memory": "current"
+      }
+    },
+    {
+      "id": "pass-15",
+      "date": "2026-11-01",
+      "phase": "P5",
+      "summary": "Dev-only prefix bridge and live command proof; bot-authored mention chat gated to DEV_GUILD_ID; /ticket stats ordering fixed; clear-then-register command sync with read-back.",
+      "journal": "journal/2026-11-01-pass-15.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "171",
+        "budget": "10/100",
+        "memory": "current"
+      }
+    },
+    {
+      "id": "pass-16",
+      "date": "2026-11-01",
+      "phase": "P5",
+      "summary": "Public release packaging: Keystone repo, README/AGENTS, AGPL-3.0 licence, safe drift-only command sync and explicit resync.",
+      "journal": "journal/2026-11-01-pass-16.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "171",
         "budget": "10/100",
         "memory": "current"
       }

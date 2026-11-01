@@ -8,3 +8,4 @@ export * from "./community-store";
 export * from "./ai-store";
 export * from "./health";
 export * from "./factories";
+export * from "./portability-store";

@@ -9,23 +9,39 @@ the off-by-default kill switch. The same phase hardened the community economy;
 AI behavior is unchanged. `/ai` is the only new root; the ledger is 10/100 and
 all five modules are registered.
 
-The provider is not configured in this environment, live Discord mention events
-are not observed, and the pgvector extension benchmark is partial. Those are
-listed below, not claimed as verified.
+Live verification on 2026-11-01: the bot logged in as **AI Team#5758**, registered
+all 10 commands with Discord, and answered mentions in `#ai-chat` with
+**qwen3:8b** served by Ollama. Ollama's `/api/ps` showed `qwen3:8b` loaded. The
+MCP harness account is itself a bot, so the development guild allows bot authors
+for one guild only; production still ignores every bot. Slash-command execution
+was **not** observed: SaseQ/discord-mcp exposes channel/message tools but no
+application-command invocation tool. The dev-only `!` bridge did execute real
+commands through the same dispatch pipeline. The pgvector extension benchmark is
+still partial.
 
 ## Verified
 
 ```text
-pnpm typecheck                         exit 0
-pnpm test                             129 tests / 23 files
+pnpm check                            exit 0 · 171 tests / 28 files
+  modules/ai/src/provider.test.ts     4 tests (incl. think:false opt-in)
+  apps/bot/src/ai-events.test.ts      4 tests (bot gate + dev guild seam)
+  apps/bot/src/prefix.test.ts         8 tests (parse, dispatch, guild gate)
   modules/ai/src/ai.test.ts           7 tests
-  modules/ai/src/provider.test.ts     3 tests
   modules/ai/src/commands.test.ts     7 tests
-  modules/community/src/commands.test.ts 9 tests (incl. /ticket summary)
+  modules/community/src/commands.test.ts 10 tests (incl. /ticket summary and stats)
   packages/db/src/ai.test.ts          2 tests
 pnpm budget                           10/100, status OK
-pnpm memory:check                     72/72
-pnpm build from removed dist          exit 0 (sizes in journal pass 09)
+pnpm memory:check                     current (pass 15)
+```
+
+Live smoke (2026-11-01, guild 1450130465146142785, channel
+1566291983377367080):
+
+```text
+AI Team#5758 ready, 2 guilds, 10 commands registered
+<@AI Team> Say hello in one short sentence.
+AI Team: Hello! How can I assist you today?
+Ollama /api/ps: qwen3:8b loaded
 ```
 
 P4 feature proofs:
@@ -38,13 +54,15 @@ P4 feature proofs:
 | RAG | Admin doc chunks; `ask` retrieves the doc and exposes its source name; no prompt appears in usage/output keys |
 | Zero retention | `ai_usage` has only `guildId`, `period`, `requests`, `inputTokens`, `outputTokens`, `costUsd`; migration has no prompt/completion columns |
 | Deflection | No doc → `retrieval-only` human hand-off, zero model calls; doc → grounded answer with source |
-| Mention-only chat | Service chat works; `chat: false` refuses with a feature-specific error; event ignores bots/DMs/non-mentions by construction |
+| Mention-only chat | Service chat works; `chat: false` refuses with a feature-specific error; event ignores bots/DMs/non-mentions by construction; **live** Qwen3 reply observed through the dev MCP seam |
 | Advisory classification | Service returns an advisory label/evidence with no action; `/ai classify` is guarded by `ManageMessages` and uses the same cap path |
 | Mod explanations | `/ai explain` reads an existing case, returns a titled explanation and leaves the case state `open` |
 | Thread summaries | `/ticket summary` calls the same `AiPort` and renders a summary with “A human decides any action” |
 | Kill switch | `/ai status` works while disabled and reports `Retention: none`; disabling does not unregister commands |
 | Isolation | Documents are guild-scoped; removing another guild's id is `false`; PGlite persists docs and usage counters |
 | Postgres | Migration 0005 and `DrizzleAiStore` persist chunks and aggregate usage atomically on PGlite |
+| Live mention chat | 2026-11-01: Qwen3:8b replied in `#ai-chat`; the MCP bot author is allowed only in `DEV_GUILD_ID` |
+| Live status surface | `!ai status` rendered the enabled/provider/features embed in the test guild |
 
 ## P4 exit
 
@@ -58,24 +76,36 @@ Not green and not claimed:
 - pgvector ANN at 1M×1536 and its p95 recall/latency: the local exact-cosine
   harness ran 1M synthetic 32-dimensional vectors (p95 136.96 ms, recall 1.0).
   See [[PGVector-Fleet]]. The extension path is open.
-- Real provider calls, real Discord mention events and live ticket threads.
+- Hosted-vendor calls and a human-authored mention are still unobserved; the
+  live chat used local Ollama and a bot author.
+- Slash `InteractionCreate` handling was not exercised by the MCP. The dev `!`
+  bridge did execute `!ping`, `!about`, `!ai status`, `!mod history` and
+  `!rank leaderboard` through the same registry, guards and reply adapter.
+- The MCP bot lacks `ManageGuild`, so the live `!ticket stats` check stopped at
+  the permission guard. That exposed a real ordering bug (guild stats required a
+  ticket first); the branch now runs before the ticket lookup and is unit-tested.
 - The operator must set `AI_API_KEY` and `AI_BASE_URL`; no key is shipped.
+- Qwen3 on Ollama needs `AI_DISABLE_THINKING=true` (or `think:false`); otherwise
+  the reasoning stream can consume the whole output budget and return empty
+  content.
 
 ## Proven vs still needs a live service
 
 | Claim | Proven here? | How to close |
 | --- | --- | --- |
-| Provider request shape/auth/cost | Yes, fake fetch | Run against a real allowed provider |
+| Provider request shape/auth/cost | Yes, fake fetch; live Qwen3:8b via Ollama | Repeat with a hosted vendor when one is authorised |
 | OpenAI-compatible embedding response | Yes, fake fetch | Same |
 | Cap refusal before provider | Yes, counting provider | Same against the configured provider |
 | Docs and usage persistence | Yes, PGlite | Same against a Postgres server |
 | Exact vector retrieval | Yes, deterministic embeddings | Measure with production embeddings and pgvector ANN |
-| Mention-only event | Service only | Staging guild with `MessageContent` |
+| Mention-only event | Yes, live Qwen3 reply through the `DEV_GUILD_ID` bot allowance | Repeat with a human author in staging |
 | Ticket summary seam | Command test + recorder | Live ticket thread |
-| Live Discord message sends | No | Token and staging guild |
+| Live Discord message sends | Yes, message reply in `#ai-chat` | Slash-command replies still unobserved |
+| Command registration | Yes, Discord API returned 10 commands | Run `/ping` and `/setup` through a human client |
 | 1M×1536 pgvector p95/recall | No | Benchmark a Postgres+pgvector instance with production dimensions |
 
-No document claims a live provider or Discord run for a row marked open.
+No document claims a live provider or Discord run for a row marked open. The
+mention row is green; the ticket-summary row is not.
 
 ## Known limitations
 
@@ -96,7 +126,12 @@ No document claims a live provider or Discord run for a row marked open.
 
 ## Next
 
-- P5 dashboard/fleet: per-guild authorisation, importers, export/restore.
+- P6 dashboard/fleet: per-guild authorisation, scoped API tokens and the
+  import/export/drift surfaces.
+- Run `/ping`, `/setup`, `/mod history` and `/rank leaderboard` from a human
+  Discord client; the MCP cannot invoke application commands. The prefix bridge
+  has already exercised the same pipeline.
+- Run `/ticket summary` inside a live ticket thread, and run `/ticket stats`
+  from a member who holds `ManageGuild`.
 - Close the pgvector ANN benchmark with a Postgres+pgvector instance.
-- Add a real-provider smoke test only when an operator key and network policy
-  allow it; never in `pnpm check`.
+- Keep real-provider calls out of `pnpm check`; the local Ollama smoke is manual.

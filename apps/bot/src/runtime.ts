@@ -120,6 +120,12 @@ export async function createRuntime(
   const cache = await createCooldownStore({ redisUrl: env.REDIS_URL, logger });
 
   const settings = new SettingsService(repository, registry);
+  if (env.DEV_GUILD_ID && env.NODE_ENV !== "production" && !database) {
+    await settings.update(env.DEV_GUILD_ID, "ai", { enabled: true, chat: true });
+    logger.warn("DEV_GUILD_ID: AI chat enabled for one guild in process memory", {
+      guildId: env.DEV_GUILD_ID,
+    });
+  }
   const cases = new CaseService(
     database ? createCaseStore(database) : new InMemoryCaseStore(),
   );
@@ -137,6 +143,7 @@ export async function createRuntime(
       embeddingModel: env.AI_EMBEDDING_MODEL,
       inputUsdPerMillion: env.AI_INPUT_USD_PER_MILLION,
       outputUsdPerMillion: env.AI_OUTPUT_USD_PER_MILLION,
+      disableThinking: env.AI_DISABLE_THINKING,
     }),
     settings.forModule("ai"),
   );

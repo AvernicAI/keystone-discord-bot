@@ -4,7 +4,15 @@
   "private": true,
   "type": "module",
   "description": "Keystone — an open-source, teach-by-default all-in-one Discord bot.",
-  "license": "SEE LICENSE IN memory/vault/99-Meta/Open-Questions.md",
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RNGBubba/keystone-discord-bot.git"
+  },
+  "homepage": "https://github.com/RNGBubba/keystone-discord-bot#readme",
+  "bugs": {
+    "url": "https://github.com/RNGBubba/keystone-discord-bot/issues"
+  },
   "packageManager": "pnpm@12.14.0",
   "engines": {
     "node": ">=22"
@@ -25,6 +33,9 @@
     "memory:check": "node memory/tools/memory-check.mjs",
     "audit:intents": "tsx scripts/audit-intents.ts",
     "audit:channels": "tsx scripts/audit-channels.ts",
+    "portability": "tsx scripts/portability.ts",
+    "commands:sync": "tsx scripts/commands.ts",
+    "commands:resync": "tsx scripts/commands.ts --clear",
     "benchmark:ai": "tsx scripts/benchmark-ai.ts",
     "pass:end": "node memory/tools/pass-end.mjs",
     "check": "pnpm typecheck && pnpm test && pnpm budget && pnpm audit:intents && pnpm audit:channels && pnpm memory:check"
@@ -35,6 +46,7 @@
   "devDependencies": {
     "@keystone/config": "workspace:*",
     "@keystone/db": "workspace:*",
+    "@keystone/importer": "workspace:*",
     "@keystone/kernel": "workspace:*",
     "@types/node": "^24.0.0",
     "tsup": "^9.0.0",

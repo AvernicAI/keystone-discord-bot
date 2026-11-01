@@ -7,6 +7,7 @@ import {
   createLogger,
   dispatchCommand,
   formatBudgetReport,
+  type DispatchDeps,
 } from "@keystone/kernel";
 import { loadEnv, requireToken } from "@keystone/config";
 import { asInteractionLike, buildCommandJson } from "./adapt";
@@ -19,6 +20,7 @@ import { syncNativeAutoModRules } from "./automod";
 import { createDiscordCommunityActions } from "./community-actions";
 import { registerCommunityEvents } from "./community-events";
 import { registerAiEvents } from "./ai-events";
+import { registerPrefixCommands } from "./prefix";
 import { buildNativeAutoModPlan, moderationSettingsSchema } from "@keystone/module-moderation";
 
 async function main(): Promise<void> {
@@ -61,6 +63,19 @@ async function main(): Promise<void> {
   );
   logger.info("runtime ready", runtime.mode);
 
+  const dispatchDeps: DispatchDeps = {
+    registry,
+    settings: runtime.settings,
+    logger,
+    cooldowns: runtime.cooldowns,
+    queue: runtime.queue,
+    health: runtime.health,
+    telemetry: runtime.telemetry,
+    moderation: runtime.moderation,
+    community: runtime.community,
+    ai: runtime.ai,
+  };
+
   client.once(Events.ClientReady, async (ready) => {
     logger.info("ready", {
       user: ready.user.tag,
@@ -69,8 +84,35 @@ async function main(): Promise<void> {
     });
 
     try {
-      await ready.application.commands.set(registry.listCommands().map((c) => buildCommandJson(c.definition)));
-      logger.info("commands registered", { count: registry.commandCount });
+      // Discord replaces the whole global command set with one bulk overwrite,
+      // so a clear on every boot is unnecessary. Clearing first also risks a
+      // 429 between the two writes and leaves the app with no commands. When
+      // the server set has drifted, however, do the explicit clear + register
+      // cycle and read the result back. `pnpm commands:resync` runs the same
+      // cycle on demand after a payload-only change.
+      const payload = registry.listCommands().map((c) => buildCommandJson(c.definition));
+      const expected = new Set(payload.map((command) => command.name));
+      let synced = await ready.application.commands.fetch();
+      const syncedNames = new Set([...synced.values()].map((command) => command.name));
+      const missing = [...expected].filter((name) => !syncedNames.has(name));
+      const extra = [...syncedNames].filter((name) => !expected.has(name));
+
+      if (missing.length > 0 || extra.length > 0) {
+        logger.warn("command set drift; clearing before re-register", { missing, extra });
+        await ready.application.commands.set([]);
+        await ready.application.commands.set(payload);
+        synced = await ready.application.commands.fetch();
+        logger.info("commands re-registered", { count: synced.size });
+      } else {
+        logger.info("commands current", { count: synced.size });
+      }
+
+      const finalNames = new Set([...synced.values()].map((command) => command.name));
+      const stillMissing = [...expected].filter((name) => !finalNames.has(name));
+      const stillExtra = [...finalNames].filter((name) => !expected.has(name));
+      if (stillMissing.length > 0 || stillExtra.length > 0) {
+        logger.error("command sync mismatch", { missing: stillMissing, extra: stillExtra });
+      }
       for (const guild of ready.guilds.cache.values()) {
         try {
           const settings = moderationSettingsSchema.parse(
@@ -96,21 +138,7 @@ async function main(): Promise<void> {
 
   client.on(Events.InteractionCreate, (interaction) => {
     if (!interaction.isChatInputCommand()) return;
-    void dispatchCommand(
-      {
-        registry,
-        settings: runtime.settings,
-        logger,
-        cooldowns: runtime.cooldowns,
-        queue: runtime.queue,
-        health: runtime.health,
-        telemetry: runtime.telemetry,
-        moderation: runtime.moderation,
-        community: runtime.community,
-        ai: runtime.ai,
-      },
-      asInteractionLike(interaction),
-    ).catch((error: unknown) => {
+    void dispatchCommand(dispatchDeps, asInteractionLike(interaction)).catch((error: unknown) => {
       logger.error("dispatch crashed", {
         error: error instanceof Error ? (error.stack ?? error.message) : String(error),
       });
@@ -191,7 +219,21 @@ async function main(): Promise<void> {
     runtime.settings.forModule("community"),
     logger.child("community"),
   );
-  const stopAi = registerAiEvents(client, runtime.ai, logger.child("ai"));
+  // One explicit development surface, never present in production: message
+  // authors (including the MCP bot) can run the real pipeline with `!`, and
+  // bot-authored mentions reach the AI event. Both are restricted to this
+  // guild, so a test harness cannot widen the production behaviour.
+  const devTestGuild =
+    env.NODE_ENV !== "production" && env.DEV_GUILD_ID ? env.DEV_GUILD_ID : undefined;
+  const stopPrefix = devTestGuild
+    ? registerPrefixCommands(client, dispatchDeps, { guildId: devTestGuild })
+    : () => undefined;
+  if (devTestGuild) {
+    logger.warn("development prefix commands enabled", { guildId: devTestGuild, prefix: "!" });
+  }
+  const stopAi = registerAiEvents(client, runtime.ai, logger.child("ai"), {
+    allowBotsInGuildId: devTestGuild,
+  });
 
   client.on(Events.Error, (error) => logger.error("client error", { error: error.message }));
   client.on(Events.Warn, (message) => logger.warn("client warning", { message }));
@@ -202,6 +244,7 @@ async function main(): Promise<void> {
     shuttingDown = true;
     logger.info("shutting down", { signal });
     stopCommunity();
+    stopPrefix();
     stopAi();
     await client.destroy();
     await runtime.close();

@@ -48,6 +48,9 @@ use, because it only ever sees the interface.
 4. Guards run in order — guild, permissions, cooldown (via the injected store).
 5. `execute` runs with a settings handle bound to its module, plus the queue and
    health ports.
+
+For the development-only `!` message bridge that feeds the same pipeline when an
+MCP cannot invoke slash commands, see [[Live-Testing]].
 6. Errors are redacted: `UserError` text reaches the user, everything else is
    logged and replaced with a generic message.
 

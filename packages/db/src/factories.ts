@@ -5,6 +5,7 @@ import { PostgresIdempotencyStore } from "./idempotency";
 import { DrizzleCaseStore } from "./case-store";
 import { DrizzleCommunityStore } from "./community-store";
 import { DrizzleAiStore } from "./ai-store";
+import { DrizzlePortabilityStore } from "./portability-store";
 
 /**
  * Factories so the composition root never needs Drizzle's generic types.
@@ -32,4 +33,8 @@ export function createCommunityStore(handle: PostgresHandle): DrizzleCommunitySt
 
 export function createAiStore(handle: PostgresHandle): DrizzleAiStore {
   return new DrizzleAiStore(handle.db as never);
+}
+
+export function createPortabilityStore(handle: PostgresHandle): DrizzlePortabilityStore {
+  return new DrizzlePortabilityStore(handle.db as never);
 }

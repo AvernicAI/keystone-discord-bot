@@ -4,14 +4,14 @@
   "tagline": "An open-source, teach-by-default all-in-one Discord bot.",
   "mission": "vault/01-Mission/Mission.md",
   "northStar": "vault/01-Mission/North-Star.md",
-  "updatedAt": "2026-10-31",
-  "phase": "P4.5",
-  "lastPass": "journal/2026-10-31-pass-12.md",
+  "updatedAt": "2026-11-01",
+  "phase": "P5",
+  "lastPass": "journal/2026-11-01-pass-16.md",
   "metrics": {
     "commands": 10,
     "commandLimit": 100,
     "modules": 5,
-    "tests": 129
+    "tests": 171
   },
   "modules": [
     {
@@ -214,8 +214,9 @@
       "id": "Q-1",
       "question": "Which license: AGPL-3.0 or MIT?",
       "blocks": "P7 open-source launch, not P1-P6 code",
-      "recommendation": "AGPL-3.0 with DCO, no CLA. Decide at pass 10; until then external contributions stay blocked.",
-      "status": "open"
+      "recommendation": "AGPL-3.0 with DCO, no CLA.",
+      "status": "answered",
+      "answer": "AGPL-3.0-or-later; LICENSE added and package metadata updated on 2026-11-01."
     },
     {
       "id": "Q-2",

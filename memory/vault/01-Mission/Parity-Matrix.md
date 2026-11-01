@@ -165,11 +165,11 @@ the reason P5 comes before the dashboard.
 
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Full export bundle | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Versioned JSON/NDJSON + manifest/checksum |
+| Full export bundle | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Versioned JSON + manifest/checksum (NDJSON is v2) |
 | Restore + config hash | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Clean-guild restore proves counts and config |
 | Dry-run diff | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Create/update/skip before any write |
 | Rollback + receipt | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | 24-hour window; deletion receipt |
-| MEE6 level import | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Public leaderboard only; rate-limited |
+| MEE6 level import | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Saved leaderboard file only; no scraping |
 | Generic JSON/CSV import | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | User-supplied file; merge modes |
 | ProBot / Ticket Tool transcripts | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | JSON/HTML user-owned files |
 | Drift detection | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Report only; no auto-fix |
