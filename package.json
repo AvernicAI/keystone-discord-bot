@@ -20,10 +20,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "budget": "tsx scripts/budget.ts",
+    "memory:render": "node memory/tools/render-memory.mjs",
+    "memory:render:check": "node memory/tools/render-memory.mjs --check",
     "memory:check": "node memory/tools/memory-check.mjs",
+    "audit:intents": "tsx scripts/audit-intents.ts",
+    "audit:channels": "tsx scripts/audit-channels.ts",
     "benchmark:ai": "tsx scripts/benchmark-ai.ts",
     "pass:end": "node memory/tools/pass-end.mjs",
-    "check": "pnpm typecheck && pnpm test && pnpm budget && pnpm memory:check"
+    "check": "pnpm typecheck && pnpm test && pnpm budget && pnpm audit:intents && pnpm audit:channels && pnpm memory:check"
   },
   "dependencies": {
     "dotenv": "^16.4.0"

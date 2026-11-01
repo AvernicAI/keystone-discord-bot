@@ -2,22 +2,37 @@
 
 ## Now
 
-**P4 is complete in-repo** (passes 08–09, 2026-11-01): the AI layer and the
-ledger-backed economy hardening. Live provider calls, Discord mention events,
-thread sends and role grants are still unverified. The pgvector ANN benchmark is
-partial. P5 is next. Nothing is committed or pushed; the repository is a local
-working tree.
+**P4.5 is complete in-repo** (passes 10–12, 2026-10-31): channel obfuscation is a
+typed outcome at every fetch site, required vs optional intents have an
+`INTENT_PROFILE` and a `/setup` capability report, and memory v2 is
+machine-checked with generated vault pages. The P4 AI layer and ledger economy
+remain as shipped. Live gateway login, obfuscated channels, provider calls,
+Discord sends and role grants are still unverified. **P5 is next.** The baseline
+and P4.5 work are committed locally; there is no remote yet, so nothing is
+pushed.
 
 ## Gate
 
 ```
-pnpm check        typecheck 0 · 129 tests / 23 files · budget 10/100 · memory 72/72
+pnpm check        typecheck 0 · 138 tests / 24 files · budget 10/100 · memory 1616/1616
 pnpm build        exit 0 from a removed dist; bot, worker and migrate artefacts
 ```
 
 A local `.env` exists in the working tree. Smoke commands pin
 `DOTENV_CONFIG_PATH=.env.absent` so the result is deterministic and does not
 read that file.
+
+## P4.5 acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | Hidden channels are a typed outcome, not a crash | `apps/bot/src/channels.test.ts`: flag, `___hidden___`, null, 10003/50001/50013 and a generic error | Fixtures; live rollout not observed |
+| 2 | Every bot fetch site uses the resolver | `pnpm audit:channels`: 9 call sites; no `.channels.cache` identity use | Static scan of `apps/bot/src` |
+| 3 | Core works without privileged intents | `INTENT_PROFILE=minimal` returns only non-privileged intents; `pnpm audit:intents` prints the disabled features | Registry + manifest tests |
+| 4 | `/setup` names disabled features | `modules/setup/src/setup.test.ts`: minimal profile shows `GuildMembers` consequence and the `INTENT_PROFILE=full` next step | Fake health probe, zero writes |
+| 5 | Optional intent contract is validated | `packages/kernel/src/registry.test.ts`: required/optional split, fallback join, duplicate rejection | Registry |
+| 6 | Memory cannot silently drift | `pnpm memory:check`: 113 features, 20 claims, 12 passes, 14 decisions, 4 generated pages, 244 wikilinks | Machine files + generated pages |
+| 7 | The plan is recorded | [[ADR-0012-required-and-optional-intents]], [[ADR-0013-roadmap-v2-portability-first]], [[ADR-0014-memory-v2-machine-truth]] | Vault check |
 
 ## P3 acceptance evidence
 
@@ -109,6 +124,8 @@ remain open.
 | P3 ticket records/transcripts | Yes, port + PGlite | Live thread round-trip |
 | P3 service events/buttons | Yes, recorder | Staging guild with intents |
 | P3 Discord sends/threads/voice | No | Staging guild with permissions |
+| Channel obfuscation classification | Yes, fixtures | A staging guild after 2026-11-16 |
+| Intent profile and `/setup` report | Yes, registry + fake health | A live login with the matching Portal intents |
 | AI provider request/cost | Yes, fake fetch | Real configured provider |
 | AI hard cap and zero retention | Yes, service + PGlite | Same against Postgres |
 | Exact server-doc retrieval | Yes, deterministic embeddings | Production embeddings + pgvector ANN |
@@ -124,6 +141,7 @@ here.
 
 ## Next
 
-P5 — dashboard and fleet: per-guild authorisation, importers, export/restore and
-drift detection. Before launch, close the pgvector ANN gate and run the live
-provider/Discord smoke in staging.
+P5 — portability and migration: the versioned export bundle, dry-run restore,
+MEE6 and file importers, drift detection and the migration guides. The dashboard
+(P6) waits for that data model. Before launch, close the pgvector ANN gate and
+run the live provider/Discord smoke in staging.

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-10-31",
+  "decisions": [
+    { "id": "ADR-0001", "title": "Use discord.js v14 behind a thin adapter", "status": "accepted", "date": "2026-10-31", "path": "vault/03-Architecture/ADR/ADR-0001-discordjs-v14-adapter.md", "alternatives": true },
+    { "id": "ADR-0002", "title": "pnpm monorepo, dev-first TypeScript resolution", "status": "accepted", "date": "2026-10-31", "path": "vault/03-Architecture/ADR/ADR-0002-monorepo-dev-first.md", "alternatives": true },
+    { "id": "ADR-0003", "title": "A CI-enforced command budget", "status": "accepted", "date": "2026-10-31", "path": "vault/03-Architecture/ADR/ADR-0003-command-budget.md", "alternatives": true },
+    { "id": "ADR-0004", "title": "Dual memory: Obsidian vault plus machine-readable project state", "status": "accepted", "date": "2026-10-31", "path": "vault/03-Architecture/ADR/ADR-0004-memory-system.md", "alternatives": true },
+    { "id": "ADR-0005", "title": "Module contract instead of a central command switch", "status": "accepted", "date": "2026-10-31", "path": "vault/03-Architecture/ADR/ADR-0005-module-contract.md", "alternatives": true },
+    { "id": "ADR-0006", "title": "Ports and adapters for persistence, cache and queue", "status": "accepted", "date": "2026-10-31", "path": "vault/03-Architecture/ADR/ADR-0006-ports-and-adapters.md", "alternatives": true },
+    { "id": "ADR-0007", "title": "A moderation capability port and event-driven security core", "status": "accepted", "date": "2026-11-01", "path": "vault/03-Architecture/ADR/ADR-0007-moderation-capability-port.md", "alternatives": true },
+    { "id": "ADR-0008", "title": "One community capability port over typed data and Discord actions", "status": "accepted", "date": "2026-11-01", "path": "vault/03-Architecture/ADR/ADR-0008-community-capability-port.md", "alternatives": true },
+    { "id": "ADR-0009", "title": "Select rows and archived season resets extend CommunityPort", "status": "accepted", "date": "2026-11-01", "path": "vault/03-Architecture/ADR/ADR-0009-select-rows-and-season-archives.md", "alternatives": true },
+    { "id": "ADR-0010", "title": "AI provider abstraction with server-side guild caps", "status": "accepted", "date": "2026-11-01", "path": "vault/03-Architecture/ADR/ADR-0010-ai-provider-and-caps.md", "alternatives": true },
+    { "id": "ADR-0011", "title": "Derived ledger balances and double-spend-safe economy", "status": "accepted", "date": "2026-11-01", "path": "vault/03-Architecture/ADR/ADR-0011-economy-ledger-and-double-spend.md", "alternatives": true },
+    { "id": "ADR-0012", "title": "Required and optional intents, and a single channel resolver", "status": "accepted", "date": "2026-10-31", "path": "vault/03-Architecture/ADR/ADR-0012-required-and-optional-intents.md", "alternatives": true },
+    { "id": "ADR-0013", "title": "Roadmap v2: portability first, dashboard second", "status": "accepted", "date": "2026-10-31", "path": "vault/03-Architecture/ADR/ADR-0013-roadmap-v2-portability-first.md", "alternatives": true },
+    { "id": "ADR-0014", "title": "Memory v2: machine truth, generated Markdown", "status": "accepted", "date": "2026-10-31", "path": "vault/03-Architecture/ADR/ADR-0014-memory-v2-machine-truth.md", "alternatives": true }
+  ]
+}

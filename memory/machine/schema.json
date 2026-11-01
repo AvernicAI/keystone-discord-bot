@@ -19,23 +19,72 @@
     "openQuestions"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
-    "name": { "type": "string", "minLength": 1 },
-    "tagline": { "type": "string", "minLength": 1 },
-    "mission": { "type": "string" },
-    "northStar": { "type": "string" },
-    "updatedAt": { "type": "string", "format": "date" },
-    "phase": { "enum": ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"] },
-    "lastPass": { "type": "string", "pattern": "^journal/.+\\.md$" },
+    "schemaVersion": {
+      "const": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tagline": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mission": {
+      "type": "string"
+    },
+    "northStar": {
+      "type": "string"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date"
+    },
+    "phase": {
+      "enum": [
+        "P0",
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P4.5",
+        "P5",
+        "P6",
+        "P7",
+        "P8",
+        "P9",
+        "P10"
+      ]
+    },
+    "lastPass": {
+      "type": "string",
+      "pattern": "^journal/.+\\.md$"
+    },
     "metrics": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["commands", "commandLimit", "modules", "tests"],
+      "required": [
+        "commands",
+        "commandLimit",
+        "modules",
+        "tests"
+      ],
       "properties": {
-        "commands": { "type": "integer", "minimum": 0 },
-        "commandLimit": { "const": 100 },
-        "modules": { "type": "integer", "minimum": 0 },
-        "tests": { "type": "integer", "minimum": 0 }
+        "commands": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "commandLimit": {
+          "const": 100
+        },
+        "modules": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tests": {
+          "type": "integer",
+          "minimum": 0
+        }
       }
     },
     "modules": {
@@ -43,21 +92,89 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "name", "status", "phase", "codePath", "specPath", "statusPath", "commands"],
+        "required": [
+          "id",
+          "name",
+          "status",
+          "phase",
+          "codePath",
+          "specPath",
+          "statusPath",
+          "commands"
+        ],
         "properties": {
-          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
-          "name": { "type": "string" },
-          "status": {
-            "enum": ["planned", "scaffolded", "reference", "in-progress", "beta", "stable", "deprecated"]
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,31}$"
           },
-          "phase": { "enum": ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"] },
-          "codePath": { "type": "string", "pattern": "^modules/" },
-          "specPath": { "type": "string" },
-          "statusPath": { "type": "string" },
-          "teachingPath": { "type": "string" },
-          "commands": { "type": "array", "items": { "type": "string" } },
-          "intents": { "type": "array", "items": { "type": "string" } },
-          "premium": { "type": "boolean", "const": false }
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "scaffolded",
+              "reference",
+              "in-progress",
+              "beta",
+              "stable",
+              "deprecated",
+              "p2-core",
+              "p4-economy",
+              "p4-complete"
+            ]
+          },
+          "phase": {
+            "enum": [
+              "P0",
+              "P1",
+              "P2",
+              "P3",
+              "P4",
+              "P4.5",
+              "P5",
+              "P6",
+              "P7",
+              "P8",
+              "P9",
+              "P10"
+            ]
+          },
+          "codePath": {
+            "type": "string",
+            "pattern": "^modules/"
+          },
+          "specPath": {
+            "type": "string"
+          },
+          "statusPath": {
+            "type": "string"
+          },
+          "teachingPath": {
+            "type": "string"
+          },
+          "commands": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "intents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "premium": {
+            "type": "boolean",
+            "const": false
+          },
+          "optionalIntents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
     },
@@ -66,12 +183,31 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "title", "status", "path"],
+        "required": [
+          "id",
+          "title",
+          "status",
+          "path"
+        ],
         "properties": {
-          "id": { "type": "string", "pattern": "^ADR-[0-9]{4}$" },
-          "title": { "type": "string" },
-          "status": { "enum": ["proposed", "accepted", "superseded", "rejected"] },
-          "path": { "type": "string" }
+          "id": {
+            "type": "string",
+            "pattern": "^ADR-[0-9]{4}$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "proposed",
+              "accepted",
+              "superseded",
+              "rejected"
+            ]
+          },
+          "path": {
+            "type": "string"
+          }
         }
       }
     },
@@ -80,16 +216,59 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "question", "status"],
+        "required": [
+          "id",
+          "question",
+          "status"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "question": { "type": "string" },
-          "blocks": { "type": "string" },
-          "recommendation": { "type": "string" },
-          "answer": { "type": "string" },
-          "status": { "enum": ["open", "answered", "dropped"] }
+          "id": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "answered",
+              "dropped"
+            ]
+          }
         }
       }
+    },
+    "phaseStatus": {
+      "enum": [
+        "planned",
+        "in-progress",
+        "complete"
+      ]
+    },
+    "nextPhase": {
+      "enum": [
+        "P0",
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P4.5",
+        "P5",
+        "P6",
+        "P7",
+        "P8",
+        "P9",
+        "P10"
+      ]
     }
   }
 }

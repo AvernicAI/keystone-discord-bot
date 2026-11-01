@@ -137,9 +137,34 @@ export interface HealthArea {
   detail?: string;
 }
 
+/** How a deployment requests gateway intents. `minimal` never asks for a privileged one. */
+export type IntentProfile = "minimal" | "full";
+
+export interface IntentCapability {
+  readonly name: string;
+  readonly kind: "required" | "optional";
+  readonly requested: boolean;
+  /** Modules that declare this intent. */
+  readonly modules: readonly string[];
+  /** What a user loses when an optional intent is not requested. */
+  readonly fallback?: string;
+}
+
+/**
+ * What the gateway will actually be able to see. This is deliberately part of
+ * the health report: `/setup` can name a disabled feature instead of leaving an
+ * operator to discover it during a raid.
+ */
+export interface CapabilityReport {
+  readonly profile: IntentProfile;
+  readonly intents: readonly IntentCapability[];
+  readonly disabledFeatures: readonly string[];
+}
+
 export interface HealthReport {
   database: HealthArea & { migrated: boolean };
   cache: HealthArea;
+  capabilities?: CapabilityReport;
 }
 
 /** What `/setup` reads. Implemented by the composition root, not by a module. */

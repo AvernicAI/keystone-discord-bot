@@ -13,7 +13,7 @@ exact command to fix each gap.
 
 | Command | Options | Guards | Behaviour |
 | --- | --- | --- | --- |
-| `/setup` | none | guild-only, `ManageGuild` | Ephemeral embed: database reachable and migrated, Redis present or absent, this module's enabled state, and the next step |
+| `/setup` | none | guild-only, `ManageGuild` | Ephemeral embed: health areas, this module's enabled state, the intents modules require, and the next step |
 
 ## Settings
 
@@ -25,17 +25,20 @@ No write path exists in this module. `/setup` never calls `settings.update`.
 
 ## Intents
 
-`Guilds` only.
+`Guilds` only. The **Intents** field is a report, not a request: it lists each
+manifest's `intents` declaration so an operator knows which privileged intents
+the installed modules need before inviting or verifying the app (ADR-0012).
 
 ## Permissions
 
 `ManageGuild` to run. The bot needs no role to answer, because every check reads
-the local runtime and the settings store.
+the local runtime, the registry and the settings store.
 
 ## What it reads
 
 - `HealthProbe` — database configured/reachable/migrated, cache configured/reachable.
 - This module's own settings — never another module's.
+- `ModuleRegistry` — only the public `manifests` list, for the intents field.
 
 The database check comes from `@keystone/db`'s `probeDatabase`: `SELECT 1`, then
 the `schema_migrations` ledger. It never runs a migration.
@@ -50,10 +53,10 @@ the `schema_migrations` ledger. It never runs a migration.
 ## Limits respected
 
 - 1 of Discord's 100 global commands.
-- Zero components; one embed with four fields.
+- Zero components; one embed with at most six fields.
 - No privileged intents.
 
 ## Verified by
 
 `modules/setup/src/setup.test.ts` — registry, budget, all three readiness states,
-and the permission guard declaration.
+the permission guard declaration, the no-write spy, and the intents field.

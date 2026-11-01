@@ -38,7 +38,7 @@ of how good the feature is.
 ## 5. Nothing illegal or unstable ships enabled
 
 - No bundled YouTube/Spotify streamer. Music is opt-in and bring-your-own
-  Lavalink (see [[Q-3|Open Questions]]; [[Platform-Limits]]).
+  Lavalink (see [[99-Meta/Open-Questions|Q-3]]; [[Platform-Limits]]).
 - No privileged intent enabled "just in case". Each one needs a written use case
   and a fallback that works without it.
 - No feature that requires a role above the bot's own role to function.

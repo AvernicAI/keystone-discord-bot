@@ -17,6 +17,13 @@ export interface ModuleManifest {
   commands: CommandDefinition[];
   /** Gateway intents this module needs, by discord.js name, e.g. "GuildMembers". */
   intents?: string[];
+  /**
+   * Privileged intents this module can use but does not require. A minimal
+   * deployment boots without them and `/setup` names the lost features.
+   */
+  optionalIntents?: string[];
+  /** Human-readable consequence of not requesting an optional intent. */
+  intentFallbacks?: Record<string, string>;
   /** Discord permissions the module needs to do its job. */
   permissions?: string[];
   /** Where the teaching doc lives, relative to the vault root. */
@@ -58,6 +65,27 @@ export function validateManifest(manifest: ModuleManifest): string[] {
 
   if (manifest.commands.length === 0) {
     errors.push("a module must declare at least one command (it may be a hub command)");
+  }
+
+  const intents = manifest.intents ?? [];
+  const optionalIntents = manifest.optionalIntents ?? [];
+  const optionalSeen = new Set<string>();
+  for (const intent of optionalIntents) {
+    if (optionalSeen.has(intent)) {
+      errors.push(`intent "${intent}" is declared twice in optionalIntents`);
+    }
+    optionalSeen.add(intent);
+    if (intents.includes(intent)) {
+      errors.push(`intent "${intent}" cannot be both required and optional`);
+    }
+  }
+  for (const [intent, fallback] of Object.entries(manifest.intentFallbacks ?? {})) {
+    if (!intents.includes(intent) && !optionalIntents.includes(intent)) {
+      errors.push(`intentFallbacks names "${intent}", which the module does not declare`);
+    }
+    if (!fallback.trim()) {
+      errors.push(`intentFallbacks.${intent} must explain what is disabled`);
+    }
   }
 
   const seen = new Set<string>();

@@ -19,13 +19,14 @@ export const moderationModule = defineModule({
   settingsSchema: moderationSettingsSchema,
   defaultSettings: moderationDefaultSettings,
   commands: [mod, appeal, verify],
-  intents: [
-    "GuildMembers",
-    "GuildMessages",
-    "MessageContent",
-    "GuildModeration",
-    "AutoModerationExecution",
-  ],
+  intents: ["Guilds", "GuildMessages", "GuildModeration", "AutoModerationExecution"],
+  optionalIntents: ["GuildMembers", "MessageContent"],
+  intentFallbacks: {
+    GuildMembers:
+      "join-gate enforcement, quarantine-on-join and member join logging are disabled; manual /mod actions still work",
+    MessageContent:
+      "the message scanner is disabled; native AutoMod sync and context-menu reports still work",
+  },
   permissions: [
     "ModerateMembers",
     "BanMembers",

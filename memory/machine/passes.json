@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-10-31",
+  "passes": [
+    {
+      "id": "pass-01",
+      "date": "2026-10-31",
+      "phase": "P0",
+      "summary": "Kernel, module contract, reference module, memory system, CI and ADR baseline.",
+      "journal": "journal/2026-10-31-pass-01.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "30",
+        "budget": "2/100",
+        "memory": "32/32"
+      }
+    },
+    {
+      "id": "pass-02",
+      "date": "2026-11-01",
+      "phase": "P1",
+      "summary": "Master plan, parity matrix and roadmap approved; the rejected plan shapes recorded.",
+      "journal": "journal/2026-11-01-pass-02.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "recorded in journal",
+        "budget": "recorded in journal",
+        "memory": "recorded in journal"
+      }
+    },
+    {
+      "id": "pass-03",
+      "date": "2026-11-01",
+      "phase": "P1",
+      "summary": "Postgres data spine, settings repository, Redis cooldowns, BullMQ worker, telemetry and /setup.",
+      "journal": "journal/2026-11-01-pass-03.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "recorded in journal",
+        "budget": "recorded in journal",
+        "memory": "recorded in journal"
+      }
+    },
+    {
+      "id": "pass-04",
+      "date": "2026-11-01",
+      "phase": "P1",
+      "summary": "P1 audit: shared retry policy, setup permission proof and a worker Redis readiness ping.",
+      "journal": "journal/2026-11-01-pass-04.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "56",
+        "budget": "recorded in journal",
+        "memory": "recorded in journal"
+      }
+    },
+    {
+      "id": "pass-05",
+      "date": "2026-11-01",
+      "phase": "P2",
+      "summary": "Moderation cases, /mod, scanner, native AutoMod plan, appeals, security, quarantine and /verify.",
+      "journal": "journal/2026-11-01-pass-05.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "recorded in journal",
+        "budget": "recorded in journal",
+        "memory": "recorded in journal"
+      }
+    },
+    {
+      "id": "pass-06",
+      "date": "2026-11-01",
+      "phase": "P2",
+      "summary": "P2 audit and case-store proofs; live Discord actions remain explicitly unproven.",
+      "journal": "journal/2026-11-01-pass-06.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "recorded in journal",
+        "budget": "recorded in journal",
+        "memory": "recorded in journal"
+      }
+    },
+    {
+      "id": "pass-07",
+      "date": "2026-11-01",
+      "phase": "P3",
+      "summary": "Community suite: leveling, economy, reaction roles, welcome, starboard, tickets, giveaways and content.",
+      "journal": "journal/2026-11-01-pass-07.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "100",
+        "budget": "10/100",
+        "memory": "recorded in journal"
+      }
+    },
+    {
+      "id": "pass-08",
+      "date": "2026-11-01",
+      "phase": "P4",
+      "summary": "AI provider, hard guild caps, exact-index RAG, deflection, explanations, summaries and classification.",
+      "journal": "journal/2026-11-01-pass-08.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "recorded in journal",
+        "budget": "10/100",
+        "memory": "recorded in journal"
+      }
+    },
+    {
+      "id": "pass-09",
+      "date": "2026-11-01",
+      "phase": "P4",
+      "summary": "Economy hardening: ledger-derived balances, guild lock, stable idempotency keys and explicit refusals.",
+      "journal": "journal/2026-11-01-pass-09.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "129",
+        "budget": "10/100",
+        "memory": "72/72"
+      }
+    },
+    {
+      "id": "pass-10",
+      "date": "2026-10-31",
+      "phase": "P4.5",
+      "summary": "Baseline commit, six research pages, memory v2 machine files, renderer and extended checks.",
+      "journal": "journal/2026-10-31-pass-10.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "129",
+        "budget": "10/100",
+        "memory": "1589/1589"
+      }
+    },
+    {
+      "id": "pass-11",
+      "date": "2026-10-31",
+      "phase": "P4.5",
+      "summary": "Channel resolver, all nine fetch sites migrated, obfuscation fixture and audit:channels.",
+      "journal": "journal/2026-10-31-pass-11.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "26 focused",
+        "budget": "10/100",
+        "memory": "current"
+      }
+    },
+    {
+      "id": "pass-12",
+      "date": "2026-10-31",
+      "phase": "P4.5",
+      "summary": "Required/optional intents, INTENT_PROFILE, /setup capability report, audit:intents and P4.5 close.",
+      "journal": "journal/2026-10-31-pass-12.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "pending full gate",
+        "budget": "10/100",
+        "memory": "current"
+      }
+    }
+  ]
+}

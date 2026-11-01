@@ -22,6 +22,11 @@ function readyHealth(): HealthProbe {
   return staticHealth({
     database: { configured: true, reachable: true, migrated: true, detail: "schema up to date" },
     cache: { configured: true, reachable: true, detail: "redis" },
+    capabilities: {
+      profile: "full",
+      intents: [ { name: "Guilds", kind: "required", requested: true, modules: ["setup"] } ],
+      disabledFeatures: [],
+    },
   });
 }
 
@@ -98,6 +103,8 @@ describe("setup module", () => {
     expect(fields.Database).toContain("ready");
     expect(fields.Database).toContain("schema up to date");
     expect(fields["Redis / cooldowns"]).toContain("ready");
+    expect(fields["Gateway intents"]).toContain("profile: full");
+    expect(fields["Gateway intents"]).toContain("every declared intent requested");
     expect(fields["Setup module"]).toBe("enabled here");
     expect(fields["Next step"]).toContain("/ping");
     expect(interaction.lastReply?.ephemeral).toBe(true);
@@ -124,6 +131,37 @@ describe("setup module", () => {
     expect(fields.Database).toContain("not configured");
     expect(fields["Next step"]).toContain("DATABASE_URL");
     expect(fields["Next step"]).toContain("pnpm db:migrate");
+  });
+
+  it("names the disabled features when the minimal intent profile is active", async () => {
+    const { outcome, interaction } = await runThroughDispatch({
+      permissions: ["ManageGuild"],
+      settings: { enabled: true },
+      health: staticHealth({
+        database: { configured: true, reachable: true, migrated: true },
+        cache: { configured: true, reachable: true },
+        capabilities: {
+          profile: "minimal",
+          intents: [
+            { name: "Guilds", kind: "required", requested: true, modules: ["setup"] },
+            {
+              name: "GuildMembers",
+              kind: "optional",
+              requested: false,
+              modules: ["community"],
+              fallback: "welcome and autorole are disabled",
+            },
+          ],
+          disabledFeatures: ["GuildMembers: welcome and autorole are disabled"],
+        },
+      }),
+    });
+
+    expect(outcome.status).toBe("ok");
+    const fields = fieldsFrom(interaction);
+    expect(fields["Gateway intents"]).toContain("profile: minimal");
+    expect(fields["Gateway intents"]).toContain("welcome and autorole are disabled");
+    expect(fields["Next step"]).toContain("INTENT_PROFILE=full");
   });
 
   it("does not claim readiness when migrations are pending", async () => {

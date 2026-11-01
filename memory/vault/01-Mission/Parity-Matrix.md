@@ -9,6 +9,11 @@ Verification rule: a cell is only ✅ or ❌ when a source was read. Anything fr
 snippet, a marketing page or memory is ❔ and stays out of marketing until
 checked. See [[Master-Plan]] for the research program.
 
+> **Phase labels below are the original research snapshot.** The authoritative
+> phase, status, evidence and live-verification flag are generated in
+> [[Feature-Status]] from `memory/machine/features.json`. Roadmap v2 renumbers
+> the old P5–P8; see [[ADR-0013-roadmap-v2-portability-first]].
+
 ## 1. Moderation
 
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
@@ -151,6 +156,24 @@ checked. See [[Master-Plan]] for the research program.
 | Public API / webhooks | ❌ | ❔ | ❌ | 💰 | ❔ | P5 | Scoped tokens |
 | i18n | ❔ | ✅ | ❔ | ✅ | ❔ | P5 | i18next, per-guild locale |
 | Status page | ❌ | ❔ | ❔ | ❔ | ❔ | P7 | Public incidents |
+
+## 12. Portability (new in Roadmap v2)
+
+No surveyed generalist documents a full export of its own data. The import path
+runs from destination to source, not the other way around. This is the wedge, and
+the reason P5 comes before the dashboard.
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Full export bundle | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Versioned JSON/NDJSON + manifest/checksum |
+| Restore + config hash | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Clean-guild restore proves counts and config |
+| Dry-run diff | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Create/update/skip before any write |
+| Rollback + receipt | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | 24-hour window; deletion receipt |
+| MEE6 level import | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Public leaderboard only; rate-limited |
+| Generic JSON/CSV import | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | User-supplied file; merge modes |
+| ProBot / Ticket Tool transcripts | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | JSON/HTML user-owned files |
+| Drift detection | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Report only; no auto-fix |
+| Guided migration | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | Dyno/Carl/Wick have no usable egress |
 
 ## Tally
 

@@ -12,6 +12,7 @@ import type {
   ModerationActionResult,
   ModerationNotice,
 } from "@keystone/kernel";
+import { resolveChannel } from "./channels";
 
 function failure(detail: string): ModerationActionResult {
   return { ok: false, detail };
@@ -89,8 +90,13 @@ export function createDiscordModerationActions(client: Client): ModerationAction
       const target = await has(guildId, PermissionFlagsBits.ManageMessages);
       if ("ok" in target) return target;
       try {
-        const channel = await target.channels.fetch(channelId);
-        if (!channel || !("bulkDelete" in channel) || typeof channel.bulkDelete !== "function") {
+        const resolved = await resolveChannel(
+          () => target.channels.fetch(channelId),
+          channelId,
+        );
+        if (resolved.status !== "ok") return failure(resolved.reason);
+        const channel = resolved.channel;
+        if (!("bulkDelete" in channel) || typeof channel.bulkDelete !== "function") {
           return failure("That channel does not support bulk deletion.");
         }
         await channel.bulkDelete(Math.min(Math.max(limit, 1), 100), true);
@@ -104,8 +110,13 @@ export function createDiscordModerationActions(client: Client): ModerationAction
       const target = await has(guildId, PermissionFlagsBits.ManageChannels);
       if ("ok" in target) return target;
       try {
-        const channel = await target.channels.fetch(channelId);
-        if (!channel || !("permissionOverwrites" in channel)) {
+        const resolved = await resolveChannel(
+          () => target.channels.fetch(channelId),
+          channelId,
+        );
+        if (resolved.status !== "ok") return failure(resolved.reason);
+        const channel = resolved.channel;
+        if (!("permissionOverwrites" in channel)) {
           return failure("That channel does not support permission overwrites.");
         }
         await channel.permissionOverwrites.edit(
@@ -123,8 +134,13 @@ export function createDiscordModerationActions(client: Client): ModerationAction
       const target = await has(guildId, PermissionFlagsBits.ManageChannels);
       if ("ok" in target) return target;
       try {
-        const channel = await target.channels.fetch(channelId);
-        if (!channel || !("setRateLimitPerUser" in channel)) {
+        const resolved = await resolveChannel(
+          () => target.channels.fetch(channelId),
+          channelId,
+        );
+        if (resolved.status !== "ok") return failure(resolved.reason);
+        const channel = resolved.channel;
+        if (!("setRateLimitPerUser" in channel)) {
           return failure("That channel does not support slowmode.");
         }
         await channel.setRateLimitPerUser(Math.min(Math.max(seconds, 0), 21_600), reason);
@@ -138,8 +154,13 @@ export function createDiscordModerationActions(client: Client): ModerationAction
       const target = await has(guildId, PermissionFlagsBits.ManageMessages);
       if ("ok" in target) return target;
       try {
-        const channel = await target.channels.fetch(channelId);
-        if (!channel || !("messages" in channel)) return failure("That channel has no messages.");
+        const resolved = await resolveChannel(
+          () => target.channels.fetch(channelId),
+          channelId,
+        );
+        if (resolved.status !== "ok") return failure(resolved.reason);
+        const channel = resolved.channel;
+        if (!("messages" in channel)) return failure("That channel has no messages.");
         const message = await channel.messages.fetch(messageId);
         await message.delete();
         return { ok: true, detail: reason };
@@ -194,8 +215,13 @@ export function createDiscordModerationActions(client: Client): ModerationAction
       if (!channelId) return;
       const target = await guild(guildId);
       if (!target) return;
-      const channel = await target.channels.fetch(channelId).catch(() => null);
-      if (!channel || !channel.isTextBased() || !("send" in channel)) return;
+      const resolved = await resolveChannel(
+        () => target.channels.fetch(channelId),
+        channelId,
+      );
+      if (resolved.status !== "ok") return;
+      const channel = resolved.channel;
+      if (!channel.isTextBased() || !("send" in channel)) return;
       await channel.send({
         embeds: notice.embeds as never,
         components: notice.components ? toComponents(notice.components) : [],

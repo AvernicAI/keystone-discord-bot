@@ -44,7 +44,14 @@ async function main(): Promise<void> {
     return;
   }
 
-  const client = createClient(registry.intents());
+  const intentNames = registry.intentsForProfile(env.INTENT_PROFILE);
+  const capabilities = registry.capabilityReport(env.INTENT_PROFILE);
+  logger.info("intent profile", {
+    profile: env.INTENT_PROFILE,
+    requested: intentNames,
+    disabledFeatures: capabilities.disabledFeatures,
+  });
+  const client = createClient(intentNames);
   const runtime = await createRuntime(
     env,
     registry,

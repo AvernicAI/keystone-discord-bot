@@ -6,17 +6,22 @@ An open-source, teach-by-default all-in-one Discord bot.
 > ships the union — free, documented, and built so a stranger can add a feature in
 > an afternoon.
 
-**Status:** P4 complete in-repo. The bot has real Postgres persistence,
-Redis cooldowns, a BullMQ worker, tracing, moderation cases with a dry-run-first
-security engine, leveling and a ledger-backed economy, button/select reaction
-roles, welcome/delayed autorole, starboard overrides, birthdays, suggestions,
-thread tickets, giveaways, temp voice, content/sticky tools, feeds, seasons and
-stat channels. P4 adds an opt-in AI layer with server-doc RAG, ticket deflection,
-mention-only chat, moderation explanations, summaries, advisory classification
-and hard per-guild caps, and hardens the economy so every balance is a sum over
-an append-only ledger with idempotent, double-spend-safe movements. Live Discord
-actions, gateway events, scheduler ticks, role grants and provider calls are
-still unverified without a token/guild/key; the pgvector ANN benchmark is open.
+**Status:** **P4.5 complete in-repo; P5 is next.** The bot has real Postgres
+persistence, Redis cooldowns, a BullMQ worker, tracing, moderation cases with a
+dry-run-first security engine, leveling and a ledger-backed economy,
+button/select reaction roles, welcome/delayed autorole, starboard overrides,
+birthdays, suggestions, thread tickets, giveaways, temp voice, content/sticky
+tools, feeds, seasons, stat channels and an opt-in AI layer with server-doc RAG,
+ticket deflection, mention-only chat, explanations, summaries, advisory
+classification and hard per-guild caps.
+
+P4.5 adds the platform hardening the 2026 Discord changes require: a single
+channel resolver for the 2026-11-16 obfuscation rollout, required vs optional
+gateway intents with an `INTENT_PROFILE` and a `/setup` capability report, and
+machine-checked memory (`features.json`, `research.json`, `passes.json`,
+`decisions.json`) with generated vault pages. Live Discord actions, gateway
+events, scheduler ticks, role grants and provider calls are still unverified
+without a token/guild/key; the pgvector ANN benchmark is open.
 
 ## Quickstart
 
@@ -90,6 +95,7 @@ Ten of a hundred. See `memory/vault/03-Architecture/Command-Budget.md`.
 | Variable | Required | Effect when absent |
 | --- | --- | --- |
 | `DISCORD_TOKEN` | yes | The bot refuses to start |
+| `INTENT_PROFILE` | no | `full` requests optional privileged intents; `minimal` runs the core without them and `/setup` names disabled features |
 | `DATABASE_URL` | production | Settings are process-local and reset on restart |
 | `REDIS_URL` | production | Cooldowns are local; jobs run in the bot process |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | no | Tracing is a no-op |
@@ -121,10 +127,9 @@ counters and explicit admin docs are. See `memory/vault/04-Modules/ai/Spec.md`.
 ## Development
 
 ```bash
-pnpm typecheck
-pnpm test
-pnpm budget
-pnpm memory:check
+pnpm check            # typecheck, tests, budget, intent/channel audits, memory
+pnpm memory:render    # regenerate Feature-Status, Claims, Decision-Index, Pass-Ledger
+pnpm memory:check     # validate machine memory, generated pages and vault links
 pnpm benchmark:ai 1000000 32 10   # research harness, not part of check
 pnpm build            # dist/bot.js, dist/worker.js, dist/migrate.js
 ```
@@ -132,10 +137,13 @@ pnpm build            # dist/bot.js, dist/worker.js, dist/migrate.js
 ## Contributing
 
 Start with `memory/vault/07-OpenSource/Contributing.md`, then
-`memory/vault/05-Learning/01-the-module-contract.md`. Open an issue with a spec
-before writing code — scope control is what keeps this maintainable.
+`memory/vault/05-Learning/01-the-module-contract.md`. Read
+`memory/vault/01-Mission/Feature-Status.md` for what is actually shipped, and
+open an issue with a spec before writing code — scope control is what keeps this
+maintainable.
 
 ## Licence
 
-Not chosen yet. See `memory/vault/99-Meta/Open-Questions.md` (Q-1). Until then,
-treat the code as all-rights-reserved and do not redistribute it.
+Not chosen yet. AGPL-3.0 with a DCO and no CLA is the recommendation; see
+`memory/vault/99-Meta/Open-Questions.md` (Q-1). Until the decision, treat the
+code as all-rights-reserved and do not redistribute it.

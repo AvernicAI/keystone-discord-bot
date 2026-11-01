@@ -109,6 +109,36 @@ describe("ModuleRegistry", () => {
       );
     expect(registry.intents()).toEqual(["GuildMembers", "Guilds"]);
   });
+
+  it("separates required and optional intents and reports disabled features", () => {
+    const registry = new ModuleRegistry().register(
+      makeModule({
+        intents: ["Guilds"],
+        optionalIntents: ["GuildMembers"],
+        intentFallbacks: { GuildMembers: "welcome and autorole are disabled" },
+      }),
+    );
+
+    expect(registry.intents()).toEqual(["Guilds"]);
+    expect(registry.optionalIntents()).toEqual(["GuildMembers"]);
+    expect(registry.intentsForProfile("minimal")).toEqual(["Guilds"]);
+    expect(registry.intentsForProfile("full")).toEqual(["GuildMembers", "Guilds"]);
+
+    const report = registry.capabilityReport("minimal");
+    expect(report.profile).toBe("minimal");
+    expect(report.disabledFeatures).toEqual([
+      "GuildMembers: demo — welcome and autorole are disabled",
+    ]);
+    expect(report.intents.find((intent) => intent.name === "GuildMembers")?.requested).toBe(false);
+  });
+
+  it("rejects an intent declared as both required and optional", () => {
+    const manifest = makeModule({
+      intents: ["GuildMembers"],
+      optionalIntents: ["GuildMembers"],
+    });
+    expect(() => new ModuleRegistry().register(manifest)).toThrow(/both required and optional/);
+  });
 });
 
 describe("auditBudget", () => {

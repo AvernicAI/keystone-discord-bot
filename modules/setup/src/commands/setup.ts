@@ -26,6 +26,15 @@ export const setup = defineCommand({
     const databaseReady = health.database.reachable && health.database.migrated;
     const cacheReady = health.cache.configured && health.cache.reachable;
     const moduleEnabled = settings.enabled === true;
+    const capabilities = health.capabilities;
+    const disabled = capabilities?.disabledFeatures ?? [];
+
+    const intentValue = capabilities
+      ? [
+          `profile: ${capabilities.profile}`,
+          disabled.length > 0 ? `disabled: ${disabled.join("; ")}` : "every declared intent requested",
+        ].join("\n")
+      : "not reported";
 
     const databaseValue = health.database.configured
       ? [
@@ -48,7 +57,9 @@ export const setup = defineCommand({
           ? "Run `pnpm db:migrate` — migrations are an explicit step, never run on boot."
           : !health.cache.configured
             ? "Optional: set `REDIS_URL` to share cooldowns and run jobs in the worker."
-            : "Everything needed for P1 is ready. Try `/ping`, then `/about`.";
+            : disabled.length > 0
+              ? "Core is ready. Set `INTENT_PROFILE=full` and enable the optional intents in the Developer Portal to turn on the features named above."
+              : "Everything needed is ready. Try `/ping`, then `/about`.";
 
     await ctx.interaction.reply({
       ephemeral: true,
@@ -60,6 +71,7 @@ export const setup = defineCommand({
           fields: [
             { name: "Database", value: databaseValue },
             { name: "Redis / cooldowns", value: cacheValue },
+            { name: "Gateway intents", value: intentValue },
             { name: "Setup module", value: moduleEnabled ? "enabled here" : "disabled here", inline: true },
             { name: "Next step", value: next },
           ],

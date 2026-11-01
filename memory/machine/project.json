@@ -4,9 +4,9 @@
   "tagline": "An open-source, teach-by-default all-in-one Discord bot.",
   "mission": "vault/01-Mission/Mission.md",
   "northStar": "vault/01-Mission/North-Star.md",
-  "updatedAt": "2026-11-01",
-  "phase": "P4",
-  "lastPass": "journal/2026-11-01-pass-09.md",
+  "updatedAt": "2026-10-31",
+  "phase": "P4.5",
+  "lastPass": "journal/2026-10-31-pass-12.md",
   "metrics": {
     "commands": 10,
     "commandLimit": 100,
@@ -23,8 +23,13 @@
       "specPath": "vault/04-Modules/diagnostics/Spec.md",
       "statusPath": "vault/04-Modules/diagnostics/Status.md",
       "teachingPath": "vault/04-Modules/diagnostics/Teaching.md",
-      "commands": ["ping", "about"],
-      "intents": ["Guilds"],
+      "commands": [
+        "ping",
+        "about"
+      ],
+      "intents": [
+        "Guilds"
+      ],
       "premium": false
     },
     {
@@ -36,8 +41,12 @@
       "specPath": "vault/04-Modules/setup/Spec.md",
       "statusPath": "vault/04-Modules/setup/Status.md",
       "teachingPath": "vault/04-Modules/setup/Teaching.md",
-      "commands": ["setup"],
-      "intents": ["Guilds"],
+      "commands": [
+        "setup"
+      ],
+      "intents": [
+        "Guilds"
+      ],
       "premium": false
     },
     {
@@ -49,9 +58,22 @@
       "specPath": "vault/04-Modules/moderation/Spec.md",
       "statusPath": "vault/04-Modules/moderation/Status.md",
       "teachingPath": "vault/04-Modules/moderation/Teaching.md",
-      "commands": ["mod", "appeal", "verify"],
-      "intents": ["GuildMembers", "GuildMessages", "MessageContent", "GuildModeration", "AutoModerationExecution"],
-      "premium": false
+      "commands": [
+        "mod",
+        "appeal",
+        "verify"
+      ],
+      "intents": [
+        "Guilds",
+        "GuildMessages",
+        "GuildModeration",
+        "AutoModerationExecution"
+      ],
+      "premium": false,
+      "optionalIntents": [
+        "GuildMembers",
+        "MessageContent"
+      ]
     },
     {
       "id": "community",
@@ -62,15 +84,22 @@
       "specPath": "vault/04-Modules/community/Spec.md",
       "statusPath": "vault/04-Modules/community/Status.md",
       "teachingPath": "vault/04-Modules/community/Teaching.md",
-      "commands": ["rank", "ticket", "tools"],
+      "commands": [
+        "rank",
+        "ticket",
+        "tools"
+      ],
       "intents": [
-        "GuildMembers",
+        "Guilds",
         "GuildMessages",
-        "MessageContent",
         "GuildMessageReactions",
         "GuildVoiceStates"
       ],
-      "premium": false
+      "premium": false,
+      "optionalIntents": [
+        "GuildMembers",
+        "MessageContent"
+      ]
     },
     {
       "id": "ai",
@@ -81,9 +110,17 @@
       "specPath": "vault/04-Modules/ai/Spec.md",
       "statusPath": "vault/04-Modules/ai/Status.md",
       "teachingPath": "vault/04-Modules/ai/Teaching.md",
-      "commands": ["ai"],
-      "intents": ["GuildMessages", "MessageContent"],
-      "premium": false
+      "commands": [
+        "ai"
+      ],
+      "intents": [
+        "Guilds",
+        "GuildMessages"
+      ],
+      "premium": false,
+      "optionalIntents": [
+        "MessageContent"
+      ]
     }
   ],
   "decisions": [
@@ -152,6 +189,24 @@
       "title": "Derived ledger balances and double-spend-safe economy",
       "status": "accepted",
       "path": "vault/03-Architecture/ADR/ADR-0011-economy-ledger-and-double-spend.md"
+    },
+    {
+      "id": "ADR-0012",
+      "title": "Required and optional intents, and a single channel resolver",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0012-required-and-optional-intents.md"
+    },
+    {
+      "id": "ADR-0013",
+      "title": "Roadmap v2: portability first, dashboard second",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0013-roadmap-v2-portability-first.md"
+    },
+    {
+      "id": "ADR-0014",
+      "title": "Memory v2: machine truth, generated Markdown",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0014-memory-v2-machine-truth.md"
     }
   ],
   "openQuestions": [
@@ -159,7 +214,7 @@
       "id": "Q-1",
       "question": "Which license: AGPL-3.0 or MIT?",
       "blocks": "P7 open-source launch, not P1-P6 code",
-      "recommendation": "AGPL-3.0 to keep a hosted tier honest, with the trade-off documented.",
+      "recommendation": "AGPL-3.0 with DCO, no CLA. Decide at pass 10; until then external contributions stay blocked.",
       "status": "open"
     },
     {
@@ -167,14 +222,18 @@
       "question": "Does v1 ship moderation + tickets first, or the full P2+P3 block?",
       "blocks": "P2 scoping",
       "recommendation": "Moderation + tickets + logging first; grow in public.",
-      "status": "open"
+      "status": "answered",
+      "answer": "The P2+P3 block shipped; the approved roadmap now sequences P4.5–P10."
     },
     {
       "id": "Q-3",
       "question": "Music: bring-your-own Lavalink only?",
       "blocks": "P6",
       "recommendation": "Yes. No bundled streamer, disabled by default.",
-      "status": "open"
+      "status": "answered",
+      "answer": "BYO Lavalink only, disabled by default, P8. No bundled streamer."
     }
-  ]
+  ],
+  "phaseStatus": "complete",
+  "nextPhase": "P5"
 }

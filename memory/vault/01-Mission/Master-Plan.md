@@ -4,7 +4,36 @@
 > with a codebase a stranger can learn from — and prove it feature by feature.**
 
 This page is the durable version of the approved plan. [[Roadmap]] is the phase
-index; [[Parity-Matrix]] is the feature-level definition of "everything".
+index; [[Parity-Matrix]] is the competitor research table; the generated
+[[Feature-Status]] is the implementation truth.
+
+## Roadmap v2 amendment (2026-10-31)
+
+Six research passes changed the order. The current sequence is:
+
+| Phase | Goal | Exit demo |
+| --- | --- | --- |
+| **P4.5** | Platform hardening: channel obfuscation, intent profiles, memory v2 | Hidden channels are typed; core runs without privileged intents; memory checks generated pages |
+| **P5** | Portability: export bundle, restore, file/MEE6 importers, drift, migration guides | 5k fixture export → wipe → restore; failed import rolls back; deletion receipt |
+| **P6** | Dashboard, API and fleet: per-guild authz, schema forms, scoped tokens | User A cannot reach guild B; repeated POST replays; every setting has a UI |
+| **P7** | Parity completion, UI and i18n: invites, forms, events, modmail, auto-responder, V2 budgeter, locales | Every panel fits 40/4,000; expiry jobs release; search cites a source |
+| **P8** | Music and activities: BYO Lavalink; Activity spike | Operator node works; no bundled streamer; go/no-go written |
+| **P9** | Open-source launch: docs, curriculum, one-command self-host, listings | Stranger self-hosts and ships a module in an afternoon |
+| **P10** | Hardening and scale: sharding, load, SLOs, v15 | Load test at target p95; v15 migration is one PR |
+
+**Why portability before the dashboard:** no surveyed generalist exports its own
+data; the dashboard needs the bundle, receipts and drift model to display
+anything real. **Why the promise is narrower:** Dyno, Carl-bot and Wick expose no
+usable egress, so they get a guided manual migration, not a fake one-click.
+**Why the dashboard is a security product:** per-guild authorization and a
+server-side token boundary are the feature, not polish.
+
+See [[ADR-0013-roadmap-v2-portability-first]], [[Import-Formats]],
+[[Dashboard-Security]] and [[Competitive-2026]].
+
+> The P5–P8 sections later on this page are the **original** plan, retained as
+> history. Their old labels migrate as P5→P6, P6→P8, P7→P9, P8→P10. Do not use
+> those sections for new work.
 
 ## Definition of done
 
@@ -135,6 +164,9 @@ Subcommands are free inside a root.
 
 Each phase ends with **a demo, a doc and a memory update**. A phase is not done
 because the code exists.
+
+> Current sequence: P4.5 → P5 → P6 → P7 → P8 → P9 → P10 (see the amendment above).
+> P1–P4 below are history and still accurate. P5–P8 below are superseded.
 
 ### P1 — Substrate (2 weeks)
 

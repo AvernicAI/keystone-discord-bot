@@ -44,7 +44,9 @@ verification and intent review are now separate processes.
 **Consequence:** slash-first. Prefix commands, arbitrary-message AI and "scan
 everything" features are opt-in extras behind an intent we can justify in one
 sentence each. Anything that can work from interactions or on-demand fetches
-must.
+must. Since P4.5 the manifests separate required from optional intents, and
+`INTENT_PROFILE=minimal` boots the core without a privileged one. See
+[[ADR-0012-required-and-optional-intents]].
 
 ## Operational limits worth remembering
 
@@ -62,13 +64,34 @@ must.
 | Ban message deletion | up to 7 days | — |
 | Scheduled events | 100 scheduled/active per guild | — |
 | Category | 50 channels | — |
-| Channel obfuscation | **2026-11-16** | Hidden channels disappear from HTTP and arrive nulled on gateway; detect via `CHANNEL_OBFUSCATED` (1 << 17), never by name |
+| Channel obfuscation | **2026-11-16** | Hidden channels disappear from HTTP and arrive nulled on gateway; detect via `CHANNEL_OBFUSCATED` (1 << 17), never by name. Every lookup goes through `resolveChannel()` since P4.5 |
 
 ## What this buys us
 
 A bot that looks simple to a user but is explicitly engineered around scarcity:
 few commands, dense components, few intents, and every destructive call preceded
 by a permission check so we never spend the invalid-request budget.
+
+## Channel obfuscation (2026-11-16)
+
+Discord begins obfuscating channels a bot cannot view. Two consequences matter
+for every module:
+
+1. **HTTP hides them.** `GET /guilds/{id}/channels` omits hidden channels, so a
+   stored channel id may resolve to `null` even though the channel exists. A
+   configuration read must treat `null` as "hidden from me", never as "deleted".
+2. **Gateway nulls them.** Events for hidden channels arrive with nulled data
+   rather than being dropped, which breaks the old "if the channel is missing,
+   the log channel was deleted" assumption.
+
+Look for the `CHANNEL_OBFUSCATED` guild feature (bit `1 << 17`) and by the
+categories a bot can see; never by channel name, and never by assuming a
+permission overwrite means the channel is readable.
+
+**Our stance (ADR-0012, point 4).** Store ids, resolve lazily, degrade with a field note.
+`/setup`, logging, tickets, welcome and level announcements all report
+"unavailable (hidden or deleted)" instead of throwing or silently writing
+somewhere else.
 
 ## Still unverified
 

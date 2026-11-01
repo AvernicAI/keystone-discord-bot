@@ -5,15 +5,15 @@
 P1 complete.
 
 - `/setup` registered through `apps/bot/src/modules.ts`, behind `ManageGuild`.
-- Reports database reachability, migration state, cache mode and module state.
+- Reports database reachability, migration state, cache mode, module state and
+  the intents each manifest requests (P4.5, ADR-0012).
 - Three readiness branches are covered by tests; the command never writes.
 
 ## Verified
 
 ```
-pnpm test                          # 56 tests, including modules/setup
-pnpm budget                        # 3/100, status OK
-node dist/bot.js (no token)        # build artefact runs; refuses with a clear message
+pnpm typecheck
+pnpm test                          # includes modules/setup with the intents field
 ```
 
 P1 exit evidence for this module:
@@ -43,5 +43,5 @@ parallel configuration check that could disagree with reality.
 
 ## Next
 
-- P2: add a first-run check for the intents the installed modules require.
-- P5: link the dashboard's setup page to this same health probe.
+- P6: link the dashboard's setup page to this same health probe.
+- P7: `/help` can render the same manifest data as documentation.

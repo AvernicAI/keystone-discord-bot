@@ -17,6 +17,11 @@ export const aiModule = defineModule({
   settingsSchema: aiSettingsSchema,
   defaultSettings: aiDefaultSettings,
   commands: [ai],
-  intents: ["GuildMessages", "MessageContent"],
+  intents: ["Guilds", "GuildMessages"],
+  optionalIntents: ["MessageContent"],
+  intentFallbacks: {
+    MessageContent:
+      "mention chat uses only the mention/reply content Discord exposes without the intent; RAG and summaries are unaffected",
+  },
   docsPath: "04-Modules/ai/Spec.md",
 });

@@ -6,6 +6,7 @@ import {
   type HealthProbe,
   type HealthReport,
   type IdempotencyStore,
+  type IntentProfile,
   type JobQueue,
   type Logger,
   type ModuleRegistry,
@@ -62,6 +63,8 @@ class RuntimeHealth implements HealthProbe {
   constructor(
     private readonly database: PostgresHandle | undefined,
     private readonly cache: CooldownHandle,
+    private readonly registry: ModuleRegistry,
+    private readonly intentProfile: IntentProfile,
   ) {}
 
   async probe(): Promise<HealthReport> {
@@ -70,7 +73,11 @@ class RuntimeHealth implements HealthProbe {
         ? { configured: true, reachable: await this.cache.ping(), detail: "redis" }
         : { configured: false, reachable: false, detail: "memory" };
 
-    return { database: await probeDatabase(this.database?.runner), cache };
+    return {
+      database: await probeDatabase(this.database?.runner),
+      cache,
+      capabilities: this.registry.capabilityReport(this.intentProfile),
+    };
   }
 }
 
@@ -160,7 +167,7 @@ export async function createRuntime(
     settings,
     cooldowns: cache.store,
     queue,
-    health: new RuntimeHealth(database, cache),
+    health: new RuntimeHealth(database, cache, registry, env.INTENT_PROFILE),
     telemetry,
     moderation,
     community,

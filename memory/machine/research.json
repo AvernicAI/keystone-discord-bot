@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-10-31",
+  "claims": [
+    {
+      "id": "R-001",
+      "topic": "platform",
+      "claim": "Discord's privileged-intent threshold is 10,000 unique users, with annual reapplication; verification and intent review are separate processes.",
+      "source": "https://support-dev.discord.com/hc/en-us/articles/40281523410967-Changes-to-Privileged-Intent-Access-for-Discord-Apps",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Platform-2026.md", "memory/vault/06-Operations/Intent-Review.md"]
+    },
+    {
+      "id": "R-002",
+      "topic": "platform",
+      "claim": "Discord's channel-obfuscation change is scheduled for 2026-11-16: hidden channels are omitted from HTTP and arrive on the gateway with the CHANNEL_OBFUSCATED flag and a null/placeholder name.",
+      "source": "https://docs.discord.com/developers/resources/channel",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2026-12-31",
+      "usedIn": ["memory/vault/02-Research/Platform-2026.md", "apps/bot/src/channels.ts"]
+    },
+    {
+      "id": "R-003",
+      "topic": "platform",
+      "claim": "Components V2 allows at most 40 components per message; the flag is irreversible and defer-then-edit is required for a V2 response.",
+      "source": "https://docs.discord.com/developers/components/reference",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Platform-2026.md", "memory/vault/03-Architecture/Command-Budget.md"]
+    },
+    {
+      "id": "R-004",
+      "topic": "platform",
+      "claim": "Components V2 combines text across text-bearing components into a roughly 4,000-character budget.",
+      "source": "https://docs.discord.food/resources/components",
+      "retrievedAt": "2026-10-31",
+      "confidence": "medium",
+      "expiresAt": "2027-01-31",
+      "usedIn": ["memory/vault/02-Research/Platform-2026.md"]
+    },
+    {
+      "id": "R-005",
+      "topic": "platform",
+      "claim": "An application may register 100 global chat-input commands, 15 user-context commands, 15 message-context commands and one primary entry point.",
+      "source": "https://docs.discord.com/developers/interactions/application-commands",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/03-Architecture/Command-Budget.md"]
+    },
+    {
+      "id": "R-006",
+      "topic": "platform",
+      "claim": "Native AutoMod allows 6 keyword rules and 10 regex patterns per guild, with 260-character Rust-flavour regexes.",
+      "source": "https://docs.discord.com/developers/resources/auto-moderation",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Platform-2026.md"]
+    },
+    {
+      "id": "R-007",
+      "topic": "platform",
+      "claim": "A bot must shard at 2,500 guilds, with a maximum of 2,500 guilds per shard, and must not hardcode shard counts.",
+      "source": "https://docs.discord.com/developers/events/gateway",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Platform-2026.md", "memory/vault/01-Mission/Master-Plan.md"]
+    },
+    {
+      "id": "R-008",
+      "topic": "monetization",
+      "claim": "If an app is monetized anywhere, Discord's Premium Apps rules require an equivalent in-Discord purchase at a price no higher than the other channel (effective 2024-10-07).",
+      "source": "https://docs.discord.com/developers/monetization/overview",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/07-OpenSource/Governance.md"]
+    },
+    {
+      "id": "R-009",
+      "topic": "portability",
+      "claim": "No surveyed generalist documents a complete export of its own config and history; portability exists because destination bots implement pull or file import.",
+      "source": "https://lurkr.gg/docs/guides/importing-levels-from-other-bots",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Import-Formats.md", "memory/vault/01-Mission/Master-Plan.md"]
+    },
+    {
+      "id": "R-010",
+      "topic": "portability",
+      "claim": "MEE6 levels can be read from its public leaderboard and are imported by Lurkr, Atom and Cakey; MEE6 publishes no documented official API.",
+      "source": "https://lurkr.gg/docs/guides/importing-levels-from-other-bots",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Import-Formats.md"]
+    },
+    {
+      "id": "R-011",
+      "topic": "portability",
+      "claim": "Dyno documents no public API or server-config export; Carl-bot documents no general export (tags are a narrow exception); Wick documents no API.",
+      "source": "https://docs.dyno.gg/en/home",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Import-Formats.md"]
+    },
+    {
+      "id": "R-012",
+      "topic": "portability",
+      "claim": "Ticket Tool does not store transcripts server-side; it generates an HTML file and sends it as a Discord message, so the user must archive it before deleting the ticket.",
+      "source": "https://docs.tickettool.xyz/debugging/faqs",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Import-Formats.md"]
+    },
+    {
+      "id": "R-013",
+      "topic": "portability",
+      "claim": "ProBot's ticket module can deliver transcripts as HTML, JSON or plain text to a transcript channel, making JSON the most portable surveyed format.",
+      "source": "https://docs.probot.io/docs/modules/tickets",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Import-Formats.md"]
+    },
+    {
+      "id": "R-014",
+      "topic": "pricing",
+      "claim": "Paid single-server all-in-one tiers cluster around $3.50-$8/month; MEE6 is an outlier near $12/month; per-server billing is a common switching trigger.",
+      "source": "https://www.patreon.com/carlbot/join",
+      "retrievedAt": "2026-10-31",
+      "confidence": "medium",
+      "expiresAt": "2027-01-31",
+      "usedIn": ["memory/vault/02-Research/Competitive-2026.md", "memory/vault/02-Research/Pain-Points.md"]
+    },
+    {
+      "id": "R-015",
+      "topic": "competition",
+      "claim": "Paid tiers most often sell multiples, a faster/private shard, white-label identity, integrations, retention and API access rather than unique core features.",
+      "source": "https://docs.dyno.gg/premium",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Competitive-2026.md"]
+    },
+    {
+      "id": "R-016",
+      "topic": "open-source",
+      "claim": "Red-DiscordBot's cog registry, YAGPDB's bot/web/feed process split and TSCord's declarative guards are the strongest open-source patterns for a modular, self-hostable bot.",
+      "source": "https://github.com/Cog-Creators/Red-DiscordBot",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/OSS-2026.md"]
+    },
+    {
+      "id": "R-017",
+      "topic": "open-source",
+      "claim": "Skyra tells users not to self-host, NadekoBot requires a copyright-assigning CLA, and Auttaja's Kubernetes-only architecture outlived its maintainers; each is a contributor or bus-factor failure mode.",
+      "source": "https://github.com/skyra-project/skyra",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/OSS-2026.md", "memory/vault/07-OpenSource/Governance.md"]
+    },
+    {
+      "id": "R-018",
+      "topic": "dashboard",
+      "claim": "Discord's production OAuth2 flow is authorization code with PKCE; state must be bound to the pre-login session and iss validated; implicit grant is not recommended.",
+      "source": "https://docs.discord.com/developers/topics/oauth2",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Dashboard-Security.md"]
+    },
+    {
+      "id": "R-019",
+      "topic": "dashboard",
+      "claim": "Per-guild authorization needs both the user's guild permissions (BigInt MANAGE_GUILD/ADMINISTRATOR) and a bot-token check that the bot is in the guild; a :guildId URL must never be trusted alone.",
+      "source": "https://docs.discord.com/developers/topics/permissions",
+      "retrievedAt": "2026-10-31",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Dashboard-Security.md"]
+    },
+    {
+      "id": "R-020",
+      "topic": "user-voice",
+      "claim": "The most repeated owner complaints are retroactive paywalls, bot sprawl, per-server billing, dashboard/command parity bugs and context-blind automod; AI persona marketing draws visible distrust.",
+      "source": "https://peakbot.pro/blog/mee6-premium-worth-it-2026",
+      "retrievedAt": "2026-10-31",
+      "confidence": "medium",
+      "expiresAt": "2027-01-31",
+      "usedIn": ["memory/vault/02-Research/User-Voice-2026.md", "memory/vault/02-Research/Pain-Points.md"]
+    }
+  ]
+}

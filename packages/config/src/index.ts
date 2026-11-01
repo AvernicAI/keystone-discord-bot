@@ -23,6 +23,13 @@ export const envSchema = z.object({
   REDIS_URL: optionalString,
   /** BullMQ queue name. Separate from any other Redis usage. */
   QUEUE_NAME: z.string().min(1).default("keystone"),
+  /**
+   * `full` requests optional privileged intents (welcome, scanner, transcripts).
+   * `minimal` requests only non-privileged intents and reports the lost features.
+   * The Developer Portal must have the matching intents enabled or login fails
+   * with close code 4014.
+   */
+  INTENT_PROFILE: z.enum(["minimal", "full"]).default("full"),
   /** Tracing is opt-in; with neither flag nor endpoint it costs nothing. */
   OTEL_ENABLED: booleanFlag.default(false),
   OTEL_EXPORTER_OTLP_ENDPOINT: optionalString,

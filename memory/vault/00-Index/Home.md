@@ -18,29 +18,31 @@ An open-source, teach-by-default all-in-one Discord bot.
 | Understand the code | [[System-Overview]] · [[Module-Contract]] |
 | Understand the 100-command wall | [[Command-Budget]] |
 | Add a feature | [[04-Modules/diagnostics/Spec\|Diagnostics spec]] then copy the folder |
-| Know what competitors do | [[02-Research/Competitors/MEE6\|MEE6]] · [[Dyno]] · [[Carl-bot]] |
-| Know the platform limits | [[Platform-Limits]] |
+| Know what is actually shipped | [[Feature-Status]] · [[Pass-Ledger]] |
+| Know what competitors do | [[02-Research/Competitors/MEE6\|MEE6]] · [[Dyno]] · [[Carl-bot]] · [[Competitive-2026]] |
+| Know the platform limits | [[Platform-Limits]] · [[Platform-2026]] |
+| Know what can be imported | [[Import-Formats]] |
+| Know the dashboard security contract | [[Dashboard-Security]] |
+| Know the evidence | [[Claims]] · [[02-Research/OSS-2026\|OSS-2026]] · [[User-Voice-2026]] |
 | Teach or learn | [[Curriculum]] |
 | Operate it | [[Release]] · [[Incident]] · [[Token-Leak]] · [[Intent-Review]] |
 
 ## Current state
 
-- Phase **P4** complete in-repo: provider abstraction, server-doc RAG, ticket
-  deflection, mention-only chat, explanations, summaries, advisory
-  classification and hard per-guild caps.
-- P4 also hardened the **economy**: balances are sums over the append-only
-  `economy_ledger`, transfers/purchases/gambles are idempotent on the interaction
-  id, money mutations serialize per guild, and refusals are explicit.
-- Phase **P3** community complete in-repo: leveling, button/select reaction
-  roles, delayed welcome, starboard overrides, birthdays, suggestions, thread
-  tickets, giveaways, temp voice, sticky/content tools, feeds and seasons.
-- 10 of Discord's 100 global commands used.
-- 5 modules registered (diagnostics, setup, moderation, community, ai).
+- Phase **P4.5** complete in-repo: channel obfuscation is a typed outcome at every
+  fetch site, `INTENT_PROFILE` separates required from optional intents, `/setup`
+  names disabled features, and memory v2 generates the status pages.
+- Phase **P4** shipped the AI layer and the ledger-backed economy hardening.
+- Phase **P3** shipped the community suite: leveling, reaction roles, welcome,
+  starboard, tickets, giveaways, temp voice, content and seasons.
+- 10 of Discord's 100 global commands used; 5 modules registered.
+- 138 tests / 24 files; `pnpm check` also runs the intent, channel and memory
+  audits.
 - Optional services: without `DATABASE_URL`/`REDIS_URL` the bot runs in a logged
   local mode; `/setup` reports which one is live.
 
-Machine truth lives in `memory/machine/project.json`; this page is the map, not
-the source of truth.
+Machine truth lives in `memory/machine/project.json` and the generated
+[[Feature-Status]]; this page is the map, not the source of truth.
 
 ## The decision log
 
@@ -55,8 +57,12 @@ the source of truth.
 - [[ADR-0009-select-rows-and-season-archives]] — select menus and non-destructive season resets
 - [[ADR-0010-ai-provider-and-caps]] — provider abstraction, hard guild caps and zero retention
 - [[ADR-0011-economy-ledger-and-double-spend]] — derived balances, guild lock and idempotent money
+- [[ADR-0012-required-and-optional-intents]] — required/optional intents and one channel resolver
+- [[ADR-0013-roadmap-v2-portability-first]] — P4.5–P10, portability before dashboard
+- [[ADR-0014-memory-v2-machine-truth]] — machine files, generated Markdown, CI drift check
 
 ## Open questions
 
-[[Open-Questions]] — art unlicensed, v1 scope, music policy. Nothing below P7 is
-blocked by them.
+[[Open-Questions]] — the licence (AGPL-3.0 recommended), hosted-tier posture and
+Activities eligibility. P4.5 and P5 are not blocked by them; the licence blocks
+external contributions and P9 launch.

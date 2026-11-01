@@ -21,13 +21,14 @@ export const communityModule = defineModule({
   settingsSchema: communitySettingsSchema,
   defaultSettings: communityDefaultSettings,
   commands: [rank, ticket, tools],
-  intents: [
-    "GuildMembers",
-    "GuildMessages",
-    "MessageContent",
-    "GuildMessageReactions",
-    "GuildVoiceStates",
-  ],
+  intents: ["Guilds", "GuildMessages", "GuildMessageReactions", "GuildVoiceStates"],
+  optionalIntents: ["GuildMembers", "MessageContent"],
+  intentFallbacks: {
+    GuildMembers:
+      "welcome, delayed autorole, role persistence and birthday joins are disabled",
+    MessageContent:
+      "ticket transcripts and starboard text snapshots are limited; XP still counts message events",
+  },
   permissions: [
     "ManageRoles",
     "ManageChannels",

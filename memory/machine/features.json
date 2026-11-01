@@ -1,0 +1,1955 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-10-31",
+  "source": "memory/vault/01-Mission/Parity-Matrix.md",
+  "domains": [
+    {
+      "id": "moderation",
+      "name": "Moderation",
+      "features": [
+        {
+          "id": "moderation.ban-kick",
+          "name": "Ban / kick",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Permission precheck before every call",
+          "evidence": [
+            "modules/moderation/src/mod.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "moderation.timeout",
+          "name": "Timeout",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Max 28 days",
+          "evidence": [
+            "modules/moderation/src/mod.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "moderation.warn-history",
+          "name": "Warn + history",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "One case file for all actions",
+          "evidence": [
+            "modules/moderation/src/mod.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "moderation.bulk-purge",
+          "name": "Bulk purge",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "100 per call, audited",
+          "evidence": [
+            "modules/moderation/src/mod.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "moderation.slowmode-lockdown",
+          "name": "Slowmode / lockdown",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Lockdown is a named preset",
+          "evidence": [
+            "modules/moderation/src/mod.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "moderation.temp-ban-temp-role",
+          "name": "Temp ban / temp role",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❔",
+            "carl": "💰",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P7",
+          "status": "open",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Expiry as a scheduled job",
+          "evidence": [
+            "modules/moderation/src/mod.test.ts"
+          ],
+          "openReason": "Expiry jobs are not wired yet; the plan schedules them with P7 parity completion.",
+          "liveVerified": false
+        },
+        {
+          "id": "moderation.case-lookup",
+          "name": "Case lookup",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "`/mod case view`",
+          "evidence": [
+            "modules/moderation/src/mod.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "moderation.evidence-card",
+          "name": "Evidence card",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "**Our edge:** what triggered it",
+          "evidence": [
+            "modules/moderation/src/mod.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "moderation.dry-run-default",
+          "name": "Dry-run default",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "**Our edge:** alert-only",
+          "evidence": [
+            "modules/moderation/src/mod.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "moderation.appeal-from-the-dm",
+          "name": "Appeal from the DM",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "**Our edge:** one button",
+          "evidence": [
+            "modules/moderation/src/mod.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "moderation.case-export",
+          "name": "Case export",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❔",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P7",
+          "status": "open",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "JSON + CSV",
+          "evidence": [
+            "modules/moderation/src/mod.test.ts"
+          ],
+          "openReason": "Export commands are part of the P5/P7 data-ownership work.",
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "automod",
+      "name": "Automod",
+      "features": [
+        {
+          "id": "automod.spam-caps-mentions",
+          "name": "Spam / caps / mentions",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "✅"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Heat decay, not a binary trip",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "automod.invite-links",
+          "name": "Invite links",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "✅"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Allow-list per guild",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "automod.link-phishing-filter",
+          "name": "Link / phishing filter",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "✅"
+          },
+          "phase": "P7",
+          "status": "open",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Local list + review queue",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "openReason": "Local list and review queue are named as open in the P3 status.",
+          "liveVerified": false
+        },
+        {
+          "id": "automod.profanity-zalgo",
+          "name": "Profanity / zalgo",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P7",
+          "status": "open",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Word-boundary aware",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "openReason": "Word-boundary filter is named as open in the P3 status.",
+          "liveVerified": false
+        },
+        {
+          "id": "automod.duplicate-crosspost",
+          "name": "Duplicate / crosspost",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Hash window",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "automod.native-automod-sync",
+          "name": "Native AutoMod sync",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "We manage Discord's rules too",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "automod.ai-classification",
+          "name": "AI classification",
+          "competitors": {
+            "mee6": "💰 (separate)",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P4",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Advisory label only; no action path",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "automod.per-rule-punishment",
+          "name": "Per-rule punishment",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "✅"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Alert / delete / timeout / quarantine",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "automod.rule-test-mode",
+          "name": "Rule test mode",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Fixture-driven, same as tests",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "automod.false-positive-report",
+          "name": "False-positive report",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Feeds the rule's own metrics",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "name": "Security",
+      "features": [
+        {
+          "id": "security.anti-nuke-role-channel",
+          "name": "Anti-nuke (role/channel)",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "✅"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Thresholds per permission",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "security.anti-nuke-webhook-bot-add",
+          "name": "Anti-nuke (webhook/bot add)",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "✅"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Bot-add block",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "security.anti-raid-join-burst",
+          "name": "Anti-raid (join burst)",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "✅"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Age + avatar heuristics",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "security.quarantine-role",
+          "name": "Quarantine role",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "✅"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Reversible by design",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "security.join-gate-verification",
+          "name": "Join gate / verification",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "✅"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Button + timeout",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "security.panic-mode",
+          "name": "Panic mode",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "✅"
+          },
+          "phase": "P7",
+          "status": "open",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "One command, logged",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "openReason": "Named as open in the moderation status; P7 parity completion owns it.",
+          "liveVerified": false
+        },
+        {
+          "id": "security.heat-scoring",
+          "name": "Heat scoring",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "✅"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Decays, so no permanent trip",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "security.backup-restore",
+          "name": "Backup / restore",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "💰"
+          },
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Structure + optional messages",
+          "liveVerified": false
+        },
+        {
+          "id": "security.shared-case-file-with-mod",
+          "name": "Shared case file with mod",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P2",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "**Our edge:** one record",
+          "evidence": [
+            "modules/moderation/src/security.test.ts"
+          ],
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "leveling",
+      "name": "Leveling",
+      "features": [
+        {
+          "id": "leveling.xp-and-levels",
+          "name": "XP and levels",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "💰",
+            "carl": "💰",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Free, always",
+          "evidence": [
+            "modules/community/src/community.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "leveling.role-rewards",
+          "name": "Role rewards",
+          "competitors": {
+            "mee6": "3 free, then 💰",
+            "dyno": "💰",
+            "carl": "💰",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Per-level, stackable",
+          "evidence": [
+            "modules/community/src/community.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "leveling.rank-card",
+          "name": "Rank card",
+          "competitors": {
+            "mee6": "✅",
+            "dyno": "💰",
+            "carl": "💰",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Components V2, 40-slot budget",
+          "evidence": [
+            "modules/community/src/community.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "leveling.leaderboard",
+          "name": "Leaderboard",
+          "competitors": {
+            "mee6": "✅",
+            "dyno": "💰",
+            "carl": "💰",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Paginated, cached",
+          "evidence": [
+            "modules/community/src/community.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "leveling.xp-multipliers",
+          "name": "XP multipliers",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "💰",
+            "carl": "💰",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Role/channel/event",
+          "evidence": [
+            "modules/community/src/community.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "leveling.import-from-mee6",
+          "name": "Import from MEE6",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "**Our edge**",
+          "liveVerified": false
+        },
+        {
+          "id": "leveling.seasonal-reset",
+          "name": "Seasonal reset",
+          "competitors": {
+            "mee6": "❔",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Archive, don't destroy",
+          "evidence": [
+            "modules/community/src/community.test.ts"
+          ],
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "economy",
+      "name": "Economy",
+      "features": [
+        {
+          "id": "economy.currency-daily",
+          "name": "Currency + daily",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❌",
+            "carl": "💰",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Server-scoped; daily uses the kernel cooldown",
+          "evidence": [
+            "modules/community/src/economy.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "economy.shop-inventory",
+          "name": "Shop / inventory",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❌",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Role and tag items; direct grant, explicit failure",
+          "evidence": [
+            "modules/community/src/economy.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "economy.transfers",
+          "name": "Transfers",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❌",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Atomic pair under a guild row lock; stable retry key",
+          "evidence": [
+            "modules/community/src/economy.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "economy.gambling",
+          "name": "Gambling",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❌",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Capped, opt-in, serialized debit",
+          "evidence": [
+            "modules/community/src/economy.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "economy.audit-ledger",
+          "name": "Audit ledger",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "**Our edge:** every coin traceable; balance is a `SUM`",
+          "evidence": [
+            "modules/community/src/economy.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "economy.global-economy",
+          "name": "Global economy",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "none",
+          "status": "non-goal",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Non-goal: server context matters",
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "community",
+      "name": "Community",
+      "features": [
+        {
+          "id": "community.welcome-goodbye",
+          "name": "Welcome / goodbye",
+          "competitors": {
+            "mee6": "✅",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P7",
+          "status": "open",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Text or V2 panel",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "openReason": "Welcome ships; goodbye messages are named as open in the P3 status.",
+          "liveVerified": false
+        },
+        {
+          "id": "community.autorole",
+          "name": "Autorole",
+          "competitors": {
+            "mee6": "✅",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "With join delay",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "community.reaction-roles",
+          "name": "Reaction roles",
+          "competitors": {
+            "mee6": "💰 (40)",
+            "dyno": "❌",
+            "carl": "✅ (250)",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Buttons and selects too",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "community.starboard",
+          "name": "Starboard",
+          "competitors": {
+            "mee6": "✅",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Per-channel thresholds",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "community.birthdays",
+          "name": "Birthdays",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Timezone-aware",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "community.suggestions",
+          "name": "Suggestions",
+          "competitors": {
+            "mee6": "❔",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Vote + status",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "community.polls",
+          "name": "Polls",
+          "competitors": {
+            "mee6": "✅",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Native poll fallback",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "community.giveaways",
+          "name": "Giveaways",
+          "competitors": {
+            "mee6": "✅",
+            "dyno": "✅ (3)",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Requirements + reroll",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "community.temp-voice",
+          "name": "Temp voice",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Hub channel pattern",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "community.stat-channels",
+          "name": "Stat channels",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "✅"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Rate-limited updates",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "community.social-feeds",
+          "name": "Social feeds",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❔",
+            "carl": "✅ (5/2)",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P7",
+          "status": "open",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "YouTube, Twitch, RSS",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "openReason": "RSS ships; YouTube/Twitch-specific feeds are named as open in the P3 status.",
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "tickets",
+      "name": "Tickets",
+      "features": [
+        {
+          "id": "tickets.panels",
+          "name": "Panels",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "✅ (1)",
+            "carl": "❔",
+            "ticket-tool": "✅",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Components V2",
+          "evidence": [
+            "modules/community/src/commands.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "tickets.thread-based-tickets",
+          "name": "Thread-based tickets",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "💰",
+            "carl": "❔",
+            "ticket-tool": "✅",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Avoids the 50-channel cap",
+          "evidence": [
+            "modules/community/src/commands.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "tickets.claiming",
+          "name": "Claiming",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "💰",
+            "carl": "❔",
+            "ticket-tool": "✅",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "With SLA clock",
+          "evidence": [
+            "modules/community/src/commands.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "tickets.transcripts",
+          "name": "Transcripts",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "💰",
+            "carl": "❔",
+            "ticket-tool": "✅ (30 d free)",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Never auto-expire",
+          "evidence": [
+            "modules/community/src/commands.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "tickets.knowledge-base",
+          "name": "Knowledge base",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "✅",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "open",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "`/ai docs-add` + exact-index RAG; pgvector ANN open",
+          "openReason": "Exact-index RAG ships; the pgvector ANN 1Mx1536 gate is open.",
+          "liveVerified": false
+        },
+        {
+          "id": "tickets.ai-deflection",
+          "name": "AI deflection",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "💰",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Capped, opt-in; no match = human hand-off, no model call",
+          "evidence": [
+            "modules/community/src/commands.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "tickets.sla-analytics",
+          "name": "SLA analytics",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "💰",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "First response, resolution",
+          "evidence": [
+            "modules/community/src/commands.test.ts"
+          ],
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "content",
+      "name": "Content",
+      "features": [
+        {
+          "id": "content.embed-builder",
+          "name": "Embed builder",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅ (3)",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Validated fields, no scripting",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "content.custom-commands-tags",
+          "name": "Custom commands / tags",
+          "competitors": {
+            "mee6": "💰 (500)",
+            "dyno": "✅ (10)",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Data, never code",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "content.scheduled-messages",
+          "name": "Scheduled messages",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Cron + timezone",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "content.reminders",
+          "name": "Reminders",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Per-user, DM or channel",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "content.sticky-messages",
+          "name": "Sticky messages",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❔",
+            "carl": "💰",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Repost on activity",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "content.rss-feeds",
+          "name": "RSS / feeds",
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P3",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Dedup by GUID",
+          "evidence": [
+            "modules/community/src/extras.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "content.translation",
+          "name": "Translation",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "none",
+          "status": "non-goal",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Non-goal: unreliable, costly",
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "music",
+      "name": "Music",
+      "features": [
+        {
+          "id": "music.playback",
+          "name": "Playback",
+          "competitors": {
+            "mee6": "❌ (removed 2023)",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P8",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "BYO Lavalink only",
+          "liveVerified": false
+        },
+        {
+          "id": "music.queue-controls",
+          "name": "Queue / controls",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P8",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Buttons + `/music`",
+          "liveVerified": false
+        },
+        {
+          "id": "music.bundled-source",
+          "name": "Bundled source",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "none",
+          "status": "non-goal",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Non-goal: legal risk",
+          "liveVerified": false
+        },
+        {
+          "id": "music.lyrics-autoplay",
+          "name": "Lyrics / autoplay",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "none",
+          "status": "non-goal",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Non-goal",
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "ai",
+      "name": "AI",
+      "features": [
+        {
+          "id": "ai.persona-chat",
+          "name": "Persona chat",
+          "competitors": {
+            "mee6": "💰 (separate)",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "💰",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Mention-only; no conversation retention",
+          "evidence": [
+            "modules/ai/src/ai.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "ai.server-rag",
+          "name": "Server RAG",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "✅",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "open",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Portable exact index; pgvector ANN open",
+          "openReason": "Portable exact index ships; pgvector ANN remains open.",
+          "liveVerified": false
+        },
+        {
+          "id": "ai.mod-explanations",
+          "name": "Mod explanations",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❌",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Why a rule fired",
+          "evidence": [
+            "modules/ai/src/ai.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "ai.thread-summaries",
+          "name": "Thread summaries",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❔",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "`/ticket summary`, on demand",
+          "evidence": [
+            "modules/ai/src/ai.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "ai.cost-caps",
+          "name": "Cost caps",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❔",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "**Our edge:** hard, per guild",
+          "evidence": [
+            "modules/ai/src/ai.test.ts"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "ai.zero-retention",
+          "name": "Zero retention",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❌",
+            "carl": "❌",
+            "ticket-tool": "❔",
+            "wick-security": "❌"
+          },
+          "phase": "P4",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Default, documented",
+          "evidence": [
+            "modules/ai/src/ai.test.ts"
+          ],
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "operations",
+      "name": "Operations",
+      "features": [
+        {
+          "id": "operations.web-dashboard",
+          "name": "Web dashboard",
+          "competitors": {
+            "mee6": "✅",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "✅",
+            "wick-security": "✅"
+          },
+          "phase": "P6",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Next.js",
+          "liveVerified": false
+        },
+        {
+          "id": "operations.multi-server-fleet",
+          "name": "Multi-server fleet",
+          "competitors": {
+            "mee6": "❔",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "✅",
+            "wick-security": "❔"
+          },
+          "phase": "P6",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "One view, per-guild authz",
+          "liveVerified": false
+        },
+        {
+          "id": "operations.config-templates",
+          "name": "Config templates",
+          "competitors": {
+            "mee6": "❔",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❔",
+            "wick-security": "❔"
+          },
+          "phase": "P6",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Apply to N guilds",
+          "liveVerified": false
+        },
+        {
+          "id": "operations.public-api-webhooks",
+          "name": "Public API / webhooks",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❔",
+            "carl": "❌",
+            "ticket-tool": "💰",
+            "wick-security": "❔"
+          },
+          "phase": "P6",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Scoped tokens",
+          "liveVerified": false
+        },
+        {
+          "id": "operations.i18n",
+          "name": "i18n",
+          "competitors": {
+            "mee6": "❔",
+            "dyno": "✅",
+            "carl": "❔",
+            "ticket-tool": "✅",
+            "wick-security": "❔"
+          },
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "i18next, per-guild locale",
+          "liveVerified": false
+        },
+        {
+          "id": "operations.status-page",
+          "name": "Status page",
+          "competitors": {
+            "mee6": "❌",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❔",
+            "wick-security": "❔"
+          },
+          "phase": "P9",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Public incidents",
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "portability",
+      "name": "Portability",
+      "source": "memory/vault/02-Research/Import-Formats.md",
+      "features": [
+        {
+          "id": "portability.full-export-bundle",
+          "name": "Full export bundle",
+          "competitors": {},
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Import-Formats.md",
+          "note": "Versioned JSON/NDJSON bundle with manifest and checksum.",
+          "liveVerified": false
+        },
+        {
+          "id": "portability.restore-and-config-hash",
+          "name": "Restore and config hash",
+          "competitors": {},
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Import-Formats.md",
+          "note": "Restore into a clean guild; verify counts and a config hash.",
+          "liveVerified": false
+        },
+        {
+          "id": "portability.dry-run-import-diff",
+          "name": "Dry-run import diff",
+          "competitors": {},
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Import-Formats.md",
+          "note": "Show create/update/skip before applying.",
+          "liveVerified": false
+        },
+        {
+          "id": "portability.rollback-window",
+          "name": "Rollback window",
+          "competitors": {},
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Import-Formats.md",
+          "note": "Failed or regretted imports roll back inside 24 hours.",
+          "liveVerified": false
+        },
+        {
+          "id": "portability.deletion-receipt",
+          "name": "Deletion receipt",
+          "competitors": {},
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Import-Formats.md",
+          "note": "Per-guild and per-user deletion with counts.",
+          "liveVerified": false
+        },
+        {
+          "id": "portability.mee6-level-import",
+          "name": "MEE6 level import",
+          "competitors": {},
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Import-Formats.md",
+          "note": "Public leaderboard only; no credentials; rate-limited.",
+          "liveVerified": false
+        },
+        {
+          "id": "portability.generic-json-csv-import",
+          "name": "Generic JSON/CSV import",
+          "competitors": {},
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Import-Formats.md",
+          "note": "userId + xp/level/cash/bank; merge modes.",
+          "liveVerified": false
+        },
+        {
+          "id": "portability.probot-json-transcript-import",
+          "name": "ProBot JSON transcript import",
+          "competitors": {},
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Import-Formats.md",
+          "note": "Parse structured ticket transcripts.",
+          "liveVerified": false
+        },
+        {
+          "id": "portability.ticket-tool-html-archive",
+          "name": "Ticket Tool HTML archive",
+          "competitors": {},
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Import-Formats.md",
+          "note": "Archive the user-owned HTML transcript as a file.",
+          "liveVerified": false
+        },
+        {
+          "id": "portability.drift-detection",
+          "name": "Drift detection",
+          "competitors": {},
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Import-Formats.md",
+          "note": "Compare desired config with live roles, channels and AutoMod.",
+          "liveVerified": false
+        },
+        {
+          "id": "portability.guided-migration-guides",
+          "name": "Guided migration guides",
+          "competitors": {},
+          "phase": "P5",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Import-Formats.md",
+          "note": "What transfers, what must be recreated, and why.",
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "invites",
+      "name": "Invites",
+      "source": "memory/vault/02-Research/Competitive-2026.md",
+      "features": [
+        {
+          "id": "invites.invite-attribution",
+          "name": "Invite attribution",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Competitive-2026.md",
+          "note": "Who invited whom, with join attribution.",
+          "liveVerified": false
+        },
+        {
+          "id": "invites.fake-invite-detection",
+          "name": "Fake invite detection",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Competitive-2026.md",
+          "note": "Flag suspicious joins without auto-punishing.",
+          "liveVerified": false
+        },
+        {
+          "id": "invites.invite-leaderboard",
+          "name": "Invite leaderboard",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Competitive-2026.md",
+          "note": "Per-inviter counts and retention.",
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "forms",
+      "name": "Forms and applications",
+      "source": "memory/vault/02-Research/Competitive-2026.md",
+      "features": [
+        {
+          "id": "forms.application-forms",
+          "name": "Application forms",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Competitive-2026.md",
+          "note": "Modal forms with validated fields.",
+          "liveVerified": false
+        },
+        {
+          "id": "forms.review-queue",
+          "name": "Review queue",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Competitive-2026.md",
+          "note": "Accept, deny and note with an audit trail.",
+          "liveVerified": false
+        },
+        {
+          "id": "forms.submission-export",
+          "name": "Submission export",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Competitive-2026.md",
+          "note": "JSON/CSV export with a receipt.",
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "events",
+      "name": "Events and RSVP",
+      "source": "memory/vault/02-Research/Competitive-2026.md",
+      "features": [
+        {
+          "id": "events.event-creation",
+          "name": "Event creation",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Competitive-2026.md",
+          "note": "One-off events with a channel post.",
+          "liveVerified": false
+        },
+        {
+          "id": "events.rsvp-buttons",
+          "name": "RSVP buttons",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Competitive-2026.md",
+          "note": "Going / maybe / no, with counts.",
+          "liveVerified": false
+        },
+        {
+          "id": "events.reminders",
+          "name": "Reminders",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Competitive-2026.md",
+          "note": "Scheduled reminders with a timezone.",
+          "liveVerified": false
+        },
+        {
+          "id": "events.ics-export",
+          "name": "ICS export",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/02-Research/Competitive-2026.md",
+          "note": "Calendar file without a third-party OAuth dependency.",
+          "liveVerified": false
+        }
+      ]
+    },
+    {
+      "id": "parity-extra",
+      "name": "Community parity extras",
+      "source": "memory/vault/01-Mission/Master-Plan.md",
+      "features": [
+        {
+          "id": "parity-extra.role-persistence",
+          "name": "Role persistence",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "Reapply roles on rejoin; requires GuildMembers.",
+          "liveVerified": false
+        },
+        {
+          "id": "parity-extra.modmail",
+          "name": "Modmail",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "DM-to-thread tickets with transcripts.",
+          "liveVerified": false
+        },
+        {
+          "id": "parity-extra.auto-responder",
+          "name": "Auto-responder",
+          "competitors": {},
+          "phase": "P7",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "Exact/contains/regex triggers with cooldowns.",
+          "liveVerified": false
+        },
+        {
+          "id": "parity-extra.message-and-member-analytics",
+          "name": "Message and member analytics",
+          "competitors": {},
+          "phase": "P6",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "Aggregate counts only; no message content.",
+          "liveVerified": false
+        },
+        {
+          "id": "parity-extra.command-usage-analytics",
+          "name": "Command usage analytics",
+          "competitors": {},
+          "phase": "P6",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "Per-command counters and latency.",
+          "liveVerified": false
+        },
+        {
+          "id": "parity-extra.captcha-verification",
+          "name": "Captcha verification",
+          "competitors": {},
+          "phase": "P10",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "Post-v1.0 provider integration.",
+          "liveVerified": false
+        },
+        {
+          "id": "parity-extra.google-calendar-sync",
+          "name": "Google Calendar sync",
+          "competitors": {},
+          "phase": "P10",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "Post-v1.0 two-way sync.",
+          "liveVerified": false
+        },
+        {
+          "id": "parity-extra.activity",
+          "name": "Activity",
+          "competitors": {},
+          "phase": "P8",
+          "status": "planned",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "Time-boxed eligibility spike; not promised for v1.0.",
+          "liveVerified": false
+        }
+      ]
+    }
+  ]
+}
