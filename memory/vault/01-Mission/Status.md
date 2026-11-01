@@ -2,6 +2,23 @@
 
 ## Now
 
+**P7 guild analytics is in repo and live-proven** (pass 29, 2026-11-01): the
+eighth module adds `/analytics overview | members | messages | commands |
+tickets | export` as a read-only aggregate over rows other modules already own.
+There is no analytics table: `logging_events`, `cases`, `invite_joins`, `tickets`
+and the new append-only `command_usage` ledger are queried directly, and every
+view prints a source-row line. `AnalyticsStore` is one port with a SQL adapter
+and an in-memory adapter over the same stores. The command is guild-scoped,
+admin-only and capped at a 90-day window. Live: `/logging status` reported **2
+stored** rows, `/analytics overview` reported the same **2 logged events**, and
+one MCP edit plus one delete appeared as **1 edited / 1 deleted**. Command runs
+rose 0 → 3 → 4 as bridge commands completed; the current invocation is recorded
+after its reply. Discord reports **14 roots / 90 subcommands / 104 actions**.
+The MCP text reader does not render embeds, so the live transcript proves the
+summary text while the embed fields and JSON export are covered by a command
+test. See [[04-Modules/analytics/Spec|Analytics spec]] and
+[[04-Modules/analytics/Status|Analytics status]].
+
 **P7 audit logging is in repo and live-proven for message and moderation events**
 (pass 28, 2026-11-01): the seventh module adds `/logging setup | channel | events
 | status | retention | export | disable`. Five event kinds (message delete, message
@@ -71,9 +88,11 @@ subcommands and 89 actions. `/help` (`browse`, `commands`, `search`, `privacy`,
 shape without writing. Two defects found during proof are fixed: the structural
 adapter now flattens nested subcommand options, and boot sync compares the whole
 option tree instead of names alone. Pass 28 added `/logging` with seven
-subcommands, bringing the current ledger to **13 roots · 84 subcommands · 97
-actions**; Discord's REST command set after pass 28 reports 13 roots / 84
-subcommands including `logging`. See
+subcommands, bringing the ledger to **13 roots · 84 subcommands · 97 actions** at
+that point. Pass 29 added `/analytics` with six subcommands, so the current
+ledger is **14 roots · 90 subcommands · 104 actions**; Discord's REST command
+set after pass 29 reports 14 roots / 90 subcommands including `analytics` and
+`logging`. See
 [[03-Architecture/Command-Budget|Command budget]] and
 [[03-Architecture/ADR/ADR-0003-command-budget]].
 
@@ -133,10 +152,11 @@ pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
 `!rank leaderboard` all returned live Discord messages/embeds. Pass 19 added
 `!invites leaderboard` and `!invites who`. Pass 26 re-registered 12 roots /
 77 subcommands at the time; pass 28 added `/logging` and Discord's fetched shape
-now reports **13 roots / 84 subcommands** with no missing, extra or changed
+now reports **14 roots / 90 subcommands** with no missing, extra or changed
 roots. The bridge added `!help commands`, `!help browse`, `!help search
 query=ban`, `!mod history`, `!ai status`, `!logging status`, `!logging events`,
-`!logging retention` and `!logging export` to the live list. Pass 23
+`!logging retention`, `!logging export`, `!analytics overview`, `!analytics
+commands` and `!analytics messages` to the live list. Pass 23
 added `!mod links` and a live link-filter proof: three marked MCP messages
 produced a blocklisted
 subdomain case, an apex case and a punycode case; `!mod review case=2` marked one
@@ -168,12 +188,13 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 283 tests / 44 files · budget 13/100 roots (84 subcommands) · memory 2027/2027
+pnpm check        exit 0 · typecheck 0 · 290 tests / 46 files · budget 14/100 roots (90 subcommands) · memory 2056/2056
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 13 roots / 84 subcommands · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered
+live              2026-11-01 · AI Team#5758 · 2 guilds · 14 roots / 90 subcommands · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered
 live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
 live env blocker 2026-11-01 · DATABASE_URL localhost:5432 → ECONNREFUSED · REDIS_URL localhost:6379 → Connection is closed · Docker/service absent
+live analytics    2026-11-01 · 2 stored audit rows = 2 logged events · 1 MCP edit + 1 delete = 1 edited / 1 deleted · command runs 0 → 3 → 4 · doctor 14 roots / 90 subcommands
 live content filters 2026-11-01 · link delete returned 10008 Unknown Message; profanity delete removed the pineapple message and kept its case; safe seed produced link/profanity/zalgo cases; one reviewed; example.com not flagged
 live auto-responder 2026-11-01 · hello keystone replied, 60s cooldown suppressed the next reply, then released
 live failure      !ticket stats → ManageGuild guard (MCP bot is not admin); branch fixed and unit-tested
@@ -183,6 +204,22 @@ public            2026-11-01 · https://github.com/RNGBubba/keystone-discord-bot
 A local `.env` exists in the working tree. Smoke commands pin
 `DOTENV_CONFIG_PATH=.env.absent` so the result is deterministic and does not
 read that file.
+
+## P7 analytics acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | Every view is a query over existing rows, not a second stream | `analytics-store.ts` has no insert/update; `command-usage-store.ts` is the only new write and is append-only | Code inspection + PGlite |
+| 2 | One printed figure equals the raw ledger | `analytics-store.test.ts`: `overview.loggedEvents` and `commandsRun` match `count(*)`; live logging status **2 stored** = overview **2 logged events** | **PGlite + live gateway** |
+| 3 | Message and member analytics count the right events | `analytics.test.ts` window filtering; live one MCP edit and one delete produced **1 edited / 1 deleted** | In-memory + **live gateway** |
+| 4 | Command usage is append-only and cannot fail a command | `dispatch.ts` records after the result; a failure logs a warning; three bridge commands produced 0 → 3 runs | Unit + **live bridge** |
+| 5 | Guild scoping is enforced in the aggregate | PGlite test seeds a second guild and asserts zero contribution; live guild 1450130465146142785 only | **PGlite** |
+| 6 | Current state is not disguised as a window count | `AnalyticsTicketStats` and the captions; test asserts open/closed current, opened/closed window | Unit |
+| 7 | Admin-only and guild-only | `analytics.test.ts`: non-admin `blocked`, store not called; live bridge ran under the MCP member with `ManageGuild` | Dispatch + **live bridge** |
+| 8 | A disabled module refuses instead of returning zeros | `analytics.test.ts`: disabled returns `error` and no snapshot | Unit |
+| 9 | One root, no extra slot | `/analytics` with six subcommands; budget **14/100** | Static registry |
+| 10 | The real surface runs | Live 2026-11-01: three `/analytics` views replied once each in `#ai-chat`; `commands:doctor` reports 14 roots / 90 subcommands | **Live gateway + Discord API** |
+| 11 | Embed fields and JSON export were read live | **Not performed** — the MCP text reader does not render embeds; command test covers the parseable export | Not claimed |
 
 ## P7 audit-logging acceptance evidence
 
@@ -410,10 +447,10 @@ here.
 ## Next
 
 P7 parity work continues alongside the P6 exit items. Auto-responders, audit
-logging and the content filters are done; the next open rows are forms/events,
-analytics (which can read `logging_events`), modmail, expiry jobs, case export
-and panic mode. `automod.false-positive-report`
-is still the smallest useful moderation follow-up. P6 remains the active phase
+logging, the content filters and guild analytics are done; the next open rows are
+forms/events, modmail, expiry jobs, case export, command-usage retention and
+panic mode. `automod.false-positive-report` is still the smallest useful
+moderation follow-up. P6 remains the active phase
 for the dashboard. The auth gate and settings writes are built;
 next are schema-driven field widgets, the Next.js shell (or a decision to keep
 server-rendered HTML), fleet actions/templates, token refresh and revocation,

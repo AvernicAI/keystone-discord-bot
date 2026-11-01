@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**117 features** across 16 domains: **83 in repo**, **10 open**, **20 planned**. Live behaviour is marked separately; a green
+**117 features** across 16 domains: **85 in repo**, **10 open**, **18 planned**. Live behaviour is marked separately; a green
 box means the code and its tests exist, not that a live guild has run it.
 
 ## Domains
@@ -27,7 +27,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Invites | 3 | 3 | 0 | 0 |
 | Forms and applications | 3 | 0 | 0 | 3 |
 | Events and RSVP | 4 | 0 | 0 | 4 |
-| Community parity extras | 8 | 1 | 0 | 7 |
+| Community parity extras | 8 | 3 | 0 | 5 |
 
 ## Moderation
 
@@ -220,8 +220,8 @@ box means the code and its tests exist, not that a live guild has run it.
 | Role persistence | P7 | ⏳ planned | Reapply roles on rejoin; requires GuildMembers. |
 | Modmail | P7 | ⏳ planned | DM-to-thread tickets with transcripts. |
 | Auto-responder | P7 | ✅ in repo | `modules/community/src/responder.test.ts`, `modules/community/src/commands.test.ts`, `apps/bot/src/community-events.test.ts`, `packages/db/src/community.test.ts` · live verified |
-| Message and member analytics | P6 | ⏳ planned | Aggregate counts only; no message content. |
-| Command usage analytics | P6 | ⏳ planned | Per-command counters and latency. |
+| Message and member analytics | P7 | ✅ in repo | `modules/analytics/src/analytics.test.ts`, `modules/analytics/src/memory.ts`, `memory/vault/04-Modules/analytics/Status.md` · live verified |
+| Command usage analytics | P7 | ✅ in repo | `packages/kernel/src/dispatch.ts`, `packages/db/src/command-usage-store.ts`, `packages/db/src/analytics-store.test.ts`, `memory/vault/04-Modules/analytics/Status.md` · live verified |
 | Captcha verification | P10 | ⏳ planned | Post-v1.0 provider integration. |
 | Google Calendar sync | P10 | ⏳ planned | Post-v1.0 two-way sync. |
 | Activity | P8 | ⏳ planned | Time-boxed eligibility spike; not promised for v1.0. |

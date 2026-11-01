@@ -21,6 +21,11 @@ import {
   type AiPort,
   type LoggingActions,
   type LoggingPort,
+  type AnalyticsStore,
+  type CommandUsageStore,
+  type CaseStore,
+  type CommunityStore,
+  type InviteStore,
 } from "@keystone/kernel";
 import type { Env } from "@keystone/config";
 import {
@@ -30,6 +35,8 @@ import {
   createAiStore,
   createInviteStore,
   createLoggingStore,
+  createAnalyticsStore,
+  createCommandUsageStore,
   createPostgresDatabase,
   createSettingsRepository,
   probeDatabase,
@@ -44,6 +51,10 @@ import {
 import { InMemoryCommunityStore } from "@keystone/module-community";
 import { InMemoryInviteStore } from "@keystone/module-invites";
 import { InMemoryLoggingStore, LoggingService } from "@keystone/module-logging";
+import {
+  InMemoryCommandUsageStore,
+  MemoryAnalyticsStore,
+} from "@keystone/module-analytics";
 import { AiService, InMemoryAiStore, createAiProvider } from "@keystone/module-ai";
 import { createCooldownStore, type CooldownHandle } from "@keystone/cache";
 import { BullJobQueue, InProcessJobQueue } from "@keystone/queue";
@@ -64,6 +75,8 @@ export interface Runtime {
   invites: InvitePort;
   ai: AiPort;
   logging: LoggingPort;
+  analytics: AnalyticsStore;
+  usage: CommandUsageStore;
   security: SecurityCoordinator;
   mode: { database: DatabaseMode; cache: CacheMode; queue: QueueMode };
   close(): Promise<void>;
@@ -147,17 +160,16 @@ export async function createRuntime(
       guildId: env.DEV_GUILD_ID,
     });
   }
-  const logging: LoggingPort = {
-    store: database ? createLoggingStore(database) : new InMemoryLoggingStore(),
-    actions: loggingActions,
-  };
+  const loggingStore = database ? createLoggingStore(database) : new InMemoryLoggingStore();
+  const logging: LoggingPort = { store: loggingStore, actions: loggingActions };
   const loggingService = new LoggingService(
     logging.store,
     logging.actions,
     settings.forModule("logging"),
   );
+  const caseStore: CaseStore = database ? createCaseStore(database) : new InMemoryCaseStore();
   const cases = new CaseService(
-    database ? createCaseStore(database) : new InMemoryCaseStore(),
+    caseStore,
     {
       onOpened: (record) => {
         void loggingService.recordCase(record).catch((error: unknown) => {
@@ -170,10 +182,10 @@ export async function createRuntime(
     },
   );
   const moderation: ModerationPort = { cases, actions: moderationActions };
-  const community: CommunityPort = {
-    store: database ? createCommunityStore(database) : new InMemoryCommunityStore(),
-    actions: communityActions,
-  };
+  const communityStore: CommunityStore = database
+    ? createCommunityStore(database)
+    : new InMemoryCommunityStore();
+  const community: CommunityPort = { store: communityStore, actions: communityActions };
   if (env.DEV_GUILD_ID && env.NODE_ENV !== "production" && !database) {
     await settings.update(env.DEV_GUILD_ID, "community", {
       responders: { enabled: true },
@@ -190,10 +202,25 @@ export async function createRuntime(
       guildId: env.DEV_GUILD_ID,
     });
   }
-  const invites: InvitePort = {
-    store: database ? createInviteStore(database) : new InMemoryInviteStore(),
-    actions: inviteActions,
-  };
+  const inviteStore: InviteStore = database ? createInviteStore(database) : new InMemoryInviteStore();
+  const invites: InvitePort = { store: inviteStore, actions: inviteActions };
+  const usage: CommandUsageStore = database
+    ? createCommandUsageStore(database)
+    : new InMemoryCommandUsageStore();
+  const analytics: AnalyticsStore = database
+    ? createAnalyticsStore(database)
+    : new MemoryAnalyticsStore({
+        logs: async (guildId) =>
+          loggingStore instanceof InMemoryLoggingStore ? loggingStore.records(guildId) : [],
+        cases: async (guildId) =>
+          caseStore instanceof InMemoryCaseStore ? caseStore.records(guildId) : [],
+        invites: async (guildId) =>
+          inviteStore instanceof InMemoryInviteStore ? inviteStore.records(guildId) : [],
+        tickets: async (guildId) =>
+          communityStore instanceof InMemoryCommunityStore ? communityStore.tickets(guildId) : [],
+        commands: async (guildId) =>
+          usage instanceof InMemoryCommandUsageStore ? usage.records(guildId) : [],
+      });
   const ai = new AiService(
     database ? createAiStore(database) : new InMemoryAiStore(),
     createAiProvider({
@@ -241,6 +268,8 @@ export async function createRuntime(
     invites,
     ai,
     logging,
+    analytics,
+    usage,
     security,
     mode: {
       database: database ? "postgres" : "memory",

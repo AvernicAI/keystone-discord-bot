@@ -15,6 +15,7 @@
     "@keystone/module-diagnostics": "workspace:*",
     "@keystone/module-community": "workspace:*",
     "@keystone/module-ai": "workspace:*",
+    "@keystone/module-analytics": "workspace:*",
     "@keystone/module-invites": "workspace:*",
     "@keystone/module-logging": "workspace:*",
     "@keystone/module-moderation": "workspace:*",

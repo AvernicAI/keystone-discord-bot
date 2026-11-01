@@ -257,6 +257,11 @@ export class InMemoryCommunityStore implements CommunityStore {
       .slice(0, Math.min(Math.max(filter.limit ?? 50, 1), 100));
   }
 
+  /** Read-only helper for the in-memory analytics adapter; not part of the port. */
+  tickets(guildId: string): readonly TicketRecord[] {
+    return [...this.#tickets.values()].filter((ticket) => ticket.guildId === guildId);
+  }
+
   async updateTicket(
     guildId: string,
     ticketId: string,

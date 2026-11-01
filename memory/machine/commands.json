@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "updatedAt": "2026-11-01",
   "source": "packages/kernel ModuleRegistry catalog()",
-  "roots": 13,
-  "subcommands": 84,
-  "actions": 97,
+  "roots": 14,
+  "subcommands": 90,
+  "actions": 104,
   "limit": 100,
   "commands": [
     {
@@ -733,6 +733,56 @@
           "name": "disable",
           "description": "Stop capturing and delivering events; keep the configuration.",
           "options": []
+        }
+      ]
+    },
+    {
+      "name": "analytics",
+      "moduleId": "analytics",
+      "description": "Read-only guild analytics from the bot's own logs, cases, invites, tickets and command usage.",
+      "options": [],
+      "subcommands": [
+        {
+          "name": "overview",
+          "description": "One-page summary of the selected window.",
+          "options": [
+            "days"
+          ]
+        },
+        {
+          "name": "members",
+          "description": "Joins, leaves, invite attribution and retention.",
+          "options": [
+            "days"
+          ]
+        },
+        {
+          "name": "messages",
+          "description": "Logged message deletes, edits and content-filter cases.",
+          "options": [
+            "days"
+          ]
+        },
+        {
+          "name": "commands",
+          "description": "Command runs, outcomes and average latency.",
+          "options": [
+            "days"
+          ]
+        },
+        {
+          "name": "tickets",
+          "description": "Ticket counts, open state and close times.",
+          "options": [
+            "days"
+          ]
+        },
+        {
+          "name": "export",
+          "description": "Export the snapshot as JSON in an embed.",
+          "options": [
+            "days"
+          ]
         }
       ]
     }

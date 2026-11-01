@@ -8,7 +8,7 @@ I still read it after the Discord message is gone?".
 
 Logging is a staple of Dyno and Carl-bot, and a common reason servers keep a
 second bot. Keystone ships it as its own module so the same event stream can
-later feed `/analytics` and case review without a second collection path.
+feed `/analytics` and case review without a second collection path.
 
 The module is deliberately **off until configured**. A fresh install must not
 start storing deleted message content because a module happened to be present in
@@ -128,8 +128,8 @@ arrive; message and moderation events continue.
 
 ## Non-goals
 
-- A hosted log search UI. The JSON export and the future `/analytics` root read
-  the same rows; this pass does not add a second query surface.
+- A hosted log search UI. The JSON export and `/analytics` read the same rows;
+  logging does not add a second query surface.
 - Voice, role, channel or audit-log ingestion. Discord's audit log is a separate
   permission and API; only the five named event kinds are captured here.
 - Guaranteed delivery. Delivery is best-effort by design; the ledger is the
@@ -140,7 +140,8 @@ arrive; message and moderation events continue.
 
 ## Limits respected
 
-- One new global root (`13/100`). Seven subcommands cost no extra slot.
+- One new global root (`14/100` now that analytics has landed). Seven
+  subcommands cost no extra slot.
 - One indexed table and an append-only write per enabled event.
 - Export is capped at ten events and trimmed to fit one embed.
 - No paid service and no network call beyond Discord.

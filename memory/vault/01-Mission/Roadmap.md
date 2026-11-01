@@ -162,15 +162,21 @@ slash check remains open. Pass 28 added audit logging as the seventh module:
 `/logging setup | channel | events | status | retention | export | disable`,
 five event kinds, an append-only `logging_events` ledger, per-event toggles and
 retention pruning. Message edit/delete and moderation cases were proven live in
-the operator channel; member join/leave are adapter-tested only. The ledger is
-now **13 roots / 84 subcommands / 97 actions**. The rest of this phase is open.
+the operator channel; member join/leave are adapter-tested only. Pass 29 added
+guild analytics as the eighth module: `/analytics overview | members | messages
+| commands | tickets | export` reads `logging_events`, `cases`, `invite_joins`,
+`tickets` and a new append-only `command_usage` ledger; it adds no analytics
+table. The live bridge matched 2 stored audit rows to 2 logged events and one MCP
+edit/delete to 1 edited / 1 deleted. The ledger is now **14 roots / 90
+subcommands / 104 actions**. The rest of this phase is open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.
-- New domains: forms/applications, events/RSVP, role persistence, modmail,
-  analytics; plus goodbye messages, YouTube/Twitch/RSS feeds, temp ban/role
-  expiry, join-gate expiry, panic mode and case export. Invites, the link,
-  profanity and zalgo filters, and auto-responders are done (above).
+- New domains: forms/applications, events/RSVP, role persistence, modmail; plus
+  goodbye messages, YouTube/Twitch/RSS feeds, temp ban/role expiry, join-gate
+  expiry, panic mode, case export and `command_usage` retention. Invites, the
+  link, profanity and zalgo filters, auto-responders and analytics are done
+  (above).
 - `/config` hub; `/help` shipped in pass 26; command-budget audit remains a gate.
 - Split `modules/community` into domain folders, then extract a module only if the
   "add a feature in an afternoon" test still fails.

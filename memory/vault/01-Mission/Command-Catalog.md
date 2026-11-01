@@ -5,7 +5,7 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**13 roots · 84 subcommands · 97 total actions · 13/100 global roots used.**
+**14 roots · 90 subcommands · 104 total actions · 14/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
@@ -26,6 +26,7 @@ root, then choose a subcommand.
 | `/ai` | `ai` | 11 |
 | `/invites` | `invites` | 3 |
 | `/logging` | `logging` | 7 |
+| `/analytics` | `analytics` | 6 |
 
 ## `/ping`
 
@@ -196,6 +197,19 @@ Log message, member and moderation events in one audit channel.
 | `/logging retention` | Set how many days to keep events, then prune older rows. | `days` |
 | `/logging export` | Export the settings and the ten newest events as JSON. | — |
 | `/logging disable` | Stop capturing and delivering events; keep the configuration. | — |
+
+## `/analytics`
+
+Read-only guild analytics from the bot's own logs, cases, invites, tickets and command usage.
+
+| Subcommand | Description | Options |
+| --- | --- | --- |
+| `/analytics overview` | One-page summary of the selected window. | `days` |
+| `/analytics members` | Joins, leaves, invite attribution and retention. | `days` |
+| `/analytics messages` | Logged message deletes, edits and content-filter cases. | `days` |
+| `/analytics commands` | Command runs, outcomes and average latency. | `days` |
+| `/analytics tickets` | Ticket counts, open state and close times. | `days` |
+| `/analytics export` | Export the snapshot as JSON in an embed. | `days` |
 
 ## How to change this page
 

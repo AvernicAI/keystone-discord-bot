@@ -1571,7 +1571,7 @@
           "phase": "P7",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "12 global roots expose 77 real Discord subcommands instead of hidden flat action options. `/help` reads the live registry, the catalog is generated, boot sync compares the full option tree, `commands:doctor` reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for `/mod ban`. Gateway `InteractionCreate` remains human-only.",
+          "note": "14 global roots expose 90 real Discord subcommands instead of hidden flat action options. `/help` reads the live registry, the catalog is generated, boot sync compares the full option tree, `commands:doctor` reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for `/mod ban`. Gateway `InteractionCreate` remains human-only.",
           "evidence": [
             "packages/kernel/src/registry.test.ts",
             "apps/bot/src/adapt.test.ts",
@@ -2072,21 +2072,32 @@
           "id": "parity-extra.message-and-member-analytics",
           "name": "Message and member analytics",
           "competitors": {},
-          "phase": "P6",
-          "status": "planned",
+          "phase": "P7",
+          "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Master-Plan.md",
-          "note": "Aggregate counts only; no message content.",
-          "liveVerified": false
+          "note": "/analytics overview|members|messages reads the audit ledger, cases, invite joins and tickets; aggregate counts only, never message content. Live 2026-11-01: 2 stored events matched 2 logged events, and one MCP edit plus one delete produced exactly 1 edited / 1 deleted.",
+          "evidence": [
+            "modules/analytics/src/analytics.test.ts",
+            "modules/analytics/src/memory.ts",
+            "memory/vault/04-Modules/analytics/Status.md"
+          ],
+          "liveVerified": true
         },
         {
           "id": "parity-extra.command-usage-analytics",
           "name": "Command usage analytics",
           "competitors": {},
-          "phase": "P6",
-          "status": "planned",
+          "phase": "P7",
+          "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Master-Plan.md",
-          "note": "Per-command counters and latency.",
-          "liveVerified": false
+          "note": "/analytics commands|tickets reads the append-only command_usage ledger: runs, ok/blocked/error, average latency and top commands. Live 2026-11-01: the reported run count rose 0 -> 3 -> 4 exactly as bridge commands completed, because the current command records after replying.",
+          "evidence": [
+            "packages/kernel/src/dispatch.ts",
+            "packages/db/src/command-usage-store.ts",
+            "packages/db/src/analytics-store.test.ts",
+            "memory/vault/04-Modules/analytics/Status.md"
+          ],
+          "liveVerified": true
         },
         {
           "id": "parity-extra.captcha-verification",

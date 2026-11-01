@@ -215,6 +215,9 @@ importers:
       '@keystone/module-ai':
         specifier: workspace:*
         version: link:../../modules/ai
+      '@keystone/module-analytics':
+        specifier: workspace:*
+        version: link:../../modules/analytics
       '@keystone/module-catalog':
         specifier: workspace:*
         version: link:../../packages/module-catalog
@@ -310,6 +313,19 @@ importers:
       '@keystone/module-moderation':
         specifier: workspace:*
         version: link:../moderation
+      '@keystone/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
+
+  modules/analytics:
+    dependencies:
+      '@keystone/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
       '@keystone/testing':
         specifier: workspace:*
         version: link:../../packages/testing
@@ -446,6 +462,9 @@ importers:
       '@keystone/module-ai':
         specifier: workspace:*
         version: link:../../modules/ai
+      '@keystone/module-analytics':
+        specifier: workspace:*
+        version: link:../../modules/analytics
       '@keystone/module-community':
         specifier: workspace:*
         version: link:../../modules/community

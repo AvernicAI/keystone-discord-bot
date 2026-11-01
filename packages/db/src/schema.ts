@@ -310,6 +310,24 @@ export const loggingEvents = pgTable(
   (table) => [index("logging_events_guild_created_idx").on(table.guildId, table.createdAt)],
 );
 
+/** One row per dispatched guild command. Aggregates are queries, not counters. */
+export const commandUsage = pgTable(
+  "command_usage",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    guildId: text("guild_id").notNull(),
+    command: text("command").notNull(),
+    path: text("path").notNull().default(""),
+    status: text("status").notNull(),
+    durationMs: integer("duration_ms").notNull(),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    index("command_usage_guild_created_idx").on(table.guildId, table.createdAt),
+    index("command_usage_guild_command_idx").on(table.guildId, table.command),
+  ],
+);
+
 /** Monotonic per-guild case numbers; the unique index on cases is the backstop. */
 export const caseCounters = pgTable("case_counters", {
   guildId: text("guild_id").primaryKey(),
@@ -376,6 +394,7 @@ export const schema = {
   aiUsage,
   inviteJoins,
   loggingEvents,
+  commandUsage,
   caseCounters,
   jobReceipts,
   imports,

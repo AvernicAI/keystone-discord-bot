@@ -27,6 +27,9 @@ export interface DispatchDeps {
   invites?: import("./invites").InvitePort;
   ai?: import("./ai").AiPort;
   logging?: import("./logging").LoggingPort;
+  analytics?: import("./analytics").AnalyticsStore;
+  /** Optional: records one real row per dispatched guild command. */
+  usage?: import("./analytics").CommandUsageStore;
   /** Optional: when absent, tracing is a no-op and costs nothing. */
   telemetry?: Telemetry;
   /** Injectable clock; defaults to the real one. */
@@ -116,22 +119,47 @@ export async function dispatchCommand(
     invites: deps.invites,
     ai: deps.ai,
     logging: deps.logging,
+    analytics: deps.analytics,
+  };
+
+  const startedAt = deps.now?.() ?? Date.now();
+  const recordUsage = async (status: DispatchStatus): Promise<void> => {
+    if (!deps.usage || !interaction.guildId) return;
+    try {
+      await deps.usage.record({
+        guildId: interaction.guildId,
+        command: interaction.commandName,
+        path: commandPath.join(" "),
+        status: status === "ok" ? "ok" : status === "blocked" ? "blocked" : "error",
+        durationMs: Math.max(0, (deps.now?.() ?? Date.now()) - startedAt),
+        at: new Date(deps.now?.() ?? Date.now()).toISOString(),
+      });
+    } catch (error) {
+      // Analytics is an observer. A failed write must never turn a successful
+      // command into an error, and the warning is the only side effect.
+      deps.logger.warn("command usage record failed", {
+        command: interaction.commandName,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   };
 
   try {
     const spanName = ["command", interaction.commandName, ...commandPath].join(" ");
-    return await telemetry.withSpan(spanName, async () => {
+    const result = await telemetry.withSpan(spanName, async () => {
       for (const guard of registered.definition.guards ?? []) {
-        const result = await guard(ctx);
-        if (!result.ok) {
-          await respond(ctx, { content: result.message, ephemeral: true });
-          return { status: "blocked", message: result.message };
+        const guardResult = await guard(ctx);
+        if (!guardResult.ok) {
+          await respond(ctx, { content: guardResult.message, ephemeral: true });
+          return { status: "blocked", message: guardResult.message } as DispatchOutcome;
         }
       }
 
       await registered.definition.execute(ctx);
-      return { status: "ok" };
+      return { status: "ok" } as DispatchOutcome;
     });
+    await recordUsage(result.status);
+    return result;
   } catch (error) {
     const userMessage =
       error instanceof UserError
@@ -146,6 +174,7 @@ export async function dispatchCommand(
     });
 
     await respond(ctx, { content: userMessage, ephemeral: true });
+    await recordUsage("error");
     return { status: "error", message: userMessage };
   }
 }

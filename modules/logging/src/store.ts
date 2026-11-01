@@ -37,6 +37,11 @@ export class InMemoryLoggingStore implements LoggingStore {
     return this.#events.filter((record) => record.guildId === guildId).length;
   }
 
+  /** Read-only helper for the in-memory analytics adapter; not part of the port. */
+  records(guildId: string): readonly LogEventRecord[] {
+    return this.#events.filter((record) => record.guildId === guildId).map((record) => ({ ...record }));
+  }
+
   async prune(guildId: string, before: string): Promise<number> {
     const beforeCount = this.#events.length;
     for (let index = this.#events.length - 1; index >= 0; index -= 1) {

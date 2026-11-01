@@ -98,6 +98,11 @@ export class InMemoryCaseStore implements CaseStore {
     });
   }
 
+  /** Read-only helper for the in-memory analytics adapter; not part of the port. */
+  records(guildId: string): readonly ModerationCase[] {
+    return [...this.#cases.values()].filter((record) => record.guildId === guildId);
+  }
+
   /** Test/read-only helper; the production store reads the same table. */
   events(caseId: string): readonly CaseEvent[] {
     return this.#events.get(caseId) ?? [];

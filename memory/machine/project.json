@@ -6,13 +6,13 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-01",
   "phase": "P7",
-  "lastPass": "journal/2026-11-01-pass-28.md",
+  "lastPass": "journal/2026-11-01-pass-29.md",
   "metrics": {
-    "commands": 13,
-    "subcommands": 84,
+    "commands": 14,
+    "subcommands": 90,
     "commandLimit": 100,
-    "modules": 7,
-    "tests": 283
+    "modules": 8,
+    "tests": 290
   },
   "modules": [
     {
@@ -166,6 +166,23 @@
         "GuildMembers",
         "MessageContent"
       ]
+    },
+    {
+      "id": "analytics",
+      "name": "Analytics",
+      "status": "beta",
+      "phase": "P7",
+      "codePath": "modules/analytics",
+      "specPath": "vault/04-Modules/analytics/Spec.md",
+      "statusPath": "vault/04-Modules/analytics/Status.md",
+      "teachingPath": "vault/04-Modules/analytics/Teaching.md",
+      "commands": [
+        "analytics"
+      ],
+      "intents": [
+        "Guilds"
+      ],
+      "premium": false
     }
   ],
   "decisions": [

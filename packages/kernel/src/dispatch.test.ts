@@ -187,4 +187,28 @@ describe("dispatchCommand", () => {
       status: "unknown-command",
     });
   });
+
+  it("records one usage row and never fails the command when analytics throws", async () => {
+    const deps = buildDeps();
+    const rows: import("./analytics").CommandUsageInput[] = [];
+    deps.usage = {
+      record: async (input) => {
+        rows.push(input);
+      },
+    };
+
+    await dispatchCommand(deps, new FakeInteraction({ commandName: "guild-only" }));
+    expect(rows).toEqual([
+      expect.objectContaining({ guildId: "1", command: "guild-only", path: "", status: "ok" }),
+    ]);
+
+    deps.usage = {
+      record: async () => {
+        throw new Error("analytics is down");
+      },
+    };
+    await expect(
+      dispatchCommand(deps, new FakeInteraction({ commandName: "guild-only" })),
+    ).resolves.toEqual({ status: "ok" });
+  });
 });

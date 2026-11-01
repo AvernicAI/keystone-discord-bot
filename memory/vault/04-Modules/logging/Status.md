@@ -3,12 +3,12 @@
 ## Now
 
 P7 audit logging is complete in-repo and live-proven for message and moderation
-events. It is the seventh module and the event source the later `/analytics` root
-is meant to read.
+events. It is the seventh module and one event source `/analytics` now reads
+(pass 29).
 
 - `/logging` is registered through the shared catalog with `setup`, `channel`,
   `events`, `status`, `retention`, `export` and `disable`. The command ledger is
-  **13 roots / 84 subcommands / 97 actions**.
+  **14 roots / 90 subcommands / 104 actions** after analytics landed.
 - An event is appended before delivery. A disabled module or a disabled event
   writes nothing; a configured channel that fails still leaves the row behind.
 - The five event kinds are message delete, message edit, member join, member
@@ -133,7 +133,7 @@ case that arrived through the case observer rather than the message adapter.
   and capture the two embeds.
 - Add a live delivery-failure case by deleting the configured channel, then
   confirm the ledger still contains the event.
-- Reuse the `logging_events` stream for `/analytics` aggregates and for the
-  moderation case timeline instead of adding a second event table.
+- `/analytics` now reads this ledger (pass 29); keep the stream append-only and
+  do not add a second event table for a future view.
 - Dashboard reads for the ledger are intentionally out of scope for this pass;
   the JSON export is the operator surface today.

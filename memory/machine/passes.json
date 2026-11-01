@@ -365,6 +365,19 @@
         "budget": "13/100 roots · 84 subcommands",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-29",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Guild analytics: the eighth module adds /analytics overview|members|messages|commands|tickets|export as a read-only aggregate over logging_events, cases, invite_joins, tickets and a new append-only command_usage ledger. Every printed number names its source table; SQL and in-memory adapters share one port. Live bridge proof matched 2 stored audit events to 2 logged events and one MCP edit/delete to exactly 1 edited/1 deleted; Discord reports 14 roots / 90 subcommands.",
+      "journal": "journal/2026-11-01-pass-29.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "290",
+        "budget": "14/100 roots · 90 subcommands",
+        "memory": "current"
+      }
     }
   ]
 }

@@ -75,4 +75,9 @@ export class InMemoryInviteStore implements InviteStore {
       )
       .sort((a, b) => b.joinedAt.localeCompare(a.joinedAt))[0];
   }
+
+  /** Read-only helper for the in-memory analytics adapter; not part of the port. */
+  records(guildId: string): readonly InviteJoinRecord[] {
+    return this.#joins.filter((join) => join.guildId === guildId).map((join) => ({ ...join }));
+  }
 }

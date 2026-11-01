@@ -18,19 +18,20 @@ API tokens and webhooks are the remaining P6 work. P7 now has invite tracking as
 a sixth module (attribution, a joins/retention leaderboard and advisory
 suspicious-join flags), audit logging as a seventh module (five event kinds, one
 operator channel and a retained ledger), link/profanity/zalgo content filters,
-and an auto-responder for exact, contains and regex triggers. The command ledger
-is **13/100 roots** with **84 real subcommands** and **97 actions**, there are
-**7 modules**, and `pnpm check` covers **283 tests across 44 files** without a
-Discord token, database or network. Live on 2026-11-01: the bot logged in and
-Discord reports **13 roots / 84 subcommands**, answered a Qwen3:8b mention in
-`#ai-chat`, and ran real moderation, community, AI, invite, logging and
-content-filter commands through a development message bridge, including
-`/help`’s generated catalog. The dashboard was booted in memory mode and
+an auto-responder for exact, contains and regex triggers, and guild analytics as
+an eighth module. The command ledger is **14/100 roots** with **90 real
+subcommands** and **104 actions**, there are **8 modules**, and `pnpm check`
+covers **290 tests across 46 files** without a Discord token, database or
+network. Live on 2026-11-01: the bot logged in and Discord reports **14 roots /
+90 subcommands**, answered a Qwen3:8b mention in `#ai-chat`, and ran real
+moderation, community, AI, invite, logging, analytics and content-filter
+commands through a development message bridge, including `/help`’s generated
+catalog. The dashboard was booted in memory mode and
 exercised over real HTTP, including authenticated settings writes against a fake
 OAuth port; live Discord OAuth is not claimed. Slash `InteractionCreate` from a
 human client is still the next live check. The configured local Postgres/Redis
 endpoints are not reachable on this machine (no Docker or service), so the live
-window remains memory mode; see [pass 28](memory/journal/2026-11-01-pass-28.md).
+window remains memory mode; see [pass 29](memory/journal/2026-11-01-pass-29.md).
 
 This repo is both the product and the course: every module has a spec, tests, a
 teaching note and a status page. The docs are the source of truth, not a
@@ -245,8 +246,8 @@ refusals. See [the community spec](memory/vault/04-Modules/community/Spec.md).
 
 ## Commands
 
-Discord's global limit is 100 **roots**; Keystone uses **13** and exposes **84
-real subcommands** (97 total actions). A subcommand does not spend another global
+Discord's global limit is 100 **roots**; Keystone uses **14** and exposes **90
+real subcommands** (104 total actions). A subcommand does not spend another global
 slot, which is why the picker now expands instead of showing one flat `action`
 option. Slash commands are the product surface. In development, `DEV_GUILD_ID`
 also enables the `!` bridge for message-only harnesses.
@@ -270,8 +271,10 @@ the same live registry.
 | `/ai` | `status`, `ask`, `chat`, `classify`, `docs-add`, `docs-list`, `docs-remove`, `deflect`, `explain`, `summary`, `budget` | Opt-in server-doc answers, advisory classification, explanations, summaries and hard caps |
 | `/invites` | `leaderboard`, `stats`, `who` | Invite attribution, joins/retention totals and who invited a member (`who` takes `user`) |
 | `/logging` | `setup`, `channel`, `events`, `status`, `retention`, `export`, `disable` | One audit channel for message, member and moderation events, with per-event toggles and retention pruning |
+| `/analytics` | `overview`, `members`, `messages`, `commands`, `tickets`, `export` | Read-only aggregates over the audit ledger, cases, invite joins, tickets and command usage; every view names its source rows |
 
-`/ticket summary` and `/ai summary` require `ManageGuild`. `/ai docs-*` and
+`/analytics` and its six views require `ManageGuild`. `/ticket summary` and
+`/ai summary` require `ManageGuild`. `/ai docs-*` and
 `/ai budget` require `ManageGuild`; `/ai classify` and `/ai deflect` require
 `ManageMessages`. AI is advisory: it never punishes, deletes or claims an action
 happened.
@@ -331,7 +334,7 @@ Everything below is free. No feature is moved behind a paywall.
 
 ### Platform and operations
 
-- Module registry with a CI-enforced 100-root budget (currently 13 roots, 84
+- Module registry with a CI-enforced 100-root budget (currently 14 roots, 90
   subcommands).
 - Real Discord subcommand tree: flat `action` options are gone from every
   existing hub, `/help` is generated from the registry, boot sync compares the
@@ -364,6 +367,10 @@ Everything below is free. No feature is moved behind a paywall.
   one operator channel, with five toggles, a 1–365 day retention window and a
   JSON export. Events are stored before delivery, so a broken channel keeps the
   ledger.
+- Guild analytics: `/analytics overview | members | messages | commands |
+  tickets | export` reads the bot's own ledgers. It adds no analytics table, and
+  every view prints its source row counts, so a number can be checked against
+  the table that produced it. Admin-only, guild-scoped and capped at 90 days.
 - An appeal button on case cards.
 
 ### Community
@@ -402,9 +409,9 @@ Everything below is free. No feature is moved behind a paywall.
 - **P6 remaining:** schema-driven field widgets, the Next.js shell, fleet
   view/templates, token refresh/revocation, scoped public API tokens,
   per-token rate limits, idempotency, webhooks and OpenAPI.
-- **P7:** invite tracking, audit logging, the link/profanity/zalgo filters and
-  auto-responders are done; the rest is parity completion (forms, events, role
-  persistence, modmail, analytics), Components V2 UI and i18n.
+- **P7:** invite tracking, audit logging, the link/profanity/zalgo filters,
+  auto-responders and guild analytics are done; the rest is parity completion
+  (forms, events, role persistence, modmail), Components V2 UI and i18n.
 - **P8:** bring-your-own Lavalink music, disabled by default; no bundled streamer.
 - **P9:** docs site, 14-lesson curriculum, release workflow, self-host kit.
 - **P10:** sharding, load tests, SLOs, Discord.js v15 migration.
@@ -424,14 +431,15 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
-| P7 Command tree | Done | 13 roots · 84 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
+| P7 Command tree | Done | 14 roots · 90 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
 | P7 Slash harness | Harness done | Synthetic nested `/mod ban` through the real adapter + dispatch; gateway `InteractionCreate` still human-only |
 | P7 Audit logging | Done | `/logging`; five event kinds, per-event toggles, append-only ledger, retention; message and moderation events live-proven |
-| P7 Parity completion | **In progress** | Invite tracking, audit logging, link/profanity/zalgo filters and auto-responders shipped; forms, events, expiry, modmail and UI/i18n open |
+| P7 Analytics | Done | `/analytics`; six read-only views over audit, cases, invites, tickets and command usage; live counts cross-checked against the ledger |
+| P7 Parity completion | **In progress** | Invite tracking, audit logging, link/profanity/zalgo filters, auto-responders and analytics shipped; forms, events, expiry, modmail and UI/i18n open |
 
-Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 12
-global roots with 84 subcommands (including `/help`, `/invites` and `/logging`)
-with no drift, and Qwen3:8b answered a mention in `#ai-chat`. A development `!`
+Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 14
+global roots with 90 subcommands (including `/analytics`, `/help`, `/invites`
+and `/logging`) with no drift, and Qwen3:8b answered a mention in `#ai-chat`. A development `!`
 bridge ran `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
 query=ban`, `!ai status`, `!mod history`, `!rank leaderboard`, `!invites
 leaderboard`, `!invites who` and `!logging status | events | retention | export`
@@ -464,9 +472,9 @@ transcript showed exactly one reply for `!mod history` and one for
 `!help search query=ban`. See [pass 27](memory/journal/2026-11-01-pass-27.md).
 
 Command-tree live evidence (2026-11-01, pass 28): the Discord REST command set
-reports `AllinOne` with **13 global roots and 84 live subcommands**, including
-`/logging`; pass 26's `commands:doctor` run reported 12 roots / 77 subcommands at
-that point. The `!` bridge then returned the generated
+reports `AllinOne` with **14 global roots and 90 live subcommands**, including
+`/analytics` and `/logging`; pass 26's `commands:doctor` run reported 12 roots /
+77 subcommands at that point. The `!` bridge then returned the generated
 catalog for `!help commands`, the module map for `!help browse`, one search hit
 for `!help search query=ban`, a case list for `!mod history`, and the AI status
 embed for `!ai status`. See [pass 26](memory/journal/2026-11-01-pass-26.md). A
@@ -491,6 +499,19 @@ versioned JSON with the settings and those three events. Each reply appeared
 once. Member join/leave delivery is covered by the adapter test but was not
 exercised with a second account. See
 [pass 28](memory/journal/2026-11-01-pass-28.md).
+
+Analytics live evidence (2026-11-01, pass 29): after a fresh memory-mode boot,
+`!logging setup channel=#ai-chat` enabled the ledger. An MCP message was edited,
+then deleted; `!logging status` reported **2 stored** events, and
+`!analytics overview days=7` printed **2 logged events** for the same window.
+`!analytics messages days=7` printed exactly **1 deleted · 1 edited**, matching
+the two MCP actions. `!analytics commands days=7` rose from 0 to 3 to 4 as bridge
+commands completed, because the current `/analytics` run is recorded after its
+reply. `pnpm commands:doctor` reported `Registry 14 roots · 90 subcommands` and
+`Discord 14 global chat-input commands · 90 subcommands`. The MCP text reader
+does not render embeds, so the embed fields, top-command list and JSON export
+were covered by [the command test](modules/analytics/src/analytics.test.ts), not
+read back live. See [pass 29](memory/journal/2026-11-01-pass-29.md).
 
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and

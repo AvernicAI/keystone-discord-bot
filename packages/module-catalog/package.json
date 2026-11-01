@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@keystone/module-ai": "workspace:*",
+    "@keystone/module-analytics": "workspace:*",
     "@keystone/module-community": "workspace:*",
     "@keystone/module-diagnostics": "workspace:*",
     "@keystone/module-invites": "workspace:*",

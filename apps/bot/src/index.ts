@@ -84,6 +84,8 @@ async function main(): Promise<void> {
     invites: runtime.invites,
     ai: runtime.ai,
     logging: runtime.logging,
+    analytics: runtime.analytics,
+    usage: runtime.usage,
   };
 
   const loggingService = new LoggingService(

@@ -10,24 +10,25 @@ refuses to boot when it fails.
 ## Current ledger
 
 ```text
-13/100 global roots used (87 left)
-84 subcommands · 97 total actions
+14/100 global roots used (86 left)
+90 subcommands · 104 total actions
 status: OK
 
-  /command  module       subs  opts  chars
-  /ai       ai             11     2   1954
-  /rank     community      12     2   2108
-  /ticket   community       8     2   1450
-  /tools    community      24     5   7224
-  /about    diagnostics     0     0    131
-  /help     diagnostics     5     1    816
-  /ping     diagnostics     0     0    103
-  /invites  invites         3     1    672
-  /logging  logging         7     2   1606
-  /appeal   moderation      0     2    282
-  /mod      moderation     14     4   3991
-  /verify   moderation      0     0    120
-  /setup    setup           0     0    130
+  /command    module       subs  opts  chars
+  /ai         ai             11     2   1954
+  /analytics  analytics       6     1   1539
+  /rank       community      12     2   2108
+  /ticket     community       8     2   1450
+  /tools      community      24     5   7224
+  /about      diagnostics     0     0    131
+  /help       diagnostics     5     1    816
+  /ping       diagnostics     0     0    103
+  /invites    invites         3     1    672
+  /logging    logging         7     2   1606
+  /appeal     moderation      0     2    282
+  /mod        moderation     14     4   3991
+  /verify     moderation      0     0    120
+  /setup      setup           0     0    130
 ```
 
 `pnpm budget` prints the live table. It is the source of truth; this page only
@@ -75,10 +76,10 @@ would duplicate the hub and spend a command for no user benefit.
 | `/tools` | embeds, giveaways, reminders, feeds | `/tools embed edit` |
 | `/help` | discovery, generated from the registry | `/help moderation` |
 
-Thirteen roots today for a bot with dozens of implemented actions. The remaining
-87 slots are held for context menus, Activities, and features that genuinely
-need their own name. `/help`, `/setup` and `/logging` are roots; `/config`,
-`/analytics`, `/export` and `/music` arrive with their modules, not as empty
+Fourteen roots today for a bot with dozens of implemented actions. The remaining
+86 slots are held for context menus, Activities, and features that genuinely
+need their own name. `/help`, `/setup`, `/logging` and `/analytics` are roots;
+`/config`, `/export` and `/music` arrive with their modules, not as empty
 advertisements.
 
 ## Component budget (the other 100-limit)

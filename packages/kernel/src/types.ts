@@ -227,6 +227,8 @@ export interface CommandContext {
   readonly ai?: import("./ai").AiPort;
   /** Present when the composition root wired the P7 audit-log adapters. */
   readonly logging?: import("./logging").LoggingPort;
+  /** Present when the composition root wired the read-only analytics store. */
+  readonly analytics?: import("./analytics").AnalyticsStore;
 }
 
 export type GuardResult = { ok: true } | { ok: false; message: string };
