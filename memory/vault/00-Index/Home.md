@@ -74,6 +74,12 @@ https://github.com/RNGBubba/keystone-discord-bot
   `pnpm commands:resync` cycle.
 - **No paid dependencies:** the project uses public GitHub, Discord, local
   Postgres/Redis/Ollama and free in-process test engines only.
+- **Slash harness (pass 27):** a nested `/mod ban` payload crosses the real
+  adapter and dispatch and creates a case; this is structural, not a gateway
+  `InteractionCreate`. Two live bot process trees were found double-posting and
+  stopped, leaving one bot and one reply per command. The updated `.env` points
+  at localhost Postgres/Redis, but neither service is installed here, so the live
+  window remains memory mode.
 - **Live 2026-11-01:** AI Team#5758 logged in, cleared and re-registered 12
   roots with 77 subcommands (then fetched Discord's shape to prove it), and
   qwen3:8b via Ollama answered mentions in `#ai-chat`. A dev-only `!` bridge

@@ -1549,11 +1549,12 @@
           "phase": "P7",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "12 global roots expose 77 real Discord subcommands instead of hidden flat action options. `/help` reads the live registry, the catalog is generated, boot sync compares the full option tree, and `commands:doctor` reports the live shape.",
+          "note": "12 global roots expose 77 real Discord subcommands instead of hidden flat action options. `/help` reads the live registry, the catalog is generated, boot sync compares the full option tree, `commands:doctor` reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for `/mod ban`. Gateway `InteractionCreate` remains human-only.",
           "evidence": [
             "packages/kernel/src/registry.test.ts",
             "apps/bot/src/adapt.test.ts",
             "apps/bot/src/command-sync.test.ts",
+            "apps/bot/src/interaction-harness.test.ts",
             "modules/diagnostics/src/diagnostics.test.ts"
           ],
           "liveVerified": true

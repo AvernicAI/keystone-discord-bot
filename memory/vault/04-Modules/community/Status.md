@@ -31,7 +31,7 @@ command tests.
 ## Verified
 
 ```text
-pnpm check                            exit 0 · 253 tests / 40 files
+pnpm check                            exit 0 · 255 tests / 41 files
   responder.test.ts                   5 tests (auto-responder service)
   community.test.ts                  12 tests
   extras.test.ts                      7 tests

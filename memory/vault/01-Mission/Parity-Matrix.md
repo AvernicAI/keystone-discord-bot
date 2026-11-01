@@ -147,7 +147,7 @@ checked. See [[Master-Plan]] for the research program.
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Web dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | P6 | Node/render first; field widgets and fleet open |
-| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 12 roots / 77 subcommands; `/help` generated; shipped pass 26 |
+| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 12 roots / 77 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human) |
 | Multi-server fleet | ❔ | ❔ | ❔ | ✅ | ❔ | P6 | One view, per-guild authz |
 | Config templates | ❔ | ❔ | ❔ | ❔ | ❔ | P6 | Apply to N guilds |
 | Drift detection | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | **Our edge** |

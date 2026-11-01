@@ -24,7 +24,7 @@ P2 core shipped in pass 05 (2026-11-01).
 ## Verified
 
 ```
-pnpm test                                  # 253 tests / 40 files
+pnpm test                                  # 255 tests / 41 files
 pnpm vitest run modules/moderation        # 24 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal, verify, native plan
 pnpm test -- packages/db/src/cases.test.ts # 2 PGlite case-store tests
 pnpm budget                                # 12/100 roots · 77 subcommands, status OK
@@ -84,6 +84,13 @@ P7 profanity/zalgo evidence (pass 24):
   `dryRun: false` and `profanity: "delete"`, the `pineapple` fixture disappeared
   from `read_messages` while `!mod filters` still showed case #1 open. The seed
   was restored to `profanity: "alert"` before the commit.
+- **Synthetic slash proof (pass 27):**
+  `apps/bot/src/interaction-harness.test.ts` sends Discord's nested
+  `/mod ban user:@target reason:"posting raid invites" dry_run:false` payload
+  through the real `asInteractionLike` adapter and `dispatchCommand`; the case
+  is created, the ban port receives the target and reason, and an unknown
+  subcommand is rejected before any side effect. This is not a gateway run and
+  does not replace a live ban.
 
 ## Proven vs still needs a live gateway
 
@@ -94,6 +101,7 @@ P7 profanity/zalgo evidence (pass 24):
 | Dry-run makes no punitive call | Yes | Same |
 | Postgres case numbering/events | Yes, PGlite | Run against a Postgres server |
 | Discord ban/kick/timeout/purge/lock | No | A live guild with the bot's permissions |
+| Slash `/mod ban` argument parsing | Yes, synthetic nested payload through the real adapter and dispatch | A human `/mod ban` in staging |
 | Native AutoMod sync | Plan tested; adapter not run | Enable `nativeAutoMod.sync` in staging |
 | Gateway joins/messages/audit events | Messages yes (link/profanity/zalgo live); joins/audit no | A live guild with privileged intents |
 | Link filter on a real message | Yes, live with the dev marker in `#ai-chat` | Repeat with a human author in staging |

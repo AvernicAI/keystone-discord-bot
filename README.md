@@ -19,7 +19,7 @@ a sixth module (attribution, a joins/retention leaderboard and advisory
 suspicious-join flags), link/profanity/zalgo content filters, and an
 auto-responder for exact, contains and regex triggers. The command ledger is
 **12/100 roots** with **77 real subcommands** and **89 actions**, there are **6
-modules**, and `pnpm check` covers **253 tests across 40 files** without a
+modules**, and `pnpm check` covers **255 tests across 41 files** without a
 Discord token, database or network. Live on 2026-11-01: the bot logged in,
 registered 12 roots and 77 subcommands through Discord, answered a Qwen3:8b
 mention in `#ai-chat`, and ran real moderation, community, AI, invite and
@@ -27,7 +27,9 @@ content-filter commands through a development message bridge, including
 `/help`’s generated catalog. The dashboard was booted in memory mode and
 exercised over real HTTP, including authenticated settings writes against a fake
 OAuth port; live Discord OAuth is not claimed. Slash `InteractionCreate` from a
-human client is still the next live check.
+human client is still the next live check. The configured local Postgres/Redis
+endpoints are not reachable on this machine (no Docker or service), so the live
+window remains memory mode; see [pass 27](memory/journal/2026-11-01-pass-27.md).
 
 This repo is both the product and the course: every module has a spec, tests, a
 teaching note and a status page. The docs are the source of truth, not a
@@ -417,11 +419,12 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
 | P7 Command tree | Done | 12 roots · 77 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
+| P7 Slash harness | Harness done | Synthetic nested `/mod ban` through the real adapter + dispatch; gateway `InteractionCreate` still human-only |
 | P7 Parity completion | **In progress** | Invite tracking, link/profanity/zalgo filters and auto-responders shipped; forms, events, expiry, modmail and UI/i18n open |
 
-Live evidence (2026-11-01): `AI Team#5758` connected, cleared and re-registered
-12 global roots with 77 subcommands (including `/help` and `/invites`), and
-Qwen3:8b answered a mention in `#ai-chat`. A development `!` bridge ran
+Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 12
+global roots with 77 subcommands (including `/help` and `/invites`) with no
+drift, and Qwen3:8b answered a mention in `#ai-chat`. A development `!` bridge ran
 `!ping`, `!about`, `!help commands`, `!help browse`, `!help search query=ban`,
 `!ai status`, `!mod history`, `!rank leaderboard`, `!invites leaderboard` and
 `!invites who` through the real dispatch pipeline. `/ticket stats` reached
@@ -442,6 +445,15 @@ repeated the delete proof for profanity: with a temporary `dryRun: false` /
 stayed open in `!mod filters`. The safe seed is back in the repository. See
 [pass 23](memory/journal/2026-11-01-pass-23.md) and
 [pass 24](memory/journal/2026-11-01-pass-24.md).
+
+Slash-harness evidence (2026-11-01, pass 27): a synthetic Discord payload for
+`/mod ban user:@target reason:"posting raid invites" dry_run:false` crossed the
+real `asInteractionLike` adapter, registry and dispatch, called the ban port and
+created case #1; an unknown subcommand was rejected before side effects. This is
+structural, not a gateway interaction. The pass also found two live bot process
+trees double-posting replies; after stopping both and starting one, the MCP
+transcript showed exactly one reply for `!mod history` and one for
+`!help search query=ban`. See [pass 27](memory/journal/2026-11-01-pass-27.md).
 
 Command-tree live evidence (2026-11-01, pass 26): `pnpm commands:doctor` reported
 `AllinOne`, 2 guilds, **12 global roots and 77 live subcommands**, with no

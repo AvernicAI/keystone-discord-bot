@@ -60,6 +60,28 @@ query=ban`, `!mod history` and `!ai status` through the real gateway. See
 [[03-Architecture/Command-Budget|Command budget]] and
 [[03-Architecture/ADR/ADR-0003-command-budget]].
 
+**P7 synthetic slash harness is in repo** (pass 27, 2026-11-01):
+`apps/bot/src/interaction-harness.test.ts` builds the nested payload Discord
+sends for `/mod ban user:@target reason:"posting raid invites" dry_run:false`
+and runs it through the real `asInteractionLike` adapter, the real module
+registry and `dispatchCommand`. It proves the adapter now flattens the nested
+`user`/`reason`/`dry_run` options, the ban port receives the target and reason,
+case #1 is created, and the reply reports the action; an unknown subcommand is
+rejected before any side effect. This is a structural harness, not a gateway
+connection — a human `InteractionCreate` remains unobserved. The pass also found
+and stopped two live bot process trees that were double-posting replies; one
+instance now answers each command once.
+
+**Live environment check (pass 27):** the updated `.env` sets `DATABASE_URL` and
+`REDIS_URL` to localhost:5432/6379, but this machine has no Docker, no
+Postgres/Redis service and no listener on either port. `pnpm db:migrate` fails
+with `AggregateError [ECONNREFUSED]`; a Redis ping fails with
+`Connection is closed`. The live window therefore remains the explicitly logged
+memory mode (`DATABASE_URL= REDIS_URL=`), and the fallback is not retired. Local
+Ollama is up (`qwen3:8b`, `qwen3-embedding:0.6b`); the first `!ai chat` after
+boot hit the provider's 30-second cold-start timeout, and a warm retry returned
+`keystone`.
+
 **P6 authorization and settings-write foundation is in repo** (passes 17–18;
 server boundaries in pass 22, 2026-11-01): Discord OAuth2 code + PKCE, sealed
 state, opaque Postgres-backed sessions, BigInt guild authorization with a
@@ -127,10 +149,12 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 253 tests / 40 files · budget 12/100 roots (77 subcommands) · memory 1986/1986
+pnpm check        exit 0 · typecheck 0 · 255 tests / 41 files · budget 12/100 roots (77 subcommands) · memory 1996/1996
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 12 roots / 77 subcommands · qwen3:8b reply in #ai-chat
+live              2026-11-01 · AI Team#5758 · 2 guilds · 12 roots / 77 subcommands · one bot process · qwen3:8b reply in #ai-chat
 live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who
+live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
+live env blocker 2026-11-01 · DATABASE_URL localhost:5432 → ECONNREFUSED · REDIS_URL localhost:6379 → Connection is closed · Docker/service absent
 live content filters 2026-11-01 · link delete returned 10008 Unknown Message; profanity delete removed the pineapple message and kept its case; safe seed produced link/profanity/zalgo cases; one reviewed; example.com not flagged
 live auto-responder 2026-11-01 · hello keystone replied, 60s cooldown suppressed the next reply, then released
 live failure      !ticket stats → ManageGuild guard (MCP bot is not admin); branch fixed and unit-tested

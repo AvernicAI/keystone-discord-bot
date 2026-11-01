@@ -103,6 +103,21 @@ XP, starboard or ticket paths. The auto-responder fixture is a seeded
 `hello keystone` trigger in the in-memory dev guild; its 60-second cooldown makes
 the live suppression/release check deterministic.
 
+## Synthetic slash harness
+
+`apps/bot/src/interaction-harness.test.ts` covers the seam the MCP cannot reach.
+It builds a Discord-shaped `ChatInputCommandInteraction` whose `options.data` is
+the nested `/mod ban` payload, then calls the real `asInteractionLike` adapter and
+the real `dispatchCommand`/registry. The test asserts the ban port receives the
+target and reason, case #1 exists, the reply reports the action, and an unknown
+subcommand is rejected before any side effect. It is a structural harness, not a
+gateway connection: only a human client can prove Discord's actual
+`InteractionCreate` delivery.
+
+Operational note from pass 27: two bot process trees were alive at once and
+every gateway event produced two replies. Stop both trees before starting a new
+one; the live check should show exactly one bot reply per command.
+
 ## What a live prefix run proves
 
 - the gateway connection, intents and `MessageCreate` handler work;

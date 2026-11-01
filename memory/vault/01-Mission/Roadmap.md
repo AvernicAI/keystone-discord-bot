@@ -156,7 +156,9 @@ per-trigger cooldown — and was proven live through the real gateway, including
 cooldown suppression and release. Pass 26 made the command tree real: every
 existing hub now registers Discord subcommands (12 roots, 77 subcommands), `/help`
 is generated from the registry, and boot sync plus `commands:doctor` compare the
-full option shape. The rest of this phase is open.
+full option shape. Pass 27 added a synthetic slash harness that crosses the real
+adapter and dispatch for a nested `/mod ban`; it is not a gateway interaction, so
+a human slash check remains open. The rest of this phase is open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.

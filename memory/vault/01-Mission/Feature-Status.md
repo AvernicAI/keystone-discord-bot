@@ -161,7 +161,7 @@ box means the code and its tests exist, not that a live guild has run it.
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Real subcommand surface | P7 | ✅ in repo | `packages/kernel/src/registry.test.ts`, `apps/bot/src/adapt.test.ts`, `apps/bot/src/command-sync.test.ts`, `modules/diagnostics/src/diagnostics.test.ts` · live verified |
+| Real subcommand surface | P7 | ✅ in repo | `packages/kernel/src/registry.test.ts`, `apps/bot/src/adapt.test.ts`, `apps/bot/src/command-sync.test.ts`, `apps/bot/src/interaction-harness.test.ts`, `modules/diagnostics/src/diagnostics.test.ts` · live verified |
 | Web dashboard | P6 | ◐ open | Login, sessions, guild reads and schema-validated settings writes are built; field widgets, fleet actions and a live OAuth round trip are not. |
 | Dashboard auth foundation | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `packages/db/src/web-store.test.ts`, `memory/vault/03-Architecture/Dashboard.md` · live unverified |
 | Dashboard settings writes | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `apps/web/src/overview.ts`, `memory/vault/03-Architecture/Dashboard.md` · live unverified |

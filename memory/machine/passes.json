@@ -339,6 +339,19 @@
         "budget": "12/100 roots · 77 subcommands",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-27",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Environment check plus synthetic slash harness: real nested /mod ban through asInteractionLike and dispatch, exact local Postgres/Redis blocker errors, Ollama warm retry, and a duplicate-process fix verified by one-reply MCP transcript.",
+      "journal": "journal/2026-11-01-pass-27.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "255",
+        "budget": "12/100 roots · 77 subcommands",
+        "memory": "current"
+      }
     }
   ]
 }
