@@ -91,6 +91,58 @@ interface GuildState {
 
 const INVITE = /(?:discord\.gg|discord\.com\/invite|discordapp\.com\/invite)\//i;
 const MENTION = /<@!?\d+>/g;
+const LINK = /https?:\/\/[^\s<>]+/gi;
+const LINK_TRAILING = /[)\].,;!?'"]+$/;
+
+interface SuspiciousLink {
+  readonly host: string;
+  readonly reason: string;
+}
+
+function normalizeHost(host: string): string {
+  return host.toLowerCase().replace(/^www\./, "").replace(/\.$/, "");
+}
+
+function hostOf(raw: string): string | undefined {
+  try {
+    const url = new URL(raw.replace(LINK_TRAILING, ""));
+    return url.hostname ? normalizeHost(url.hostname) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function onBlocklist(host: string, blocklist: readonly string[]): boolean {
+  return blocklist.some((entry) => {
+    const domain = normalizeHost(entry.replace(/^https?:\/\//i, "").split("/")[0] ?? "");
+    return domain.length > 0 && (host === domain || host.endsWith(`.${domain}`));
+  });
+}
+
+/**
+ * The local reputation check. A blocklist entry covers its subdomains; a
+ * punycode label is flagged even without an entry because it can hide a
+ * lookalike domain. Ordinary links are left to Discord and native AutoMod.
+ */
+function suspiciousLink(
+  content: string,
+  blocklist: readonly string[],
+): SuspiciousLink | undefined {
+  for (const raw of content.match(LINK) ?? []) {
+    const host = hostOf(raw);
+    if (!host) continue;
+    if (onBlocklist(host, blocklist)) {
+      return { host, reason: `The link host ${host} is on this server's blocklist.` };
+    }
+    if (host.split(".").some((label) => label.startsWith("xn--"))) {
+      return {
+        host,
+        reason: `The link host ${host} uses punycode, which can hide a lookalike domain.`,
+      };
+    }
+  }
+  return undefined;
+}
 
 function freshState(): GuildState {
   return {
@@ -269,6 +321,27 @@ export class SecurityEngine {
             evidence: { invitePosts: times.length },
           });
         }
+      }
+    }
+
+    const linkMode = settings.automod.links;
+    if (linkMode !== "off") {
+      const link = suspiciousLink(event.content, settings.automod.linkBlocklist);
+      if (link) {
+        findings.push({
+          kind: linkMode === "alert" ? "alert" : "delete-message",
+          rule: "automod.link",
+          reason: link.reason,
+          targetId: event.userId,
+          channelId: event.channelId,
+          messageId: event.messageId,
+          evidence: {
+            host: link.host,
+            match: onBlocklist(link.host, settings.automod.linkBlocklist)
+              ? "blocklist"
+              : "punycode",
+          },
+        });
       }
     }
 

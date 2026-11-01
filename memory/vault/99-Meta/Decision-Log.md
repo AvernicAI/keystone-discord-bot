@@ -108,6 +108,15 @@ including the small calls that did not deserve an ADR.
 | 64 | Suspicious-join flags are advisory only; the invite port has no punishment method | [[04-Modules/invites/Spec\|Invites spec]] |
 | 65 | Invite settings use the existing dashboard write path; `/invites` is read-only and one new root | [[04-Modules/invites/Spec\|Invites spec]] |
 
+## 2026-11-01 — P7 link / phishing filter
+
+| # | Decision | Where |
+| --- | --- | --- |
+| 66 | The link filter is a local host blocklist plus a punycode heuristic; no remote threat feed, network call or paid reputation service | [[04-Modules/moderation/Spec\|Moderation spec]] |
+| 67 | `/mod links` is an action under the existing root, not a new command; review uses the existing `/mod review case=N` path | [[04-Modules/moderation/Spec\|Moderation spec]] |
+| 68 | The only bot-author exception in the security adapter is a `keystone-test:` marker in `DEV_GUILD_ID`, stripped before evaluation; production has no marker path | [[Live-Testing]] |
+| 69 | The live proof used `alert` mode; `delete` shares the coordinator path but is not claimed as live-run until a staging deletion is recorded | [[04-Modules/moderation/Status\|Moderation status]] |
+
 ## How to add a decision
 
 1. If it changes the contract, write an ADR with **Alternatives**.

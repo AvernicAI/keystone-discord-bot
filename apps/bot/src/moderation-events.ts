@@ -10,6 +10,23 @@ const AUDIT_ACTIONS: Partial<Record<AuditLogEvent, "channel.delete" | "role.dele
 };
 
 /**
+ * A message from a bot starts with this marker only when a development
+ * harness (the Discord MCP) is asking the security engine to evaluate a
+ * fixture. The marker is stripped before evaluation, so a test message behaves
+ * exactly like the content a member would post.
+ */
+export const BOT_TEST_MARKER = "keystone-test:";
+
+export interface ModerationEventOptions {
+  /**
+   * Development-only: accept bot-authored messages in this one guild when they
+   * carry BOT_TEST_MARKER. Production passes nothing, so every bot author is
+   * still ignored there.
+   */
+  readonly botTestGuildId?: string;
+}
+
+/**
  * The gateway half of security. It does no policy: it translates discord.js
  * objects into structural events and hands them to the coordinator. That keeps
  * the scripted-raid test and production on the same decision path.
@@ -18,6 +35,7 @@ export function registerModerationEvents(
   client: Client,
   coordinator: SecurityCoordinator,
   logger: Logger,
+  options: ModerationEventOptions = {},
 ): void {
   const report = (error: unknown): void => {
     logger.error("security event failed", {
@@ -40,7 +58,18 @@ export function registerModerationEvents(
   });
 
   client.on(Events.MessageCreate, (message) => {
-    if (!message.inGuild() || message.author.bot) return;
+    if (!message.inGuild()) return;
+
+    const test =
+      Boolean(options.botTestGuildId) &&
+      message.author.bot &&
+      message.guild.id === options.botTestGuildId &&
+      message.content.startsWith(BOT_TEST_MARKER);
+    if (message.author.bot && !test) return;
+
+    const content = test ? message.content.slice(BOT_TEST_MARKER.length).trim() : message.content;
+    if (!content) return;
+
     void coordinator
       .handle({
         type: "message.create",
@@ -48,8 +77,8 @@ export function registerModerationEvents(
         channelId: message.channelId,
         messageId: message.id,
         userId: message.author.id,
-        content: message.content,
-        isBot: message.author.bot,
+        content,
+        isBot: false,
         at: Date.now(),
       })
       .catch(report);

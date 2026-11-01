@@ -34,6 +34,8 @@ export const moderationSettingsSchema = z.object({
   automod: z
     .object({
       invites: z.enum(["off", "alert", "delete", "timeout"]).default("delete"),
+      links: z.enum(["off", "alert", "delete"]).default("off"),
+      linkBlocklist: z.array(z.string().trim().min(1).max(253)).max(200).default([]),
       maxMentions: z.number().int().min(0).max(50).default(8),
       duplicateWindowMs: z.number().int().min(1_000).max(600_000).default(30_000),
       duplicateThreshold: z.number().int().min(2).max(20).default(3),

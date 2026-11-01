@@ -26,6 +26,7 @@ const ACTIONS = [
   "case",
   "note",
   "history",
+  "links",
   "review",
 ] as const;
 
@@ -174,6 +175,29 @@ export const mod = defineCommand({
       return;
     }
 
+    if (action === "links") {
+      const records = await ports.cases.list(guildId, { limit: 25 });
+      const findings = records.filter((record) => record.rule === "automod.link");
+      if (findings.length === 0) {
+        await ctx.interaction.reply({
+          content: "No link-filter findings in the last 25 cases.",
+          ephemeral: true,
+        });
+        return;
+      }
+      const lines = findings
+        .slice(0, 10)
+        .map(
+          (record) =>
+            `#${record.caseNumber} · ${record.state} · <@${record.targetId}> · ${record.reason}`,
+        );
+      await ctx.interaction.reply({
+        content: `Link-filter findings (newest first):\n${lines.join("\n")}`.slice(0, 2_000),
+        ephemeral: true,
+      });
+      return;
+    }
+
     if (action === "review") {
       const number = optionInteger(ctx, "case");
       if (number) {
@@ -296,7 +320,7 @@ export const mod = defineCommand({
     await replyResult(ctx, record, result);
   },
   notes:
-    "One hub command for manual moderation. Every enforced action creates a case before the external call, so a failed ban still leaves a reviewable record.",
+    "One hub command for manual moderation. Every enforced action creates a case before the external call, so a failed ban still leaves a reviewable record. `links` reads the newest local link-filter findings without widening the command budget.",
 });
 
 function describeAction(ctx: CommandContext, action: ModAction): string {

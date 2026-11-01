@@ -287,6 +287,19 @@
         "budget": "11/100",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-23",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Link/phishing filter: local host blocklist and punycode detection in the security engine, /mod links review queue, and a dev marker seam for MCP-driven live proof.",
+      "journal": "journal/2026-11-01-pass-23.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "217",
+        "budget": "11/100",
+        "memory": "current"
+      }
     }
   ]
 }

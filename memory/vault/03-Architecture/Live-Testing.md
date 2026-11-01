@@ -22,8 +22,9 @@ The bridge is registered only when **all** of these are true:
 - the message starts with `!` in that exact guild.
 
 It is never registered in production, and a message in another guild is ignored.
-Bot-authored mention chat uses the same single-guild allowance, because the MCP
-harness is a bot account. Production still ignores every bot author.
+Bot-authored mention chat and the security fixture marker use the same
+single-guild allowance, because the MCP harness is a bot account. Production
+still ignores every bot author.
 
 The flag is deliberately not called a feature: it is test scaffolding. Slash
 commands remain the only product surface, and the command budget is unchanged.
@@ -47,6 +48,7 @@ Examples that were actually run against AI Team:
 !about
 !ai status
 !mod history
+!mod links
 !rank leaderboard
 !ticket stats
 !invites leaderboard
@@ -55,6 +57,24 @@ Examples that were actually run against AI Team:
 
 A parse failure is answered in the channel with the generated usage line, so a
 typo does not leave the tester guessing.
+
+## Security fixture marker
+
+The moderation adapter correctly ignores bot authors. To exercise a message rule
+without a second human account, a bot message in `DEV_GUILD_ID` that starts with
+`keystone-test:` is evaluated as member content after the marker is stripped:
+
+```text
+keystone-test: https://login.phish.test/verify
+!mod links
+```
+
+The event still travels the real gateway `MessageCreate` → `SecurityCoordinator`
+→ `SecurityEngine` → case store path. The only development exception is the
+author guard. `apps/bot/src/runtime.ts` seeds the in-memory dev guild with
+`automod.links: "alert"` and a local `phish.test` example, so the fixture is
+deterministic and never needs a remote list. Production gets no marker option
+and no seed.
 
 ## What a live prefix run proves
 
@@ -68,6 +88,8 @@ typo does not leave the tester guessing.
 
 - `InteractionCreate` handling, slash option parsing by Discord, autocomplete or
   ephemeral replies. Those need an interaction harness or a human click.
+- A `delete`-mode finding actually removing a message: the marker fixture seeds
+  `alert` mode, so the live run leaves the message in place.
 - Application-command registration beyond the REST response already observed in
   the ready log.
 - Production behaviour of the dev seam, because it is not registered there.
@@ -83,3 +105,7 @@ ephemeral message channel.
 - `apps/bot/src/prefix.test.ts` — quote, choice, bounds, dispatch and guild-gate tests.
 - `apps/bot/src/index.ts` — registers the bridge only for `DEV_GUILD_ID`.
 - `apps/bot/src/ai-events.ts` — bot-authored mention allowance for the same guild.
+- `apps/bot/src/moderation-events.ts` — marker-gated bot messages for the security
+  engine; production passes no guild.
+- `apps/bot/src/moderation-events.test.ts` — guild scope, marker stripping and
+  ordinary member scanning without a token.

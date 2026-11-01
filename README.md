@@ -14,14 +14,15 @@ tickets, economy and AI all stand on.
 foundation** is now in repo: Discord OAuth2/PKCE login, opaque Postgres-backed
 sessions, per-guild BigInt authorization, schema-validated module settings writes
 from the dashboard and a `PATCH /api/v1` route. Fleet actions, templates, scoped
-API tokens and webhooks are the remaining P6 work. P7 invite tracking is now in
-repo as a sixth module: attribution, a joins/retention leaderboard and advisory
-suspicious-join flags. The command ledger is **11/100**, there are **6 modules**,
-and `pnpm check` covers **208 tests across 35 files** without a Discord token,
-database or network. Live on 2026-11-01: the bot logged in, registered 11 commands
-through Discord, answered a Qwen3:8b mention in `#ai-chat`, and ran real
-moderation, community, AI and invite commands through a development message
-bridge. The dashboard was booted in memory mode and
+API tokens and webhooks are the remaining P6 work. P7 now has invite tracking as
+a sixth module (attribution, a joins/retention leaderboard and advisory
+suspicious-join flags) and a link/phishing filter (local host blocklist, punycode
+detection and `/mod links`). The command ledger is **11/100**, there are **6
+modules**, and `pnpm check` covers **217 tests across 36 files** without a Discord
+token, database or network. Live on 2026-11-01: the bot logged in, registered 11
+commands through Discord, answered a Qwen3:8b mention in `#ai-chat`, and ran real
+moderation, community, AI, invite and link-filter commands through a development
+message bridge. The dashboard was booted in memory mode and
 exercised over real HTTP, including authenticated settings writes against a fake
 OAuth port; live Discord OAuth is not claimed. Slash `InteractionCreate` from a
 human client is still the next live check.
@@ -246,7 +247,7 @@ message-only harnesses.
 | `/ping` | — | Confirm the gateway is alive and show uptime |
 | `/about` | — | Version, module state, teaching link |
 | `/setup` | — | Database, migrations, cache, intents and next-step report |
-| `/mod` | `ban`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `review` | Moderation with cases, reasons, evidence and a review queue |
+| `/mod` | `ban`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `links`, `review` | Moderation with cases, reasons, evidence, a link-filter review queue and a case queue |
 | `/appeal` | `case`, `message` | Open an appeal for your own case |
 | `/verify` | — | Complete the join gate and leave quarantine |
 | `/rank` | `view`, `leaderboard`, `rewards`, `admin`, `balance`, `daily`, `pay`, `shop`, `buy`, `gamble`, `ledger`, `season` | XP, levels, ledger-backed currency, shop and seasons |
@@ -333,6 +334,8 @@ Everything below is free. No feature is moved behind a paywall.
 
 - Cases with atomic case numbers, notes, review, appeals and evidence.
 - `/mod` actions plus dry-run-first message scanning.
+- Link / phishing filter: a local host blocklist plus punycode detection, with
+  `alert` or `delete` mode and `/mod links` as its review queue. No remote feed.
 - Native AutoMod plan and `Keystone ·` rule ownership.
 - Anti-nuke, anti-raid, quarantine, join gate and `/verify`.
 - Action logging and an appeal button on case cards.
@@ -369,9 +372,9 @@ Everything below is free. No feature is moved behind a paywall.
 - **P6 remaining:** schema-driven field widgets, the Next.js shell, fleet
   view/templates, token refresh/revocation, scoped public API tokens,
   per-token rate limits, idempotency, webhooks and OpenAPI.
-- **P7:** invite tracking is done; the rest is parity completion (forms,
-  events, role persistence, modmail, auto-responders, analytics), Components V2
-  UI and i18n.
+- **P7:** invite tracking and the link/phishing filter are done; the rest is
+  parity completion (forms, events, role persistence, modmail, auto-responders,
+  analytics), Components V2 UI and i18n.
 - **P8:** bring-your-own Lavalink music, disabled by default; no bundled streamer.
 - **P9:** docs site, 14-lesson curriculum, release workflow, self-host kit.
 - **P10:** sharding, load tests, SLOs, Discord.js v15 migration.
@@ -385,13 +388,13 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | --- | --- | --- |
 | P0 Foundation | Done | Kernel, module contract, diagnostics, memory, CI |
 | P1 Substrate | Done | Postgres, Redis, BullMQ, telemetry, `/setup` |
-| P2 Moderation | Done | Cases, scanner, appeals, verify, action logging |
+| P2 Moderation | Done | Cases, scanner (invite/mention/duplicate/link), appeals, verify, action logging |
 | P3 Community | Done | XP, economy, tickets, tools, events |
 | P4 AI + economy | Done | Provider, caps, RAG, chat, explanations, summaries |
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
-| P7 Parity completion | **In progress** | Invite tracking shipped; forms, events, expiry, modmail and UI/i18n open |
+| P7 Parity completion | **In progress** | Invite tracking and link/phishing filter shipped; forms, events, expiry, modmail and UI/i18n open |
 
 Live evidence (2026-11-01): `AI Team#5758` connected, cleared and re-registered
 11 global commands (including `/invites`), and Qwen3:8b answered a mention in
@@ -400,6 +403,13 @@ Live evidence (2026-11-01): `AI Team#5758` connected, cleared and re-registered
 through the real dispatch pipeline. `/ticket stats` reached
 the `ManageGuild` guard (the MCP bot is not an admin); that check exposed a real
 ordering bug, now fixed and unit-tested.
+
+Link-filter live evidence (2026-11-01): in memory mode, a marked MCP message
+with `https://login.phish.test/verify` created case #1 (`alerted`, blocklist);
+`https://www.phish.test/account` created #2; `!mod review case=2` changed #2 to
+`reviewed`; `https://xn--pple-43d.test/login` created #3 (punycode); and
+`https://example.com/docs` created no case. See
+[pass 23](memory/journal/2026-11-01-pass-23.md).
 
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and
@@ -514,11 +524,14 @@ message bridge that feeds the same registry, guards, cooldowns and reply adapter
 !about
 !ai status
 !mod history
+!mod links
 !rank leaderboard
 ```
 
 The bridge is **never registered in production** and only answers in that one
-guild. Mention chat also allows bot authors only there. See
+guild. Mention chat and the `keystone-test:` security fixture marker also allow
+bot authors only there; the marker is stripped before the real security engine
+sees the content. See
 [Live-Testing](memory/vault/03-Architecture/Live-Testing.md).
 
 Discord replaces the whole global command set with one bulk overwrite. Keystone

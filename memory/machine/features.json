@@ -273,14 +273,15 @@
             "wick-security": "✅"
           },
           "phase": "P7",
-          "status": "open",
+          "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "Local list + review queue",
+          "note": "Local host blocklist plus punycode detection; /mod links review queue. Live 2026-11-01 via the dev marker: subdomain, apex and punycode cases in #ai-chat, reviewed through !mod review.",
           "evidence": [
-            "modules/moderation/src/security.test.ts"
+            "modules/moderation/src/security.test.ts",
+            "modules/moderation/src/mod.test.ts",
+            "apps/bot/src/moderation-events.test.ts"
           ],
-          "openReason": "Local list and review queue are named as open in the P3 status.",
-          "liveVerified": false
+          "liveVerified": true
         },
         {
           "id": "automod.profanity-zalgo",

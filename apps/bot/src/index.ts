@@ -216,7 +216,11 @@ async function main(): Promise<void> {
     }
   });
 
-  registerModerationEvents(client, runtime.security, logger);
+  const devTestGuild =
+    env.NODE_ENV !== "production" && env.DEV_GUILD_ID ? env.DEV_GUILD_ID : undefined;
+  registerModerationEvents(client, runtime.security, logger, {
+    botTestGuildId: devTestGuild,
+  });
   const stopCommunity = registerCommunityEvents(
     client,
     runtime.community,
@@ -233,8 +237,6 @@ async function main(): Promise<void> {
   // authors (including the MCP bot) can run the real pipeline with `!`, and
   // bot-authored mentions reach the AI event. Both are restricted to this
   // guild, so a test harness cannot widen the production behaviour.
-  const devTestGuild =
-    env.NODE_ENV !== "production" && env.DEV_GUILD_ID ? env.DEV_GUILD_ID : undefined;
   const stopPrefix = devTestGuild
     ? registerPrefixCommands(client, dispatchDeps, { guildId: devTestGuild })
     : () => undefined;

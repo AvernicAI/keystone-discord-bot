@@ -178,6 +178,26 @@ describe("moderation module", () => {
     expect(interaction.lastReply?.content).toContain("Dry run");
   });
 
+  it("lists recent link-filter findings through /mod links", async () => {
+    const { ctx, cases, actions } = buildContext({ action: "links" });
+    await cases.open({
+      guildId: "guild-1",
+      actorId: "keystone",
+      targetId: "target-1",
+      action: "security.alert",
+      reason: "The link host phish.test is on this server's blocklist.",
+      rule: "automod.link",
+      state: "alerted",
+    });
+
+    await mod.execute(ctx);
+
+    expect(actions.calls).toEqual([]);
+    expect(ctx.interaction.lastReply?.content).toContain("Link-filter findings");
+    expect(ctx.interaction.lastReply?.content).toContain("phish.test");
+    expect(ctx.interaction.lastReply?.content).toContain("#1");
+  });
+
   it("requires a reason for a punitive action", async () => {
     const { ctx } = buildContext({ action: "kick", user: "target-1" });
     await expect(mod.execute(ctx)).rejects.toThrow(/reason is required/i);

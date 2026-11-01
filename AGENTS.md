@@ -126,17 +126,24 @@ by a rate-limited register leaves the app with no commands.
   flags. A cold cache records an unknown inviter; the adapter test covers it.
   The gateway state (cache, per-guild join queue) lives in
   `apps/bot/src/invite-tracker.ts`; `invite-events.ts` is only translation.
-  The rest of P7 (forms, events, modmail, expiry jobs, UI/i18n) is open.
-- 6 modules, 11 global command roots, 208 tests in 35 files.
+- P7 link / phishing filter is in repo: a local host blocklist plus punycode
+  detection in the moderation security engine, `alert` or `delete` mode, and
+  `/mod links` as the review queue. No remote feed. The live proof used the
+  dev-only `keystone-test:` marker in `DEV_GUILD_ID`; production ignores bot
+  authors.
+- The rest of P7 (forms, events, modmail, expiry jobs, UI/i18n) is open.
+- 6 modules, 11 global command roots, 217 tests in 36 files.
 - Live: AI Team#5758 connected; 11 commands registered; Qwen3:8b replied in
-  `#ai-chat`; `!ping`, `!about`, `!ai status`, `!mod history`,
+  `#ai-chat`; `!ping`, `!about`, `!ai status`, `!mod history`, `!mod links`,
   `!rank leaderboard`, `!invites leaderboard` and `!invites who` ran through the
-  real pipeline. The web process booted in memory mode and answered real HTTP
-  requests; the write path was exercised over real local HTTP with a fake OAuth
-  port. Live Discord OAuth is open.
-- Open: human slash run, a live member join for invite attribution, live
-  Postgres/role/select/voice/scheduler paths, pgvector ANN benchmark, MEE6 live
-  fetch, P6 field widgets/fleet/tokens and the rest of P7.
+  real pipeline. Three marked link messages created blocklist/punycode cases and
+  one was reviewed; `example.com` was not flagged. The web process booted in
+  memory mode and answered real HTTP requests; the write path was exercised over
+  real local HTTP with a fake OAuth port. Live Discord OAuth is open.
+- Open: human slash run, a live member join for invite attribution, a live
+  `delete`-mode link finding, live Postgres/role/select/voice/scheduler paths,
+  pgvector ANN benchmark, MEE6 live fetch, P6 field widgets/fleet/tokens and the
+  rest of P7.
 
 When you finish a pass, update `memory/machine/project.json` (`lastPass`,
 `tests`), append to `memory/machine/passes.json`, write the journal, update the

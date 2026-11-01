@@ -205,6 +205,71 @@ describe("scripted raid", () => {
   });
 });
 
+describe("link filter", () => {
+  const event = (content: string) =>
+    ({
+      type: "message.create" as const,
+      guildId: `guild-link-${Math.random()}`,
+      channelId: "general",
+      messageId: "message-1",
+      userId: "member-1",
+      content,
+    }) as const;
+
+  it("does nothing when the filter is off", () => {
+    const engine = new SecurityEngine();
+    const settings = moderationSettingsSchema.parse({
+      automod: { linkBlocklist: ["phish.test"] },
+    });
+    expect(engine.evaluate(event("https://phish.test/login"), settings, 1_000)).toEqual([]);
+  });
+
+  it("alerts on a blocklisted host and its subdomains", () => {
+    const engine = new SecurityEngine();
+    const settings = moderationSettingsSchema.parse({
+      automod: { links: "alert", linkBlocklist: ["phish.test"] },
+    });
+    const findings = engine.evaluate(
+      event("open https://login.phish.test/verify"),
+      settings,
+      1_000,
+    );
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      kind: "alert",
+      rule: "automod.link",
+      targetId: "member-1",
+      evidence: { host: "login.phish.test", match: "blocklist" },
+    });
+  });
+
+  it("deletes when configured and flags punycode without a list", () => {
+    const engine = new SecurityEngine();
+    const settings = moderationSettingsSchema.parse({
+      automod: { links: "delete" },
+    });
+    const findings = engine.evaluate(
+      event("verify at https://xn--pple-43d.test/login"),
+      settings,
+      1_000,
+    );
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      kind: "delete-message",
+      rule: "automod.link",
+      evidence: { host: "xn--pple-43d.test", match: "punycode" },
+    });
+  });
+
+  it("does not flag an ordinary link", () => {
+    const engine = new SecurityEngine();
+    const settings = moderationSettingsSchema.parse({
+      automod: { links: "delete", linkBlocklist: ["phish.test"] },
+    });
+    expect(engine.evaluate(event("read https://example.com/docs"), settings, 1_000)).toEqual([]);
+  });
+});
+
 describe("native AutoMod plan", () => {
   it("only manages prefixed rules and includes an alert action when a log channel is set", () => {
     const settings = moderationSettingsSchema.parse({

@@ -128,7 +128,10 @@ export async function createRuntime(
   const settings = new SettingsService(repository, registry);
   if (env.DEV_GUILD_ID && env.NODE_ENV !== "production" && !database) {
     await settings.update(env.DEV_GUILD_ID, "ai", { enabled: true, chat: true });
-    logger.warn("DEV_GUILD_ID: AI chat enabled for one guild in process memory", {
+    await settings.update(env.DEV_GUILD_ID, "moderation", {
+      automod: { links: "alert", linkBlocklist: ["phish.test"] },
+    });
+    logger.warn("DEV_GUILD_ID: AI chat and the link filter are enabled in process memory", {
       guildId: env.DEV_GUILD_ID,
     });
   }

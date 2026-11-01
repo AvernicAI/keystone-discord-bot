@@ -16,6 +16,19 @@ discord.js events. MEE6's invite tracker is partly premium-gated (its wiki says
 parts or the entirety may require Premium); neither Dyno nor Carl-bot documents
 it. Distinguish this from P6, which remains open below.
 
+**P7 link / phishing filter is in repo** (pass 23, 2026-11-01): the security
+engine checks a local host blocklist and punycode labels in `alert` or `delete`
+mode. `/mod links` lists the newest findings, and `/mod review case=N` closes
+one; there is no new command root. Live: marked MCP messages in `#ai-chat`
+created case #1 (`login.phish.test`, blocklist), #2 (`phish.test`, blocklist)
+and #3 (`xn--pple-43d.test`, punycode); #2 became `reviewed` after
+`!mod review case=2`, and `example.com` created no case. The live run used
+`alert` mode, so no message deletion is claimed. A `keystone-test:` marker is
+accepted from a bot author only in `DEV_GUILD_ID` and stripped before the
+engine sees it; production has no marker path. See
+[[04-Modules/moderation/Spec|Moderation spec]] and
+[[04-Modules/moderation/Status|Moderation status]].
+
 **P6 authorization and settings-write foundation is in repo** (passes 17–18;
 server boundaries in pass 22, 2026-11-01): Discord OAuth2 code + PKCE, sealed
 state, opaque Postgres-backed sessions, BigInt guild authorization with a
@@ -49,7 +62,10 @@ invoke slash commands, so a **dev-only `!` bridge** now feeds the real dispatch
 pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
 `!rank leaderboard` all returned live Discord messages/embeds. Pass 19 added
 `!invites leaderboard` and `!invites who`; the bot re-registered **11** commands
-and Discord's server set included `invites`. `!ticket stats`
+and Discord's server set included `invites`. Pass 23 added `!mod links` and a
+live link-filter proof: three marked MCP messages produced a blocklisted
+subdomain case, an apex case and a punycode case; `!mod review case=2` marked one
+reviewed, and an ordinary `example.com` link produced no case. `!ticket stats`
 exposed a real ordering bug (guild stats required a ticket first), now fixed and
 tested. On ready the bot fetches Discord's command set and only clears and
 re-registers when the names drift; otherwise it logs that the set is current.
@@ -64,10 +80,11 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 208 tests / 35 files · budget 11/100 · memory 1883/1883
+pnpm check        exit 0 · typecheck 0 · 217 tests / 36 files · budget 11/100 · memory 1903/1903
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 11 commands · qwen3:8b reply in #ai-chat
-live commands     2026-11-01 · !ping · !about · !ai status · !mod history · !rank leaderboard · !invites leaderboard · !invites who
+live commands     2026-11-01 · !ping · !about · !ai status · !mod history · !mod links · !rank leaderboard · !invites leaderboard · !invites who
+live link filter  2026-11-01 · blocklist subdomain + apex + punycode cases; #2 reviewed; example.com not flagged
 live failure      !ticket stats → ManageGuild guard (MCP bot is not admin); branch fixed and unit-tested
 public            2026-11-01 · https://github.com/RNGBubba/keystone-discord-bot · AGPL-3.0-or-later
 ```
@@ -89,6 +106,19 @@ read that file.
 | 7 | The command fits the budget and declares its intents | `commands.test.ts`: one root, budget 1, `GuildInvites` required, `GuildMembers` fallback named by `/setup` | Registry |
 | 8 | The real surface runs | Live 2026-11-01: 11 commands registered including `invites`; `!invites leaderboard` and `!invites who` dispatched and replied in `#ai-chat` | Live gateway |
 | 9 | A live member join was **not** performed | `Status.md` limitation; no second account was available | Not claimed |
+
+## P7 link-filter acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | A blocklisted host and its subdomains alert or delete | `security.test.ts`: `login.phish.test` matches `phish.test`; live #1 and #2 | Pure engine + **live gateway** |
+| 2 | Punycode is suspicious without a list | `security.test.ts`: `xn--pple-43d.test`; live #3 | Pure engine + **live gateway** |
+| 3 | An ordinary link is not flagged | `security.test.ts`: `example.com` returns no finding; live `!mod links` stayed at #3 | Pure engine + **live gateway** |
+| 4 | A finding is reviewable through the existing case queue | `mod.test.ts`: `/mod links` reads an `automod.link` case; live `!mod review case=2` changed #2 to `reviewed` | Command + **live gateway** |
+| 5 | Bot authors stay ignored outside the dev marker | `moderation-events.test.ts`: no marker → ignored; marker in another guild → ignored; marker stripped in `DEV_GUILD_ID` | Adapter test; production passes no option |
+| 6 | Evidence is the host and match, not the message | `security.test.ts` asserts `{ host, match }`; the case stores no content | Unit |
+| 7 | The feature costs no new root | `/mod links` is an existing `/mod` action; `pnpm budget` remains 11/100 | Static registry |
+| 8 | A live `delete`-mode deletion | Not run; the live seed used `alert` | Not claimed |
 
 ## P6 foundation acceptance evidence
 
@@ -134,7 +164,7 @@ scoped API tokens remain open.
 | 3 | Core works without privileged intents | `INTENT_PROFILE=minimal` returns only non-privileged intents; `pnpm audit:intents` prints the disabled features | Registry + manifest tests |
 | 4 | `/setup` names disabled features | `modules/setup/src/setup.test.ts`: minimal profile shows `GuildMembers` consequence and the `INTENT_PROFILE=full` next step | Fake health probe, zero writes |
 | 5 | Optional intent contract is validated | `packages/kernel/src/registry.test.ts`: required/optional split, fallback join, duplicate rejection | Registry |
-| 6 | Memory cannot silently drift | `pnpm memory:check`: 113 features, 20 claims, 16 passes, 15 decisions, 4 generated pages, 286 wikilinks | Machine files + generated pages |
+| 6 | Memory cannot silently drift | `pnpm memory:check`: 115 features, 20 claims, 23 passes, 17 decisions, 4 generated pages, 334 wikilinks | Machine files + generated pages |
 | 7 | The plan is recorded | [[ADR-0012-required-and-optional-intents]], [[ADR-0013-roadmap-v2-portability-first]], [[ADR-0014-memory-v2-machine-truth]] | Vault check |
 
 ## P3 acceptance evidence
@@ -220,6 +250,7 @@ remain open.
 | Case numbering/events | Yes, PGlite | Same against Postgres |
 | Real ban/kick/timeout/purge/lock | No | Staging guild with the bot's permissions |
 | Gateway joins/messages/audit events | Messages yes; joins/audit no | Message event observed live; replay joins/audit in staging |
+| Link / phishing filter | Yes, live alert + review through the dev marker | Run `delete` mode with a disposable message in staging |
 | Native AutoMod sync | Plan tested, adapter not run | Enable sync in staging |
 | XP/currency idempotency | Yes, in-memory + PGlite | Same against a Postgres server |
 | Economy double-spend | Yes, in-memory queue + PGlite guild lock | Two bot shards against one Postgres server |
@@ -254,9 +285,12 @@ here.
 
 ## Next
 
-P6 remains the active phase. The auth gate and settings writes are built; next
-are schema-driven field widgets, the Next.js shell (or a decision to keep
-server-rendered HTML), fleet actions/templates, token refresh and revocation,
+P7 parity work continues alongside the P6 exit items. The link filter should get
+a staging run in `delete` mode and, before broad enablement, an allow-list for
+legitimate punycode domains. P6 remains the active phase for the dashboard. The
+auth gate and settings writes are built; next are schema-driven field widgets,
+the Next.js shell (or a decision to keep server-rendered HTML), fleet
+actions/templates, token refresh and revocation,
 scoped API tokens, per-token rate limits, `Idempotency-Key`, webhooks and
 OpenAPI. Before launch, close the pgvector ANN gate and run the live
 provider/Discord/Postgres/OAuth smoke in staging.

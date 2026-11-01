@@ -31,6 +31,28 @@ The third is **event sourcing**. `case_events` is append-only. A reversal is a
 new event and a state transition, never an edit to the original reason. That is
 what makes an appeal defensible later.
 
+## The link filter, as a worked example
+
+A detector should be a pure function before it is an event handler.
+`suspiciousLink` takes message content and the local blocklist, and returns a
+host plus a reason. It does not delete, log or write a case. That separation is
+why the same function can be tested with four one-line fixtures and then driven
+by a real gateway event.
+
+Two details are worth copying into your own rules:
+
+- **Normalise before comparing.** `new URL` lowercases the host, and the code
+  removes `www.` and a trailing dot. A blocklist entry matches the host exactly
+  or as a `.`-suffixed subdomain. Never use `includes`: `notphish.test` would
+  otherwise match `phish.test`.
+- **Keep the response a policy decision.** The detector returns the same finding
+  whether the operator chose `alert` or `delete`; the mode decides the kind. The
+  coordinator, case, appeal button and notification path are unchanged.
+
+The list is local settings data, not a downloaded reputation feed. That keeps
+the feature testable, private and free. The cost is that somebody has to maintain
+the list, and punycode is a heuristic rather than proof.
+
 ## Exercise
 
 Add an `appeal` rate limit and a `case export` action.
@@ -41,6 +63,16 @@ Add an `appeal` rate limit and a `case export` action.
 3. Add `/mod export` that returns JSON only for a moderator with
    `ModerateMembers`; include cases and events, never another guild's rows.
 4. Explain in [[Status]] why export belongs to the case service, not the command.
+
+## Link-filter exercise
+
+1. Add `automod.linkAllowlist` and make a host that matches it win over the
+   punycode check. Decide the order explicitly: allow-list, blocklist, heuristic.
+2. Add a fixture with a userinfo trick (`https://phish.test@example.com`) and
+   assert which host `new URL` reports. The answer is `example.com`; the part
+   before `@` is not the host.
+3. Keep the finding evidence to `{ host, match }`. If you are tempted to store
+   the message, re-read the retention rule in [[Spec]].
 
 ## The mistake you will probably make
 

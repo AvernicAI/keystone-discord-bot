@@ -36,7 +36,7 @@ checked. See [[Master-Plan]] for the research program.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Spam / caps / mentions | 💰 | ✅ | ✅ | ❌ | ✅ | P2 | Heat decay, not a binary trip |
 | Invite links | 💰 | ✅ | ✅ | ❌ | ✅ | P2 | Allow-list per guild |
-| Link / phishing filter | 💰 | ✅ | ✅ | ❌ | ✅ | P2 | Local list + review queue |
+| Link / phishing filter | 💰 | ✅ | ✅ | ❌ | ✅ | P2 | Local host list + punycode; `/mod links`; shipped pass 23 |
 | Profanity / zalgo | 💰 | ✅ | ✅ | ❌ | ❔ | P2 | Word-boundary aware |
 | Duplicate / crosspost | 💰 | ✅ | ❔ | ❌ | ❔ | P2 | Hash window |
 | Native AutoMod sync | ❌ | ❔ | ❔ | ❌ | ❔ | P2 | We manage Discord's rules too |

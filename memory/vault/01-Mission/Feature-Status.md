@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**115 features** across 16 domains: **78 in repo**, **12 open**, **21 planned**. Live behaviour is marked separately; a green
+**115 features** across 16 domains: **79 in repo**, **11 open**, **21 planned**. Live behaviour is marked separately; a green
 box means the code and its tests exist, not that a live guild has run it.
 
 ## Domains
@@ -13,7 +13,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Domain | Features | In repo | Open | Planned |
 | --- | ---: | ---: | ---: | ---: |
 | Moderation | 11 | 9 | 2 | 0 |
-| Automod | 10 | 7 | 2 | 1 |
+| Automod | 10 | 8 | 1 | 1 |
 | Security | 9 | 8 | 1 | 0 |
 | Leveling | 7 | 7 | 0 | 0 |
 | Economy | 6 | 5 | 0 | 0 |
@@ -51,7 +51,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | --- | --- | --- | --- |
 | Spam / caps / mentions | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 | Invite links | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
-| Link / phishing filter | P7 | ◐ open | Local list and review queue are named as open in the P3 status. · `modules/moderation/src/security.test.ts` |
+| Link / phishing filter | P7 | ✅ in repo | `modules/moderation/src/security.test.ts`, `modules/moderation/src/mod.test.ts`, `apps/bot/src/moderation-events.test.ts` · live verified |
 | Profanity / zalgo | P7 | ◐ open | Word-boundary filter is named as open in the P3 status. · `modules/moderation/src/security.test.ts` |
 | Duplicate / crosspost | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 | Native AutoMod sync | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |

@@ -40,6 +40,12 @@ https://github.com/RNGBubba/keystone-discord-bot
   advisory evidence only. The gateway state (cache, per-guild join queue) is
   owned by `apps/bot/src/invite-tracker.ts`; `invite-events.ts` only translates
   discord.js events. See [[04-Modules/invites/Spec|Invites spec]].
+- **Link / phishing filter** in repo (pass 23): a local host blocklist plus
+  punycode detection in `alert` or `delete` mode, `/mod links` as the review
+  queue, and a dev-only `keystone-test:` marker for live MCP proof. Live cases
+  #1–#3 were a blocklisted subdomain, an apex host and a punycode host; #2 was
+  reviewed, and `example.com` produced no case. See
+  [[04-Modules/moderation/Spec|Moderation spec]].
 - Phase **P6** foundation in repo: Discord OAuth2/PKCE, opaque Postgres-backed
   sessions, BigInt per-guild authorization with a bot-membership check, a
   server-rendered dashboard, `/api/v1` reads and schema-validated module settings
@@ -57,9 +63,11 @@ https://github.com/RNGBubba/keystone-discord-bot
 - **Live 2026-11-01:** AI Team#5758 logged in, cleared and re-registered all 11
   commands (then fetched Discord's list to prove it), and qwen3:8b via Ollama
   answered mentions in `#ai-chat`. A dev-only `!` bridge proved `!ping`, `!about`,
-  `!ai status`, `!mod history`, `!rank leaderboard`, `!invites leaderboard` and
-  `!invites who` through the real dispatch pipeline. Slash execution still needs a
-  human client; the MCP cannot invoke application commands or render embeds.
+  `!ai status`, `!mod history`, `!mod links`, `!rank leaderboard`,
+  `!invites leaderboard` and `!invites who` through the real dispatch pipeline. The link
+  filter produced three live cases from marked MCP messages and one review;
+  `example.com` produced none. Slash execution still needs a human client; the
+  MCP cannot invoke application commands or render embeds.
 - Phase **P4.5** made channel obfuscation a typed outcome at every fetch site,
   separated required from optional intents with `INTENT_PROFILE`, and made `/setup`
   name disabled features.
