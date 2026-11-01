@@ -67,7 +67,7 @@ packages/queue        BullMQ + in-process driver
 packages/telemetry    OTLP wrapper, off by default
 packages/config       Zod-validated environment
 packages/testing      fixtures for module authors
-modules/              diagnostics, setup, moderation, community, ai
+modules/              diagnostics, setup, moderation, community, ai, invites
 memory/machine/       machine truth
 memory/vault/         Obsidian vault (human half)
 memory/journal/       one entry per pass
@@ -121,14 +121,19 @@ by a rate-limited register leaves the app with no commands.
 - P0–P5 complete in-repo. P6 auth and settings-write foundation is in repo:
   OAuth2/PKCE, opaque Postgres sessions, per-guild BigInt authz, dashboard/API
   reads and schema-validated module settings writes with CSRF.
-- 5 modules, 10 global command roots, 185 tests in 30 files.
-- Live: AI Team#5758 connected; 10 commands registered; Qwen3:8b replied in
-  `#ai-chat`; `!ping`, `!about`, `!ai status`, `!mod history` and
-  `!rank leaderboard` ran through the real pipeline. The web process booted in
-  memory mode and answered real HTTP requests; the write path was exercised over
-  real local HTTP with a fake OAuth port. Live Discord OAuth is open.
-- Open: human slash run, live Postgres/role/select/voice/scheduler paths,
-  pgvector ANN benchmark, MEE6 live fetch, P6 field widgets/fleet/tokens.
+- P7 invite tracking is in repo as the sixth module: `/invites` leaderboard,
+  stats and who-invited-whom, backed by `invite_joins` and advisory fake-join
+  flags. The rest of P7 (forms, events, modmail, expiry jobs, UI/i18n) is open.
+- 6 modules, 11 global command roots, 206 tests in 33 files.
+- Live: AI Team#5758 connected; 11 commands registered; Qwen3:8b replied in
+  `#ai-chat`; `!ping`, `!about`, `!ai status`, `!mod history`,
+  `!rank leaderboard`, `!invites leaderboard` and `!invites who` ran through the
+  real pipeline. The web process booted in memory mode and answered real HTTP
+  requests; the write path was exercised over real local HTTP with a fake OAuth
+  port. Live Discord OAuth is open.
+- Open: human slash run, a live member join for invite attribution, live
+  Postgres/role/select/voice/scheduler paths, pgvector ANN benchmark, MEE6 live
+  fetch, P6 field widgets/fleet/tokens and the rest of P7.
 
 When you finish a pass, update `memory/machine/project.json` (`lastPass`,
 `tests`), append to `memory/machine/passes.json`, write the journal, update the

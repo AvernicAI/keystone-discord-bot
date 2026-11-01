@@ -19,6 +19,8 @@ import { registerModerationEvents } from "./moderation-events";
 import { syncNativeAutoModRules } from "./automod";
 import { createDiscordCommunityActions } from "./community-actions";
 import { registerCommunityEvents } from "./community-events";
+import { createDiscordInviteActions } from "./invites-actions";
+import { registerInviteEvents } from "./invite-events";
 import { registerAiEvents } from "./ai-events";
 import { registerPrefixCommands } from "./prefix";
 import { buildNativeAutoModPlan, moderationSettingsSchema } from "@keystone/module-moderation";
@@ -60,6 +62,7 @@ async function main(): Promise<void> {
     logger,
     createDiscordModerationActions(client),
     createDiscordCommunityActions(client),
+    createDiscordInviteActions(client, logger.child("invites")),
   );
   logger.info("runtime ready", runtime.mode);
 
@@ -73,6 +76,7 @@ async function main(): Promise<void> {
     telemetry: runtime.telemetry,
     moderation: runtime.moderation,
     community: runtime.community,
+    invites: runtime.invites,
     ai: runtime.ai,
   };
 
@@ -218,6 +222,12 @@ async function main(): Promise<void> {
     runtime.community,
     runtime.settings.forModule("community"),
     logger.child("community"),
+  );
+  registerInviteEvents(
+    client,
+    runtime.invites,
+    runtime.settings.forModule("invites"),
+    logger.child("invites"),
   );
   // One explicit development surface, never present in production: message
   // authors (including the MCP bot) can run the real pipeline with `!`, and

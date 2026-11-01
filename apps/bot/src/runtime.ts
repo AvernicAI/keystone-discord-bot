@@ -16,6 +16,8 @@ import {
   type ModerationPort,
   type CommunityActions,
   type CommunityPort,
+  type InviteActions,
+  type InvitePort,
   type AiPort,
 } from "@keystone/kernel";
 import type { Env } from "@keystone/config";
@@ -24,6 +26,7 @@ import {
   createCaseStore,
   createCommunityStore,
   createAiStore,
+  createInviteStore,
   createPostgresDatabase,
   createSettingsRepository,
   probeDatabase,
@@ -36,6 +39,7 @@ import {
   SecurityEngine,
 } from "@keystone/module-moderation";
 import { InMemoryCommunityStore } from "@keystone/module-community";
+import { InMemoryInviteStore } from "@keystone/module-invites";
 import { AiService, InMemoryAiStore, createAiProvider } from "@keystone/module-ai";
 import { createCooldownStore, type CooldownHandle } from "@keystone/cache";
 import { BullJobQueue, InProcessJobQueue } from "@keystone/queue";
@@ -53,6 +57,7 @@ export interface Runtime {
   telemetry: Telemetry;
   moderation: ModerationPort;
   community: CommunityPort;
+  invites: InvitePort;
   ai: AiPort;
   security: SecurityCoordinator;
   mode: { database: DatabaseMode; cache: CacheMode; queue: QueueMode };
@@ -95,6 +100,7 @@ export async function createRuntime(
   logger: Logger,
   moderationActions: ModerationActions,
   communityActions: CommunityActions,
+  inviteActions: InviteActions,
 ): Promise<Runtime> {
   const telemetry = env.OTEL_EXPORTER_OTLP_ENDPOINT
     ? await createOtlpTelemetry(env.OTEL_EXPORTER_OTLP_ENDPOINT, "keystone-bot")
@@ -133,6 +139,10 @@ export async function createRuntime(
   const community: CommunityPort = {
     store: database ? createCommunityStore(database) : new InMemoryCommunityStore(),
     actions: communityActions,
+  };
+  const invites: InvitePort = {
+    store: database ? createInviteStore(database) : new InMemoryInviteStore(),
+    actions: inviteActions,
   };
   const ai = new AiService(
     database ? createAiStore(database) : new InMemoryAiStore(),
@@ -178,6 +188,7 @@ export async function createRuntime(
     telemetry,
     moderation,
     community,
+    invites,
     ai,
     security,
     mode: {

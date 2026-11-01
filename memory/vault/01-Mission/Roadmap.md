@@ -136,11 +136,18 @@ and defer writes.
 
 **Goal:** close the union the paid bots cover and make every panel fit the platform.
 
+**Shipped slice (pass 19, 2026-11-01):** invite tracking as `modules/invites` —
+cached-counter attribution serialized per guild, durable `invite_joins`,
+`/invites leaderboard | stats | who`, and advisory account-age / no-avatar
+flags. Live: 11 commands registered and the `!invites` bridge ran in `#ai-chat`;
+a live member join remains unperformed. The rest of this phase is open.
+
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.
-- New domains: invites, forms/applications, events/RSVP, role persistence,
-  modmail, auto-responders, analytics; plus goodbye messages, YouTube/Twitch/RSS
-  feeds, temp ban/role expiry, join-gate expiry, panic mode and case export.
+- New domains: forms/applications, events/RSVP, role persistence, modmail,
+  auto-responders, analytics; plus goodbye messages, YouTube/Twitch/RSS feeds,
+  temp ban/role expiry, join-gate expiry, panic mode and case export. Invites
+  are done (above).
 - `/config` and `/help` hubs; command-budget audit.
 - Split `modules/community` into domain folders, then extract a module only if the
   "add a feature in an afternoon" test still fails.

@@ -1837,32 +1837,55 @@
         {
           "id": "invites.invite-attribution",
           "name": "Invite attribution",
-          "competitors": {},
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❌",
+            "carl": "❌"
+          },
           "phase": "P7",
-          "status": "planned",
+          "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "Who invited whom, with join attribution.",
-          "liveVerified": false
+          "note": "Cached invite uses diffed after each join, serialized per guild; the join row is unique on (guild, member, joined_at).",
+          "liveVerified": false,
+          "evidence": [
+            "modules/invites/src/invites.test.ts",
+            "packages/db/src/invite-store.test.ts"
+          ]
         },
         {
           "id": "invites.fake-invite-detection",
           "name": "Fake invite detection",
-          "competitors": {},
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❌",
+            "carl": "❌"
+          },
           "phase": "P7",
-          "status": "planned",
+          "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "Flag suspicious joins without auto-punishing.",
-          "liveVerified": false
+          "note": "Advisory account-age and no-avatar flags, recorded on the join and optionally posted to one log channel; never a punishment.",
+          "liveVerified": false,
+          "evidence": [
+            "modules/invites/src/invites.test.ts"
+          ]
         },
         {
           "id": "invites.invite-leaderboard",
           "name": "Invite leaderboard",
-          "competitors": {},
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "❌",
+            "carl": "❌"
+          },
           "phase": "P7",
-          "status": "planned",
+          "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "Per-inviter counts and retention.",
-          "liveVerified": false
+          "note": "Joins, leaves and retained per inviter, aggregated in SQL and exposed by /invites.",
+          "liveVerified": false,
+          "evidence": [
+            "modules/invites/src/commands.test.ts",
+            "packages/db/src/invite-store.test.ts"
+          ]
         }
       ]
     },

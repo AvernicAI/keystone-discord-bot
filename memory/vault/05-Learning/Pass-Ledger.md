@@ -7,6 +7,7 @@
 
 | Pass | Date | Phase | Summary | Journal |
 | --- | --- | --- | --- | --- |
+| pass-19 | 2026-11-01 | P7 | Invite tracking: cached-counter attribution, durable invite_joins, /invites leaderboard\|stats\|who and advisory flags; live 11-command registration and dev-bridge run. | [journal](../../journal/2026-11-01-pass-19.md) |
 | pass-18 | 2026-11-01 | P6 | P6 settings writes: CSRF-protected dashboard form and PATCH API through SettingsService, module Zod validation, cross-guild/non-admin/bot-absent tests. | [journal](../../journal/2026-11-01-pass-18.md) |
 | pass-17 | 2026-11-01 | P6 | P6 dashboard/API foundation: OAuth2/PKCE sessions, BigInt guild authz with bot membership, read-only HTML/API reads, Postgres stores and no-paid-service rule. | [journal](../../journal/2026-11-01-pass-17.md) |
 | pass-16 | 2026-11-01 | P5 | Public release packaging: Keystone repo, README/AGENTS, AGPL-3.0 licence, safe drift-only command sync and explicit resync. | [journal](../../journal/2026-11-01-pass-16.md) |
@@ -26,4 +27,4 @@
 | pass-02 | 2026-11-01 | P1 | Master plan, parity matrix and roadmap approved; the rejected plan shapes recorded. | [journal](../../journal/2026-11-01-pass-02.md) |
 | pass-01 | 2026-10-31 | P0 | Kernel, module contract, reference module, memory system, CI and ADR baseline. | [journal](../../journal/2026-10-31-pass-01.md) |
 
-Current phase: **P6**. 185 tests reported; 10/100 commands.
+Current phase: **P7**. 206 tests reported; 11/100 commands.

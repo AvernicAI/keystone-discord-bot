@@ -4,6 +4,7 @@ import { setupModule } from "@keystone/module-setup";
 import { moderationModule } from "@keystone/module-moderation";
 import { communityModule } from "@keystone/module-community";
 import { aiModule } from "@keystone/module-ai";
+import { invitesModule } from "@keystone/module-invites";
 
 /**
  * The one module list.
@@ -18,4 +19,5 @@ export const modules: readonly ModuleManifest[] = [
   moderationModule,
   communityModule,
   aiModule,
+  invitesModule,
 ];

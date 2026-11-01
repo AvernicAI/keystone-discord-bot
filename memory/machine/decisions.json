@@ -129,6 +129,14 @@
       "date": "2026-11-01",
       "path": "vault/03-Architecture/ADR/ADR-0016-dashboard-foundation.md",
       "alternatives": true
+    },
+    {
+      "id": "ADR-0017",
+      "title": "Invite tracking: diff the cache, store the join",
+      "status": "accepted",
+      "date": "2026-11-01",
+      "path": "vault/03-Architecture/ADR/ADR-0017-invite-tracking.md",
+      "alternatives": true
     }
   ]
 }

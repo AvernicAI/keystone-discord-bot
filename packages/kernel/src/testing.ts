@@ -132,6 +132,7 @@ export interface TestContextOptions {
   health?: HealthProbe;
   moderation?: ModerationPort;
   community?: import("./community").CommunityPort;
+  invites?: import("./invites").InvitePort;
   ai?: import("./ai").AiPort;
 }
 
@@ -153,6 +154,7 @@ export function createTestContext(options: TestContextOptions = {}): TestContext
     health: options.health ?? staticHealth(),
     moderation: options.moderation,
     community: options.community,
+    invites: options.invites,
     ai: options.ai,
   };
 }

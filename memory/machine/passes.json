@@ -235,6 +235,19 @@
         "budget": "10/100",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-19",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Invite tracking: cached-counter attribution, durable invite_joins, /invites leaderboard|stats|who and advisory flags; live 11-command registration and dev-bridge run.",
+      "journal": "journal/2026-11-01-pass-19.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "206",
+        "budget": "11/100",
+        "memory": "current"
+      }
     }
   ]
 }

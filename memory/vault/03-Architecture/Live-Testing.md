@@ -49,6 +49,8 @@ Examples that were actually run against AI Team:
 !mod history
 !rank leaderboard
 !ticket stats
+!invites leaderboard
+!invites who
 ```
 
 A parse failure is answered in the channel with the generated usage line, so a

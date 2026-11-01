@@ -11,3 +11,4 @@ export * from "./factories";
 export * from "./portability-store";
 export * from "./web-session-store";
 export * from "./web-dashboard-store";
+export * from "./invite-store";

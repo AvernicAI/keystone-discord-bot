@@ -5,13 +5,13 @@
   "mission": "vault/01-Mission/Mission.md",
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-01",
-  "phase": "P6",
-  "lastPass": "journal/2026-11-01-pass-18.md",
+  "phase": "P7",
+  "lastPass": "journal/2026-11-01-pass-19.md",
   "metrics": {
-    "commands": 10,
+    "commands": 11,
     "commandLimit": 100,
-    "modules": 5,
-    "tests": 185
+    "modules": 6,
+    "tests": 206
   },
   "modules": [
     {
@@ -121,6 +121,27 @@
       "optionalIntents": [
         "MessageContent"
       ]
+    },
+    {
+      "id": "invites",
+      "name": "Invites",
+      "status": "beta",
+      "phase": "P7",
+      "codePath": "modules/invites",
+      "specPath": "vault/04-Modules/invites/Spec.md",
+      "statusPath": "vault/04-Modules/invites/Status.md",
+      "teachingPath": "vault/04-Modules/invites/Teaching.md",
+      "commands": [
+        "invites"
+      ],
+      "intents": [
+        "Guilds",
+        "GuildInvites"
+      ],
+      "premium": false,
+      "optionalIntents": [
+        "GuildMembers"
+      ]
     }
   ],
   "decisions": [
@@ -219,6 +240,12 @@
       "title": "Dashboard foundation: framework-free HTTP over kernel ports",
       "status": "accepted",
       "path": "vault/03-Architecture/ADR/ADR-0016-dashboard-foundation.md"
+    },
+    {
+      "id": "ADR-0017",
+      "title": "Invite tracking: diff the cache, store the join",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0017-invite-tracking.md"
     }
   ],
   "openQuestions": [

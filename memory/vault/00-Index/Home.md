@@ -33,11 +33,15 @@ https://github.com/RNGBubba/keystone-discord-bot
 
 ## Current state
 
+- Phase **P7** has started: invite tracking is the sixth module. It records
+  attribution by diffing cached invite counters, stores joins/leaves in
+  `invite_joins`, exposes `/invites leaderboard | stats | who`, and flags new or
+  avatar-less accounts as advisory evidence only. See [[04-Modules/invites/Spec|Invites spec]].
 - Phase **P6** foundation in repo: Discord OAuth2/PKCE, opaque Postgres-backed
   sessions, BigInt per-guild authorization with a bot-membership check, a
   server-rendered dashboard, `/api/v1` reads and schema-validated module settings
   writes from the HTML form and a CSRF-protected `PATCH`. Field widgets, fleet
-  actions and scoped API tokens are next. See [[Dashboard]] and
+  actions and scoped API tokens are still open. See [[Dashboard]] and
   [[ADR-0016-dashboard-foundation]].
 - Phase **P5** complete in-repo: versioned export/restore with checksum
   verification, 24-hour rollback, deletion receipts, file level importers,
@@ -47,19 +51,19 @@ https://github.com/RNGBubba/keystone-discord-bot
   `pnpm commands:resync` cycle.
 - **No paid dependencies:** the project uses public GitHub, Discord, local
   Postgres/Redis/Ollama and free in-process test engines only.
-- **Live 2026-11-01:** AI Team#5758 logged in, cleared and re-registered all 10
+- **Live 2026-11-01:** AI Team#5758 logged in, cleared and re-registered all 11
   commands (then fetched Discord's list to prove it), and qwen3:8b via Ollama
   answered mentions in `#ai-chat`. A dev-only `!` bridge proved `!ping`, `!about`,
-  `!ai status`, `!mod history` and `!rank leaderboard` through the real dispatch
-  pipeline. Slash execution still needs a human client; the MCP cannot invoke
-  application commands.
+  `!ai status`, `!mod history`, `!rank leaderboard`, `!invites leaderboard` and
+  `!invites who` through the real dispatch pipeline. Slash execution still needs a
+  human client; the MCP cannot invoke application commands or render embeds.
 - Phase **P4.5** made channel obfuscation a typed outcome at every fetch site,
   separated required from optional intents with `INTENT_PROFILE`, and made `/setup`
   name disabled features.
 - Phase **P4** shipped the AI layer and the ledger-backed economy hardening.
 - Phase **P3** shipped the community suite: leveling, reaction roles, welcome,
   starboard, tickets, giveaways, temp voice, content and seasons.
-- 10 of Discord's 100 global commands used; 5 modules registered.
+- 11 of Discord's 100 global commands used; 6 modules registered.
 - The full suite covers the 5,000-row portability round trip and the failure,
   rollback and deletion paths; `pnpm check` also runs the intent, channel and
   memory audits.
@@ -87,6 +91,7 @@ Machine truth lives in `memory/machine/project.json` and the generated
 - [[ADR-0014-memory-v2-machine-truth]] — machine files, generated Markdown, CI drift check
 - [[ADR-0015-portability-bundles-and-receipts]] — checksum bundles, transactional restore, narrow merge, receipts
 - [[ADR-0016-dashboard-foundation]] — framework-free HTTP, opaque sessions, per-guild authz first
+- [[ADR-0017-invite-tracking]] — diff cached invite counters, store joins, advisory flags only
 
 ## Open questions
 

@@ -264,6 +264,35 @@ export const aiUsage = pgTable(
   (table) => [primaryKey({ columns: [table.guildId, table.period] })],
 );
 
+/**
+ * One row per attributed member join. `(guild, member, joined_at)` is unique, so
+ * a repeated gateway delivery cannot double-count an invite. The inviter is
+ * nullable: vanity URLs and invites Keystone never saw still produce a row, and
+ * a later "who invited me" answer is better than a silent gap.
+ */
+export const inviteJoins = pgTable(
+  "invite_joins",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    guildId: text("guild_id").notNull(),
+    userId: text("user_id").notNull(),
+    inviterId: text("inviter_id"),
+    code: text("code"),
+    fakeReasons: jsonValue("fake_reasons").notNull(),
+    joinedAt: timestamp("joined_at", { withTimezone: true }).notNull(),
+    leftAt: timestamp("left_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    uniqueIndex("invite_joins_guild_user_joined_idx").on(
+      table.guildId,
+      table.userId,
+      table.joinedAt,
+    ),
+    index("invite_joins_guild_inviter_idx").on(table.guildId, table.inviterId),
+  ],
+);
+
 /** Monotonic per-guild case numbers; the unique index on cases is the backstop. */
 export const caseCounters = pgTable("case_counters", {
   guildId: text("guild_id").primaryKey(),
@@ -330,6 +359,7 @@ export const schema = {
   communityRecords,
   aiDocuments,
   aiUsage,
+  inviteJoins,
   caseCounters,
   jobReceipts,
   imports,

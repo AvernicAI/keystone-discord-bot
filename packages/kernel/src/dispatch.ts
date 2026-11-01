@@ -24,6 +24,7 @@ export interface DispatchDeps {
   /** Optional: absent in tests that do not exercise moderation. */
   moderation?: import("./types").ModerationPort;
   community?: import("./community").CommunityPort;
+  invites?: import("./invites").InvitePort;
   ai?: import("./ai").AiPort;
   /** Optional: when absent, tracing is a no-op and costs nothing. */
   telemetry?: Telemetry;
@@ -85,6 +86,7 @@ export async function dispatchCommand(
     health: deps.health,
     moderation: deps.moderation,
     community: deps.community,
+    invites: deps.invites,
     ai: deps.ai,
   };
 

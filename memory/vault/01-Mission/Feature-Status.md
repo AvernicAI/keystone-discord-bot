@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**115 features** across 16 domains: **75 in repo**, **12 open**, **24 planned**. Live behaviour is marked separately; a green
+**115 features** across 16 domains: **78 in repo**, **12 open**, **21 planned**. Live behaviour is marked separately; a green
 box means the code and its tests exist, not that a live guild has run it.
 
 ## Domains
@@ -24,7 +24,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | AI | 6 | 5 | 1 | 0 |
 | Operations | 8 | 2 | 3 | 3 |
 | Portability | 11 | 11 | 0 | 0 |
-| Invites | 3 | 0 | 0 | 3 |
+| Invites | 3 | 3 | 0 | 0 |
 | Forms and applications | 3 | 0 | 0 | 3 |
 | Events and RSVP | 4 | 0 | 0 | 4 |
 | Community parity extras | 8 | 0 | 0 | 8 |
@@ -190,9 +190,9 @@ box means the code and its tests exist, not that a live guild has run it.
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Invite attribution | P7 | ⏳ planned | Who invited whom, with join attribution. |
-| Fake invite detection | P7 | ⏳ planned | Flag suspicious joins without auto-punishing. |
-| Invite leaderboard | P7 | ⏳ planned | Per-inviter counts and retention. |
+| Invite attribution | P7 | ✅ in repo | `modules/invites/src/invites.test.ts`, `packages/db/src/invite-store.test.ts` · live unverified |
+| Fake invite detection | P7 | ✅ in repo | `modules/invites/src/invites.test.ts` · live unverified |
+| Invite leaderboard | P7 | ✅ in repo | `modules/invites/src/commands.test.ts`, `packages/db/src/invite-store.test.ts` · live unverified |
 
 ## Forms and applications
 

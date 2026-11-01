@@ -213,6 +213,8 @@ export interface CommandContext {
   readonly moderation?: ModerationPort;
   /** Present when the composition root wired the P3 community adapters. */
   readonly community?: import("./community").CommunityPort;
+  /** Present when the composition root wired the invite-tracking adapters. */
+  readonly invites?: import("./invites").InvitePort;
   /** Present when the composition root wired the P4 AI provider. */
   readonly ai?: import("./ai").AiPort;
 }

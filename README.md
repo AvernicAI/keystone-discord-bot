@@ -14,12 +14,14 @@ tickets, economy and AI all stand on.
 foundation** is now in repo: Discord OAuth2/PKCE login, opaque Postgres-backed
 sessions, per-guild BigInt authorization, schema-validated module settings writes
 from the dashboard and a `PATCH /api/v1` route. Fleet actions, templates, scoped
-API tokens and webhooks are the remaining P6 work. The command ledger is
-**10/100**, there are **5 modules**, and `pnpm check` covers **185 tests across
-30 files** without a Discord token, database or network. Live on 2026-11-01: the
-bot logged in, registered 10 commands through Discord, answered a Qwen3:8b
-mention in `#ai-chat`, and ran real moderation, community and AI commands through
-a development message bridge. The dashboard was booted in memory mode and
+API tokens and webhooks are the remaining P6 work. P7 invite tracking is now in
+repo as a sixth module: attribution, a joins/retention leaderboard and advisory
+suspicious-join flags. The command ledger is **11/100**, there are **6 modules**,
+and `pnpm check` covers **206 tests across 33 files** without a Discord token,
+database or network. Live on 2026-11-01: the bot logged in, registered 11 commands
+through Discord, answered a Qwen3:8b mention in `#ai-chat`, and ran real
+moderation, community, AI and invite commands through a development message
+bridge. The dashboard was booted in memory mode and
 exercised over real HTTP, including authenticated settings writes against a fake
 OAuth port; live Discord OAuth is not claimed. Slash `InteractionCreate` from a
 human client is still the next live check.
@@ -235,7 +237,7 @@ refusals. See [the community spec](memory/vault/04-Modules/community/Spec.md).
 
 ## Commands
 
-Discord's global limit is 100; Keystone uses **10**. Slash commands are the
+Discord's global limit is 100; Keystone uses **11**. Slash commands are the
 product surface. In development, `DEV_GUILD_ID` also enables the `!` bridge for
 message-only harnesses.
 
@@ -251,6 +253,7 @@ message-only harnesses.
 | `/ticket` | `panel`, `open`, `claim`, `close`, `add`, `transcript`, `summary`, `stats` | Thread tickets, claiming, transcripts, AI summary and SLA stats |
 | `/tools` | `embed`, `tag`, `reminder`, `schedule`, `giveaway`, `giveaway-end`, `giveaway-reroll`, `poll`, `feed`, `stat`, `welcome`, `roles`, `starboard`, `starboard-override`, `voice`, `birthdays`, `birthday`, `suggestions`, `suggestion`, `suggestion-decide`, `sticky` | Community utilities and panels |
 | `/ai` | `status`, `ask`, `chat`, `classify`, `docs-add`, `docs-list`, `docs-remove`, `deflect`, `explain`, `summary`, `budget` | Opt-in server-doc answers, advisory classification, explanations, summaries and hard caps |
+| `/invites` | `leaderboard`, `stats`, `who`, `user`, `limit` | Invite attribution, joins/retention totals and who invited a member |
 
 `/ticket summary` and `/ai summary` require `ManageGuild`. `/ai docs-*` and
 `/ai budget` require `ManageGuild`; `/ai classify` and `/ai deflect` require
@@ -310,7 +313,7 @@ Everything below is free. No feature is moved behind a paywall.
 
 ### Platform and operations
 
-- Module registry with a CI-enforced 100-command budget (currently 10).
+- Module registry with a CI-enforced 100-command budget (currently 11).
 - Postgres schema and ordered migrations; Drizzle repositories.
 - Redis cooldowns and a BullMQ worker, with explicit in-memory fallbacks.
 - OpenTelemetry tracing, off by default.
@@ -336,8 +339,11 @@ Everything below is free. No feature is moved behind a paywall.
 
 - XP and levels, leaderboards, role rewards and seasonal resets.
 - Ledger-backed currency, daily, pay, shop, buying, gambling and an audit ledger.
-- Button and select reaction roles, welcome/goodbye and delayed autoroles.
+- Button and select reaction roles, welcome and delayed autoroles.
 - Starboard with per-channel overrides and sticky messages.
+- Invite tracking: attribution from cached invite counters, a joins/retention
+  leaderboard, and advisory flags for new or avatar-less accounts. No punishment
+  is attached to a flag.
 - Thread tickets: panel, open, claim, add, transcript, close, stats and AI summary.
 - Giveaways, polls, reminders, schedules, feeds and stat channels.
 - Birthdays, suggestions and temporary voice rooms.
@@ -360,8 +366,9 @@ Everything below is free. No feature is moved behind a paywall.
 - **P6 remaining:** schema-driven field widgets, the Next.js shell, fleet
   view/templates, token refresh/revocation, scoped public API tokens,
   per-token rate limits, idempotency, webhooks and OpenAPI.
-- **P7:** parity completion (forms, events, role persistence, modmail,
-  auto-responders, analytics), Components V2 UI, i18n.
+- **P7:** invite tracking is done; the rest is parity completion (forms,
+  events, role persistence, modmail, auto-responders, analytics), Components V2
+  UI and i18n.
 - **P8:** bring-your-own Lavalink music, disabled by default; no bundled streamer.
 - **P9:** docs site, 14-lesson curriculum, release workflow, self-host kit.
 - **P10:** sharding, load tests, SLOs, Discord.js v15 migration.
@@ -381,11 +388,13 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
+| P7 Parity completion | **In progress** | Invite tracking shipped; forms, events, expiry, modmail and UI/i18n open |
 
 Live evidence (2026-11-01): `AI Team#5758` connected, cleared and re-registered
-10 global commands, and Qwen3:8b answered a mention in `#ai-chat`. A development
-`!` bridge ran `!ping`, `!about`, `!ai status`, `!mod history` and
-`!rank leaderboard` through the real dispatch pipeline. `/ticket stats` reached
+11 global commands (including `/invites`), and Qwen3:8b answered a mention in
+`#ai-chat`. A development `!` bridge ran `!ping`, `!about`, `!ai status`,
+`!mod history`, `!rank leaderboard`, `!invites leaderboard` and `!invites who`
+through the real dispatch pipeline. `/ticket stats` reached
 the `ManageGuild` guard (the MCP bot is not an admin); that check exposed a real
 ordering bug, now fixed and unit-tested.
 
@@ -446,8 +455,8 @@ module's existing defaults.
 If the feature needs a database table, add a migration in
 `packages/db/src/migrations` and a repository; if it needs a Discord permission,
 declare it on the manifest. If it needs a new root command, check the budget
-first: ten roots are used, ninety remain, and every root is a permanent public
-interface.
+first: eleven roots are used, eighty-nine remain, and every root is a permanent
+public interface.
 
 ## How to have an agent read it easily
 
@@ -532,7 +541,7 @@ packages/queue  BullMQ adapter + in-process driver for tests
 packages/telemetry  OpenTelemetry wrapper, off by default
 packages/config Zod-validated environment
 packages/testing token-free fixtures for module authors
-modules/        diagnostics, setup, moderation, community, ai
+modules/        diagnostics, setup, moderation, community, ai, invites
 memory/         Obsidian vault + machine state + journal
 ```
 

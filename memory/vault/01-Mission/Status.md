@@ -2,6 +2,15 @@
 
 ## Now
 
+**P7 invite tracking is in repo** (pass 19, 2026-11-01): the sixth module adds
+`/invites leaderboard | stats | who`, durable `invite_joins` attribution with a
+unique `(guild, user, joined_at)` key, SQL join/leave/retention totals, and
+advisory account-age / no-avatar flags that never punish. The bot receives
+`GuildInvites` and requests `GuildMembers` optionally; a live join could not be
+performed because no second Discord account was available. MEE6 sells this as a
+paid plugin and neither Dyno nor Carl-bot ships it. Distinguish this from P6,
+which remains open below.
+
 **P6 authorization and settings-write foundation is in repo** (passes 17–18,
 2026-11-01): Discord OAuth2 code + PKCE, sealed state, opaque Postgres-backed
 sessions, BigInt guild authorization with a bot-token membership check, a
@@ -29,7 +38,9 @@ CSRF token or unauthorized guild is refused. Live Discord OAuth is not claimed.
 guild and answered a qwen3:8b mention in `#ai-chat`. SaseQ's `discord-mcp` cannot
 invoke slash commands, so a **dev-only `!` bridge** now feeds the real dispatch
 pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
-`!rank leaderboard` all returned live Discord messages/embeds. `!ticket stats`
+`!rank leaderboard` all returned live Discord messages/embeds. Pass 19 added
+`!invites leaderboard` and `!invites who`; the bot re-registered **11** commands
+and Discord's server set included `invites`. `!ticket stats`
 exposed a real ordering bug (guild stats required a ticket first), now fixed and
 tested. On ready the bot now clears application commands, re-registers the full
 set, and fetches Discord's list to log missing/extra names. Slash interaction
@@ -42,10 +53,10 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 185 tests / 30 files · budget 10/100 · memory 1807/1807
+pnpm check        exit 0 · typecheck 0 · 206 tests / 33 files · budget 11/100 · memory 1853/1853
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 10 commands · qwen3:8b reply in #ai-chat
-live commands     2026-11-01 · !ping · !about · !ai status · !mod history · !rank leaderboard
+live              2026-11-01 · AI Team#5758 · 2 guilds · 11 commands · qwen3:8b reply in #ai-chat
+live commands     2026-11-01 · !ping · !about · !ai status · !mod history · !rank leaderboard · !invites leaderboard · !invites who
 live failure      !ticket stats → ManageGuild guard (MCP bot is not admin); branch fixed and unit-tested
 public            2026-11-01 · https://github.com/RNGBubba/keystone-discord-bot · AGPL-3.0-or-later
 ```
@@ -53,6 +64,20 @@ public            2026-11-01 · https://github.com/RNGBubba/keystone-discord-bot
 A local `.env` exists in the working tree. Smoke commands pin
 `DOTENV_CONFIG_PATH=.env.absent` so the result is deterministic and does not
 read that file.
+
+## P7 invite acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | Attribution is a deterministic diff, not a guess | `invites.test.ts`: increment, new code, unchanged, missing inviter, code tie-break | Pure functions |
+| 2 | A repeated gateway delivery cannot double-count | `invites.test.ts` and `invite-store.test.ts`: second identical join returns false; the unique key is `(guild, user, joined_at)` | In-memory + **PGlite** |
+| 3 | Concurrent joins are serialized per guild | `apps/bot/src/invite-events.ts`: one promise chain per guild; no queue is shared across guilds | Code inspection; the race test is the two-join unit case |
+| 4 | Joins, leaves and retention are computed in SQL | `invite-store.test.ts`: two joins and one leave produce `{joins: 2, leaves: 1, retained: 1}` | **PGlite** |
+| 5 | Flags are advisory | `invites.test.ts`: one log embed, footer "Advisory only"; the port has no ban/kick/timeout method | In-memory + recorder |
+| 6 | Settings are the module's own schema | `inviteSettingsSchema`; the dashboard uses the same catalog, no web-only schema | Shared catalog |
+| 7 | The command fits the budget and declares its intents | `commands.test.ts`: one root, budget 1, `GuildInvites` required, `GuildMembers` fallback named by `/setup` | Registry |
+| 8 | The real surface runs | Live 2026-11-01: 11 commands registered including `invites`; `!invites leaderboard` and `!invites who` dispatched and replied in `#ai-chat` | Live gateway |
+| 9 | A live member join was **not** performed | `Status.md` limitation; no second account was available | Not claimed |
 
 ## P6 foundation acceptance evidence
 

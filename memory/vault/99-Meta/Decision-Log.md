@@ -98,6 +98,16 @@ including the small calls that did not deserve an ADR.
 | 59 | Settings writes reuse the viewer's `GuildAccessService` gate, session CSRF and `SettingsService` schema; no second write path | [[Dashboard]] |
 | 60 | The first settings editor is a validated JSON textarea; richer field widgets remain P6 work | [[Dashboard]] |
 
+## 2026-11-01 — P7 invite tracking
+
+| # | Decision | Where |
+| --- | --- | --- |
+| 61 | Attribution is a pure diff of cached invite `uses`, with the code as tie-breaker; there is no invented join event | [[ADR-0017-invite-tracking]] |
+| 62 | Join handling is serialized per guild, so two arrivals cannot both claim one increment | [[ADR-0017-invite-tracking]] |
+| 63 | `invite_joins` is unique on `(guild, user, joined_at)`; leaves mark the newest open row and totals are SQL aggregates | [[ADR-0017-invite-tracking]] |
+| 64 | Suspicious-join flags are advisory only; the invite port has no punishment method | [[04-Modules/invites/Spec\|Invites spec]] |
+| 65 | Invite settings use the existing dashboard write path; `/invites` is read-only and one new root | [[04-Modules/invites/Spec\|Invites spec]] |
+
 ## How to add a decision
 
 1. If it changes the contract, write an ADR with **Alternatives**.
