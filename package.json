@@ -22,6 +22,8 @@
     "start": "tsx apps/bot/src/index.ts",
     "worker:dev": "tsx watch apps/worker/src/index.ts",
     "worker:start": "tsx apps/worker/src/index.ts",
+    "web:dev": "tsx watch apps/web/src/index.ts",
+    "web:start": "tsx apps/web/src/index.ts",
     "build": "tsup",
     "db:migrate": "tsx scripts/migrate.ts",
     "typecheck": "tsc --noEmit",

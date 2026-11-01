@@ -14,7 +14,7 @@
                  └──────────┬──────────┘
         ┌───────────────────┼───────────────────┐
 ┌───────▼────────┐ ┌────────▼────────┐ ┌────────▼────────┐
-│ modules/<name> │ │  apps/worker    │ │  apps/web (P5)  │
+│ modules/<name> │ │  apps/worker    │ │  apps/web (P6)  │
 └───────┬────────┘ └────────┬────────┘ └─────────────────┘
         │                   │
 ┌───────▼───────┐ ┌─────────▼───────┐ ┌─────────────────┐
@@ -32,7 +32,9 @@
 **Dependencies point inward.** A module may depend on the kernel. The kernel
 depends on nothing of ours and never imports discord.js, Drizzle or BullMQ.
 `apps/bot` knows about discord.js and composes the adapters; `apps/worker` knows
-about BullMQ; `packages/db` knows about Postgres.
+about BullMQ; `apps/web` knows about HTTP sessions and OAuth; `packages/db` knows
+about Postgres. The web app shares the kernel ports and the module catalog, so it
+cannot drift from the bot's settings schemas.
 
 **One composition root.** `apps/bot/src/runtime.ts` is the only function that
 chooses an implementation of a port. A module cannot ask which database is in
@@ -121,6 +123,8 @@ run only through `pnpm db:migrate` — never on boot.
 | `packages/testing` | Token-free fixtures | nothing |
 | `apps/bot` | Gateway process and composition root | discord.js |
 | `apps/worker` | BullMQ consumer, job handlers | BullMQ, Postgres |
+| `apps/web` | Optional dashboard/API, OAuth sessions, guild authorization | node:http, Postgres |
+| `packages/module-catalog` | One module list for bot and web | modules |
 | `modules/*` | Features | kernel only |
 
 ## Failure posture

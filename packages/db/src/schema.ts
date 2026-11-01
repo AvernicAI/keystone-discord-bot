@@ -48,6 +48,7 @@ const jsonValue = customType<{ data: unknown; driverData: unknown }>({
 // instance between tables is a subtle bug waiting to happen.
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 const updatedAt = () => timestamp("updated_at", { withTimezone: true }).notNull().defaultNow();
+const rotatedAt = () => timestamp("rotated_at", { withTimezone: true }).notNull().defaultNow();
 
 export const guilds = pgTable("guilds", {
   id: text("id").primaryKey(),
@@ -299,6 +300,22 @@ export const backups = pgTable("backups", {
   createdAt: createdAt(),
 });
 
+export const webSessions = pgTable(
+  "web_sessions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    username: text("username").notNull(),
+    accessToken: text("access_token").notNull(),
+    refreshToken: text("refresh_token"),
+    csrfHash: text("csrf_hash").notNull(),
+    createdAt: createdAt(),
+    rotatedAt: rotatedAt(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [index("web_sessions_expires_idx").on(table.expiresAt)],
+);
+
 export const schema = {
   guilds,
   settings,
@@ -317,6 +334,7 @@ export const schema = {
   jobReceipts,
   imports,
   backups,
+  webSessions,
 };
 
 export type Schema = typeof schema;

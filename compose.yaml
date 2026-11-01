@@ -67,5 +67,23 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # The dashboard/API is optional: a gateway-only self-host can omit this
+  # service and still run the bot and worker. It refuses to boot in production
+  # without SESSION_SECRET, and /login returns 503 until the OAuth values are set.
+  web:
+    build: .
+    command: ["node", "dist/web.js"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://keystone:keystone@postgres:5432/keystone
+      WEB_PORT: "3000"
+      WEB_ORIGIN: http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
 volumes:
   pgdata:

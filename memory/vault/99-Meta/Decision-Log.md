@@ -85,6 +85,17 @@ including the small calls that did not deserve an ADR.
 | 51 | README is the user and agent entry point; `AGENTS.md` holds the short read order and non-negotiables | `README.md`, `AGENTS.md` |
 | 52 | The public repository is `RNGBubba/keystone-discord-bot`, named after the bot and the project | https://github.com/RNGBubba/keystone-discord-bot |
 
+## 2026-11-01 — P6 dashboard foundation
+
+| # | Decision | Where |
+| --- | --- | --- |
+| 53 | The P6 foundation is framework-free Node HTTP over kernel ports; the Next.js shell is a later UI decision | [[ADR-0016-dashboard-foundation]] |
+| 54 | Sessions are opaque random values; only a SHA-256 hash is stored, and Discord tokens are sealed before Postgres | [[Dashboard-Security]] |
+| 55 | Every guild route checks both the user's BigInt permissions and bot membership; a URL guild id is never trusted | [[Dashboard-Security]] |
+| 56 | Web reads go through `SettingsService` and the `DashboardStore` port, not ad-hoc SQL in a handler | [[Dashboard]] |
+| 57 | Read-only first: settings writes, fleet actions and scoped tokens are deferred until the authz matrix is proven | [[Roadmap]] |
+| 58 | No paid services, including paid GitHub plans/features; free/local only | [[01-Mission/Non-Negotiables\|Non-Negotiables]] |
+
 ## How to add a decision
 
 1. If it changes the contract, write an ADR with **Alternatives**.

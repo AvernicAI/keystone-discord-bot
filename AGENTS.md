@@ -30,6 +30,12 @@ The newest journal entry is the best short history of the current work. Read its
 - **No secrets in the repo or the vault.** Never print, commit or paste a Discord
   token, provider key or `.env` value. `.env.example` is the only committed
   environment shape.
+- **Nothing that costs money.** Never add a paid GitHub plan/feature (Actions
+  minutes beyond the free tier, Copilot, Codespaces, Packages, private-repo
+  seats, Advanced Security) or any other paid service, hosting, database, CI,
+  storage, email, monitoring or AI provider. Use public GitHub, Discord, local
+  Postgres/Redis/Ollama, PGlite and in-memory adapters. A free tier is acceptable
+  only while it covers the documented use; never add a card or billing account.
 - **The kernel stays inward.** Modules may import `@keystone/kernel`. The kernel
   must not import discord.js, Drizzle, BullMQ, Redis or a module. Discord
   interactions and side effects belong in `apps/bot` adapters or a port
@@ -51,7 +57,9 @@ The newest journal entry is the best short history of the current work. Read its
 apps/bot              gateway, discord.js adapter, composition root, dispatch,
                       development `!` bridge
 apps/worker           BullMQ consumer with idempotent handlers
+apps/web              optional dashboard/API: OAuth sessions, guild authz, reads
 packages/kernel       registry, guards, settings, dispatch, budget, ports
+packages/module-catalog  the one module list shared by bot and web
 packages/db           Drizzle schema, migrations, Postgres repositories
 packages/importer     export/restore/rollback, importers, drift
 packages/cache        Redis cooldowns + in-memory fallback
@@ -79,6 +87,7 @@ pnpm budget             # command-root ledger; must stay below 100
 pnpm check              # the full gate: typecheck, tests, budget, audits, memory
 pnpm memory:render      # regenerate vault pages from machine truth
 pnpm memory:check       # validate machine files, generated pages and wikilinks
+pnpm web:start           # dashboard/API at http://localhost:3000
 pnpm commands:sync      # atomic command replace
 pnpm commands:resync    # explicit clear -> register -> fetch verification
 pnpm portability ...    # export/restore/rollback CLI
@@ -109,13 +118,15 @@ by a rate-limited register leaves the app with no commands.
 
 ## Current state (2026-11-01)
 
-- P0–P5 complete in-repo; P6 dashboard/API is next.
-- 5 modules, 10 global command roots, 171 tests in 28 files.
+- P0–P5 complete in-repo. P6 authorization foundation is in repo: OAuth2/PKCE,
+  opaque Postgres sessions, per-guild BigInt authz, read-only HTML/API reads.
+- 5 modules, 10 global command roots, 182 tests in 30 files.
 - Live: AI Team#5758 connected; 10 commands registered; Qwen3:8b replied in
   `#ai-chat`; `!ping`, `!about`, `!ai status`, `!mod history` and
-  `!rank leaderboard` ran through the real pipeline.
+  `!rank leaderboard` ran through the real pipeline. The web process booted in
+  memory mode and answered real HTTP requests; live Discord OAuth is open.
 - Open: human slash run, live Postgres/role/select/voice/scheduler paths,
-  pgvector ANN benchmark, MEE6 live fetch, P6 dashboard/API.
+  pgvector ANN benchmark, MEE6 live fetch, P6 settings writes/fleet/tokens.
 
 When you finish a pass, update `memory/machine/project.json` (`lastPass`,
 `tests`), append to `memory/machine/passes.json`, write the journal, update the

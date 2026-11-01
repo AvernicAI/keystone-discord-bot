@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-31",
+  "updatedAt": "2026-11-01",
   "decisions": [
     {
       "id": "ADR-0001",
@@ -120,6 +120,14 @@
       "status": "accepted",
       "date": "2026-10-31",
       "path": "vault/03-Architecture/ADR/ADR-0015-portability-bundles-and-receipts.md",
+      "alternatives": true
+    },
+    {
+      "id": "ADR-0016",
+      "title": "Dashboard foundation: framework-free HTTP over kernel ports",
+      "status": "accepted",
+      "date": "2026-11-01",
+      "path": "vault/03-Architecture/ADR/ADR-0016-dashboard-foundation.md",
       "alternatives": true
     }
   ]

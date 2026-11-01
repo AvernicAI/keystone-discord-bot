@@ -1546,9 +1546,31 @@
             "wick-security": "✅"
           },
           "phase": "P6",
-          "status": "planned",
+          "status": "open",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "Next.js",
+          "note": "Read-only auth foundation in repo; settings writes and the Next.js shell are pending",
+          "liveVerified": false,
+          "openReason": "Login, sessions and one guild overview read are built; schema-driven settings forms, writes, fleet actions and a live OAuth round trip are not."
+        },
+        {
+          "id": "operations.dashboard-auth-foundation",
+          "name": "Dashboard auth foundation",
+          "competitors": {
+            "mee6": "✅",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "✅",
+            "wick-security": "✅"
+          },
+          "phase": "P6",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "OAuth2/PKCE, opaque sessions, BigInt guild authz, read-only /api/v1 and HTML overview",
+          "evidence": [
+            "apps/web/src/web.test.ts",
+            "packages/db/src/web-store.test.ts",
+            "memory/vault/03-Architecture/Dashboard.md"
+          ],
           "liveVerified": false
         },
         {
@@ -1562,10 +1584,11 @@
             "wick-security": "❔"
           },
           "phase": "P6",
-          "status": "planned",
+          "status": "open",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "One view, per-guild authz",
-          "liveVerified": false
+          "note": "The guild list is per-guild authorized; bulk fleet actions and templates are pending",
+          "liveVerified": false,
+          "openReason": "A user sees every guild they can manage, but there is no fleet action surface, template application or cross-guild write path yet."
         },
         {
           "id": "operations.config-templates",
@@ -1594,10 +1617,11 @@
             "wick-security": "❔"
           },
           "phase": "P6",
-          "status": "planned",
+          "status": "open",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "Scoped tokens",
-          "liveVerified": false
+          "note": "Read-only /api/v1 exists; scoped tokens, webhooks and idempotency are pending",
+          "liveVerified": false,
+          "openReason": "OAuth-session reads are built; public token issuance, scopes, per-token rate limits, Idempotency-Key, webhooks and OpenAPI are not."
         },
         {
           "id": "operations.i18n",

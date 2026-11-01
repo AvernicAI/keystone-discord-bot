@@ -10,13 +10,18 @@ tickets, economy and AI all stand on.
 > Keystone ships the union — free, documented, and built so a stranger can add a
 > feature in an afternoon.
 
-**Status:** P0–P5 are complete in-repo. P6 (dashboard, API and fleet) is next.
-The command ledger is **10/100**, there are **5 modules**, and `pnpm check`
-covers **171 tests across 28 files** without a Discord token, database or
-network. Live on 2026-11-01: the bot logged in, registered 10 commands through
-Discord, answered a Qwen3:8b mention in `#ai-chat`, and ran real moderation,
-community and AI commands through a development message bridge. Slash
-`InteractionCreate` from a human client is still the next live check.
+**Status:** P0–P5 are complete in-repo. P6's **authorization foundation** is now
+in repo: Discord OAuth2/PKCE login, opaque Postgres-backed sessions, per-guild
+BigInt authorization, a read-only HTML dashboard and `/api/v1`. Settings writes,
+fleet actions, scoped API tokens and webhooks are the remaining P6 work. The
+command ledger is **10/100**, there are **5 modules**, and `pnpm check` covers
+**182 tests across 30 files** without a Discord token, database or network. Live
+on 2026-11-01: the bot logged in, registered 10 commands through Discord,
+answered a Qwen3:8b mention in `#ai-chat`, and ran real moderation, community and
+AI commands through a development message bridge. The dashboard was also booted
+in memory mode and exercised over real HTTP (`/healthz`, `/`, `/api/v1/...`);
+live Discord OAuth is not claimed. Slash `InteractionCreate` from a human client
+is still the next live check.
 
 This repo is both the product and the course: every module has a spec, tests, a
 teaching note and a status page. The docs are the source of truth, not a
@@ -31,6 +36,7 @@ marketing site.
 - [Discord app setup](#discord-app-setup)
 - [Configuration](#configuration)
 - [Commands](#commands)
+- [Dashboard and API](#dashboard-and-api)
 - [Features](#features)
 - [Current progress](#current-progress)
 - [How to add stuff](#how-to-add-stuff)
@@ -59,6 +65,9 @@ marketing site.
 
 **Optional**
 
+- A Discord OAuth2 client for the dashboard. Without it, `pnpm web:start` still
+  boots and `/healthz` works, but `/login` returns `503`; no other feature is
+  affected.
 - An OpenAI-compatible AI provider. Without one, `/ai` reports `unconfigured`
   and every AI call refuses safely. Ollama + Qwen3 works locally.
 - An OTLP endpoint for tracing. Tracing is off by default.
@@ -101,6 +110,7 @@ docker compose up -d postgres redis
 pnpm db:migrate          # explicit, idempotent — never on boot
 pnpm dev                 # bot
 pnpm worker:dev          # second terminal: BullMQ consumer
+pnpm web:start           # third terminal: dashboard/API at http://localhost:3000
 ```
 
 `pnpm db:migrate` is safe to rerun. Postgres data lives in the `pgdata` volume.
@@ -111,11 +121,26 @@ pnpm worker:dev          # second terminal: BullMQ consumer
 docker compose up --build
 ```
 
-This builds the bot, runs migrations once, then starts the bot and worker.
-`docker compose up -d postgres redis` is the lighter path when you want hot
-reload with `pnpm dev`.
+This builds the bot, runs migrations once, then starts the bot, worker and web
+service. `docker compose up -d postgres redis` is the lighter path when you want
+hot reload with `pnpm dev`; the web service is optional, so a gateway-only
+self-host can omit it or run `docker compose up bot worker` without a dashboard.
 
-### 5. Verify without secrets
+### 5. Dashboard and API (optional)
+
+```bash
+pnpm web:start           # http://localhost:3000
+```
+
+Memory mode works without Postgres, Redis or OAuth: `/healthz` reports
+`{"database":"memory","oauth":false}` and `/login` returns `503`. To sign in,
+create a Discord OAuth2 client (see [Discord app setup](#discord-app-setup)) and
+set `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` and
+`DISCORD_OAUTH_REDIRECT_URI`, plus `SESSION_SECRET` in production. The dashboard
+only lists servers where you are owner or hold **Administrator** / **Manage
+Server**, and the bot must be in the server.
+
+### 6. Verify without secrets
 
 ```bash
 pnpm check
@@ -125,7 +150,7 @@ This runs typecheck, the full test suite, the command-budget audit, the intent
 and channel audits, and the memory consistency check. It must stay green in CI
 without a token or network.
 
-### 6. Register or refresh Discord commands
+### 7. Register or refresh Discord commands
 
 The bot writes commands at boot only when the server set has drifted, then reads
 them back and logs any mismatch. For a payload-only change (description, options)
@@ -148,7 +173,11 @@ uses both slots; if it is rate-limited it waits and retries, but do not loop it.
    - **Server Members** — welcome, delayed autoroles, join gate, role persistence.
    - **Message Content** — automod scanner, ticket transcripts, starboard snapshots.
    - If you cannot enable them, set `INTENT_PROFILE=minimal`; the core still runs.
-4. **OAuth2** → URL Generator:
+4. **OAuth2** → **General**: copy the Client ID and Client Secret, and add the
+   exact redirect `http://localhost:3000/auth/callback` (use your
+   `WEB_ORIGIN` when it differs). The dashboard needs the `identify guilds`
+   scope; it never asks for your bot token.
+5. **OAuth2** → URL Generator:
    - Scopes: `bot`, `applications.commands`.
    - Permissions: for a first run, **Administrator** is simplest. Least privilege:
      `View Channels`, `Send Messages`, `Embed Links`, `Read Message History`,
@@ -156,7 +185,7 @@ uses both slots; if it is rate-limited it waits and retries, but do not loop it.
      `Manage Messages`, `Add Reactions`, `Create Public Threads`,
      `Manage Threads`, `Connect`, `Moderate Members`, `Ban Members`,
      `Kick Members`.
-5. Invite the bot, then start it as above. `/setup` is the first command to run.
+6. Invite the bot, then start it as above. `/setup` is the first command to run.
 
 ## Configuration
 
@@ -177,6 +206,12 @@ message or the vault.
 | `AI_INPUT_USD_PER_MILLION` / `AI_OUTPUT_USD_PER_MILLION` | no | Rate-card defaults for the hard cost cap |
 | `AI_DISABLE_THINKING` | no | Sends Ollama's `think: false`; use it for Qwen3 or reasoning can consume the whole output budget |
 | `DEV_GUILD_ID` | no | Development only: seeds AI chat in memory and enables `!` commands plus bot-authored mentions in that one guild |
+| `WEB_PORT` | no | Dashboard/API port; defaults to `3000` |
+| `WEB_ORIGIN` | production | Public origin used for the redirect/cookie mode; defaults to `http://localhost:$WEB_PORT` |
+| `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` | dashboard | Without them `/login` returns `503`; the bot is unaffected |
+| `DISCORD_OAUTH_REDIRECT_URI` | dashboard | Must match the Developer Portal exactly; defaults to `$WEB_ORIGIN/auth/callback` |
+| `DISCORD_OAUTH_ISSUER` | no | Defaults to `https://discord.com`; the callback rejects any other `iss` |
+| `SESSION_SECRET` | production web | 32 bytes base64/base64url or 64 hex; the process refuses to boot in production without it |
 
 `/setup` reports which mode is live. A configured-but-unreachable service is a
 boot error, not a silent downgrade.
@@ -221,6 +256,40 @@ message-only harnesses.
 `ManageMessages`. AI is advisory: it never punishes, deletes or claims an action
 happened.
 
+## Dashboard and API
+
+The P6 foundation is a separate, optional Node process in `apps/web`. It is
+**security-first and read-only**: it proves login and one real read path before
+any write surface exists.
+
+```text
+GET /healthz                              public, no secrets
+GET /login                                OAuth2 code + PKCE; 503 without OAuth config
+GET /auth/callback                        state + iss validation, then a session
+GET /dashboard                            servers the user can manage
+GET /dashboard/guilds/:id                 read-only guild overview
+GET /api/v1/me                            signed-in user, never a token
+GET /api/v1/guilds                        manageable servers only
+GET /api/v1/guilds/:id/overview           counts, module settings, latest import
+POST /logout                              session + CSRF; deletes the server-side session
+```
+
+Every guild route performs **two checks**: the OAuth user must be owner or hold
+`ADMINISTRATOR` / `MANAGE_GUILD` (parsed as `BigInt`, because bit 40 is
+`MODERATE_MEMBERS`), **and** the bot token must confirm the bot is in the guild.
+The `:guildId` in a URL is never trusted. Sessions are opaque random values;
+only their SHA-256 hash is stored. Discord tokens are AES-256-GCM sealed before
+they reach Postgres and never appear in HTML or JSON. Responses carry a strict
+CSP, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` and
+`Cache-Control: no-store`.
+
+This is a foundation, not the P6 exit demo. Still open: schema-driven settings
+writes, the fleet view/templates, token refresh and revocation, public scoped
+API tokens, per-token rate limits, `Idempotency-Key`, webhooks, OpenAPI, and a
+live OAuth round trip against Discord. See
+[Dashboard](memory/vault/03-Architecture/Dashboard.md) and
+[ADR-0016](memory/vault/03-Architecture/ADR/ADR-0016-dashboard-foundation.md).
+
 ## Features
 
 Everything below is free. No feature is moved behind a paywall.
@@ -236,6 +305,8 @@ Everything below is free. No feature is moved behind a paywall.
 - One channel resolver for Discord's 2026 channel-obfuscation rollout.
 - Versioned export bundle, checksum verification, transactional restore,
   24-hour rollback, deletion receipts, importers and a read-only drift report.
+- P6 dashboard/API foundation: Discord OAuth2/PKCE, opaque Postgres sessions,
+  per-guild BigInt authorization, a read-only HTML overview and `/api/v1` reads.
 - Token-free tests on PGlite and structural fakes.
 
 ### Moderation and security
@@ -271,8 +342,9 @@ Everything below is free. No feature is moved behind a paywall.
 
 ### Planned (honest roadmap)
 
-- **P6:** Next.js dashboard, per-guild OAuth authorization, fleet view, scoped
-  public API tokens, webhooks.
+- **P6 remaining:** schema-driven settings writes, the Next.js shell, fleet
+  view/templates, token refresh/revocation, scoped public API tokens,
+  per-token rate limits, idempotency, webhooks and OpenAPI.
 - **P7:** parity completion (forms, events, role persistence, modmail,
   auto-responders, analytics), Components V2 UI, i18n.
 - **P8:** bring-your-own Lavalink music, disabled by default; no bundled streamer.
@@ -293,7 +365,7 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P4 AI + economy | Done | Provider, caps, RAG, chat, explanations, summaries |
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
-| P6 Dashboard + API | **Next** | Not started |
+| P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, read-only dashboard and `/api/v1` |
 
 Live evidence (2026-11-01): `AI Team#5758` connected, cleared and re-registered
 10 global commands, and Qwen3:8b answered a mention in `#ai-chat`. A development
@@ -301,6 +373,12 @@ Live evidence (2026-11-01): `AI Team#5758` connected, cleared and re-registered
 `!rank leaderboard` through the real dispatch pipeline. `/ticket stats` reached
 the `ManageGuild` guard (the MCP bot is not an admin); that check exposed a real
 ordering bug, now fixed and unit-tested.
+
+P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
+real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and
+`/login` `503` with the OAuth-unconfigured message. The authenticated flow is
+proven against a real local HTTP server with a fake OAuth port; a live Discord
+login and a Postgres session are not claimed.
 
 Still open and not claimed as done:
 
@@ -310,7 +388,8 @@ Still open and not claimed as done:
 - pgvector ANN at 1M×1536 with production embeddings; the exact index is the
   portable path today.
 - MEE6 import is file-based, not a live fetch.
-- Dashboard, API and fleet are P6.
+- Live Discord OAuth, a Postgres-backed session smoke, settings writes, fleet
+  actions and scoped API tokens are the remaining P6 work.
 
 ## How to add stuff
 
@@ -419,7 +498,9 @@ commands.
 ```text
 apps/bot        gateway adapter, composition root, dispatch, dev prefix bridge
 apps/worker     BullMQ consumer with idempotent handlers
+apps/web        optional dashboard/API: OAuth sessions, guild authz, read-only views
 packages/kernel registry · guards · settings · dispatch · budget · ports
+packages/module-catalog  the one module list shared by bot and web
 packages/db     Drizzle schema, migrations, Postgres repositories
 packages/importer  bundles, restore/rollback, importers, drift
 packages/cache  Redis cooldowns + explicit in-memory fallback
@@ -443,6 +524,11 @@ Start with [Contributing](memory/vault/07-OpenSource/Contributing.md), then
 an issue with a small spec before writing a large feature; scope control is what
 keeps this maintainable. The expected checks are `pnpm check` and a memory
 update in the same PR.
+
+**No paid dependencies.** Keystone must stay runnable on free/local services:
+public GitHub, Discord, Postgres, Redis, Ollama, PGlite and in-memory adapters.
+Never add a paid GitHub plan/feature or another paid service to make a feature
+work; see [Non-Negotiables](memory/vault/01-Mission/Non-Negotiables.md#8-nothing-that-costs-money).
 
 **Licence: AGPL-3.0-or-later.** See [`LICENSE`](LICENSE). You may run, study,
 share and modify Keystone; if you run a modified version as a network service,

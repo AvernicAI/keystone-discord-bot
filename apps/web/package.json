@@ -1,0 +1,17 @@
+{
+  "name": "@keystone/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "P6 dashboard and versioned HTTP API: OAuth2 sessions, per-guild authorization and read-only guild overview.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/config": "workspace:*",
+    "@keystone/db": "workspace:*",
+    "@keystone/kernel": "workspace:*",
+    "@keystone/module-catalog": "workspace:*",
+    "dotenv": "^16.4.0"
+  }
+}

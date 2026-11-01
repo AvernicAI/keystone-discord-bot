@@ -1,0 +1,117 @@
+/**
+ * Web-facing ports.
+ *
+ * The dashboard is a separate process, but it reads the same guild data as the
+ * bot. These interfaces live in the kernel so the web app and the Postgres
+ * adapters share one contract without the web app importing Drizzle or the
+ * database package reaching into an app.
+ */
+
+export interface WebSession {
+  /** SHA-256 hash of the browser cookie value. The raw token is never stored. */
+  readonly id: string;
+  readonly userId: string;
+  readonly username: string;
+  /** Sealed (AES-256-GCM) Discord access token; never sent to the browser. */
+  readonly accessToken: string;
+  /** Sealed Discord refresh token, or null when Discord did not issue one. */
+  readonly refreshToken: string | null;
+  /** SHA-256 hash of the browser CSRF token. */
+  readonly csrfHash: string;
+  readonly createdAt: string;
+  readonly rotatedAt: string;
+  readonly expiresAt: string;
+}
+
+export interface SessionPatch {
+  accessToken?: string;
+  refreshToken?: string | null;
+  rotatedAt?: string;
+  expiresAt?: string;
+}
+
+export interface SessionStore {
+  create(session: WebSession): Promise<void>;
+  get(id: string): Promise<WebSession | undefined>;
+  update(id: string, patch: SessionPatch): Promise<void>;
+  delete(id: string): Promise<void>;
+}
+
+export interface GuildCounts {
+  cases: number;
+  openTickets: number;
+  levels: number;
+  imports: number;
+  backups: number;
+}
+
+export interface ImportSummary {
+  id: string;
+  source: string;
+  state: string;
+  createdAt: string;
+}
+
+export interface DashboardOverview {
+  guildId: string;
+  name: string | null;
+  joinedAt: string | null;
+  counts: GuildCounts;
+  latestImport: ImportSummary | null;
+}
+
+export interface DashboardStore {
+  overview(guildId: string): Promise<DashboardOverview>;
+}
+
+export function emptyGuildCounts(): GuildCounts {
+  return { cases: 0, openTickets: 0, levels: 0, imports: 0, backups: 0 };
+}
+
+export function emptyOverview(guildId: string): DashboardOverview {
+  return {
+    guildId,
+    name: null,
+    joinedAt: null,
+    counts: emptyGuildCounts(),
+    latestImport: null,
+  };
+}
+
+/** Local/test backing store. Production uses `DrizzleSessionStore`. */
+export class InMemorySessionStore implements SessionStore {
+  readonly #sessions = new Map<string, WebSession>();
+
+  async create(session: WebSession): Promise<void> {
+    this.#sessions.set(session.id, { ...session });
+  }
+
+  async get(id: string): Promise<WebSession | undefined> {
+    const session = this.#sessions.get(id);
+    return session ? { ...session } : undefined;
+  }
+
+  async update(id: string, patch: SessionPatch): Promise<void> {
+    const current = this.#sessions.get(id);
+    if (!current) return;
+    this.#sessions.set(id, { ...current, ...patch });
+  }
+
+  async delete(id: string): Promise<void> {
+    this.#sessions.delete(id);
+  }
+}
+
+/** Local/test backing store. Production uses `DrizzleDashboardStore`. */
+export class InMemoryDashboardStore implements DashboardStore {
+  readonly #overviews = new Map<string, DashboardOverview>();
+
+  seed(overview: DashboardOverview): this {
+    this.#overviews.set(overview.guildId, { ...overview });
+    return this;
+  }
+
+  async overview(guildId: string): Promise<DashboardOverview> {
+    return this.#overviews.get(guildId) ?? emptyOverview(guildId);
+  }
+}

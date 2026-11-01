@@ -26,19 +26,26 @@ https://github.com/RNGBubba/keystone-discord-bot
 | Know the platform limits | [[Platform-Limits]] · [[Platform-2026]] |
 | Know what can be imported | [[Import-Formats]] · [[Migration-Guides]] |
 | Export, restore or delete a guild | [[Portability]] · [[Portability-Runbook]] |
-| Know the dashboard security contract | [[Dashboard-Security]] |
+| Know the dashboard security contract | [[Dashboard-Security]] · [[Dashboard]] |
 | Know the evidence | [[Claims]] · [[02-Research/OSS-2026\|OSS-2026]] · [[User-Voice-2026]] |
 | Teach or learn | [[Curriculum]] |
 | Operate it | [[Release]] · [[Incident]] · [[Token-Leak]] · [[Intent-Review]] |
 
 ## Current state
 
+- Phase **P6** foundation in repo: Discord OAuth2/PKCE, opaque Postgres-backed
+  sessions, BigInt per-guild authorization with a bot-membership check, a
+  read-only HTML dashboard and `/api/v1` reads. Settings writes, fleet actions
+  and scoped API tokens are next. See [[Dashboard]] and
+  [[ADR-0016-dashboard-foundation]].
 - Phase **P5** complete in-repo: versioned export/restore with checksum
   verification, 24-hour rollback, deletion receipts, file level importers,
   transcript archives and a read-only drift report.
 - **Public release (pass 16):** AGPL-3.0-or-later, README and `AGENTS.md` for
   humans and agents, and a safe drift-only command sync with an explicit
   `pnpm commands:resync` cycle.
+- **No paid dependencies:** the project uses public GitHub, Discord, local
+  Postgres/Redis/Ollama and free in-process test engines only.
 - **Live 2026-11-01:** AI Team#5758 logged in, cleared and re-registered all 10
   commands (then fetched Discord's list to prove it), and qwen3:8b via Ollama
   answered mentions in `#ai-chat`. A dev-only `!` bridge proved `!ping`, `!about`,
@@ -78,6 +85,7 @@ Machine truth lives in `memory/machine/project.json` and the generated
 - [[ADR-0013-roadmap-v2-portability-first]] — P4.5–P10, portability before dashboard
 - [[ADR-0014-memory-v2-machine-truth]] — machine files, generated Markdown, CI drift check
 - [[ADR-0015-portability-bundles-and-receipts]] — checksum bundles, transactional restore, narrow merge, receipts
+- [[ADR-0016-dashboard-foundation]] — framework-free HTTP, opaque sessions, per-guild authz first
 
 ## Open questions
 

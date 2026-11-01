@@ -11,4 +11,5 @@ export * from "./idempotency";
 export * from "./guards";
 export * from "./settings";
 export * from "./telemetry";
+export * from "./web";
 export * from "./dispatch";

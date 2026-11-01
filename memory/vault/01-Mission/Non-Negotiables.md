@@ -55,3 +55,19 @@ of how good the feature is.
   does not.
 - Adding a module may not require editing another module.
 - The command budget is enforced in CI, not by memory.
+
+## 8. Nothing that costs money
+
+- **Never** add a paid GitHub plan or paid GitHub feature (Actions minutes beyond
+  the free tier, Copilot, Codespaces, Packages, Advanced Security, private-repo
+  seats) or any other paid service, API, hosting, database, storage, CI, email,
+  monitoring or AI provider to this project.
+- The default path is local or free-tier only: Discord, public GitHub, Postgres,
+  Redis, Ollama, PGlite and in-memory adapters. A provider with a free tier is
+  acceptable only while the free tier covers the documented use; never add a card
+  or a billing account to make a feature work.
+- If a free tier changes, replace the dependency or degrade explicitly. A paid
+  dependency is not a fallback, and a missing key must never block `pnpm check` or
+  the token-free test suite.
+- The same rule applies to the hosted story: self-hosting and a free local run are
+  the products; no paid infrastructure is required to follow this repository.

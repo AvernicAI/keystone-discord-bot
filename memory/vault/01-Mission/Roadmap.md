@@ -101,14 +101,25 @@ mention was performed.
 
 **Goal:** one dashboard with real per-guild authorization and an API at every tier.
 
-- Next.js App Router, OAuth2 code + PKCE, `state` and `iss` validation, exact
-  redirect URIs.
-- Postgres sessions, encrypted Discord tokens server-side, rotation and revoke.
-- `requireGuildAccess()` with BigInt permissions and a bot-token membership check;
-  `owners[]` for instance-wide actions; CSP, CSRF, rate limits.
-- Schema-driven settings forms from the module Zod schemas; fleet view; templates;
-  audit log; import/export/drift; analytics aggregates.
-- Public API v1: hashed scoped tokens, OpenAPI, `Idempotency-Key`, webhooks,
+**Foundation shipped (pass 17, 2026-11-01):** see
+[[ADR-0016-dashboard-foundation]] and [[Dashboard]]. The first slice is a
+framework-free Node HTTP service so the authorization matrix could be proven
+before a UI framework was added.
+
+- [x] OAuth2 code + PKCE, sealed `state`, `iss` and exact redirect validation.
+- [x] Opaque Postgres-backed sessions; Discord access/refresh tokens sealed
+  server-side and never sent to the browser.
+- [x] `GuildAccessService` with BigInt permissions and a bot-token membership
+  check; CSP, CSRF and `no-store` on authenticated responses.
+- [x] Read-only dashboard and `/api/v1` reads through the kernel
+  `SettingsService` + `DashboardStore` seams.
+- [ ] Next.js shell (or keep server-rendered HTML), schema-driven settings forms
+  from the module Zod schemas, writes and CSRF-protected mutations.
+- [ ] Fleet view and templates with an explicit preview; audit log;
+  import/export/drift surfaces; analytics aggregates.
+- [ ] Session refresh/rotation and Discord token revocation on logout; per-route
+  rate limits; `owners[]` for instance-wide actions.
+- [ ] Public API v1: hashed scoped tokens, OpenAPI, `Idempotency-Key`, webhooks,
   per-token rate limits.
 
 **Exit demo:** two guilds and two users; user A cannot read/write guild B through

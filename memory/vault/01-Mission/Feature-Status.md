@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**113 features** across 16 domains: **73 in repo**, **9 open**, **27 planned**. Live behaviour is marked separately; a green
+**114 features** across 16 domains: **74 in repo**, **12 open**, **24 planned**. Live behaviour is marked separately; a green
 box means the code and its tests exist, not that a live guild has run it.
 
 ## Domains
@@ -22,7 +22,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Content | 7 | 6 | 0 | 0 |
 | Music | 4 | 0 | 0 | 2 |
 | AI | 6 | 5 | 1 | 0 |
-| Operations | 6 | 0 | 0 | 6 |
+| Operations | 7 | 1 | 3 | 3 |
 | Portability | 11 | 11 | 0 | 0 |
 | Invites | 3 | 0 | 0 | 3 |
 | Forms and applications | 3 | 0 | 0 | 3 |
@@ -161,10 +161,11 @@ box means the code and its tests exist, not that a live guild has run it.
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Web dashboard | P6 | ⏳ planned | Next.js |
-| Multi-server fleet | P6 | ⏳ planned | One view, per-guild authz |
+| Web dashboard | P6 | ◐ open | Login, sessions and one guild overview read are built; schema-driven settings forms, writes, fleet actions and a live OAuth round trip are not. |
+| Dashboard auth foundation | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `packages/db/src/web-store.test.ts`, `memory/vault/03-Architecture/Dashboard.md` · live unverified |
+| Multi-server fleet | P6 | ◐ open | A user sees every guild they can manage, but there is no fleet action surface, template application or cross-guild write path yet. |
 | Config templates | P6 | ⏳ planned | Apply to N guilds |
-| Public API / webhooks | P6 | ⏳ planned | Scoped tokens |
+| Public API / webhooks | P6 | ◐ open | OAuth-session reads are built; public token issuance, scopes, per-token rate limits, Idempotency-Key, webhooks and OpenAPI are not. |
 | i18n | P7 | ⏳ planned | i18next, per-guild locale |
 | Status page | P9 | ⏳ planned | Public incidents |
 

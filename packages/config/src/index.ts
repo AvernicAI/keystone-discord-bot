@@ -53,6 +53,14 @@ export const envSchema = z.object({
    * this guild only. Ignored in production.
    */
   DEV_GUILD_ID: optionalString,
+  /** P6 web surface. OAuth values are operator secrets; never expose them. */
+  WEB_PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
+  WEB_ORIGIN: optionalString,
+  DISCORD_CLIENT_ID: optionalString,
+  DISCORD_CLIENT_SECRET: optionalString,
+  DISCORD_OAUTH_REDIRECT_URI: optionalString,
+  DISCORD_OAUTH_ISSUER: z.string().url().default("https://discord.com"),
+  SESSION_SECRET: optionalString,
 });
 
 export type Env = z.infer<typeof envSchema>;

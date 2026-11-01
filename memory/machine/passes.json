@@ -209,6 +209,19 @@
         "budget": "10/100",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-17",
+      "date": "2026-11-01",
+      "phase": "P6",
+      "summary": "P6 dashboard/API foundation: OAuth2/PKCE sessions, BigInt guild authz with bot membership, read-only HTML/API reads, Postgres stores and no-paid-service rule.",
+      "journal": "journal/2026-11-01-pass-17.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "182",
+        "budget": "10/100",
+        "memory": "current"
+      }
     }
   ]
 }

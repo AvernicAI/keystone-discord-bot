@@ -7,6 +7,7 @@
 
 | Pass | Date | Phase | Summary | Journal |
 | --- | --- | --- | --- | --- |
+| pass-17 | 2026-11-01 | P6 | P6 dashboard/API foundation: OAuth2/PKCE sessions, BigInt guild authz with bot membership, read-only HTML/API reads, Postgres stores and no-paid-service rule. | [journal](../../journal/2026-11-01-pass-17.md) |
 | pass-16 | 2026-11-01 | P5 | Public release packaging: Keystone repo, README/AGENTS, AGPL-3.0 licence, safe drift-only command sync and explicit resync. | [journal](../../journal/2026-11-01-pass-16.md) |
 | pass-15 | 2026-11-01 | P5 | Dev-only prefix bridge and live command proof; bot-authored mention chat gated to DEV_GUILD_ID; /ticket stats ordering fixed; clear-then-register command sync with read-back. | [journal](../../journal/2026-11-01-pass-15.md) |
 | pass-14 | 2026-11-01 | P5 | First live run: AI Team#5758 online, 10 commands registered, Qwen3:8b mention replies in #ai-chat; dev-only test seam and think:false adapter. | [journal](../../journal/2026-11-01-pass-14.md) |
@@ -24,4 +25,4 @@
 | pass-02 | 2026-11-01 | P1 | Master plan, parity matrix and roadmap approved; the rejected plan shapes recorded. | [journal](../../journal/2026-11-01-pass-02.md) |
 | pass-01 | 2026-10-31 | P0 | Kernel, module contract, reference module, memory system, CI and ADR baseline. | [journal](../../journal/2026-10-31-pass-01.md) |
 
-Current phase: **P5**. 171 tests reported; 10/100 commands.
+Current phase: **P6**. 182 tests reported; 10/100 commands.

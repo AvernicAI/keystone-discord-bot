@@ -6,6 +6,8 @@ import { DrizzleCaseStore } from "./case-store";
 import { DrizzleCommunityStore } from "./community-store";
 import { DrizzleAiStore } from "./ai-store";
 import { DrizzlePortabilityStore } from "./portability-store";
+import { DrizzleSessionStore } from "./web-session-store";
+import { DrizzleDashboardStore } from "./web-dashboard-store";
 
 /**
  * Factories so the composition root never needs Drizzle's generic types.
@@ -37,4 +39,12 @@ export function createAiStore(handle: PostgresHandle): DrizzleAiStore {
 
 export function createPortabilityStore(handle: PostgresHandle): DrizzlePortabilityStore {
   return new DrizzlePortabilityStore(handle.db as never);
+}
+
+export function createSessionStore(handle: PostgresHandle): DrizzleSessionStore {
+  return new DrizzleSessionStore(handle.db as never);
+}
+
+export function createDashboardStore(handle: PostgresHandle): DrizzleDashboardStore {
+  return new DrizzleDashboardStore(handle.db as never);
 }

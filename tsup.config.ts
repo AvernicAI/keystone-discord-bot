@@ -12,6 +12,7 @@ export default defineConfig({
   entry: {
     bot: "apps/bot/src/index.ts",
     worker: "apps/worker/src/index.ts",
+    web: "apps/web/src/index.ts",
     migrate: "scripts/migrate.ts",
     portability: "scripts/portability.ts",
   },

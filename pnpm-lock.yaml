@@ -215,6 +215,9 @@ importers:
       '@keystone/module-ai':
         specifier: workspace:*
         version: link:../../modules/ai
+      '@keystone/module-catalog':
+        specifier: workspace:*
+        version: link:../../packages/module-catalog
       '@keystone/module-community':
         specifier: workspace:*
         version: link:../../modules/community
@@ -246,6 +249,24 @@ importers:
       zod:
         specifier: ^3.25.0
         version: 3.25.76
+
+  apps/web:
+    dependencies:
+      '@keystone/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@keystone/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@keystone/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
+      '@keystone/module-catalog':
+        specifier: workspace:*
+        version: link:../../packages/module-catalog
+      dotenv:
+        specifier: ^16.4.0
+        version: 16.6.1
 
   apps/worker:
     dependencies:
@@ -384,6 +405,24 @@ importers:
       zod:
         specifier: ^3.25.0
         version: 3.25.76
+
+  packages/module-catalog:
+    dependencies:
+      '@keystone/module-ai':
+        specifier: workspace:*
+        version: link:../../modules/ai
+      '@keystone/module-community':
+        specifier: workspace:*
+        version: link:../../modules/community
+      '@keystone/module-diagnostics':
+        specifier: workspace:*
+        version: link:../../modules/diagnostics
+      '@keystone/module-moderation':
+        specifier: workspace:*
+        version: link:../../modules/moderation
+      '@keystone/module-setup':
+        specifier: workspace:*
+        version: link:../../modules/setup
 
   packages/queue:
     dependencies:

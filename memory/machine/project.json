@@ -5,13 +5,13 @@
   "mission": "vault/01-Mission/Mission.md",
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-01",
-  "phase": "P5",
-  "lastPass": "journal/2026-11-01-pass-16.md",
+  "phase": "P6",
+  "lastPass": "journal/2026-11-01-pass-17.md",
   "metrics": {
     "commands": 10,
     "commandLimit": 100,
     "modules": 5,
-    "tests": 171
+    "tests": 182
   },
   "modules": [
     {
@@ -207,6 +207,18 @@
       "title": "Memory v2: machine truth, generated Markdown",
       "status": "accepted",
       "path": "vault/03-Architecture/ADR/ADR-0014-memory-v2-machine-truth.md"
+    },
+    {
+      "id": "ADR-0015",
+      "title": "Portability bundles, narrow merge and receipts",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0015-portability-bundles-and-receipts.md"
+    },
+    {
+      "id": "ADR-0016",
+      "title": "Dashboard foundation: framework-free HTTP over kernel ports",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0016-dashboard-foundation.md"
     }
   ],
   "openQuestions": [
@@ -235,6 +247,6 @@
       "answer": "BYO Lavalink only, disabled by default, P8. No bundled streamer."
     }
   ],
-  "phaseStatus": "complete",
-  "nextPhase": "P5"
+  "phaseStatus": "in-progress",
+  "nextPhase": "P7"
 }

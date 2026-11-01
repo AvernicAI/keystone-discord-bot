@@ -2,11 +2,25 @@
 
 ## Now
 
+**P6 authorization foundation is in repo** (pass 17, 2026-11-01): Discord
+OAuth2 code + PKCE, sealed state, opaque Postgres-backed sessions, BigInt
+guild authorization with a bot-token membership check, a read-only HTML
+dashboard and `/api/v1` reads. The browser never receives a Discord token. This
+is the read-only first step from the roadmap's kill signal, not the full P6
+exit demo: settings writes, fleet actions and scoped API tokens are still open.
+See [[Dashboard]] and [[ADR-0016-dashboard-foundation]].
+
 **P5 is complete in-repo** (pass 13, 2026-10-31): a versioned export bundle with
 checksum and counts, transactional restore with post-import verification, a
 24-hour rollback, deletion receipts, file level importers, transcript archives,
 a read-only drift report and migration guides. P4.5 platform hardening and the
 P4 AI/economy layers remain as shipped.
+
+**Web verification (pass 17):** `pnpm web:start` booted in memory mode; real
+HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and
+`/login` `503`. A real local HTTP server with a fake OAuth port proved login,
+logout/CSRF, cross-guild `403`s, escaped HTML and no token in the response. Live
+Discord OAuth is not claimed.
 
 **Live verification (pass 15, 2026-11-01):** AI Team#5758 logged into the test
 guild and answered a qwen3:8b mention in `#ai-chat`. SaseQ's `discord-mcp` cannot
@@ -17,16 +31,16 @@ exposed a real ordering bug (guild stats required a ticket first), now fixed and
 tested. On ready the bot now clears application commands, re-registers the full
 set, and fetches Discord's list to log missing/extra names. Slash interaction
 handling from a human client is still unproven; obscured channels, live role
-grants, live Postgres and a MEE6 pull remain unverified. **P6 is next.** The
-baseline, P4.5 and P5 work are committed locally and published publicly at
+grants, live Postgres and a MEE6 pull remain unverified. The P6 auth foundation
+now follows this work. The baseline, P4.5, P5 and P6 foundation are published at
 https://github.com/RNGBubba/keystone-discord-bot under AGPL-3.0-or-later; the
 public packaging pass also added the README and `AGENTS.md` read paths.
 
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 171 tests / 28 files · budget 10/100 · memory 1731/1731
-pnpm build        exit 0 · bot, worker, migrate and portability artefacts
+pnpm check        exit 0 · typecheck 0 · 182 tests / 30 files · budget 10/100 · memory 1785/1785
+pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 10 commands · qwen3:8b reply in #ai-chat
 live commands     2026-11-01 · !ping · !about · !ai status · !mod history · !rank leaderboard
 live failure      !ticket stats → ManageGuild guard (MCP bot is not admin); branch fixed and unit-tested
@@ -36,6 +50,22 @@ public            2026-11-01 · https://github.com/RNGBubba/keystone-discord-bot
 A local `.env` exists in the working tree. Smoke commands pin
 `DOTENV_CONFIG_PATH=.env.absent` so the result is deterministic and does not
 read that file.
+
+## P6 foundation acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | OAuth2 code + PKCE, sealed state and `iss` validation | `apps/web/src/web.test.ts`: missing state cookie, wrong issuer and wrong state all `400` before exchange | Real local HTTP + fake OAuth |
+| 2 | Opaque server-side session, not a browser token | `packages/db/src/web-store.test.ts`: round trip and update; `web.test.ts`: raw session id is not a key | **PGlite** + in-memory store |
+| 3 | Discord tokens never reach the browser | `web.test.ts`: HTML/JSON bodies do not contain the access or refresh token; sealed values only | Real HTTP response assertions |
+| 4 | Per-guild authorization, two checks | `web.test.ts`: non-admin `403`, cross-guild id `403`, guild without the bot `403`; `access.ts` BigInt tests | Real HTTP + fake OAuth/bot membership |
+| 5 | BigInt permission parsing | `web.test.ts`: bit 40 `MODERATE_MEMBERS` is not Manage Guild; invalid bitfield is false | Unit |
+| 6 | One real read path through repository seams | `web.test.ts`: `/api/v1/guilds/:id/overview` and the HTML page show guild-scoped counts; `packages/db/src/web-store.test.ts` proves a second guild does not leak | Real HTTP + **PGlite** |
+| 7 | CSRF and revocation | `web.test.ts`: logout without CSRF `403`; valid logout `302` then `/api/v1/me` `401` | Real local HTTP |
+| 8 | No token or secret in a route | `web.test.ts`: `/healthz` has only ok/database/oauth; CSP and `no-store` asserted | Real HTTP |
+
+This table proves the foundation, not the exit demo. Live OAuth, a live
+Postgres-backed session and every P6 write surface remain open.
 
 ## P5 acceptance evidence
 
@@ -169,6 +199,9 @@ remain open.
 | Container build | No | `docker compose up` on a machine with a daemon |
 | Live gateway login | Yes, 2026-11-01 as AI Team#5758 | Repeat on the production shard after P10 |
 | Slash-command execution | No | A human client, or a harness with interaction support |
+| Dashboard HTTP surface | Yes, real process in memory mode | Re-run with Postgres and a real OAuth client |
+| Dashboard login/session/CSRF/authz | Yes, real HTTP + fake OAuth | A live Discord OAuth round trip |
+| Dashboard Postgres session | Yes, PGlite | A Postgres server |
 
 No document claims a live-server or live-gateway run for a row marked "not
 proven". The join-gate expiry job, temporary-ban/temp-role expiry, case export
@@ -177,8 +210,9 @@ here.
 
 ## Next
 
-P6 — dashboard, API and fleet: OAuth2/PKCE with exact redirect URIs, encrypted
-server-side Discord tokens, per-guild authorization, schema-driven settings,
-fleet view, scoped API tokens and the drift/import/export surfaces the bundle
-now makes possible. Before launch, close the pgvector ANN gate and run the live
-provider/Discord/Postgres smoke in staging.
+P6 remains the active phase. The auth foundation is built; next are schema-driven
+settings writes, the Next.js shell (or a decision to keep server-rendered HTML),
+fleet actions/templates, token refresh and revocation, scoped API tokens,
+per-token rate limits, `Idempotency-Key`, webhooks and OpenAPI. Before launch,
+close the pgvector ANN gate and run the live provider/Discord/Postgres/OAuth
+smoke in staging.
