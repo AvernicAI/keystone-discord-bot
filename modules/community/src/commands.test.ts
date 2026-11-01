@@ -176,6 +176,78 @@ describe("community commands", () => {
     expect(interaction.lastReply?.embeds?.[0]?.description).toContain("A human decides any action");
   });
 
+  it("configures, lists and removes auto-responders behind ManageGuild", async () => {
+    const enable = context({ action: "responders", value: "on" }, ["ManageGuild"]);
+    await tools.execute(enable.ctx);
+    expect(await enable.ctx.settings.get("guild-a")).toMatchObject({
+      responders: { enabled: true },
+    });
+
+    const add = context(
+      {
+        action: "responder",
+        name: "hello there",
+        value: "General Kenobi!",
+        match: "contains",
+        limit: 30,
+      },
+      ["ManageGuild"],
+    );
+    await tools.execute(add.ctx);
+    expect(add.interaction.lastReply?.content).toContain("Auto-responder saved");
+    const records = await add.store.listRecords("guild-a", "responder");
+    expect(records[0]?.data).toMatchObject({
+      trigger: "hello there",
+      match: "contains",
+      response: "General Kenobi!",
+      cooldownSeconds: 30,
+    });
+
+    const listInteraction = new FakeInteraction({
+      commandName: "tools",
+      guildId: "guild-a",
+      userId: "user-a",
+      permissions: ["ManageGuild"],
+      options: { action: "responders" },
+    });
+    await tools.execute({ ...add.ctx, interaction: listInteraction });
+    expect(listInteraction.lastReply?.content).toContain("hello there → General Kenobi!");
+
+    for (let index = 0; index < 11; index += 1) {
+      await add.store.putRecord("guild-a", "responder", `extra-${index}`, {
+        id: `extra-${index}`,
+        trigger: `trigger ${index}`,
+        match: "exact",
+        response: "x".repeat(120),
+        cooldownSeconds: 0,
+        createdBy: "mod",
+      });
+    }
+    const cappedInteraction = new FakeInteraction({
+      commandName: "tools",
+      guildId: "guild-a",
+      userId: "user-a",
+      permissions: ["ManageGuild"],
+      options: { action: "responders" },
+    });
+    await tools.execute({ ...add.ctx, interaction: cappedInteraction });
+    expect(cappedInteraction.lastReply?.content?.length ?? 0).toBeLessThanOrEqual(2_000);
+    expect(cappedInteraction.lastReply?.content).toContain("showing 10 of 12");
+
+    const removeInteraction = new FakeInteraction({
+      commandName: "tools",
+      guildId: "guild-a",
+      userId: "user-a",
+      permissions: ["ManageGuild"],
+      options: { action: "responder-remove", name: records[0]?.key ?? "" },
+    });
+    await tools.execute({ ...add.ctx, interaction: removeInteraction });
+    expect(await add.store.getRecord("guild-a", "responder", records[0]?.key ?? "")).toBeUndefined();
+
+    const denied = context({ action: "responder", name: "x", value: "y" });
+    await expect(tools.execute(denied.ctx)).rejects.toThrow(/ManageGuild/i);
+  });
+
   it("runs every economy surface and keeps bot/self/cooldown refusals explicit", async () => {
     const balance = context({ action: "balance" });
     await balance.store.addLedger({

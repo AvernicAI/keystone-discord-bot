@@ -24,7 +24,7 @@ P2 core shipped in pass 05 (2026-11-01).
 ## Verified
 
 ```
-pnpm test                                  # 224 tests / 36 files, 36 suites
+pnpm test                                  # 234 tests / 38 files, 38 suites
 pnpm vitest run modules/moderation        # 24 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal, verify, native plan
 pnpm test -- packages/db/src/cases.test.ts # 2 PGlite case-store tests
 pnpm budget                                # 11/100, status OK
@@ -80,6 +80,10 @@ P7 profanity/zalgo evidence (pass 24):
   `links: "delete"`, the blocked message ID returned `10008: Unknown Message`
   after the bot handled it, while `!mod links` still showed the open case. The
   final seed is restored to `alert`.
+- **Live profanity delete proof (pass 25, temporary seed):** with
+  `dryRun: false` and `profanity: "delete"`, the `pineapple` fixture disappeared
+  from `read_messages` while `!mod filters` still showed case #1 open. The seed
+  was restored to `profanity: "alert"` before the commit.
 
 ## Proven vs still needs a live gateway
 
@@ -95,7 +99,7 @@ P7 profanity/zalgo evidence (pass 24):
 | Link filter on a real message | Yes, live with the dev marker in `#ai-chat` | Repeat with a human author in staging |
 | Link-filter delete action | Yes: temporary `dryRun: false` + `links: "delete"`; Discord returned `10008: Unknown Message` and the case survived | Re-run on a staging guild with a disposable message |
 | Profanity / zalgo findings | Yes, live with the safe alert seed; `/mod filters` and `/mod review` | Repeat with a human author in staging |
-| Profanity/zalgo delete action | No; live run used `alert` mode | Send a disposable fixture in staging with `dryRun: false` |
+| Profanity/zalgo delete action | Profanity yes (live 2026-11-01, message gone, case kept); zalgo no | Send a disposable zalgo fixture in staging with `dryRun: false` |
 | Bot authors ignored outside the marker | Yes, adapter test | Production has no marker option at all |
 | Join-gate timeout expiry | Not wired | Scheduled job; see known limitations |
 
@@ -122,13 +126,13 @@ No document claims a live Discord run for the unproven rows.
   `pineapples`, and leetspeak or homoglyph obfuscation is not normalised.
 - The zalgo threshold is a heuristic; scripts with many legitimate combining
   marks can trip it. It is configurable and can be disabled separately.
-- Profanity and zalgo were live-tested in `alert` mode; their `delete` branch
-  shares the coordinator path with the live link delete proof but was not itself
-  run live.
+- Profanity and zalgo were live-tested in `alert` mode; profanity `delete` was
+  then proven live with a temporary seed. Zalgo `delete` still shares the
+  coordinator path but has not itself been run live.
 - There is no false-positive report or per-rule analytics yet.
 - Live ban/kick/timeout/purge API calls, button interactions and join/audit
-  gateway events remain unverified; message events now have live link, delete,
-  profanity and zalgo runs.
+  gateway events remain unverified; message events now have live link/profanity
+  delete and alert runs for link, profanity and zalgo.
 
 ## Next
 

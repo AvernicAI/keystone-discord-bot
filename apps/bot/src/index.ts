@@ -226,6 +226,7 @@ async function main(): Promise<void> {
     runtime.community,
     runtime.settings.forModule("community"),
     logger.child("community"),
+    { botTestGuildId: devTestGuild },
   );
   registerInviteEvents(
     client,

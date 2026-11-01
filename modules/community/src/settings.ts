@@ -137,6 +137,13 @@ export const communitySettingsSchema = z.object({
       max: z.number().int().min(1).max(10).default(3),
     })
     .default({}),
+  responders: z
+    .object({
+      enabled: z.boolean().default(false),
+      max: z.number().int().min(1).max(100).default(25),
+      cooldownSeconds: z.number().int().min(0).max(3_600).default(10),
+    })
+    .default({}),
 });
 
 export type CommunitySettings = z.infer<typeof communitySettingsSchema>;

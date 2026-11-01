@@ -2004,12 +2004,24 @@
         {
           "id": "parity-extra.auto-responder",
           "name": "Auto-responder",
-          "competitors": {},
+          "competitors": {
+            "mee6": "💰",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "❌",
+            "wick-security": "❔"
+          },
           "phase": "P7",
-          "status": "planned",
-          "source": "memory/vault/01-Mission/Master-Plan.md",
-          "note": "Exact/contains/regex triggers with cooldowns.",
-          "liveVerified": false
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Exact, contains and regex triggers stored as guild records, one reply per message, per-trigger cooldown. Live 2026-11-01 via the dev marker: trigger fired, cooldown suppressed a second reply, and it released after the window.",
+          "evidence": [
+            "modules/community/src/responder.test.ts",
+            "modules/community/src/commands.test.ts",
+            "apps/bot/src/community-events.test.ts",
+            "packages/db/src/community.test.ts"
+          ],
+          "liveVerified": true
         },
         {
           "id": "parity-extra.message-and-member-analytics",

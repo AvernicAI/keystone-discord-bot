@@ -313,6 +313,19 @@
         "budget": "11/100",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-25",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Auto-responder: exact/contains/regex triggers in the community record seam, one reply with deterministic precedence, per-trigger cooldowns and /tools admin actions; live gateway proof plus a live profanity delete-mode proof.",
+      "journal": "journal/2026-11-01-pass-25.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "234",
+        "budget": "11/100",
+        "memory": "current"
+      }
     }
   ]
 }

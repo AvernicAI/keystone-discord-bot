@@ -1,6 +1,9 @@
 import { AuditLogEvent, Events, type Client } from "discord.js";
 import type { Logger } from "@keystone/kernel";
 import type { SecurityCoordinator } from "@keystone/module-moderation";
+import { BOT_TEST_MARKER, botFixtureContent } from "./dev-fixture";
+
+export { BOT_TEST_MARKER };
 
 const AUDIT_ACTIONS: Partial<Record<AuditLogEvent, "channel.delete" | "role.delete" | "ban.add" | "webhook.create">> = {
   [AuditLogEvent.ChannelDelete]: "channel.delete",
@@ -8,14 +11,6 @@ const AUDIT_ACTIONS: Partial<Record<AuditLogEvent, "channel.delete" | "role.dele
   [AuditLogEvent.MemberBanAdd]: "ban.add",
   [AuditLogEvent.WebhookCreate]: "webhook.create",
 };
-
-/**
- * A message from a bot starts with this marker only when a development
- * harness (the Discord MCP) is asking the security engine to evaluate a
- * fixture. The marker is stripped before evaluation, so a test message behaves
- * exactly like the content a member would post.
- */
-export const BOT_TEST_MARKER = "keystone-test:";
 
 export interface ModerationEventOptions {
   /**
@@ -60,14 +55,10 @@ export function registerModerationEvents(
   client.on(Events.MessageCreate, (message) => {
     if (!message.inGuild()) return;
 
-    const test =
-      Boolean(options.botTestGuildId) &&
-      message.author.bot &&
-      message.guild.id === options.botTestGuildId &&
-      message.content.startsWith(BOT_TEST_MARKER);
-    if (message.author.bot && !test) return;
+    const fixture = botFixtureContent(message, options.botTestGuildId);
+    if (message.author.bot && fixture === undefined) return;
 
-    const content = test ? message.content.slice(BOT_TEST_MARKER.length).trim() : message.content;
+    const content = fixture ?? message.content;
     if (!content) return;
 
     void coordinator

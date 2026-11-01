@@ -18,19 +18,31 @@ and is covered by a test. Select interactions, thread/voice behavior, live role
 grants and the scheduler tick are still unverified. The Postgres guild lock is
 exercised on PGlite, not a Postgres server.
 
+P7 added the auto-responder in pass 25. Exact, contains and regex triggers are
+guild records; a message gets at most one reply, exact beats contains and
+contains beats regex, and each trigger carries its own cooldown. `/tools` gained
+`responder`, `responders` and `responder-remove` actions, so the command ledger
+stays at 11/100. Live 2026-11-01: the seeded `hello keystone` trigger replied to
+a marked MCP message, a second identical message inside the 60-second cooldown
+got no reply, and a third after the window replied again. The admin actions were
+not run live because the MCP bot lacks `ManageGuild`; they are covered by the
+command tests.
+
 ## Verified
 
 ```text
-pnpm check                            exit 0 · 171 tests / 28 files
+pnpm check                            exit 0 · 234 tests / 38 files
+  responder.test.ts                   5 tests (auto-responder service)
   community.test.ts                  12 tests
   extras.test.ts                      7 tests
-  commands.test.ts                   10 tests
+  commands.test.ts                   11 tests
   economy.test.ts                     6 tests
+  apps/bot/src/community-events.test.ts 3 tests (dev marker + responder)
   apps/bot/src/prefix.test.ts         8 tests (dev bridge)
-  packages/db/src/community.test.ts   4 tests
+  packages/db/src/community.test.ts   5 tests (incl. responder reopen)
   packages/db/src/economy.test.ts     2 tests
-pnpm budget                           10/100, status OK
-pnpm memory:check                     current (pass 15)
+pnpm budget                           11/100, status OK
+pnpm memory:check                     current (pass 25)
 ```
 
 Feature proofs (P3 plus the P4 economy hardening):
@@ -66,6 +78,7 @@ Feature proofs (P3 plus the P4 economy hardening):
 | Sticky | Duplicate message event does not increment; threshold posts once; next threshold deletes only the recorded previous sticky |
 | Stat channels | Rename action receives `Members: 42`; bad feed URL rejected |
 | Season reset | Start archives one profile and clears leaderboard; same season refuses to archive twice; rollover before due is false; after due archives the new profile; archive records remain |
+| Auto-responder | Exact/contains/regex matching, exact precedence, one send, cooldown suppress and release, duplicate/invalid-regex/max refusals, list/remove |
 | Postgres | XP idempotency, leaderboard isolation, ledger transfer, ticket events, record scoping/delete, season archive in one reset |
 | PGlite restart | Close and reopen the same data directory: balance and ledger rows return, and a duplicate key inserts nothing |
 | PGlite double spend | Two concurrent transfers on PGlite cannot spend the same balance twice |
@@ -119,6 +132,7 @@ Not green and not claimed:
 | Season archive | In-memory + PGlite transaction | Same against a Postgres server |
 | Shop role grant | Action recorder | Live role grant in staging |
 | Scheduler reminders/giveaways/seasons | Service tick tested | Run the bot tick in staging |
+| Auto-responder service | Service + command + PGlite tests; **live gateway** for trigger and cooldown | Run the admin actions with a ManageGuild member and a human author |
 | RSS poll | Parser/dedupe tested | Point at a live feed |
 | Stat channel rename | Action recorder | Live channel rename permission |
 | Discord send/edit/thread/select/voice | Adapter typechecks only | Staging guild |
@@ -144,6 +158,11 @@ No document claims a live Discord run for a row marked “staging”.
   administrative orphan cleanup pass is not built.
 - Birthdays use one guild timezone and support month/day only, not birth years.
 - Goodbye messages and YouTube/Twitch-specific feed adapters are not built.
+- Auto-responder regex is operator-owned and compiled as-is; there is no ReDoS
+  sandbox or safe-pattern linter beyond the trigger length cap. The feature is
+  admin-only and disabled by default.
+- The auto-responder admin actions were not run live because the MCP bot lacks
+  `ManageGuild`; the trigger/cooldown path was run live with a seeded record.
 - Live Discord API and all gateway events are unverified here.
 
 ## Next

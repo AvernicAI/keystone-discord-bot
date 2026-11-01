@@ -176,6 +176,8 @@ export interface CommunityMessage {
   readonly embeds?: import("./types").EmbedPayload[];
   readonly components?: import("./types").ActionRow[];
   readonly ephemeral?: boolean;
+  /** Optional mention policy; auto-responders use `{ parse: [] }`. */
+  readonly allowedMentions?: { readonly parse: readonly string[] };
 }
 
 /** Discord side of community; tests record these calls instead of using a gateway. */

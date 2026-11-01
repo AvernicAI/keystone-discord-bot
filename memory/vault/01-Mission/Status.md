@@ -33,6 +33,17 @@ stripped before the engine sees it; production has no marker path. See
 [[04-Modules/moderation/Spec|Moderation spec]] and
 [[04-Modules/moderation/Status|Moderation status]].
 
+**P7 auto-responder is in repo** (pass 25, 2026-11-01): the community module
+owns exact, contains and regex triggers in the existing
+`community_records` seam. One trigger replies per message (exact beats
+contains, contains beats regex), every trigger has its own cooldown, and
+`/tools responder | responders | responder-remove` is the admin surface under
+the existing `/tools` root. Live: the seeded `hello keystone` trigger replied to
+a marked MCP message; a second identical message inside the 60-second cooldown
+got no reply; a third after the window replied again. See
+[[04-Modules/community/Spec|Community spec]] and
+[[04-Modules/community/Status|Community status]].
+
 **P6 authorization and settings-write foundation is in repo** (passes 17–18;
 server boundaries in pass 22, 2026-11-01): Discord OAuth2 code + PKCE, sealed
 state, opaque Postgres-backed sessions, BigInt guild authorization with a
@@ -74,7 +85,14 @@ reviewed, and an ordinary `example.com` link produced no case. Pass 24 added
 temporary `dryRun: false` / `links: "delete"` seed made the blocked message
 return `10008: Unknown Message` while its case remained. The safe seed then
 produced a profanity case for `pineapple` and a zalgo case for a 16-mark string,
-listed by `!mod filters`; an ordinary sentence produced no case. `!ticket stats`
+listed by `!mod filters`; an ordinary sentence produced no case. Pass 25 then
+repeated the delete proof for profanity: a temporary `dryRun: false` /
+`profanity: "delete"` seed removed the `pineapple` message while case #1 stayed
+open in `!mod filters`; the safe seed is committed. Pass 25 also added the
+auto-responder: a marked MCP message matched the seeded `hello keystone` trigger
+and got `Hi from Keystone's auto-responder.`, a second identical message inside
+the 60-second cooldown got no reply, and a third after the window replied again.
+`!ticket stats`
 exposed a real ordering bug (guild stats required a ticket first), now fixed and
 tested. On ready the bot fetches Discord's command set and only clears and
 re-registers when the names drift; otherwise it logs that the set is current.
@@ -89,11 +107,12 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 224 tests / 36 files · budget 11/100 · memory 1919/1919
+pnpm check        exit 0 · typecheck 0 · 234 tests / 38 files · budget 11/100 · memory 1941/1941
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 11 commands · qwen3:8b reply in #ai-chat
 live commands     2026-11-01 · !ping · !about · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who
-live content filters 2026-11-01 · link delete returned 10008 Unknown Message; safe seed produced link/profanity/zalgo cases; one reviewed; example.com not flagged
+live content filters 2026-11-01 · link delete returned 10008 Unknown Message; profanity delete removed the pineapple message and kept its case; safe seed produced link/profanity/zalgo cases; one reviewed; example.com not flagged
+live auto-responder 2026-11-01 · hello keystone replied, 60s cooldown suppressed the next reply, then released
 live failure      !ticket stats → ManageGuild guard (MCP bot is not admin); branch fixed and unit-tested
 public            2026-11-01 · https://github.com/RNGBubba/keystone-discord-bot · AGPL-3.0-or-later
 ```
@@ -115,6 +134,19 @@ read that file.
 | 7 | The command fits the budget and declares its intents | `commands.test.ts`: one root, budget 1, `GuildInvites` required, `GuildMembers` fallback named by `/setup` | Registry |
 | 8 | The real surface runs | Live 2026-11-01: 11 commands registered including `invites`; `!invites leaderboard` and `!invites who` dispatched and replied in `#ai-chat` | Live gateway |
 | 9 | A live member join was **not** performed | `Status.md` limitation; no second account was available | Not claimed |
+
+## P7 auto-responder acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | Exact, contains and regex triggers are distinct | `modules/community/src/responder.test.ts`: exact does not fire on a longer sentence; contains and regex do | In-memory service |
+| 2 | One reply per message, with deterministic precedence | Same suite: exact beats contains regardless of save order; one send | In-memory service |
+| 3 | A trigger cooldown suppresses and then releases | Same suite moves the clock; live 2026-11-01: second message inside 60s got no reply, third after the window replied | Service + **live gateway** |
+| 4 | Configuration is admin-only and input is validated | `modules/community/src/commands.test.ts`: `ManageGuild` guard, enable/list/remove, duplicate and invalid regex rejected | Command + service |
+| 5 | Records are guild-scoped and survive a restart | `packages/db/src/community.test.ts`: one record after close/reopen, zero in another guild | **PGlite** |
+| 6 | The dev marker cannot widen production | `apps/bot/src/community-events.test.ts`: bot message without marker and marker in another guild do nothing; fixture message never awards XP | Adapter test |
+| 7 | The feature costs no new root | `/tools` actions `responder`, `responders`, `responder-remove`; budget remains 11/100 | Static registry |
+| 8 | The real surface runs | Live 2026-11-01: marked MCP message `hello keystone` produced `Hi from Keystone's auto-responder.` | **Live gateway** |
 
 ## P7 content-filter acceptance evidence
 
@@ -176,7 +208,7 @@ scoped API tokens remain open.
 | 3 | Core works without privileged intents | `INTENT_PROFILE=minimal` returns only non-privileged intents; `pnpm audit:intents` prints the disabled features | Registry + manifest tests |
 | 4 | `/setup` names disabled features | `modules/setup/src/setup.test.ts`: minimal profile shows `GuildMembers` consequence and the `INTENT_PROFILE=full` next step | Fake health probe, zero writes |
 | 5 | Optional intent contract is validated | `packages/kernel/src/registry.test.ts`: required/optional split, fallback join, duplicate rejection | Registry |
-| 6 | Memory cannot silently drift | `pnpm memory:check`: 115 features, 20 claims, 24 passes, 17 decisions, 4 generated pages, 339 wikilinks | Machine files + generated pages |
+| 6 | Memory cannot silently drift | `pnpm memory:check`: 115 features, 20 claims, 25 passes, 17 decisions, 4 generated pages, 347 wikilinks | Machine files + generated pages |
 | 7 | The plan is recorded | [[ADR-0012-required-and-optional-intents]], [[ADR-0013-roadmap-v2-portability-first]], [[ADR-0014-memory-v2-machine-truth]] | Vault check |
 
 ## P3 acceptance evidence
@@ -263,7 +295,8 @@ remain open.
 | Real ban/kick/timeout/purge/lock | No | Staging guild with the bot's permissions |
 | Gateway joins/messages/audit events | Messages yes; joins/audit no | Message event observed live; replay joins/audit in staging |
 | Link / phishing filter | Yes: live alert + review, and live delete (`10008: Unknown Message`) | Re-run on staging with a human author |
-| Profanity / zalgo filter | Yes: live alert cases + `/mod filters` + review; delete branch unit/coordinator only | Run `delete` with a disposable fixture on staging |
+| Profanity / zalgo filter | Yes: live alert cases + `/mod filters` + review, and live profanity delete (message gone, case #1 open) | Repeat zalgo delete with a disposable fixture on staging |
+| Auto-responder | Yes: live trigger, cooldown suppression and release through the real gateway | Repeat with a human author and a re-opened process |
 | Native AutoMod sync | Plan tested, adapter not run | Enable sync in staging |
 | XP/currency idempotency | Yes, in-memory + PGlite | Same against a Postgres server |
 | Economy double-spend | Yes, in-memory queue + PGlite guild lock | Two bot shards against one Postgres server |
@@ -298,11 +331,11 @@ here.
 
 ## Next
 
-P7 parity work continues alongside the P6 exit items. The next review gap is
-`automod.false-positive-report`; an allow-list for legitimate punycode and a
-per-guild word policy are the natural hardening steps before broad enablement.
-The profanity/zalgo `delete` branch still needs a staging run. P6 remains the
-active phase for the dashboard. The auth gate and settings writes are built;
+P7 parity work continues alongside the P6 exit items. Auto-responders and the
+content filters are done; the next open rows are forms/events, analytics,
+modmail, expiry jobs, case export and panic mode. `automod.false-positive-report`
+is still the smallest useful moderation follow-up. P6 remains the active phase
+for the dashboard. The auth gate and settings writes are built;
 next are schema-driven field widgets, the Next.js shell (or a decision to keep
 server-rendered HTML), fleet actions/templates, token refresh and revocation,
 scoped API tokens, per-token rate limits, `Idempotency-Key`, webhooks and

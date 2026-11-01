@@ -149,15 +149,18 @@ and one review in `#ai-chat`. The profanity/zalgo filter shipped in pass 24 — 
 operator-owned word list matched on Unicode word edges, a configurable
 combining-mark threshold, `/mod filters` as the combined review queue, and a
 live safe-seed proof of both finding types. The link delete branch was also
-proven live once with a temporary `dryRun: false` seed. The rest of this phase is
-open.
+proven live once with a temporary `dryRun: false` seed, and pass 25 repeated the
+delete proof for profanity. The auto-responder shipped in pass 25 — exact,
+contains and regex triggers stored as guild records, one reply per message and a
+per-trigger cooldown — and was proven live through the real gateway, including
+cooldown suppression and release. The rest of this phase is open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.
 - New domains: forms/applications, events/RSVP, role persistence, modmail,
-  auto-responders, analytics; plus goodbye messages, YouTube/Twitch/RSS feeds,
-  temp ban/role expiry, join-gate expiry, panic mode and case export. Invites and
-  the link, profanity and zalgo filters are done (above).
+  analytics; plus goodbye messages, YouTube/Twitch/RSS feeds, temp ban/role
+  expiry, join-gate expiry, panic mode and case export. Invites, the link,
+  profanity and zalgo filters, and auto-responders are done (above).
 - `/config` and `/help` hubs; command-budget audit.
 - Split `modules/community` into domain folders, then extract a module only if the
   "add a feature in an afternoon" test still fails.

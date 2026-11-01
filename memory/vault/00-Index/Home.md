@@ -46,8 +46,15 @@ https://github.com/RNGBubba/keystone-discord-bot
   threshold. Both support `alert` or `delete`; `/mod links` and `/mod filters`
   are the review queues. A dev-only `keystone-test:` marker makes the MCP proof
   possible. Live: link, delete, profanity and zalgo cases; `!mod filters` listed
-  them and `!mod review` closed one; `example.com` produced no case. See
+  them and `!mod review` closed one; `example.com` produced no case. Pass 25
+  also removed a profanity fixture in `delete` mode while keeping its case. See
   [[04-Modules/moderation/Spec|Moderation spec]].
+- **Auto-responder** in repo (pass 25): exact, contains and regex triggers in
+  the community record seam, one reply per message (exact beats contains, then
+  regex), and a per-trigger cooldown. `/tools responder`, `/tools responders` and
+  `/tools responder-remove` configure it under the existing root. Live:  the `hello keystone` trigger replied, a second message inside 60 seconds did not,
+  and a third after the window did. See
+  [[04-Modules/community/Spec|Community spec]].
 - Phase **P6** foundation in repo: Discord OAuth2/PKCE, opaque Postgres-backed
   sessions, BigInt per-guild authorization with a bot-membership check, a
   server-rendered dashboard, `/api/v1` reads and schema-validated module settings
@@ -69,8 +76,9 @@ https://github.com/RNGBubba/keystone-discord-bot
   `!rank leaderboard`, `!invites leaderboard` and `!invites who` through the real
   dispatch pipeline. The content filters produced live link, delete, profanity
   and zalgo cases; `!mod filters` listed them, `!mod review` closed one, and
-  `example.com` produced none. Slash execution still needs a human client; the
-  MCP cannot invoke application commands or render embeds.
+  `example.com` produced none. The auto-responder trigger replied, its cooldown
+  suppressed a second reply, then released. Slash execution still needs a human
+  client; the MCP cannot invoke application commands or render embeds.
 - Phase **P4.5** made channel obfuscation a typed outcome at every fetch site,
   separated required from optional intents with `INTENT_PROFILE`, and made `/setup`
   name disabled features.

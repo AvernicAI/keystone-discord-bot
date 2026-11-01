@@ -127,6 +127,16 @@ including the small calls that did not deserve an ADR.
 | 73 | The default word list is empty and both rules are off; the operator owns the policy | [[04-Modules/moderation/Spec\|Moderation spec]] |
 | 74 | The link filter's delete branch was proven live with a temporary `dryRun: false` seed; the committed dev seed and production default stay `alert`/dry-run | [[04-Modules/moderation/Status\|Moderation status]] |
 
+## 2026-11-01 — P7 auto-responder
+
+| # | Decision | Where |
+| --- | --- | --- |
+| 75 | Auto-responder triggers are guild-scoped `community_records`, not a new table: the record seam already gives in-memory and Postgres the same behaviour | [[04-Modules/community/Spec\|Community spec]] |
+| 76 | One reply per message, with exact > contains > regex precedence, so the result never depends on storage order | [[04-Modules/community/Spec\|Community spec]] |
+| 77 | The 60-second cooldown is per trigger and written only after a successful send; a failed send retries next time | [[04-Modules/community/Spec\|Community spec]] |
+| 78 | The `keystone-test:` marker now has one shared matcher; a fixture message reaches the auto-responder only, never XP/starboard/tickets | [[Live-Testing]] |
+| 79 | The profanity `delete` branch was proven live with a temporary `dryRun: false` seed; this closes the pass-24 claim gap, and the committed seed stays `alert` | [[04-Modules/moderation/Status\|Moderation status]] |
+
 ## How to add a decision
 
 1. If it changes the contract, write an ADR with **Alternatives**.

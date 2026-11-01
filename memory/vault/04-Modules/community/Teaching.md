@@ -10,11 +10,14 @@
 4. `modules/community/src/tickets.ts` — thread tickets and transcript events.
 5. `modules/community/src/content.ts` — validated embeds, tags, reminders,
    polls, feeds and stat channels.
-6. `packages/kernel/src/community.ts` — the store/action contract.
-7. `packages/db/src/community-store.ts` + `migrations/0004-community-records.ts`
+6. `modules/community/src/responder.ts` — auto-responder matching, precedence
+   and per-trigger cooldowns.
+7. `packages/kernel/src/community.ts` — the store/action contract.
+8. `packages/db/src/community-store.ts` + `migrations/0004-community-records.ts`
    — the Postgres side.
-8. `apps/bot/src/community-actions.ts` and `community-events.ts` — the only
-   Discord/gateway seam for P3.
+9. `apps/bot/src/community-actions.ts` and `community-events.ts` — the only
+   Discord/gateway seam for P3. `apps/bot/src/dev-fixture.ts` is the shared
+   development-marker seam.
 
 ## The idea to take away
 
@@ -37,7 +40,13 @@ the adapter only passes the stored id.
 
 **One root, many features.** `/tools` is a hub; adding a utility does not spend
 another global command. `/rank` is the same idea for leveling and money. Discord
-has 100; the project uses 10 in total.
+has 100; the project uses 11 in total.
+
+**A trigger is data, not code.** Auto-responders store an operator-owned string
+and a response; the service compiles a regex only when the match mode asks for
+one, and it chooses exact over contains over regex so the result never depends on
+the order records came back from the store. The cooldown timestamp is written
+after a successful send, so a failed reply retries next time.
 
 ## The mistake you will probably make
 
@@ -55,6 +64,11 @@ interaction; if each attempt gets a fresh UUID the ledger records two movements.
 Use the interaction id the platform already gives you, and let the unique key
 turn the second attempt into a no-op.
 
+The fourth mistake is letting an auto-responder answer every matching trigger.
+One message, one reply: sort by precedence, stop at the first live match, and
+write the cooldown only after the send succeeds. Otherwise a phrase with two
+matches produces a wall of replies and a failed send burns the cooldown.
+
 ## Exercise
 
 Add a per-channel XP multiplier without changing the kernel.
@@ -65,6 +79,13 @@ Add a per-channel XP multiplier without changing the kernel.
 3. Add a test where the same message id is delivered twice and the channel
    multiplier changes between deliveries: the second must still award zero.
 4. Explain why the multiplier belongs in the service, not the adapter.
+
+## Auto-responder exercise
+
+1. Add a `priority` number to each trigger and use it before the match-mode rank.
+2. Keep one reply per message and add a test where two triggers share a priority.
+3. Move the cooldown into the Redis `CooldownStore` and explain why the record
+   timestamp is still useful for the admin list.
 
 ## P4 exercise: prove the double spend
 

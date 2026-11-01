@@ -131,20 +131,26 @@ by a rate-limited register leaves the app with no commands.
   edges plus a combining-mark threshold), both in `alert` or `delete` mode.
   `/mod links` and `/mod filters` are the review queues; no new root. The live
   proof used the dev-only `keystone-test:` marker in `DEV_GUILD_ID`; production
-  ignores bot authors. The link filter's delete branch was proven live with a
-  temporary `dryRun: false` seed; the committed seed stays `alert`.
-- The rest of P7 (forms, events, modmail, expiry jobs, UI/i18n) is open.
-- 6 modules, 11 global command roots, 224 tests in 36 files.
+  ignores bot authors. The link and profanity delete branches were proven live
+  with temporary `dryRun: false` seeds; the committed seed stays `alert`.
+- P7 auto-responder is in repo: exact, contains and regex triggers stored in
+  `community_records`, one reply per message, per-trigger cooldown, configured
+  through `/tools` actions `responder`, `responders` and `responder-remove`.
+- The rest of P7 (forms, events, modmail, analytics, expiry jobs, UI/i18n) is
+  open.
+- 6 modules, 11 global command roots, 234 tests in 38 files.
 - Live: AI Team#5758 connected; 11 commands registered; Qwen3:8b replied in
   `#ai-chat`; `!ping`, `!about`, `!ai status`, `!mod history`, `!mod links`,
   `!mod filters`, `!rank leaderboard`, `!invites leaderboard` and `!invites who`
   ran through the real pipeline. Marked messages created link, delete, profanity
   and zalgo cases; `!mod filters` listed them, `!mod review` closed one, and
-  `example.com` was not flagged. The web process booted in
-  memory mode and answered real HTTP requests; the write path was exercised over
-  real local HTTP with a fake OAuth port. Live Discord OAuth is open.
+  `example.com` was not flagged. A seeded `hello keystone` auto-responder replied
+  to a marked MCP message; a second message inside 60 seconds got no reply, and
+  a third after the window did. The web process booted in memory mode and
+  answered real HTTP requests; the write path was exercised over real local HTTP
+  with a fake OAuth port. Live Discord OAuth is open.
 - Open: human slash run, a live member join for invite attribution, a human
-  author through the content filters, live profanity/zalgo `delete` mode, live
+  author through the content filters, live zalgo `delete` mode, live
   Postgres/role/select/voice/scheduler paths, pgvector ANN benchmark, MEE6 live
   fetch, P6 field widgets/fleet/tokens and the rest of P7.
 

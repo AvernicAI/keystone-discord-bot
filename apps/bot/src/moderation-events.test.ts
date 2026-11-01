@@ -17,6 +17,7 @@ function message(input: MessageFixture = {}) {
   return {
     inGuild: () => true,
     guild: { id: input.guildId ?? "guild-1" },
+    guildId: input.guildId ?? "guild-1",
     channelId: "channel-1",
     id: "message-1",
     author: { id: input.authorId ?? "author-1", bot: input.bot ?? false },

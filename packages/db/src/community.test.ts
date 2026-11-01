@@ -1,3 +1,6 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createMigratedPglite, type PgliteHarness } from "./testing";
 import { DrizzleCommunityStore } from "./community-store";
@@ -120,6 +123,39 @@ describe("DrizzleCommunityStore", () => {
     });
     await store.deleteRecord("guild-a", "tag", "rules");
     expect(await store.getRecord("guild-a", "tag", "rules")).toBeUndefined();
+  });
+
+  it("persists auto-responder records per guild through a close and reopen", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "keystone-responder-"));
+    try {
+      harness = await createMigratedPglite(directory);
+      let store = new DrizzleCommunityStore(harness.db as never);
+      await store.putRecord("guild-a", "responder", "dev-hello", {
+        id: "dev-hello",
+        trigger: "hello keystone",
+        match: "exact",
+        response: "Hi from the fixture.",
+        cooldownSeconds: 10,
+        createdBy: "mod-1",
+      });
+      await harness.close();
+      harness = undefined;
+
+      harness = await createMigratedPglite(directory);
+      store = new DrizzleCommunityStore(harness.db as never);
+      const records = await store.listRecords("guild-a", "responder");
+      expect(records).toHaveLength(1);
+      expect(records[0]?.data).toMatchObject({
+        trigger: "hello keystone",
+        match: "exact",
+        response: "Hi from the fixture.",
+      });
+      expect(await store.listRecords("guild-b", "responder")).toHaveLength(0);
+    } finally {
+      await harness?.close();
+      harness = undefined;
+      await rm(directory, { recursive: true, force: true });
+    }
   });
 
   it("archives the XP projection before clearing a season", async () => {

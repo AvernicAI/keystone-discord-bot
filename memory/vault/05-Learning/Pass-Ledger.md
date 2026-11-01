@@ -7,6 +7,7 @@
 
 | Pass | Date | Phase | Summary | Journal |
 | --- | --- | --- | --- | --- |
+| pass-25 | 2026-11-01 | P7 | Auto-responder: exact/contains/regex triggers in the community record seam, one reply with deterministic precedence, per-trigger cooldowns and /tools admin actions; live gateway proof plus a live profanity delete-mode proof. | [journal](../../journal/2026-11-01-pass-25.md) |
 | pass-24 | 2026-11-01 | P7 | Profanity/zalgo filter: operator-owned banned words on Unicode word edges, a combining-mark threshold, /mod filters review action, and the live delete-mode link proof. | [journal](../../journal/2026-11-01-pass-24.md) |
 | pass-23 | 2026-11-01 | P7 | Link/phishing filter: local host blocklist and punycode detection in the security engine, /mod links review queue, and a dev marker seam for MCP-driven live proof. | [journal](../../journal/2026-11-01-pass-23.md) |
 | pass-22 | 2026-11-01 | P7 | Dashboard server boundaries: ordered route table, per-area handlers, one session context, shared render/http modules and one settings-write CSRF gate. | [journal](../../journal/2026-11-01-pass-22.md) |
@@ -32,4 +33,4 @@
 | pass-02 | 2026-11-01 | P1 | Master plan, parity matrix and roadmap approved; the rejected plan shapes recorded. | [journal](../../journal/2026-11-01-pass-02.md) |
 | pass-01 | 2026-10-31 | P0 | Kernel, module contract, reference module, memory system, CI and ADR baseline. | [journal](../../journal/2026-10-31-pass-01.md) |
 
-Current phase: **P7**. 224 tests reported; 11/100 commands.
+Current phase: **P7**. 234 tests reported; 11/100 commands.

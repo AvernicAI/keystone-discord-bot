@@ -149,6 +149,22 @@ export async function createRuntime(
     store: database ? createCommunityStore(database) : new InMemoryCommunityStore(),
     actions: communityActions,
   };
+  if (env.DEV_GUILD_ID && env.NODE_ENV !== "production" && !database) {
+    await settings.update(env.DEV_GUILD_ID, "community", {
+      responders: { enabled: true },
+    });
+    await community.store.putRecord(env.DEV_GUILD_ID, "responder", "dev-hello", {
+      id: "dev-hello",
+      trigger: "hello keystone",
+      match: "exact",
+      response: "Hi from Keystone's auto-responder.",
+      cooldownSeconds: 60,
+      createdBy: "dev-seed",
+    });
+    logger.warn("DEV_GUILD_ID: auto-responder fixture enabled in process memory", {
+      guildId: env.DEV_GUILD_ID,
+    });
+  }
   const invites: InvitePort = {
     store: database ? createInviteStore(database) : new InMemoryInviteStore(),
     actions: inviteActions,

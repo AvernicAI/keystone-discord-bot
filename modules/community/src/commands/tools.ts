@@ -6,6 +6,7 @@ import {
   SuggestionService,
 } from "../extras";
 import { GiveawayService, ReactionRoleService, WelcomeService } from "../engagement";
+import { AutoResponderService, type ResponderMatch } from "../responder";
 import {
   channelId,
   integer,
@@ -19,7 +20,7 @@ import {
 
 export const tools = defineCommand({
   name: "tools",
-  description: "Community utilities: birthdays, suggestions, content, roles, giveaways and feeds.",
+  description: "Community utilities: birthdays, suggestions, content, roles, giveaways, feeds and auto-responders.",
   options: [
     {
       type: "string",
@@ -48,6 +49,9 @@ export const tools = defineCommand({
         "suggestion",
         "suggestion-decide",
         "sticky",
+        "responder",
+        "responders",
+        "responder-remove",
       ].map((value) => ({ name: value, value })),
     },
     { type: "string", name: "name", description: "Name, title, question or id" },
@@ -59,6 +63,12 @@ export const tools = defineCommand({
     { type: "integer", name: "duration", description: "Minutes from now", minValue: 1 },
     { type: "integer", name: "limit", description: "Winners, threshold or delay", minValue: 1 },
     { type: "string", name: "url", description: "Feed URL" },
+    {
+      type: "string",
+      name: "match",
+      description: "Auto-responder match mode",
+      choices: ["exact", "contains", "regex"].map((value) => ({ name: value, value })),
+    },
   ],
   guards: [
     (ctx) =>
@@ -74,6 +84,7 @@ export const tools = defineCommand({
     const birthdays = new BirthdayService(store, actions, settings, ctx.now);
     const suggestions = new SuggestionService(store, actions, settings, ctx.now);
     const sticky = new StickyService(store, actions);
+    const responders = new AutoResponderService(store, actions, settings, ctx.now);
     const guildId = ctx.guildId as string;
     const selected = text(ctx, "action");
 
@@ -388,6 +399,86 @@ export const tools = defineCommand({
       if (!target || !message) throw new UserError("Sticky needs a channel, message and refresh count.");
       await sticky.configure(guildId, target, message, after);
       await ctx.interaction.reply({ content: "Sticky message configured.", ephemeral: true });
+      return;
+    }
+
+    if (selected === "responder") {
+      requirePermission(ctx, "ManageGuild");
+      const trigger = text(ctx, "name");
+      const response = text(ctx, "value");
+      if (!trigger || !response) {
+        throw new UserError("Auto-responder needs a trigger in name and a reply in value.");
+      }
+      const record = await responders.save(guildId, {
+        trigger,
+        match: (text(ctx, "match") ?? "exact") as ResponderMatch,
+        response,
+        createdBy: ctx.userId,
+        cooldownSeconds: integer(ctx, "limit"),
+      });
+      await ctx.interaction.reply({
+        content: `Auto-responder saved (${record.id}).`,
+        ephemeral: true,
+      });
+      return;
+    }
+
+    if (selected === "responders") {
+      requirePermission(ctx, "ManageGuild");
+      const toggle = text(ctx, "value")?.toLowerCase();
+      if (toggle) {
+        if (toggle !== "on" && toggle !== "off") {
+          throw new UserError("Use value=on or value=off, or omit value to list triggers.");
+        }
+        await ctx.settings.update(guildId, {
+          responders: { ...settings.responders, enabled: toggle === "on" },
+        });
+        await ctx.interaction.reply({
+          content: `Auto-responders ${toggle === "on" ? "enabled" : "disabled"}.`,
+          ephemeral: true,
+        });
+        return;
+      }
+
+      const records = await responders.list(guildId);
+      if (records.length === 0) {
+        await ctx.interaction.reply({
+          content: "No auto-responders configured.",
+          ephemeral: true,
+        });
+        return;
+      }
+      // Discord caps a message at 2,000 characters. Show the newest 10 with
+      // short trigger/reply previews; the full id is still removable.
+      const listed = records.slice(0, 10);
+      const lines = listed.map((record) => {
+        const trigger = record.trigger.length > 40
+          ? `${record.trigger.slice(0, 39)}…`
+          : record.trigger;
+        const reply = record.response.length > 40
+          ? `${record.response.slice(0, 39)}…`
+          : record.response;
+        return `\`${record.id}\` · ${record.match} · ${trigger} → ${reply}`;
+      });
+      const suffix = records.length > listed.length
+        ? ` (showing ${listed.length} of ${records.length})`
+        : "";
+      await ctx.interaction.reply({
+        content: `Auto-responders${suffix}:\n${lines.join("\n")}`,
+        ephemeral: true,
+      });
+      return;
+    }
+
+    if (selected === "responder-remove") {
+      requirePermission(ctx, "ManageGuild");
+      const id = text(ctx, "name");
+      if (!id) throw new UserError("Pass the auto-responder id in name.");
+      const removed = await responders.remove(guildId, id);
+      await ctx.interaction.reply({
+        content: removed ? "Auto-responder removed." : "No auto-responder with that id.",
+        ephemeral: true,
+      });
       return;
     }
   },

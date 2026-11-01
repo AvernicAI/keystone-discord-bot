@@ -3,9 +3,9 @@
 The P3 suite replaces the everyday community half of **MEE6, Dyno and Carl-bot**:
 leveling and role rewards, a server-scoped economy, reaction roles (buttons and
 selects), welcome/delayed autorole, starboard, birthdays, suggestions, giveaways,
-temporary voice, embed/tag/reminder/scheduled/sticky content, polls, RSS feeds
-and stat channels. **Ticket Tool** is replaced by the thread-based ticket root in
-the same module.
+temporary voice, embed/tag/reminder/scheduled/sticky content, polls, RSS feeds,
+stat channels and keyword auto-responders. **Ticket Tool** is replaced by the
+thread-based ticket root in the same module.
 
 P4 hardens the economy half on the same `/rank` root instead of adding a second
 one. It replaces **MEE6**'s paid currency/daily/shop bundle and **Carl-bot**'s
@@ -22,7 +22,7 @@ up-sell.
 | --- | --- | --- | --- |
 | `/rank` | `action` (view, leaderboard, rewards, admin, balance, daily, pay, shop, buy, gamble, ledger, season), `user`, `amount`, `level`, `value`, `item`, `limit`, `days` | guild-only; `ManageGuild` for rewards/admin/season | Reads XP/rank, configures role rewards, administers levels, runs the ledger-backed currency (balance, daily, pay, shop/buy, gamble, ledger), and starts a season (archives, then clears the projection). |
 | `/ticket` | `action` (panel, open, claim, close, add, transcript, summary, stats), `subject`, `user`, `channel`, `ticket`, `title` | guild-only; `ManageGuild` for panel/transcript/summary/stats | Posts a panel, opens a private thread, claims/closes it, adds a participant, returns a transcript, calls the AI summary port and reports SLA stats. |
-| `/tools` | `action` (embed, tag, reminder, schedule, giveaway, giveaway-end, giveaway-reroll, poll, feed, stat, welcome, roles, starboard, starboard-override, voice, birthdays, birthday, suggestions, suggestion, suggestion-decide, sticky), `name`, `value`, `channel`, `target`, `role`, `user`, `duration`, `limit`, `url` | guild-only; `ManageGuild` for configuration and server-wide sends | One utility root for content, giveaways, feeds, stat channels, reaction-role buttons/selects, birthdays, suggestions, sticky messages and event configuration. |
+| `/tools` | `action` (embed, tag, reminder, schedule, giveaway, giveaway-end, giveaway-reroll, poll, feed, stat, welcome, roles, starboard, starboard-override, voice, birthdays, birthday, suggestions, suggestion, suggestion-decide, sticky, responder, responders, responder-remove), `name`, `value`, `channel`, `target`, `role`, `user`, `duration`, `limit`, `url`, `match` | guild-only; `ManageGuild` for configuration and server-wide sends | One utility root for content, giveaways, feeds, stat channels, reaction-role buttons/selects, birthdays, suggestions, sticky messages, auto-responders and event configuration. |
 
 The three roots take the bot from 6 to **10 of Discord's 100** global commands.
 The P3 exit requires fewer than 20 roots; this is well inside it.
@@ -52,6 +52,7 @@ The P3 exit requires fewer than 20 roots; this is well inside it.
 | Feeds | RSS/Atom-style item parser, GUID dedupe, channel delivery | `ContentService` |
 | Stat channels | Member/online/boosters metric record, rate-limited adapter tick | `ContentService` |
 | Sticky messages | Per-channel configured message, repost after N human messages, duplicate event no-op, previous sticky deleted by its recorded id | `StickyService` |
+| Auto-responders | Operator-owned exact, contains or regex triggers; one reply per message (exact > contains > regex); per-trigger cooldown; guild-scoped records | `AutoResponderService` |
 
 ## Data
 
@@ -65,7 +66,8 @@ The P3 exit requires fewer than 20 roots; this is well inside it.
 - `community_records` (migration 0004) — guild-scoped `(kind, key)` records for
   reaction-role panels, starboard entries, giveaways, tags, embeds, reminders,
   feeds, stat channels, temporary voice, ticket events, birthdays, suggestions,
-  sticky messages, delayed autoroles, season state and season archives.
+  sticky messages, auto-responder triggers, delayed autoroles, season state and
+  season archives.
 
 Season reset is transactional in the Drizzle adapter: archive rows, idempotency
 marker, then delete the projection. Modules never import a table; the module owns
@@ -98,6 +100,9 @@ marker, then delete the projection. Modules never import a table; the module own
 | `content.*` | enabled config | Tag/embed caps |
 | `feeds.*` | 5 feeds / 15 min | Feed cap and poll interval |
 | `statChannels.*` | 3 channels | Stat-channel cap |
+| `responders.enabled` | `false` | Master switch for automatic replies |
+| `responders.max` | `25` | Guild trigger cap |
+| `responders.cooldownSeconds` | `10` | Default per-trigger cooldown; a trigger can override it |
 
 ## Events and safety
 
@@ -122,6 +127,16 @@ marker, then delete the projection. Modules never import a table; the module own
   message events do not increment the counter.
 - Season archives and markers make reset retries idempotent; no `xp_events` are
   deleted.
+- Auto-responders send at most one reply per message, choose exact over
+  contains over regex regardless of storage order, and skip a trigger whose
+  cooldown has not elapsed. The cooldown timestamp is written only after a
+  successful send. Records are guild-scoped; the operator owns every trigger and
+  response, and there is no remote word list. Replies send with empty
+  `allowedMentions`, so a trigger cannot ping a role or `@everyone`.
+- A bot-authored message is ignored unless it carries the dev-only
+  `keystone-test:` marker and the guild is the configured development guild. A
+  marker message reaches the auto-responder only; it does not award XP, touch the
+  starboard or append a ticket transcript.
 - Ticket transcripts are the only default message-content store; documented.
 - No punitive action is taken by birthdays, suggestions, sticky or seasons.
 

@@ -14,6 +14,7 @@ import type {
   ModuleSettings,
 } from "@keystone/kernel";
 import {
+  AutoResponderService,
   BirthdayService,
   ContentService,
   GiveawayService,
@@ -26,6 +27,12 @@ import {
   WelcomeService,
   communitySettingsSchema,
 } from "@keystone/module-community";
+import { botFixtureContent } from "./dev-fixture";
+
+export interface CommunityEventOptions {
+  /** Development-only guild where a bot marker may drive the real message path. */
+  readonly botTestGuildId?: string;
+}
 
 /**
  * Gateway → structural service seam. It translates events, then delegates every
@@ -37,14 +44,41 @@ export function registerCommunityEvents(
   port: CommunityPort,
   settings: ModuleSettings,
   logger: Logger,
+  options: CommunityEventOptions = {},
 ): () => void {
   const config = async (guildId: string) =>
     communitySettingsSchema.parse(await settings.get(guildId));
 
   const onMessage = async (message: Message): Promise<void> => {
-    if (!message.inGuild() || message.author.bot) return;
+    if (!message.inGuild()) return;
+    const fixture = botFixtureContent(message, options.botTestGuildId);
+    if (message.author.bot && fixture === undefined) return;
+
     const current = await config(message.guildId);
     if (!current.enabled) return;
+
+    if (fixture !== undefined) {
+      try {
+        await new AutoResponderService(port.store, port.actions, current).respond(
+          message.guildId,
+          message.channelId,
+          fixture,
+        );
+      } catch (error) {
+        logger.warn("auto-responder fixture failed", { error: messageOf(error) });
+      }
+      return;
+    }
+
+    try {
+      await new AutoResponderService(port.store, port.actions, current).respond(
+        message.guildId,
+        message.channelId,
+        message.content,
+      );
+    } catch (error) {
+      logger.warn("auto-responder failed", { error: messageOf(error) });
+    }
 
     try {
       await new ContentService(port.store, port.actions, current).tick(message.guildId);

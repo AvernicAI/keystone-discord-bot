@@ -59,11 +59,12 @@ Examples that were actually run against AI Team:
 A parse failure is answered in the channel with the generated usage line, so a
 typo does not leave the tester guessing.
 
-## Security fixture marker
+## Development fixture marker
 
-The moderation adapter correctly ignores bot authors. To exercise a message rule
-without a second human account, a bot message in `DEV_GUILD_ID` that starts with
-`keystone-test:` is evaluated as member content after the marker is stripped:
+Adapters correctly ignore bot authors. To exercise a message path without a
+second human account, a bot message in `DEV_GUILD_ID` that starts with
+`keystone-test:` is evaluated after the marker is stripped. The shared matcher
+lives in `apps/bot/src/dev-fixture.ts`; moderation and community consume it:
 
 ```text
 keystone-test: https://login.phish.test/verify
@@ -72,6 +73,8 @@ keystone-test: https://login.phish.test/verify
 keystone-test: I really like pineapple pizza
 keystone-test: z̸̸̸̸a̸̸̸̸l̸̸̸̸g̸̸̸̸o
 !mod filters
+
+keystone-test: hello keystone   # auto-responder fixture
 ```
 
 The event still travels the real gateway `MessageCreate` → `SecurityCoordinator`
@@ -81,10 +84,17 @@ author guard. `apps/bot/src/runtime.ts` seeds the in-memory dev guild with
 benign word `pineapple`, and `zalgo: "alert"`, so the fixture is deterministic
 and never needs a remote list. Production gets no marker option and no seed.
 
-The delete branch was also driven live once: the temporary seed used
-`dryRun: false` and `links: "delete"`, and the MCP's message ID returned
-`10008: Unknown Message` after the bot handled it. The committed seed stays
-`alert`; the destructive proof is deliberately not the default.
+The delete branch was driven live twice: pass 23 used `dryRun: false` and
+`links: "delete"` so the MCP's message ID returned `10008: Unknown Message`;
+pass 25 used `dryRun: false` and `profanity: "delete"` and the `pineapple`
+message disappeared while its case stayed open. The committed seed stays
+`alert`; the destructive proofs are deliberately not the default.
+
+A marker message is seen by both adapters: moderation evaluates the stripped
+content, while the community adapter runs only the auto-responder and never the
+XP, starboard or ticket paths. The auto-responder fixture is a seeded
+`hello keystone` trigger in the in-memory dev guild; its 60-second cooldown makes
+the live suppression/release check deterministic.
 
 ## What a live prefix run proves
 

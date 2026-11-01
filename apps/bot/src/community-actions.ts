@@ -238,5 +238,6 @@ function toPayload(message: CommunityMessage) {
     content: message.content,
     embeds: message.embeds,
     components: message.components ? toComponents(message.components) : undefined,
+    allowedMentions: message.allowedMentions,
   } as never;
 }

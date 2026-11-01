@@ -16,13 +16,14 @@ sessions, per-guild BigInt authorization, schema-validated module settings write
 from the dashboard and a `PATCH /api/v1` route. Fleet actions, templates, scoped
 API tokens and webhooks are the remaining P6 work. P7 now has invite tracking as
 a sixth module (attribution, a joins/retention leaderboard and advisory
-suspicious-join flags) and a link/phishing filter (local host blocklist, punycode
-detection and `/mod links`). The command ledger is **11/100**, there are **6
-modules**, and `pnpm check` covers **224 tests across 36 files** without a Discord
-token, database or network. Live on 2026-11-01: the bot logged in, registered 11
-commands through Discord, answered a Qwen3:8b mention in `#ai-chat`, and ran real
-moderation, community, AI, invite and link-filter commands through a development
-message bridge. The dashboard was booted in memory mode and
+suspicious-join flags), link/profanity/zalgo content filters, and an
+auto-responder for exact, contains and regex triggers. The command ledger is
+**11/100**, there are **6 modules**, and `pnpm check` covers **234 tests across
+38 files** without a Discord token, database or network. Live on 2026-11-01: the
+bot logged in, registered 11 commands through Discord, answered a Qwen3:8b
+mention in `#ai-chat`, and ran real moderation, community, AI, invite and
+content-filter commands through a development message bridge. The dashboard was
+booted in memory mode and
 exercised over real HTTP, including authenticated settings writes against a fake
 OAuth port; live Discord OAuth is not claimed. Slash `InteractionCreate` from a
 human client is still the next live check.
@@ -252,7 +253,7 @@ message-only harnesses.
 | `/verify` | — | Complete the join gate and leave quarantine |
 | `/rank` | `view`, `leaderboard`, `rewards`, `admin`, `balance`, `daily`, `pay`, `shop`, `buy`, `gamble`, `ledger`, `season` | XP, levels, ledger-backed currency, shop and seasons |
 | `/ticket` | `panel`, `open`, `claim`, `close`, `add`, `transcript`, `summary`, `stats` | Thread tickets, claiming, transcripts, AI summary and SLA stats |
-| `/tools` | `embed`, `tag`, `reminder`, `schedule`, `giveaway`, `giveaway-end`, `giveaway-reroll`, `poll`, `feed`, `stat`, `welcome`, `roles`, `starboard`, `starboard-override`, `voice`, `birthdays`, `birthday`, `suggestions`, `suggestion`, `suggestion-decide`, `sticky` | Community utilities and panels |
+| `/tools` | `embed`, `tag`, `reminder`, `schedule`, `giveaway`, `giveaway-end`, `giveaway-reroll`, `poll`, `feed`, `stat`, `welcome`, `roles`, `starboard`, `starboard-override`, `voice`, `birthdays`, `birthday`, `suggestions`, `suggestion`, `suggestion-decide`, `sticky`, `responder`, `responders`, `responder-remove` | Community utilities, panels and auto-responders |
 | `/ai` | `status`, `ask`, `chat`, `classify`, `docs-add`, `docs-list`, `docs-remove`, `deflect`, `explain`, `summary`, `budget` | Opt-in server-doc answers, advisory classification, explanations, summaries and hard caps |
 | `/invites` | `leaderboard`, `stats`, `who`, `user`, `limit` | Invite attribution, joins/retention totals and who invited a member |
 
@@ -356,6 +357,10 @@ Everything below is free. No feature is moved behind a paywall.
 - Thread tickets: panel, open, claim, add, transcript, close, stats and AI summary.
 - Giveaways, polls, reminders, schedules, feeds and stat channels.
 - Birthdays, suggestions and temporary voice rooms.
+- Auto-responders: operator-owned exact, contains or regex triggers with one
+  reply per message and a per-trigger cooldown. Configuration is `/tools
+  responder`, `/tools responders` and `/tools responder-remove`; records are
+  guild-scoped and survive a restart through the same record seam as tags.
 
 ### AI (opt-in, capped, zero-retention by default)
 
@@ -375,9 +380,9 @@ Everything below is free. No feature is moved behind a paywall.
 - **P6 remaining:** schema-driven field widgets, the Next.js shell, fleet
   view/templates, token refresh/revocation, scoped public API tokens,
   per-token rate limits, idempotency, webhooks and OpenAPI.
-- **P7:** invite tracking, the link/phishing filter and the profanity/zalgo
-  filter are done; the rest is parity completion (forms, events, role
-  persistence, modmail, auto-responders, analytics), Components V2 UI and i18n.
+- **P7:** invite tracking, the link/profanity/zalgo filters and auto-responders
+  are done; the rest is parity completion (forms, events, role persistence,
+  modmail, analytics), Components V2 UI and i18n.
 - **P8:** bring-your-own Lavalink music, disabled by default; no bundled streamer.
 - **P9:** docs site, 14-lesson curriculum, release workflow, self-host kit.
 - **P10:** sharding, load tests, SLOs, Discord.js v15 migration.
@@ -397,7 +402,7 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
-| P7 Parity completion | **In progress** | Invite tracking and link/profanity/zalgo filters shipped; forms, events, expiry, modmail and UI/i18n open |
+| P7 Parity completion | **In progress** | Invite tracking, link/profanity/zalgo filters and auto-responders shipped; forms, events, expiry, modmail and UI/i18n open |
 
 Live evidence (2026-11-01): `AI Team#5758` connected, cleared and re-registered
 11 global commands (including `/invites`), and Qwen3:8b answered a mention in
@@ -415,9 +420,18 @@ with `https://login.phish.test/verify` created case #1 (`alerted`, blocklist);
 `dryRun: false` / `delete` seed, the blocked message returned `10008: Unknown
 Message` after the bot handled it. The safe seed then produced a profanity case
 for `pineapple` and a zalgo case for a 16-mark string; `!mod filters` listed all
-three content-filter cases and `!mod review` closed the profanity one. See
+three content-filter cases and `!mod review` closed the profanity one. Pass 25
+repeated the delete proof for profanity: with a temporary `dryRun: false` /
+`profanity: "delete"` seed the `pineapple` message disappeared while case #1
+stayed open in `!mod filters`. The safe seed is back in the repository. See
 [pass 23](memory/journal/2026-11-01-pass-23.md) and
 [pass 24](memory/journal/2026-11-01-pass-24.md).
+
+Auto-responder live evidence (2026-11-01, pass 25): the seeded guild trigger
+`hello keystone` replied to a marked MCP message with
+`Hi from Keystone's auto-responder.` A second identical message inside the
+60-second cooldown produced no reply; a third after the window replied again.
+See [pass 25](memory/journal/2026-11-01-pass-25.md).
 
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and
@@ -535,12 +549,13 @@ message bridge that feeds the same registry, guards, cooldowns and reply adapter
 !mod links
 !mod filters
 !rank leaderboard
+!tools responders
 ```
 
 The bridge is **never registered in production** and only answers in that one
-guild. Mention chat and the `keystone-test:` security fixture marker also allow
-bot authors only there; the marker is stripped before the real security engine
-sees the content. See
+guild. Mention chat and the shared `keystone-test:` fixture marker also allow
+bot authors only there; the marker is stripped before the security engine or the
+auto-responder sees the content. See
 [Live-Testing](memory/vault/03-Architecture/Live-Testing.md).
 
 Discord replaces the whole global command set with one bulk overwrite. Keystone

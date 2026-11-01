@@ -20,6 +20,12 @@ export {
 } from "./engagement";
 export { TicketService, type TicketStats } from "./tickets";
 export {
+  AutoResponderService,
+  type ResponderHit,
+  type ResponderMatch,
+  type ResponderRecord,
+} from "./responder";
+export {
   BirthdayService,
   SeasonService,
   StickyService,

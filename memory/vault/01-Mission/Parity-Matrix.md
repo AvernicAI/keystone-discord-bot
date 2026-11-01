@@ -191,6 +191,12 @@ fake-invite detection (verified 2026-11-01). Keystone now ships the attribution
 and leaderboard free, with advisory flags rather than MEE6's 24-hour invalidation
 rule.
 
+## 14. Parity extras (new in P7)
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Auto-responder | 💰 | ✅ | ✅ | ❌ | ❔ | P7 | Exact/contains/regex triggers, one reply, per-trigger cooldown; `/tools`; shipped pass 25 |
+
 ## Tally
 
 | Domain | Rows | P3 | P4 adds | Ours by P8 | Note |
