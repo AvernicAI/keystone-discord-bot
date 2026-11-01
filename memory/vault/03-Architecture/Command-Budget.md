@@ -11,7 +11,7 @@ refuses to boot when it fails.
 
 ```text
 17/100 global roots used (83 left)
-113 subcommands · 130 total actions
+115 subcommands · 132 total actions
 4 context menus (2 user · 2 message; 15 each)
 status: OK
 
@@ -26,7 +26,7 @@ status: OK
   /ping       diagnostics     0     0    103
   /invites    invites         3     1    672
   /logging    logging         7     2   1606
-  /appeal     moderation      0     2    282
+  /appeal     moderation      2     2    575
   /mod        moderation     14     4   3991
   /verify     moderation      0     0    120
   /music      music           8     2   1322

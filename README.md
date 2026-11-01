@@ -27,11 +27,11 @@ through the same `SettingsService` and Zod schema as the dashboard, with no
 second store. `/export guild | user | import | delete | drift | rollback` puts
 the P5 portability service inside Discord: real JSON file attachments, a
 dry-run-first import, a confirmation-gated delete and live drift facts from the
-gateway cache. The command ledger is **17/100 roots** with **113 real
-subcommands**, **130 actions** and **4 context menus** (2 user, 2 message),
-there are **9 modules**, and `pnpm check` covers **365 tests across 56 files**
+gateway cache. The command ledger is **17/100 roots** with **115 real
+subcommands**, **132 actions** and **4 context menus** (2 user, 2 message),
+there are **9 modules**, and `pnpm check` covers **368 tests across 56 files**
 without a Discord token, database or network. Live on 2026-11-01: the bot logged
-in and Discord reports **17 roots / 113 subcommands / 2 user menus / 2 message
+in and Discord reports **17 roots / 115 subcommands / 2 user menus / 2 message
 menus**, answered a Qwen3:8b mention in `#ai-chat`, and ran real
 moderation, community, AI, invite, logging, analytics, configuration, music and
 content-filter commands through a development message bridge, including
@@ -255,8 +255,8 @@ refusals. See [the community spec](memory/vault/04-Modules/community/Spec.md).
 
 ## Commands
 
-Discord's global limit is 100 **roots**; Keystone uses **17** and exposes **113
-real subcommands** (130 total actions), plus **4 context menus** on their own
+Discord's global limit is 100 **roots**; Keystone uses **17** and exposes **115
+real subcommands** (132 total actions), plus **4 context menus** on their own
 15 + 15 budget. A subcommand does not spend another global slot, which is why the
 picker now expands instead of showing one flat `action` option. Slash commands
 are the product surface; context menus appear under right-click → Apps. In
@@ -276,7 +276,7 @@ the same live registry.
 | `/config` | `list`, `get`, `set`, `export` | Read or change any module's per-guild settings through that module's own Zod schema; admin-only and guild-scoped |
 | `/export` | `guild`, `user`, `import`, `delete`, `drift`, `rollback` | Download a verified JSON bundle, export one member, preview/restore a bundle, delete with an exact-id confirmation, or compare stored ids with the live server |
 | `/mod` | `ban`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `links`, `filters`, `review` | Moderation with cases, reasons, evidence, a content-filter review queue and a case queue |
-| `/appeal` | — | Open an appeal for your own case (takes `case` or `message`) |
+| `/appeal` | `open`, `status` | Open an appeal on your own case, or read the append-only appeal events and the current case state |
 | `/verify` | — | Complete the join gate and leave quarantine |
 | `/rank` | `view`, `leaderboard`, `rewards`, `admin`, `balance`, `daily`, `pay`, `shop`, `buy`, `gamble`, `ledger`, `season` | XP, levels, ledger-backed currency, shop and seasons |
 | `/ticket` | `panel`, `open`, `claim`, `close`, `add`, `transcript`, `summary`, `stats` | Thread tickets, claiming, transcripts, AI summary and SLA stats |
@@ -359,7 +359,7 @@ Everything below is free. No feature is moved behind a paywall.
 
 ### Platform and operations
 
-- Module registry with a CI-enforced 100-root budget (currently 17 roots, 113
+- Module registry with a CI-enforced 100-root budget (currently 17 roots, 115
   subcommands) and a separate 15 + 15 context-menu budget (currently 4 menus).
 - First-run `/setup` hub: readiness, a module switchboard, a read-only integrity
   check, a bundle preview and a settings-only module reset. Every write goes
@@ -472,7 +472,7 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
-| P7 Command tree | Done | 17 roots · 113 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
+| P7 Command tree | Done | 17 roots · 115 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
 | P7 Context menus | Done | 4 menus (2 user, 2 message) registered in Discord; report opens a real case, case history and rank card read existing rows, explain uses the capped AI path; invocation is human-only |
 | P7 Slash harness | Harness done | Synthetic nested `/mod ban` through the real adapter + dispatch; gateway `InteractionCreate` still human-only |
 | P7 Audit logging | Done | `/logging`; five event kinds, per-event toggles, append-only ledger, retention; message and moderation events live-proven |
@@ -484,8 +484,9 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P7 Parity completion | **In progress** | Invite tracking, audit logging, link/profanity/zalgo filters, auto-responders, analytics, in-bot config, `/export` and the music queue shipped; forms, events, expiry, modmail, real playback and UI/i18n open |
 
 Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 17
-global roots with 113 subcommands (including `/analytics`, `/config`, `/export`,
-`/help`, `/invites`, `/logging`, `/music` and the five `/setup` actions) plus
+global roots with 115 subcommands (including `/analytics`, `/config`, `/export`,
+`/help`, `/invites`, `/logging`, `/music`, the five `/setup` actions and the two
+`/appeal` actions) plus
 **2 user menus and 2 message menus** with no drift, and Qwen3:8b answered a
 mention in
 `#ai-chat`. A development `!`
@@ -560,7 +561,8 @@ reply. At pass 29 `pnpm commands:doctor` reported `Registry 14 roots · 90
 subcommands`; after pass 30's `/config` it reported 15 roots / 94 subcommands,
 pass 31's `/export` reached 16 roots / 100 subcommands, and pass 32's `/music`
 brought it to 17 roots / 108 subcommands; pass 34's `/setup` hub brought it to
-**17 roots / 113 subcommands**. The MCP text reader
+17 roots / 113 subcommands, and pass 35's `/appeal` hub brought it to **17 roots /
+115 subcommands**. The MCP text reader
 does not render embeds, so the embed fields, top-command list and JSON export
 were covered by [the command test](modules/analytics/src/analytics.test.ts), not
 read back live. See [pass 29](memory/journal/2026-11-01-pass-29.md).
@@ -624,6 +626,19 @@ Discord reported **17 roots · 113 subcommands**, and `commands:doctor` agreed
 with no drift. `/setup import` is a preview only and was not sent live because
 the MCP cannot attach a file; its dry-run path is covered by a test. See
 [pass 34](memory/journal/2026-11-01-pass-34.md).
+
+Appeal live evidence (2026-11-01, pass 35): one memory-mode process served the
+bridge. `!config set module=moderation key=dryRun value=false` allowed a real
+warning case against the MCP author; `!appeal open case=1` appended the appeal;
+`!appeal status case=1` returned **#1 · warn · appealed · 1 appeal**; then
+`!mod review case=1` changed the case state and `!appeal status case=1` returned
+**#1 · warn · reviewed · 1 appeal** — the event survived the state change because
+status reads `case_events`, not the current state. A case against the bot was
+refused with **Case #2 is not one of your cases.**; the no-option status listed
+the same appeal. `commands:doctor` read Discord and reported **17 roots / 115
+subcommands**. The MCP cannot invoke slash, and the embed fields are covered by
+the command test; the plain-text content is the live-read part. See
+[pass 35](memory/journal/2026-11-01-pass-35.md).
 
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and

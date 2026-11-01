@@ -105,6 +105,9 @@ describe("moderation module", () => {
     const registry = new ModuleRegistry().register(moderationModule);
     expect(registry.getCommand("mod")?.moduleId).toBe("moderation");
     expect(registry.getCommand("appeal")?.moduleId).toBe("moderation");
+    expect(registry.getCommand("appeal")?.definition.subcommands?.map((entry) => entry.name)).toEqual(
+      ["open", "status"],
+    );
     expect(registry.getCommand("verify")?.moduleId).toBe("moderation");
     expect(auditBudget(registry).status).toBe("ok");
   });
@@ -244,6 +247,7 @@ describe("moderation module", () => {
       commandName: "appeal",
       guildId: "guild-1",
       userId: "target-1",
+      subcommand: "open",
       options: { case: record.caseNumber, message: "I did not post that." },
     });
     const targetCtx = createTestContext({
@@ -261,6 +265,7 @@ describe("moderation module", () => {
       commandName: "appeal",
       guildId: "guild-1",
       userId: "someone-else",
+      subcommand: "open",
       options: { case: record.caseNumber },
     });
     const otherCtx = createTestContext({
@@ -270,6 +275,91 @@ describe("moderation module", () => {
       moderation: { cases, actions: new RecordingActions() },
     });
     await expect(appeal.execute(otherCtx)).rejects.toThrow(/only appeal a case against you/i);
+  });
+
+  it("reports an appeal from the append-only event after the state changes", async () => {
+    const { ctx, cases } = buildContext({ action: "warn", user: "target-1", reason: "first warning" });
+    await mod.execute(ctx);
+    const record = (await cases.list("guild-1"))[0]!;
+
+    const openCtx = createTestContext({
+      interaction: new FakeInteraction({
+        commandName: "appeal",
+        guildId: "guild-1",
+        userId: "target-1",
+        subcommand: "open",
+        options: { case: record.caseNumber, message: "Please review the evidence." },
+      }),
+      moduleId: "moderation",
+      settings: { appealsEnabled: true },
+      moderation: { cases, actions: new RecordingActions() },
+    });
+    await appeal.execute(openCtx);
+    await cases.review(record.id, "mod-1");
+
+    const status = new FakeInteraction({
+      commandName: "appeal",
+      guildId: "guild-1",
+      userId: "target-1",
+      subcommand: "status",
+      options: { case: record.caseNumber },
+    });
+    await appeal.execute(
+      createTestContext({
+        interaction: status,
+        moduleId: "moderation",
+        moderation: { cases, actions: new RecordingActions() },
+      }),
+    );
+
+    const field = status.lastReply?.embeds?.[0]?.fields?.[0];
+    expect(field?.name).toContain("reviewed");
+    expect(field?.value).toContain("Appeals on record: 1");
+    expect(field?.value).toContain("Please review the evidence.");
+    expect(status.lastReply?.content).toContain("#1 · warn · reviewed · 1 appeal");
+  });
+
+  it("reports no appeals for a member with no appeal events", async () => {
+    const { cases } = buildContext({});
+    const status = new FakeInteraction({
+      commandName: "appeal",
+      guildId: "guild-1",
+      userId: "target-1",
+      subcommand: "status",
+      options: {},
+    });
+    await appeal.execute(
+      createTestContext({
+        interaction: status,
+        moduleId: "moderation",
+        moderation: { cases, actions: new RecordingActions() },
+      }),
+    );
+    expect(status.lastReply?.content).toContain("No appeal events are on record");
+    expect(status.lastReply?.embeds?.[0]?.description).toContain("No appeal events are on record");
+  });
+
+  it("does not show one member another member's case status", async () => {
+    const { ctx, cases } = buildContext({ action: "warn", user: "target-1", reason: "first warning" });
+    await mod.execute(ctx);
+    const record = (await cases.list("guild-1"))[0]!;
+    const status = new FakeInteraction({
+      commandName: "appeal",
+      guildId: "guild-1",
+      userId: "someone-else",
+      subcommand: "status",
+      options: { case: record.caseNumber },
+    });
+
+    await expect(
+      appeal.execute(
+        createTestContext({
+          interaction: status,
+          moduleId: "moderation",
+          moderation: { cases, actions: new RecordingActions() },
+        }),
+      ),
+    ).rejects.toThrow(/not one of your cases/i);
   });
 
   it("verifies a quarantined member through the join gate", async () => {

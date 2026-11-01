@@ -20,18 +20,21 @@ P2 core shipped in pass 05 (2026-11-01).
   history** (user) without a root. Report message opens a real case with the
   message id, channel id and a 500-character excerpt; Case history requires
   `ModerateMembers` and reads the same rows as `/mod history`.
-- `/appeal` and the case-button appeal path add events; `/verify` clears
-  quarantine.
+- `/appeal open | status` is a hub (pass 35). `open` keeps the target-only guard
+  and appends the existing `appealed` event; `status` reads the append-only
+  `case_events` rows through `CaseStore.listEvents`, so a review that changes the
+  case state cannot erase the appeal. The case-button path still calls
+  `appealById`; `/verify` clears quarantine.
 - Native AutoMod rules are built and synced only when explicitly enabled.
 - Dry-run is the default and produces alerts/cases without punitive calls.
 
 ## Verified
 
 ```
-pnpm test                                  # 360 tests / 56 files
-pnpm vitest run modules/moderation        # 28 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal, verify, native plan, context menus
-pnpm test -- packages/db/src/cases.test.ts # 2 PGlite case-store tests
-pnpm budget                                # 17/100 roots · 108 subcommands · 4 context menus, status OK
+pnpm test                                  # 368 tests / 56 files
+pnpm vitest run modules/moderation        # 31 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal/status, verify, native plan, context menus
+pnpm test -- packages/db/src/cases.test.ts # 2 PGlite case-store tests, including listEvents
+pnpm budget                                # 17/100 roots · 115 subcommands · 4 context menus, status OK
 pnpm build                                 # bot, worker, migrate artefacts
 ```
 
@@ -46,7 +49,9 @@ P2 exit evidence:
 - `/mod` creates a case before a ban and asserts the reason and appeal custom id.
   Its default dry-run creates no case and calls no action. A missing reason
   throws. A caller without `ModerateMembers` is blocked by dispatch.
-- `/appeal` only accepts the target's own case and appends an `appealed` event.
+- `/appeal open` only accepts the target's own case and appends an `appealed`
+  event. `/appeal status` keeps reporting that event after `CaseService.review`
+  changes the case state, and refuses a case that is not the caller's.
   `/verify` calls the same quarantine action the button uses.
 - `DrizzleCaseStore` allocates 1..8 without duplicates under `Promise.all` on
   PGlite, persists cases/events/state and isolates guilds.
@@ -114,12 +119,27 @@ P7 profanity/zalgo evidence (pass 24):
   subcommand is rejected before any side effect. This is not a gateway run and
   does not replace a live ban.
 
+P7 appeal-hub evidence (pass 35):
+
+- `mod.test.ts` registers `/appeal` with exactly `open` and `status`, opens an
+  appeal for the target only, and proves `status` still reports one appeal after
+  `CaseService.review` changes the state to `reviewed`.
+- The same suite refuses another member's case with `not one of your cases` and
+  returns `No appeal events are on record` when the member has none.
+- `packages/db/src/cases.test.ts` asserts `DrizzleCaseStore.listEvents` returns
+  the appended `appealed` row on PGlite, the SQL counterpart of the live
+  in-memory read.
+- Live in `#ai-chat`: case #1 read `#1 · warn · appealed · 1 appeal`, then
+  `#1 · warn · reviewed · 1 appeal` after `!mod review`; a case against the bot
+  was refused as `Case #2 is not one of your cases.`; `commands:doctor` read
+  17 roots / 115 subcommands with no drift.
+
 ## Proven vs still needs a live gateway
 
 | Claim | Proven here? | How to close |
 | --- | --- | --- |
 | Scripted raid is contained | Yes, policy engine + coordinator | Replay in a staging guild with a real token |
-| Every action has a case/reason/appeal | Yes, fake action recorder and case store | Same |
+| Every action has a case/reason/appeal | Yes, fake action recorder and case store; `/appeal status` survives a state change | Same |
 | Dry-run makes no punitive call | Yes | Same |
 | Postgres case numbering/events | Yes, PGlite | Run against a Postgres server |
 | Discord ban/kick/timeout/purge/lock | No | A live guild with the bot's permissions |
@@ -127,6 +147,7 @@ P7 profanity/zalgo evidence (pass 24):
 | Native AutoMod sync | Plan tested; adapter not run | Enable `nativeAutoMod.sync` in staging |
 | Gateway joins/messages/audit events | Messages yes (link/profanity/zalgo live); joins/audit no | A live guild with privileged intents |
 | Link filter on a real message | Yes, live with the dev marker in `#ai-chat` | Repeat with a human author in staging |
+| Appeal status after review | Yes, live: `#1` stayed `1 appeal` after `!mod review` changed its state to `reviewed`; another member's case was refused | Repeat with a human appellant and moderator |
 | Link-filter delete action | Yes: temporary `dryRun: false` + `links: "delete"`; Discord returned `10008: Unknown Message` and the case survived | Re-run on a staging guild with a disposable message |
 | Profanity / zalgo findings | Yes, live with the safe alert seed; `/mod filters` and `/mod review` | Repeat with a human author in staging |
 | Profanity/zalgo delete action | Profanity yes (live 2026-11-01, message gone, case kept); zalgo no | Send a disposable zalgo fixture in staging with `dryRun: false` |

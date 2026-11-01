@@ -88,6 +88,10 @@ export class InMemoryCaseStore implements CaseStore {
     return event;
   }
 
+  async listEvents(caseId: string): Promise<CaseEvent[]> {
+    return [...(this.#events.get(caseId) ?? [])];
+  }
+
   async updateState(caseId: string, state: ModerationCaseState): Promise<void> {
     const existing = this.#cases.get(caseId);
     if (!existing) return;
@@ -209,6 +213,10 @@ export class CaseService {
     await this.store.appendEvent(caseId, "reviewed", actorId);
     await this.store.updateState(caseId, "reviewed");
     return { ...record, state: "reviewed" };
+  }
+
+  listEvents(caseId: string): Promise<CaseEvent[]> {
+    return this.store.listEvents(caseId);
   }
 
   async setState(caseId: string, state: ModerationCaseState): Promise<void> {

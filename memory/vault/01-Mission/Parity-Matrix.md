@@ -27,7 +27,7 @@ checked. See [[Master-Plan]] for the research program.
 | Case lookup | 💰 | ✅ | ✅ | ❌ | ❔ | P2 | `/mod case view` |
 | Evidence card | ❌ | ❌ | ❌ | ❌ | ❌ | P2 | **Our edge:** what triggered it |
 | Dry-run default | ❌ | ❌ | ❌ | ❌ | ❌ | P2 | **Our edge:** alert-only |
-| Appeal from the DM | ❌ | ❌ | ❌ | ❌ | ❌ | P2 | **Our edge:** one button |
+| Appeal from the DM | ❌ | ❌ | ❌ | ❌ | ❌ | P2 | **Our edge:** one button, plus `/appeal open | status`; status reads the append-only appeal events, live-proven pass 35 |
 | Case export | ❌ | ❔ | ❌ | ❌ | ❌ | P2 | JSON + CSV |
 
 ## 2. Automod
@@ -147,7 +147,7 @@ checked. See [[Master-Plan]] for the research program.
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Web dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | P6 | Node/render first; field widgets and fleet open |
-| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 17 roots / 113 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human); `/music` pass 32; `/setup` hub pass 34. The saved plan table is 12 roots / 59 names; the handoff's 18 / 160 has no per-root list and is unverified |
+| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 17 roots / 115 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human); `/music` pass 32; `/setup` hub pass 34; `/appeal` hub pass 35. The saved plan table is 12 roots / 59 names; the handoff's 18 / 160 has no per-root list and is unverified |
 | Context menus | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | 4 menus (Report message, Case history, Rank card, Explain with AI) registered live on the separate 15 + 15 budget; invocation is human-only because the MCP cannot right-click. Competitor presence not verified for every row |
 | In-bot configuration | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/config` (list, get, set, export) over every module's own schema; shipped pass 30; live-proven. Competitor in-Discord config not verified (all surveyed bots also ship a web dashboard) |
 | First-run setup hub | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/setup status | module | verify | import | reset`; real settings/health/export seams, settings-only reset; live pass 34 |

@@ -443,6 +443,19 @@
         "budget": "17/100 roots · 113 subcommands · 4 context menus",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-35",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Appeal hub: /appeal open | status replaces the option-only root. open appends the existing target-only appealed event; status reads case_events through the new CaseStore.listEvents, so a review that changes the case state cannot erase the appeal. The root keeps one global slot, adds two real subcommands, no table and no new dependency. Live bridge: warning case #1 opened against the MCP author, appeal opened, status #1 · warn · appealed · 1 appeal; after !mod review case=1 status still read #1 · warn · reviewed · 1 appeal; a case against the bot was refused as Case #2 is not one of your cases. Discord reports 17 roots / 115 subcommands / 4 context menus. Tests 368 / 56 files.",
+      "journal": "journal/2026-11-01-pass-35.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "368",
+        "budget": "17/100 roots · 115 subcommands · 4 context menus",
+        "memory": "current"
+      }
     }
   ]
 }

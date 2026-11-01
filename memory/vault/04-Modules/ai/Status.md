@@ -39,7 +39,7 @@ pnpm check                            exit 0 · 360 tests / 56 files
   modules/ai/src/context.test.ts      3 tests (Explain with AI menu)
   modules/community/src/commands.test.ts 10 tests (incl. /ticket summary and stats)
   packages/db/src/ai.test.ts          2 tests
-pnpm budget                           17/100 roots · 108 subcommands · 4 context menus, status OK
+pnpm budget                           17/100 roots · 115 subcommands · 4 context menus, status OK
 pnpm memory:check                     current (pass 33)
 ```
 

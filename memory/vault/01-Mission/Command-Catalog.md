@@ -5,7 +5,7 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**17 roots · 113 subcommands · 130 total actions · 4 context menus · 17/100 global roots used.**
+**17 roots · 115 subcommands · 132 total actions · 4 context menus · 17/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
@@ -21,7 +21,7 @@ and appear under right-click → Apps.
 | `/config` | `setup` | 4 |
 | `/export` | `setup` | 6 |
 | `/mod` | `moderation` | 14 |
-| `/appeal` | `moderation` | 0 |
+| `/appeal` | `moderation` | 2 |
 | `/verify` | `moderation` | 0 |
 | `/rank` | `community` | 12 |
 | `/ticket` | `community` | 8 |
@@ -115,9 +115,12 @@ Moderate members, inspect cases and review the queue.
 
 ## `/appeal`
 
-Appeal a moderation case against you.
+Appeal a case against you, or check an appeal's status.
 
-No subcommands; the root has its own options.
+| Subcommand | Description | Options |
+| --- | --- | --- |
+| `/appeal open` | Appeal a moderation case against you. | `case`, `message` |
+| `/appeal status` | Read your appeal events and the current case states. | `case` |
 
 ## `/verify`
 

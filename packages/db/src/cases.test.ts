@@ -36,6 +36,9 @@ describe("DrizzleCaseStore", () => {
     const event = await store.appendEvent(record.id, "appealed", "user-1", { message: "review" });
     expect(event.type).toBe("appealed");
     expect(event.data).toEqual({ message: "review" });
+    expect((await store.listEvents(record.id)).map((entry) => entry.type)).toEqual([
+      "appealed",
+    ]);
 
     await store.updateState(record.id, "appealed");
     expect((await store.getById(record.id))?.state).toBe("appealed");

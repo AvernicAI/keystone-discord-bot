@@ -42,7 +42,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Case lookup | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
 | Evidence card | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
 | Dry-run default | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
-| Appeal from the DM | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
+| Appeal from the DM | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts`, `packages/db/src/cases.test.ts` · live verified |
 | Case export | P7 | ◐ open | Export commands are part of the P5/P7 data-ownership work. · `modules/moderation/src/mod.test.ts` |
 | Report message menu | P7 | ✅ in repo | `modules/moderation/src/context.test.ts` · live unverified |
 | Case history menu | P7 | ✅ in repo | `modules/moderation/src/context.test.ts` · live unverified |

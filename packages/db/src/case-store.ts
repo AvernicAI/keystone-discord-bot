@@ -131,6 +131,15 @@ export class DrizzleCaseStore implements CaseStore {
     return toEvent(row);
   }
 
+  async listEvents(caseId: string): Promise<CaseEvent[]> {
+    const rows = await this.db
+      .select()
+      .from(caseEvents)
+      .where(eq(caseEvents.caseId, caseId))
+      .orderBy(caseEvents.createdAt, caseEvents.id);
+    return rows.map(toEvent);
+  }
+
   async updateState(caseId: string, state: ModerationCaseState): Promise<void> {
     await this.db
       .update(cases)

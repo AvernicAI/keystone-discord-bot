@@ -51,7 +51,7 @@ pnpm check                            exit 0 · 360 tests / 56 files
   context.test.ts                     2 tests (Rank card menu)
   packages/db/src/community.test.ts   5 tests (incl. responder reopen)
   packages/db/src/economy.test.ts     2 tests
-pnpm budget                           17/100 roots · 108 subcommands · 4 context menus, status OK
+pnpm budget                           17/100 roots · 115 subcommands · 4 context menus, status OK
 pnpm memory:check                     current (pass 33)
 ```
 

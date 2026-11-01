@@ -8,11 +8,13 @@
    model, and why an appeal is a new event.
 3. `modules/moderation/src/commands/mod.ts` — one hub command, dry-run gate,
    case-before-action ordering.
-4. `packages/db/src/case-store.ts` + `migrations/0003-case-counters.ts` — the
-   atomic case-number allocation.
-5. `apps/bot/src/moderation-actions.ts` — permission prechecks and the only file
+4. `modules/moderation/src/commands/appeal.ts` — a two-subcommand hub; note that
+   `status` reads the event log, not the case state.
+5. `packages/db/src/case-store.ts` + `migrations/0003-case-counters.ts` — the
+   atomic case-number allocation and `listEvents`, the append-only history read.
+6. `apps/bot/src/moderation-actions.ts` — permission prechecks and the only file
    that turns a case action into a Discord call.
-6. `apps/bot/src/moderation-events.ts` — the gateway-to-structural-event seam.
+7. `apps/bot/src/moderation-events.ts` — the gateway-to-structural-event seam.
 
 ## The idea to take away
 
@@ -30,6 +32,15 @@ can fail; the accountability record cannot disappear with it.
 The third is **event sourcing**. `case_events` is append-only. A reversal is a
 new event and a state transition, never an edit to the original reason. That is
 what makes an appeal defensible later.
+
+`/appeal status` is the small exercise that proves it. It does not ask "is the
+state `appealed`?" — a review changes the state to `reviewed`, and that question
+would forget the appeal. It asks `CaseStore.listEvents(caseId)` and filters for
+the `appealed` type. The live proof is deliberately two commands apart:
+`!appeal status case=1` printed `1 appeal` while the state read `appealed`, then
+`!mod review case=1` changed the state, and the same read printed `1 appeal`
+beside `reviewed`. If you later add a second kind of review, keep the event read
+as the source of truth and treat the state as a cache of the latest transition.
 
 ## The link filter, as a worked example
 

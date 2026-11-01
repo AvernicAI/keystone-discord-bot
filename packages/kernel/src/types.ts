@@ -413,6 +413,8 @@ export interface CaseStore {
     filter?: { targetId?: string; state?: ModerationCaseState; limit?: number },
   ): Promise<ModerationCase[]>;
   appendEvent(caseId: string, type: string, actorId?: string, data?: unknown): Promise<CaseEvent>;
+  /** Append-only history, oldest first. Used by appeal status, never by edits. */
+  listEvents(caseId: string): Promise<CaseEvent[]>;
   updateState(caseId: string, state: ModerationCaseState): Promise<void>;
 }
 
@@ -472,5 +474,7 @@ export interface CaseServicePort {
     message: string,
   ): Promise<ModerationCase>;
   appealById(caseId: string, actorId: string, message: string): Promise<ModerationCase>;
+  /** The append-only record behind an appeal; state alone cannot prove one. */
+  listEvents(caseId: string): Promise<CaseEvent[]>;
   setState(caseId: string, state: ModerationCaseState): Promise<void>;
 }

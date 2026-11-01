@@ -13,11 +13,12 @@ reason, evidence and an appeal path. The default is dry-run.
 | Command | Options | Guards | Behaviour |
 | --- | --- | --- | --- |
 | `/mod` | subcommands `ban`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `links`, `filters`, `review`; each declares only the options it needs (`user`, `reason`, `case`, `duration`, `limit`, `channel`, `dry_run`) | guild-only, `ModerateMembers` | Executes one manual action or reads the case/review queue. `links` lists link findings, `filters` lists link/profanity/zalgo findings, and `review` closes the loop. Every enforced action opens a case before the external call. |
-| `/appeal` | `case` (required), `message` | guild-only | Opens an appeal for the target's own case. Adds an `appealed` event; never edits history or reverses automatically. |
+| `/appeal` | subcommands `open` (`case` required, `message`) and `status` (optional `case`) | guild-only, 5 s cooldown | `open` appends an `appealed` event to the caller's own case; never edits history or reverses automatically. `status` reads the append-only appeal events and the current case state, and refuses a case that is not the caller's. |
 | `/verify` | none | guild-only | Completes the join gate by removing the quarantine role. A command fallback for the verification button. |
 
 `/mod` is a hub: those fourteen subcommands cost **one** global root. The module
-spends 3 of Discord's 100 roots (`/mod`, `/appeal`, `/verify`).
+spends 3 of Discord's 100 roots (`/mod`, `/appeal`, `/verify`); `/appeal`'s two
+subcommands and `/mod`'s fourteen cost no extra slots.
 
 ### Context menus
 
@@ -187,5 +188,5 @@ permission **before** the Discord call.
   stripped; ordinary member messages still reach the coordinator.
 - `packages/db/src/cases.test.ts` — PGlite case numbering, events, state and
   concurrent allocation.
-- `pnpm budget` — 17/100 roots with all shipped commands (108 subcommands) and
+- `pnpm budget` — 17/100 roots with all shipped commands (115 subcommands) and
   4 context menus on their own 15 + 15 budget.

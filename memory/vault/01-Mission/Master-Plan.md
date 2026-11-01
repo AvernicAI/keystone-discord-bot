@@ -143,13 +143,13 @@ same interfaces. No module changes when a port changes.
 
 ### Command allocation
 
-**Gap audit (pass 34, 2026-11-01):** the "18 roots / 160 subcommands" figure in
-the plan handoff has no per-root list in this repository. This table is the only
-saved allocation list; it names **12 roots / 59 subcommands**, not 160, and does
-not name an 18th root. The live registry now has **17 roots / 113 subcommands**
-(see [[01-Mission/Command-Catalog|Command-Catalog]]); 47 names in the 160 figure
-remain unaccounted for. `/setup` is complete; the only named plan gaps are
-`/appeal open | status` and `/verify start | status` (four names). Do not invent
+**Gap audit (passes 34–35, 2026-11-01):** the "18 roots / 160 subcommands" figure
+in the plan handoff has no per-root list in this repository. This table is the
+only saved allocation list; it names **12 roots / 59 subcommands**, not 160, and
+does not name an 18th root. The live registry now has **17 roots / 115
+subcommands** (see [[01-Mission/Command-Catalog|Command-Catalog]]); 47 names in
+the 160 figure remain unaccounted for. `/setup` and `/appeal` are complete; the
+only named plan gap left is `/verify start | status` (two names). Do not invent
 the missing names or an 18th root: the generated catalog and this table are the
 evidence.
 
@@ -163,7 +163,7 @@ evidence.
 | `/tools` | embed, tag, reminder, giveaway, poll, feed, stat | Carl/MEE6 utilities |
 | `/help` | browse, search, privacy | every bot's help |
 | `/logging` | setup, channel, events, status, retention, export, disable | Dyno/Carl audit logging |
-| `/appeal` | open, status | nobody (our edge) |
+| `/appeal` | open, status | nobody (our edge) — **shipped pass 35** |
 | `/export` | guild, user, import, delete, drift, rollback | nobody (our edge) |
 | `/verify` | start, status | Security Bot |
 | `/music` | play, queue, stop | BYO Lavalink |
