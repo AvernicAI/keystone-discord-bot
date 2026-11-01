@@ -1,0 +1,20 @@
+{
+  "name": "@keystone/queue",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Job queue port adapters: BullMQ for production, an in-process driver with the same retry contract.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/kernel": "workspace:*",
+    "bullmq": "6.5.2",
+    "ioredis": "^6.0.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.14",
+    "@keystone/db": "workspace:*",
+    "@keystone/telemetry": "workspace:*"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@keystone/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Postgres data spine: Drizzle schema, ordered migrations, settings and idempotency repositories.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./testing": "./src/testing.ts"
+  },
+  "dependencies": {
+    "@keystone/kernel": "workspace:*",
+    "drizzle-orm": "^0.45.4",
+    "postgres": "^4.0.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.14",
+    "zod": "^3.25.0"
+  }
+}

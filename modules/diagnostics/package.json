@@ -1,0 +1,17 @@
+{
+  "name": "@keystone/module-diagnostics",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Health, version and configuration checks — and the reference module for contributors.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/kernel": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@keystone/testing": "workspace:*"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@keystone/module-community",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "P3 community suite: XP, economy, reaction roles, welcome, starboard, tickets, giveaways, temp voice, content and feeds.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/kernel": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@keystone/testing": "workspace:*"
+  }
+}

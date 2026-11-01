@@ -1,0 +1,1 @@
+export { diagnosticsModule } from "./manifest";

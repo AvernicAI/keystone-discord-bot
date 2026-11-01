@@ -1,0 +1,18 @@
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+# Obsidian workspace state is per-user, never shared.
+memory/vault/.obsidian/workspace*.json
+memory/vault/.trash/
+
+.DS_Store
+Thumbs.db
+*.log

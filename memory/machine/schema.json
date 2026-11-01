@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://keystone.local/memory.schema.json",
+  "title": "Keystone machine memory",
+  "description": "The machine-readable half of /memory. Validated by memory/tools/memory-check.mjs. Paths are relative to /memory.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "name",
+    "tagline",
+    "mission",
+    "updatedAt",
+    "phase",
+    "lastPass",
+    "metrics",
+    "modules",
+    "decisions",
+    "openQuestions"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "tagline": { "type": "string", "minLength": 1 },
+    "mission": { "type": "string" },
+    "northStar": { "type": "string" },
+    "updatedAt": { "type": "string", "format": "date" },
+    "phase": { "enum": ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"] },
+    "lastPass": { "type": "string", "pattern": "^journal/.+\\.md$" },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commands", "commandLimit", "modules", "tests"],
+      "properties": {
+        "commands": { "type": "integer", "minimum": 0 },
+        "commandLimit": { "const": 100 },
+        "modules": { "type": "integer", "minimum": 0 },
+        "tests": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "status", "phase", "codePath", "specPath", "statusPath", "commands"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,31}$" },
+          "name": { "type": "string" },
+          "status": {
+            "enum": ["planned", "scaffolded", "reference", "in-progress", "beta", "stable", "deprecated"]
+          },
+          "phase": { "enum": ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"] },
+          "codePath": { "type": "string", "pattern": "^modules/" },
+          "specPath": { "type": "string" },
+          "statusPath": { "type": "string" },
+          "teachingPath": { "type": "string" },
+          "commands": { "type": "array", "items": { "type": "string" } },
+          "intents": { "type": "array", "items": { "type": "string" } },
+          "premium": { "type": "boolean", "const": false }
+        }
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "status", "path"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^ADR-[0-9]{4}$" },
+          "title": { "type": "string" },
+          "status": { "enum": ["proposed", "accepted", "superseded", "rejected"] },
+          "path": { "type": "string" }
+        }
+      }
+    },
+    "openQuestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "question", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "question": { "type": "string" },
+          "blocks": { "type": "string" },
+          "recommendation": { "type": "string" },
+          "answer": { "type": "string" },
+          "status": { "enum": ["open", "answered", "dropped"] }
+        }
+      }
+    }
+  }
+}

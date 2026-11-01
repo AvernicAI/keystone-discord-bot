@@ -1,0 +1,29 @@
+{
+  "name": "@keystone/bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Gateway process. Thin on purpose: it adapts discord.js to the kernel and composes the P1 ports.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/cache": "workspace:*",
+    "@keystone/config": "workspace:*",
+    "@keystone/db": "workspace:*",
+    "@keystone/kernel": "workspace:*",
+    "@keystone/module-diagnostics": "workspace:*",
+    "@keystone/module-community": "workspace:*",
+    "@keystone/module-ai": "workspace:*",
+    "@keystone/module-moderation": "workspace:*",
+    "@keystone/module-setup": "workspace:*",
+    "@keystone/queue": "workspace:*",
+    "@keystone/telemetry": "workspace:*",
+    "discord.js": "^14.16.0",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "@keystone/testing": "workspace:*",
+    "zod": "^3.25.0"
+  }
+}

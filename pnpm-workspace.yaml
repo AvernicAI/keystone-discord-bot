@@ -1,0 +1,17 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "modules/*"
+
+# pnpm 12 blocks lifecycle scripts by default. Every entry here is a security
+# decision documented in memory/vault/07-OpenSource/Security.md.
+allowBuilds:
+  # tsx and vitest need the esbuild binary.
+  esbuild: true
+  # Optional native accelerator for msgpackr (a BullMQ dependency). Denied on
+  # purpose: msgpackr ships a pure-JS fallback, and refusing the native build
+  # removes a gyp toolchain from every contributor and container.
+  msgpackr-extract: false
+
+minimumReleaseAgeExclude:
+  - "@electric-sql/pglite@0.5.14"

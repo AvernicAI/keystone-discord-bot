@@ -1,0 +1,190 @@
+# Parity matrix
+
+The definition of "everything", one feature at a time.
+
+**Legend:** ✅ free · 💰 paid only · ❌ absent · ❔ unverified / not documented.
+"Phase" is the Keystone phase that ships it; every shipped feature is free.
+
+Verification rule: a cell is only ✅ or ❌ when a source was read. Anything from a
+snippet, a marketing page or memory is ❔ and stays out of marketing until
+checked. See [[Master-Plan]] for the research program.
+
+## 1. Moderation
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Ban / kick | 💰 | ✅ | ✅ | ❌ | ❔ | P2 | Permission precheck before every call |
+| Timeout | 💰 | ✅ | ✅ | ❌ | ❔ | P2 | Max 28 days |
+| Warn + history | 💰 | ✅ | ✅ | ❌ | ❔ | P2 | One case file for all actions |
+| Bulk purge | 💰 | ✅ | ✅ | ❌ | ❔ | P2 | 100 per call, audited |
+| Slowmode / lockdown | 💰 | ✅ | ✅ | ❌ | ❔ | P2 | Lockdown is a named preset |
+| Temp ban / temp role | 💰 | ❔ | 💰 | ❌ | ❔ | P2 | Expiry as a scheduled job |
+| Case lookup | 💰 | ✅ | ✅ | ❌ | ❔ | P2 | `/mod case view` |
+| Evidence card | ❌ | ❌ | ❌ | ❌ | ❌ | P2 | **Our edge:** what triggered it |
+| Dry-run default | ❌ | ❌ | ❌ | ❌ | ❌ | P2 | **Our edge:** alert-only |
+| Appeal from the DM | ❌ | ❌ | ❌ | ❌ | ❌ | P2 | **Our edge:** one button |
+| Case export | ❌ | ❔ | ❌ | ❌ | ❌ | P2 | JSON + CSV |
+
+## 2. Automod
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Spam / caps / mentions | 💰 | ✅ | ✅ | ❌ | ✅ | P2 | Heat decay, not a binary trip |
+| Invite links | 💰 | ✅ | ✅ | ❌ | ✅ | P2 | Allow-list per guild |
+| Link / phishing filter | 💰 | ✅ | ✅ | ❌ | ✅ | P2 | Local list + review queue |
+| Profanity / zalgo | 💰 | ✅ | ✅ | ❌ | ❔ | P2 | Word-boundary aware |
+| Duplicate / crosspost | 💰 | ✅ | ❔ | ❌ | ❔ | P2 | Hash window |
+| Native AutoMod sync | ❌ | ❔ | ❔ | ❌ | ❔ | P2 | We manage Discord's rules too |
+| AI classification | 💰 (separate) | ❌ | ❌ | ❌ | ❔ | P4 | Advisory label only; no action path |
+| Per-rule punishment | 💰 | ✅ | ✅ | ❌ | ✅ | P2 | Alert / delete / timeout / quarantine |
+| Rule test mode | ❌ | ❔ | ❔ | ❌ | ❔ | P2 | Fixture-driven, same as tests |
+| False-positive report | ❌ | ❌ | ❌ | ❌ | ❔ | P3 | Feeds the rule's own metrics |
+
+## 3. Security
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Anti-nuke (role/channel) | ❌ | ❌ | ❌ | ❌ | ✅ | P2 | Thresholds per permission |
+| Anti-nuke (webhook/bot add) | ❌ | ❌ | ❌ | ❌ | ✅ | P2 | Bot-add block |
+| Anti-raid (join burst) | ❌ | ❌ | ❌ | ❌ | ✅ | P2 | Age + avatar heuristics |
+| Quarantine role | ❌ | ❌ | ❌ | ❌ | ✅ | P2 | Reversible by design |
+| Join gate / verification | ❌ | ❔ | ❔ | ❌ | ✅ | P2 | Button + timeout |
+| Panic mode | ❌ | ❌ | ❌ | ❌ | ✅ | P2 | One command, logged |
+| Heat scoring | ❌ | ❌ | ❌ | ❌ | ✅ | P2 | Decays, so no permanent trip |
+| Backup / restore | ❌ | ❔ | ❔ | ❌ | 💰 | P5 | Structure + optional messages |
+| Shared case file with mod | ❌ | ❌ | ❌ | ❌ | ❔ | P2 | **Our edge:** one record |
+
+## 4. Leveling
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| XP and levels | 💰 | 💰 | 💰 | ❌ | ❌ | P3 | Free, always |
+| Role rewards | 3 free, then 💰 | 💰 | 💰 | ❌ | ❌ | P3 | Per-level, stackable |
+| Rank card | ✅ | 💰 | 💰 | ❌ | ❌ | P3 | Components V2, 40-slot budget |
+| Leaderboard | ✅ | 💰 | 💰 | ❌ | ❌ | P3 | Paginated, cached |
+| XP multipliers | 💰 | 💰 | 💰 | ❌ | ❌ | P3 | Role/channel/event |
+| Import from MEE6 | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | **Our edge** |
+| Seasonal reset | ❔ | ❔ | ❔ | ❌ | ❌ | P3 | Archive, don't destroy |
+
+## 5. Economy
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Currency + daily | 💰 | ❌ | 💰 | ❌ | ❌ | P3 · P4 | Server-scoped; daily uses the kernel cooldown |
+| Shop / inventory | 💰 | ❌ | ❔ | ❌ | ❌ | P3 · P4 | Role and tag items; direct grant, explicit failure |
+| Transfers | 💰 | ❌ | ❔ | ❌ | ❌ | P3 · P4 | Atomic pair under a guild row lock; stable retry key |
+| Gambling | 💰 | ❌ | ❔ | ❌ | ❌ | P3 · P4 | Capped, opt-in, serialized debit |
+| Audit ledger | ❌ | ❌ | ❌ | ❌ | ❌ | P3 · P4 | **Our edge:** every coin traceable; balance is a `SUM` |
+| Global economy | ❌ | ❌ | ❌ | ❌ | ❌ | — | Non-goal: server context matters |
+
+## 6. Community
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Welcome / goodbye | ✅ | ✅ | ✅ | ❌ | ❔ | P3 | Text or V2 panel |
+| Autorole | ✅ | ✅ | ✅ | ❌ | ❔ | P3 | With join delay |
+| Reaction roles | 💰 (40) | ❌ | ✅ (250) | ❌ | ❔ | P3 | Buttons and selects too |
+| Starboard | ✅ | ✅ | ✅ | ❌ | ❌ | P3 | Per-channel thresholds |
+| Birthdays | 💰 | ❔ | ❔ | ❌ | ❌ | P3 | Timezone-aware |
+| Suggestions | ❔ | ❔ | ❔ | ❌ | ❌ | P3 | Vote + status |
+| Polls | ✅ | ❔ | ❔ | ❌ | ❌ | P3 | Native poll fallback |
+| Giveaways | ✅ | ✅ (3) | ✅ | ❌ | ❌ | P3 | Requirements + reroll |
+| Temp voice | 💰 | ❔ | ❔ | ❌ | ❌ | P3 | Hub channel pattern |
+| Stat channels | 💰 | ❔ | ❔ | ❌ | ✅ | P3 | Rate-limited updates |
+| Social feeds | 💰 | ❔ | ✅ (5/2) | ❌ | ❌ | P3 | YouTube, Twitch, RSS |
+
+## 7. Tickets
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Panels | ❌ | ✅ (1) | ❔ | ✅ | ❌ | P3 | Components V2 |
+| Thread-based tickets | ❌ | 💰 | ❔ | ✅ | ❌ | P3 | Avoids the 50-channel cap |
+| Claiming | ❌ | 💰 | ❔ | ✅ | ❌ | P3 | With SLA clock |
+| Transcripts | ❌ | 💰 | ❔ | ✅ (30 d free) | ❌ | P3 | Never auto-expire |
+| Knowledge base | ❌ | ❌ | ❌ | ✅ | ❌ | P4 | `/ai docs-add` + exact-index RAG; pgvector ANN open |
+| AI deflection | ❌ | ❌ | ❌ | 💰 | ❌ | P4 | Capped, opt-in; no match = human hand-off, no model call |
+| SLA analytics | ❌ | ❌ | ❌ | 💰 | ❌ | P3 | First response, resolution |
+
+## 8. Content
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Embed builder | 💰 | ✅ (3) | ✅ | ❌ | ❌ | P3 | Validated fields, no scripting |
+| Custom commands / tags | 💰 (500) | ✅ (10) | ✅ | ❌ | ❌ | P3 | Data, never code |
+| Scheduled messages | 💰 | ❔ | ❔ | ❌ | ❌ | P3 | Cron + timezone |
+| Reminders | 💰 | ✅ | ❔ | ❌ | ❌ | P3 | Per-user, DM or channel |
+| Sticky messages | ❌ | ❔ | 💰 | ❌ | ❌ | P3 | Repost on activity |
+| RSS / feeds | 💰 | ❔ | ❔ | ❌ | ❌ | P3 | Dedup by GUID |
+| Translation | ❌ | ❌ | ❌ | ❌ | ❌ | — | Non-goal: unreliable, costly |
+
+## 9. Music
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Playback | ❌ (removed 2023) | ❌ | ❌ | ❌ | ❌ | P6 | BYO Lavalink only |
+| Queue / controls | ❌ | ❌ | ❌ | ❌ | ❌ | P6 | Buttons + `/music` |
+| Bundled source | ❌ | ❌ | ❌ | ❌ | ❌ | — | Non-goal: legal risk |
+| Lyrics / autoplay | ❌ | ❌ | ❌ | ❌ | ❌ | — | Non-goal |
+
+## 10. AI
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Persona chat | 💰 (separate) | ❌ | ❌ | 💰 | ❌ | P4 | Mention-only; no conversation retention |
+| Server RAG | ❌ | ❌ | ❌ | ✅ | ❌ | P4 | Portable exact index; pgvector ANN open |
+| Mod explanations | ❌ | ❌ | ❌ | ❌ | ❌ | P4 | Why a rule fired |
+| Thread summaries | ❌ | ❌ | ❌ | ❔ | ❌ | P4 | `/ticket summary`, on demand |
+| Cost caps | ❌ | ❌ | ❌ | ❔ | ❌ | P4 | **Our edge:** hard, per guild |
+| Zero retention | ❌ | ❌ | ❌ | ❔ | ❌ | P4 | Default, documented |
+
+## 11. Operations
+
+| Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Web dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | P5 | Next.js |
+| Multi-server fleet | ❔ | ❔ | ❔ | ✅ | ❔ | P5 | One view, per-guild authz |
+| Config templates | ❔ | ❔ | ❔ | ❔ | ❔ | P5 | Apply to N guilds |
+| Drift detection | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | **Our edge** |
+| Importer (MEE6/Dyno/Carl) | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | **Our edge** |
+| Full export | ❌ | ❔ | ❌ | ❔ | ❌ | P5 | JSON, documented schema |
+| Real deletion | ❔ | ❔ | ❔ | ❔ | ❔ | P5 | Receipt included |
+| Public API / webhooks | ❌ | ❔ | ❌ | 💰 | ❔ | P5 | Scoped tokens |
+| i18n | ❔ | ✅ | ❔ | ✅ | ❔ | P5 | i18next, per-guild locale |
+| Status page | ❌ | ❔ | ❔ | ❔ | ❔ | P7 | Public incidents |
+
+## Tally
+
+| Domain | Rows | P3 | P4 adds | Ours by P8 | Note |
+| --- | --- | --- | --- | --- | --- |
+| Moderation | 11 | 8 | 0 | 11 | Case model is the spine; temp-ban/role expiry and case export open |
+| Automod | 10 | 5 | 0 | 10 | Invite, mentions, duplicates, native-plan and test mode; link/profanity filters open |
+| Security | 9 | 7 | 0 | 9 | Anti-nuke, anti-raid, quarantine, join gate and shared cases; panic mode open |
+| Leveling | 7 | 6 | 0 | 7 | XP, rewards, rank, leaderboard, multiplier and archived seasonal reset; MEE6 import is P5 |
+| Economy | 6 | 5 | 0 | 6 | Daily, shop, transfers, gambling and the audit ledger; P4 added the lock/idempotency hardening, not a new row |
+| Community | 11 | 10 | 0 | 11 | Welcome, delayed autorole, button/select roles, per-channel starboard, birthdays, suggestions, giveaways, temp voice, stat, feeds, polls; goodbye messages open |
+| Tickets | 7 | 5 | 2 | 7 | Knowledge base and AI deflection; portable RAG, pgvector ANN open |
+| Content | 7 | 6 | 0 | 6 | Embed, tags, schedules, reminders, feeds and sticky messages; translation non-goal |
+| Music | 4 | 0 | 0 | 2 | BYO only |
+| AI | 6 | 0 | 6 | 6 | Advisory, capped, opt-in, zero-retention |
+| Operations | 10 | 0 | 0 | 10 | Export is the wedge |
+
+Two rows are non-goals (global economy, translation) and two are music features we
+refuse to ship. Everything else is promised, free.
+
+P3/P4 counts are implementation counts, not live-Discord verification. The
+adapter, buttons, gateway, scheduler, provider, mention event, live role grants
+and the Postgres guild lock are unrun here; see
+[[04-Modules/ai/Status|AI status]] and
+[[04-Modules/community/Status|community status]] for the proven/unproven split.
+Economy concurrency is proven in-memory and on PGlite, not across shards. The
+exact vector index is not pgvector ANN; [[PGVector-Fleet]] keeps that row honest.
+"Green" is not claimed for the open rows; only tested buildable rows are counted.
+
+## How this stays honest
+
+- A feature moves to ✅ only when its tests pass and its **Status.md** says
+  verified.
+- `pnpm memory:check` fails if a module's spec omits a registered command, so the
+  matrix cannot drift from the code.
+- Prices and competitor states are re-checked before launch (P7). Until then, 💰
+  means "paid on the tier we read", not "paid on every tier".

@@ -1,0 +1,41 @@
+{
+  "name": "keystone",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Keystone — an open-source, teach-by-default all-in-one Discord bot.",
+  "license": "SEE LICENSE IN memory/vault/99-Meta/Open-Questions.md",
+  "packageManager": "pnpm@12.14.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx watch apps/bot/src/index.ts",
+    "start": "tsx apps/bot/src/index.ts",
+    "worker:dev": "tsx watch apps/worker/src/index.ts",
+    "worker:start": "tsx apps/worker/src/index.ts",
+    "build": "tsup",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "budget": "tsx scripts/budget.ts",
+    "memory:check": "node memory/tools/memory-check.mjs",
+    "benchmark:ai": "tsx scripts/benchmark-ai.ts",
+    "pass:end": "node memory/tools/pass-end.mjs",
+    "check": "pnpm typecheck && pnpm test && pnpm budget && pnpm memory:check"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "@keystone/config": "workspace:*",
+    "@keystone/db": "workspace:*",
+    "@keystone/kernel": "workspace:*",
+    "@types/node": "^24.0.0",
+    "tsup": "^9.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}

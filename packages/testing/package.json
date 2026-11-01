@@ -1,0 +1,13 @@
+{
+  "name": "@keystone/testing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Test fixtures for Keystone modules. Contributor-facing name for @keystone/kernel/testing.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/kernel": "workspace:*"
+  }
+}

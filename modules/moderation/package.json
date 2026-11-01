@@ -1,0 +1,17 @@
+{
+  "name": "@keystone/module-moderation",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Cases, /mod, automod decisions, appeals, anti-raid, anti-nuke and join gate.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/kernel": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@keystone/testing": "workspace:*"
+  }
+}

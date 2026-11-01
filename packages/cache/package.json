@@ -1,0 +1,14 @@
+{
+  "name": "@keystone/cache",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Redis-backed cooldowns with an explicit, logged in-memory fallback.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/kernel": "workspace:*",
+    "ioredis": "^6.0.0"
+  }
+}

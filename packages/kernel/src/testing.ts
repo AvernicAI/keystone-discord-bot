@@ -1,0 +1,158 @@
+import { InMemoryCooldownStore } from "./cooldowns";
+import { createSilentLogger } from "./logger";
+import type {
+  CommandContext,
+  HealthProbe,
+  HealthReport,
+  InteractionLike,
+  JobQueue,
+  Logger,
+  ModerationPort,
+  ModuleSettings,
+  ReplyInput,
+} from "./types";
+
+export interface FakeInteractionInit {
+  id?: string;
+  commandName?: string;
+  guildId?: string | null;
+  userId?: string;
+  channelId?: string | null;
+  options?: Record<string, string | number | boolean | null>;
+  permissions?: string[];
+}
+
+/**
+ * A token-free stand-in for a Discord interaction. This is what lets a
+ * contributor write and run tests for a command in under a second, with no
+ * bot, no gateway and no guild.
+ */
+export class FakeInteraction implements InteractionLike {
+  readonly id: string;
+  readonly commandName: string;
+  readonly guildId: string | null;
+  readonly channelId: string | null;
+  readonly userId: string;
+  readonly options: Readonly<Record<string, string | number | boolean | null>>;
+  readonly permissions: readonly string[];
+  readonly replies: ReplyInput[] = [];
+
+  #replied = false;
+  #deferred = false;
+
+  constructor(init: FakeInteractionInit = {}) {
+    this.id = init.id ?? "interaction-1";
+    this.commandName = init.commandName ?? "test";
+    this.guildId = init.guildId === undefined ? "1" : init.guildId;
+    this.channelId = init.channelId === undefined ? "99" : init.channelId;
+    this.userId = init.userId ?? "42";
+    this.options = { ...(init.options ?? {}) };
+    this.permissions = init.permissions ?? [];
+  }
+
+  get replied(): boolean {
+    return this.#replied;
+  }
+
+  get deferred(): boolean {
+    return this.#deferred;
+  }
+
+  get lastReply(): ReplyInput | undefined {
+    return this.replies.at(-1);
+  }
+
+  async reply(input: ReplyInput): Promise<unknown> {
+    this.#replied = true;
+    this.replies.push(input);
+    return undefined;
+  }
+
+  async deferReply(): Promise<unknown> {
+    this.#deferred = true;
+    return undefined;
+  }
+
+  async editReply(input: ReplyInput): Promise<unknown> {
+    this.replies.push(input);
+    return undefined;
+  }
+
+  async followUp(input: ReplyInput): Promise<unknown> {
+    this.replies.push(input);
+    return undefined;
+  }
+}
+
+export interface TestSettings extends ModuleSettings {
+  readonly store: Record<string, unknown>;
+}
+
+export function createTestSettings(initial: Record<string, unknown> = {}): TestSettings {
+  const store: Record<string, unknown> = { ...initial };
+  return {
+    store,
+    get: async () => ({ ...store }),
+    update: async (_guildId, patch) => {
+      Object.assign(store, patch);
+      return { ...store };
+    },
+  };
+}
+
+/** A queue that accepts everything and does nothing, for command tests. */
+export const noopQueue: JobQueue = {
+  async enqueue() {
+    return "noop";
+  },
+  async close() {
+    /* nothing to close */
+  },
+};
+
+export function staticHealth(report?: Partial<HealthReport>): HealthProbe {
+  const base: HealthReport = {
+    database: { configured: false, reachable: false, migrated: false },
+    cache: { configured: false, reachable: false, detail: "memory" },
+  };
+  return {
+    async probe() {
+      return { ...base, ...report, database: { ...base.database, ...report?.database } };
+    },
+  };
+}
+
+export interface TestContextOptions {
+  interaction?: FakeInteraction;
+  moduleId?: string;
+  settings?: Record<string, unknown>;
+  logger?: Logger;
+  now?: () => number;
+  queue?: JobQueue;
+  health?: HealthProbe;
+  moderation?: ModerationPort;
+  community?: import("./community").CommunityPort;
+  ai?: import("./ai").AiPort;
+}
+
+export type TestContext = CommandContext & { interaction: FakeInteraction };
+
+export function createTestContext(options: TestContextOptions = {}): TestContext {
+  const interaction =
+    options.interaction ?? new FakeInteraction({ commandName: options.moduleId ?? "test" });
+  return {
+    interaction,
+    moduleId: options.moduleId ?? "test",
+    guildId: interaction.guildId,
+    userId: interaction.userId,
+    settings: createTestSettings(options.settings),
+    logger: options.logger ?? createSilentLogger(),
+    now: options.now ?? (() => 1_700_000_000_000),
+    cooldowns: new InMemoryCooldownStore(),
+    queue: options.queue ?? noopQueue,
+    health: options.health ?? staticHealth(),
+    moderation: options.moderation,
+    community: options.community,
+    ai: options.ai,
+  };
+}

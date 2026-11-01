@@ -1,0 +1,14 @@
+{
+  "name": "@keystone/kernel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Framework-agnostic kernel: module registry, guards, settings, dispatch and the command-budget ledger.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts"
+  },
+  "dependencies": {
+    "zod": "^3.25.0"
+  }
+}

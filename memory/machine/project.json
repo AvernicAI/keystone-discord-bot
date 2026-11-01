@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "name": "Keystone",
+  "tagline": "An open-source, teach-by-default all-in-one Discord bot.",
+  "mission": "vault/01-Mission/Mission.md",
+  "northStar": "vault/01-Mission/North-Star.md",
+  "updatedAt": "2026-11-01",
+  "phase": "P4",
+  "lastPass": "journal/2026-11-01-pass-09.md",
+  "metrics": {
+    "commands": 10,
+    "commandLimit": 100,
+    "modules": 5,
+    "tests": 129
+  },
+  "modules": [
+    {
+      "id": "diagnostics",
+      "name": "Diagnostics",
+      "status": "reference",
+      "phase": "P0",
+      "codePath": "modules/diagnostics",
+      "specPath": "vault/04-Modules/diagnostics/Spec.md",
+      "statusPath": "vault/04-Modules/diagnostics/Status.md",
+      "teachingPath": "vault/04-Modules/diagnostics/Teaching.md",
+      "commands": ["ping", "about"],
+      "intents": ["Guilds"],
+      "premium": false
+    },
+    {
+      "id": "setup",
+      "name": "Setup",
+      "status": "stable",
+      "phase": "P1",
+      "codePath": "modules/setup",
+      "specPath": "vault/04-Modules/setup/Spec.md",
+      "statusPath": "vault/04-Modules/setup/Status.md",
+      "teachingPath": "vault/04-Modules/setup/Teaching.md",
+      "commands": ["setup"],
+      "intents": ["Guilds"],
+      "premium": false
+    },
+    {
+      "id": "moderation",
+      "name": "Moderation & security",
+      "status": "p2-core",
+      "phase": "P2",
+      "codePath": "modules/moderation",
+      "specPath": "vault/04-Modules/moderation/Spec.md",
+      "statusPath": "vault/04-Modules/moderation/Status.md",
+      "teachingPath": "vault/04-Modules/moderation/Teaching.md",
+      "commands": ["mod", "appeal", "verify"],
+      "intents": ["GuildMembers", "GuildMessages", "MessageContent", "GuildModeration", "AutoModerationExecution"],
+      "premium": false
+    },
+    {
+      "id": "community",
+      "name": "Community",
+      "status": "p4-economy",
+      "phase": "P3",
+      "codePath": "modules/community",
+      "specPath": "vault/04-Modules/community/Spec.md",
+      "statusPath": "vault/04-Modules/community/Status.md",
+      "teachingPath": "vault/04-Modules/community/Teaching.md",
+      "commands": ["rank", "ticket", "tools"],
+      "intents": [
+        "GuildMembers",
+        "GuildMessages",
+        "MessageContent",
+        "GuildMessageReactions",
+        "GuildVoiceStates"
+      ],
+      "premium": false
+    },
+    {
+      "id": "ai",
+      "name": "AI",
+      "status": "p4-complete",
+      "phase": "P4",
+      "codePath": "modules/ai",
+      "specPath": "vault/04-Modules/ai/Spec.md",
+      "statusPath": "vault/04-Modules/ai/Status.md",
+      "teachingPath": "vault/04-Modules/ai/Teaching.md",
+      "commands": ["ai"],
+      "intents": ["GuildMessages", "MessageContent"],
+      "premium": false
+    }
+  ],
+  "decisions": [
+    {
+      "id": "ADR-0001",
+      "title": "Use discord.js v14 behind a thin adapter",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0001-discordjs-v14-adapter.md"
+    },
+    {
+      "id": "ADR-0002",
+      "title": "pnpm monorepo, dev-first TypeScript resolution",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0002-monorepo-dev-first.md"
+    },
+    {
+      "id": "ADR-0003",
+      "title": "A CI-enforced command budget",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0003-command-budget.md"
+    },
+    {
+      "id": "ADR-0004",
+      "title": "Dual memory: Obsidian vault plus machine-readable project state",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0004-memory-system.md"
+    },
+    {
+      "id": "ADR-0005",
+      "title": "Module contract instead of a central command switch",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0005-module-contract.md"
+    },
+    {
+      "id": "ADR-0006",
+      "title": "Ports and adapters for persistence, cache and queue",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0006-ports-and-adapters.md"
+    },
+    {
+      "id": "ADR-0007",
+      "title": "A moderation capability port and event-driven security core",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0007-moderation-capability-port.md"
+    },
+    {
+      "id": "ADR-0008",
+      "title": "One community capability port over typed data and Discord actions",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0008-community-capability-port.md"
+    },
+    {
+      "id": "ADR-0009",
+      "title": "Select rows and archived season resets extend CommunityPort",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0009-select-rows-and-season-archives.md"
+    },
+    {
+      "id": "ADR-0010",
+      "title": "AI provider abstraction with server-side guild caps",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0010-ai-provider-and-caps.md"
+    },
+    {
+      "id": "ADR-0011",
+      "title": "Derived ledger balances and double-spend-safe economy",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0011-economy-ledger-and-double-spend.md"
+    }
+  ],
+  "openQuestions": [
+    {
+      "id": "Q-1",
+      "question": "Which license: AGPL-3.0 or MIT?",
+      "blocks": "P7 open-source launch, not P1-P6 code",
+      "recommendation": "AGPL-3.0 to keep a hosted tier honest, with the trade-off documented.",
+      "status": "open"
+    },
+    {
+      "id": "Q-2",
+      "question": "Does v1 ship moderation + tickets first, or the full P2+P3 block?",
+      "blocks": "P2 scoping",
+      "recommendation": "Moderation + tickets + logging first; grow in public.",
+      "status": "open"
+    },
+    {
+      "id": "Q-3",
+      "question": "Music: bring-your-own Lavalink only?",
+      "blocks": "P6",
+      "recommendation": "Yes. No bundled streamer, disabled by default.",
+      "status": "open"
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+# Community — spec
+
+The P3 suite replaces the everyday community half of **MEE6, Dyno and Carl-bot**:
+leveling and role rewards, a server-scoped economy, reaction roles (buttons and
+selects), welcome/delayed autorole, starboard, birthdays, suggestions, giveaways,
+temporary voice, embed/tag/reminder/scheduled/sticky content, polls, RSS feeds
+and stat channels. **Ticket Tool** is replaced by the thread-based ticket root in
+the same module.
+
+P4 hardens the economy half on the same `/rank` root instead of adding a second
+one. It replaces **MEE6**'s paid currency/daily/shop bundle and **Carl-bot**'s
+currency/gambling surface; **Dyno** has no server economy. Balances are always a
+`SUM` over the append-only `economy_ledger`, every movement carries a stable
+idempotency key, and concurrent spends serialize on a guild row lock.
+
+Everything in this module is free. There is no tier, no paywalled limit and no
+up-sell.
+
+## Commands
+
+| Command | Options | Guards | Behaviour |
+| --- | --- | --- | --- |
+| `/rank` | `action` (view, leaderboard, rewards, admin, balance, daily, pay, shop, buy, gamble, ledger, season), `user`, `amount`, `level`, `value`, `item`, `limit`, `days` | guild-only; `ManageGuild` for rewards/admin/season | Reads XP/rank, configures role rewards, administers levels, runs the ledger-backed currency (balance, daily, pay, shop/buy, gamble, ledger), and starts a season (archives, then clears the projection). |
+| `/ticket` | `action` (panel, open, claim, close, add, transcript, summary, stats), `subject`, `user`, `channel`, `ticket`, `title` | guild-only; `ManageGuild` for panel/transcript/summary/stats | Posts a panel, opens a private thread, claims/closes it, adds a participant, returns a transcript, calls the AI summary port and reports SLA stats. |
+| `/tools` | `action` (embed, tag, reminder, schedule, giveaway, giveaway-end, giveaway-reroll, poll, feed, stat, welcome, roles, starboard, starboard-override, voice, birthdays, birthday, suggestions, suggestion, suggestion-decide, sticky), `name`, `value`, `channel`, `target`, `role`, `user`, `duration`, `limit`, `url` | guild-only; `ManageGuild` for configuration and server-wide sends | One utility root for content, giveaways, feeds, stat channels, reaction-role buttons/selects, birthdays, suggestions, sticky messages and event configuration. |
+
+The three roots take the bot from 6 to **10 of Discord's 100** global commands.
+The P3 exit requires fewer than 20 roots; this is well inside it.
+
+## Features and where they live
+
+| Feature | Behaviour | Service |
+| --- | --- | --- |
+| XP and levels | Message XP, injected cooldown clock, one award per message id, projection updated from `xp_events` | `LevelingService` |
+| Role rewards | Configured level thresholds grant roles once when crossed | `LevelingService` |
+| Leaderboard | Top profiles by XP, guild-scoped | `LevelingService` |
+| Seasonal reset | Admin starts a keyed season; profiles archived to `community_records`, marker written, `levels` cleared; repeated start is a no-op | `SeasonService` |
+| Economy | Daily through the kernel cooldown; atomic transfers and purchases; shop role items; capped opt-in gambling; balances derived from an append-only ledger | `EconomyService` |
+| Welcome / delayed autorole | Welcome text/DM, immediate role or durable delayed-role record applied by the tick | `WelcomeService` |
+| Reaction roles | Button panel plus multi-select/multi-role select panel; selected set reconciled against the panel | `ReactionRoleService` |
+| Starboard | Global threshold plus per-source-channel threshold and destination overrides | `StarboardService` |
+| Birthdays | Guild timezone, due-day announcement, optional role, once per user per year | `BirthdayService` |
+| Suggestions | Validated submission, one vote per user, up/down buttons, approval/rejection with immutable decision | `SuggestionService` |
+| Giveaways | Timed start, one entry per member, end, DM winners and reroll | `GiveawayService` |
+| Temporary voice | Hub channel creates an owned room; empty room deletion is owner-scoped | `TempVoiceService` |
+| Thread tickets | Panel, private public thread, claim, close, add, transcript, stats | `TicketService` |
+| Embeds | Validated title/description/fields, 6,000-character cap | `ContentService` |
+| Tags | Data-only, lowercase names, max count, owner recorded | `ContentService` |
+| Reminders | User DM or channel delivery, idempotent `sent` flag | `ContentService` |
+| Scheduled messages | Channel delivery at a due time | `ContentService` |
+| Polls | 2–5 options, one vote per member, counts | `ContentService` |
+| Feeds | RSS/Atom-style item parser, GUID dedupe, channel delivery | `ContentService` |
+| Stat channels | Member/online/boosters metric record, rate-limited adapter tick | `ContentService` |
+| Sticky messages | Per-channel configured message, repost after N human messages, duplicate event no-op, previous sticky deleted by its recorded id | `StickyService` |
+
+## Data
+
+- `levels` and `xp_events` — XP is a projection; the event ledger is the truth.
+  A season archives the projection and keeps the event history.
+- `economy_ledger` — append-only. Every movement has a unique idempotency key and
+  the balance is `SUM(amount)`; there is no balance column. A transfer writes a
+  paired `:out`/`:in` entry in one transaction, and a checked debit reads the sum
+  and inserts the negative entry under the same guild lock.
+- `tickets` — thread-backed lifecycle and SLA timestamps.
+- `community_records` (migration 0004) — guild-scoped `(kind, key)` records for
+  reaction-role panels, starboard entries, giveaways, tags, embeds, reminders,
+  feeds, stat channels, temporary voice, ticket events, birthdays, suggestions,
+  sticky messages, delayed autoroles, season state and season archives.
+
+Season reset is transactional in the Drizzle adapter: archive rows, idempotency
+marker, then delete the projection. Modules never import a table; the module owns
+`CommunityStore` and the composition root injects the adapter.
+
+## Settings
+
+| Key | Default | Meaning |
+| --- | --- | --- |
+| `enabled` | `true` | Community event processing |
+| `xp.minPerMessage` / `maxPerMessage` | `15` / `25` | Base award range |
+| `xp.cooldownMs` | `60000` | Per-member award window |
+| `xp.multiplier` | `1` | Server-wide multiplier |
+| `xp.rewards` | `[]` | `{ level, roleId }` rewards |
+| `economy.currency` | `coins` | Display name |
+| `economy.dailyAmount` | `100` | Daily claim |
+| `economy.dailyCooldownMs` | `86400000` | Kernel cooldown window; the UTC day key remains the hard guard |
+| `economy.transferMax` | `10000` | Per-transfer cap |
+| `economy.gambling` | `false` | Opt-in gambling |
+| `economy.gambleMax` | `100` | Per-bet cap |
+| `economy.shop` | `[]` | Role/tag items |
+| `welcome.*` | disabled | Channel, message, role, DM, `roleDelayMinutes` |
+| `starboard.*` | disabled | Channel, threshold, emoji, per-channel `overrides` |
+| `birthdays.*` | disabled | Channel, role, IANA timezone |
+| `suggestions.*` | disabled | Channel, min/max length |
+| `sticky.maxPerChannel` | `1` | Configuration guard |
+| `tickets.*` | enabled config | Support role, SLA, open-ticket cap |
+| `giveaways.*` | enabled config | Max duration/winners |
+| `tempVoice.*` | disabled | Hub, category, name template, user limit |
+| `content.*` | enabled config | Tag/embed caps |
+| `feeds.*` | 5 feeds / 15 min | Feed cap and poll interval |
+| `statChannels.*` | 3 channels | Stat-channel cap |
+
+## Events and safety
+
+- XP awards and currency movements use idempotency keys. Re-delivery cannot
+  double-award or double-spend.
+- Economy refusals are explicit: insufficient funds, self-pay, bot target,
+  transfer cap, bet cap and an already-claimed daily. The store's reason reaches
+  the user; nothing is silently clamped or overdrawn.
+- Money mutations serialize per guild: Postgres locks the guild row with
+  `SELECT … FOR UPDATE`; the in-memory store uses one queue. Two concurrent
+  debits cannot both pass the balance check.
+- Shop purchases debit first and grant the role second. A failed grant is
+  reported as an explicit repair request; the ledger entry stays auditable.
+- Birthdays mark `lastAnnouncedYear` only after a successful send, so a failed
+  send retries; a second tick in the same year is inert.
+- Suggestions allow one vote per user; repeating the same vote is a no-op, a
+  decided suggestion refuses new votes, and repeating a decision changes nothing.
+- Select-role values are checked against the stored panel role set; unmanaged
+  values are rejected. Reconciliation is idempotent.
+- Delayed autoroles are records with `applied`; the tick applies each once.
+- Sticky deletion is limited to the message id the bot recorded; duplicate
+  message events do not increment the counter.
+- Season archives and markers make reset retries idempotent; no `xp_events` are
+  deleted.
+- Ticket transcripts are the only default message-content store; documented.
+- No punitive action is taken by birthdays, suggestions, sticky or seasons.
+
+## Limits
+
+Commands: 3 global roots (10/100 total). Components: a select holds at most 25
+options and one action row; buttons are capped at five per row. Intents:
+`GuildMembers`, `GuildMessages`, `MessageContent`, `GuildMessageReactions`,
+`GuildVoiceStates`. `MessageContent` and `GuildMembers` are privileged and already
+required by moderation; no new privileged intent is added.
+
+## Open / non-goals
+
+- Live Discord sends, gateway events, select interactions, threads, voice, live
+  role grants and the scheduler tick are unverified without a token/staging guild.
+- Durable queue delivery for reminders/giveaways/feeds is still in-process.
+- Goodbye messages, YouTube/Twitch-specific feed adapters and MEE6 XP import
+  remain open (import is P5).
+- A failed shop role grant has no automatic refund/repair command; the user is
+  told to ask an admin and the ledger entry remains. A review queue is not built.
+- `statChannels.online` is approximated by member count; presence is not an intent.
+- Translation is a non-goal; global economy is a non-goal.

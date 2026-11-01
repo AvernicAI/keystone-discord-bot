@@ -1,0 +1,17 @@
+{
+  "name": "@keystone/module-setup",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "First-run readiness: database, migrations, cache and module state — read-only.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/kernel": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@keystone/testing": "workspace:*"
+  }
+}
