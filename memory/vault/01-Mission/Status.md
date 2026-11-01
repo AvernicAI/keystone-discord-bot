@@ -2,6 +2,22 @@
 
 ## Now
 
+**P8 music is in repo and live-proven for the saved queue; playback is explicitly
+not shipped** (pass 32, 2026-11-01): `/music play | queue | add | remove | clear |
+skip | stop | status` is the ninth module and the last named v1.0 root. The saved
+queue is a real `community_records` row per guild (kind `music_queue`, key
+`default`); the SQL adapter locks the guild row so concurrent adds hold the cap,
+and the in-memory adapter serializes per guild. Playback is a separate port with
+one adapter that refuses: this build has no Discord voice client, no Lavalink
+client and no `LAVALINK_URL`, so `play`, `skip` and `stop` return that exact
+reason and `/music status` prints `playback UNAVAILABLE`. The queue is disabled by
+default; `status` still works while disabled. Live in `#ai-chat`: status showed
+disabled 0/25, `/config set music.enabled=true` enabled it, two adds reached
+2/25, `queue` listed both tracks, `play` and `skip` refused, `remove position=1`
+left 1/25, and after disabling, `add` was refused. The root adds one slot and
+eight subcommands; no migration, no new intent, no paid service. See
+[[04-Modules/music/Spec|Music spec]] and [[04-Modules/music/Status|Music status]].
+
 **P7 in-Discord portability is in repo and live-proven for export and drift**
 (pass 31, 2026-11-01): `/export guild | user | import | delete | drift |
 rollback` puts the P5 service inside Discord. Guild and member exports are real
@@ -30,9 +46,9 @@ Zod schema before it is stored. The command is guild-only, requires
 subcommands, no module, no table and no second settings store. Live in
 `#ai-chat`: `moderation.automod.links` went `alert → delete → alert`, with a
 read-back after each write; `bogus` returned `automod.links: Invalid enum value`
-and the next read still returned `"alert"`. Pass 31 added `/export`, so Discord
-now reports **16 roots / 100 subcommands / 116 actions** including `config` and
-`export`. The MCP cannot invoke slash
+and the next read still returned `"alert"`. Pass 31 added `/export` and pass 32 added
+`/music`, so Discord now reports **17 roots / 108 subcommands / 125 actions**
+including `config`, `export` and `music`. The MCP cannot invoke slash
 commands or render embeds, so the live proof is the message bridge with
 plain-text replies; list/export embeds are covered by a command test. See
 [[04-Modules/setup/Spec|Setup spec]] and [[04-Modules/setup/Status|Setup status]].
@@ -49,8 +65,8 @@ stored** rows, `/analytics overview` reported the same **2 logged events**, and
 one MCP edit plus one delete appeared as **1 edited / 1 deleted**. Command runs
 rose 0 → 3 → 4 as bridge commands completed; the current invocation is recorded
 after its reply. At pass 29 Discord reported **14 roots / 90 subcommands / 104
-actions**; pass 30 added `/config` and pass 31 added `/export`, so the current
-ledger is **16 / 100 / 116**.
+actions**; pass 30 added `/config`, pass 31 added `/export` and pass 32 added
+`/music`, so the current ledger is **17 / 108 / 125**.
 The MCP text reader does not render embeds, so the live transcript proves the
 summary text while the embed fields and JSON export are covered by a command
 test. See [[04-Modules/analytics/Spec|Analytics spec]] and
@@ -127,12 +143,12 @@ adapter now flattens nested subcommand options, and boot sync compares the whole
 option tree instead of names alone. Pass 28 added `/logging` with seven
 subcommands, bringing the ledger to **13 roots · 84 subcommands · 97 actions** at
 that point. Pass 29 added `/analytics` with six subcommands, pass 30 added
-`/config` with four and pass 31 added `/export` with six, so the current ledger
-is **16 roots · 100 subcommands · 116 actions**. After pass 30 the boot found
+`/config` with four, pass 31 added `/export` with six and pass 32 added `/music`
+with eight, so the current ledger is **17 roots · 108 subcommands · 125 actions**. After pass 30 the boot found
 `config` missing, cleared the global set once and re-registered it; pass 31's
 boot found only `export` missing and did the same. `commands:doctor` now
-reports 16 roots / 100 subcommands including `analytics`, `logging`, `config`
-and `export`. See
+reports 17 roots / 108 subcommands including `analytics`, `logging`, `config`,
+`export` and `music`. See
 [[03-Architecture/Command-Budget|Command budget]] and
 [[03-Architecture/ADR/ADR-0003-command-budget]].
 
@@ -195,13 +211,15 @@ pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
 `!rank leaderboard` all returned live Discord messages/embeds. Pass 19 added
 `!invites leaderboard` and `!invites who`. Pass 26 re-registered 12 roots /
 77 subcommands at the time; pass 28 added `/logging`, pass 29 added
-`/analytics`, pass 30 added `/config` and pass 31 added `/export`, so Discord's
-fetched shape now reports **16 roots / 100 subcommands** with no missing, extra or
-changed roots. The bridge
+`/analytics`, pass 30 added `/config`, pass 31 added `/export` and pass 32 added
+`/music`, so Discord's fetched shape now reports **17 roots / 108 subcommands**
+with no missing, extra or changed roots. The bridge
 added `!help commands`, `!help browse`, `!help search query=ban`, `!mod history`,
 `!ai status`, `!logging status`, `!logging events`, `!logging retention`,
 `!logging export`, `!analytics overview`, `!analytics commands`, `!analytics
-messages`, `!config list`, `!config get` and `!config set` to the live list. Pass 23
+messages`, `!config list`, `!config get`, `!config set`, `!export guild`, `!export user`,
+`!export drift` and `!music status | add | queue | play | remove | skip` to the
+live list. Pass 23
 added `!mod links` and a live link-filter proof: three marked MCP messages
 produced a blocklisted
 subdomain case, an apex case and a punycode case; `!mod review case=2` marked one
@@ -233,10 +251,10 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 322 tests / 50 files · budget 16/100 roots (100 subcommands) · memory current
+pnpm check        exit 0 · typecheck 0 · 339 tests / 52 files · budget 17/100 roots (108 subcommands) · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 16 roots / 100 subcommands · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed
-live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set · !export guild · !export user · !export drift
+live              2026-11-01 · AI Team#5758 · 2 guilds · 17 roots / 108 subcommands · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused
+live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set · !export guild · !export user · !export drift · !music status · !music add · !music queue · !music play · !music remove · !music skip
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
 live env blocker 2026-11-01 · DATABASE_URL localhost:5432 → ECONNREFUSED (4ms) · REDIS_URL localhost:6379 → ECONNREFUSED (1ms) · Docker/service absent
 live analytics    2026-11-01 · 2 stored audit rows = 2 logged events · 1 MCP edit + 1 delete = 1 edited / 1 deleted · command runs 0 → 3 → 4
@@ -251,6 +269,21 @@ public            2026-11-01 · https://github.com/RNGBubba/keystone-discord-bot
 A local `.env` exists in the working tree. Smoke commands pin
 `DOTENV_CONFIG_PATH=.env.absent` so the result is deterministic and does not
 read that file.
+
+## P8 music acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | The saved queue is a real row, not a view | `music-store.test.ts` reads `community_records` directly and finds `(guild-a, music_queue, default)` with two tracks; remove and clear delete it | **PGlite** |
+| 2 | The cap holds under concurrent adds | `music-store.test.ts`: five concurrent adds against a cap of three add exactly three; `store.ts` serializes in memory per guild | **PGlite** + unit |
+| 3 | Playback refusals are explicit and propagated | `music.test.ts`: `play`, `skip` and `stop` throw the adapter's reason; live `!music play` and `!music skip` returned that exact text | Unit + **live bridge** |
+| 4 | Status is available while disabled | `music.test.ts`: disabled `status` names the enabling command; live 0/25 `playback UNAVAILABLE` reply before enabling | Unit + **live bridge** |
+| 5 | A disabled module refuses mutations without writing | `music.test.ts`: disabled `add` throws; live `add` after disabling returned the refusal | Unit + **live bridge** |
+| 6 | Queue mutations are permission-gated | `music.test.ts`: `remove`/`clear` without `ManageGuild` are blocked; live `remove` ran under the MCP member who holds `ManageGuild` | Dispatch + **live bridge** |
+| 7 | One root, eight subcommands, budget intact | `music.test.ts` registry shape; `pnpm budget`: 17/100 roots, 108 subcommands | Registry + budget |
+| 8 | The live counts match the queue | Live two adds → **2/25**, one remove → **1/25**, and the disabled add wrote nothing | **Live gateway** |
+| 9 | Audio was played | **Not performed and not claimed** — the playback adapter is unavailable by design; `play`, `skip` and `stop` refused | Not claimed |
+| 10 | The SQL queue was exercised live | **Not performed** — local Postgres still returns `ECONNREFUSED`; PGlite covers the SQL adapter | Not claimed |
 
 ## P7 export acceptance evidence
 
@@ -527,8 +560,9 @@ here.
 
 P7 parity work continues alongside the P6 exit items. Auto-responders, audit
 logging, the content filters, guild analytics, in-bot configuration and
-`/export` are done; the next open rows are forms/events, modmail, expiry jobs,
-case export, command-usage retention, panic mode and `/music`. `automod.false-positive-report` is still the smallest useful
+`/export` and the `/music` saved queue are done; the next open rows are
+forms/events, modmail, expiry jobs, case export, command-usage retention, panic
+mode and real music playback (a voice/Lavalink client). `automod.false-positive-report` is still the smallest useful
 moderation follow-up. P6 remains the active phase
 for the dashboard. The auth gate and settings writes are built;
 next are schema-driven field widgets, the Next.js shell (or a decision to keep

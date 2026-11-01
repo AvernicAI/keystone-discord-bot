@@ -1,0 +1,17 @@
+{
+  "name": "@keystone/module-music",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A real saved queue and explicit playback readiness; no voice backend is bundled.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/kernel": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@keystone/testing": "workspace:*"
+  }
+}

@@ -126,8 +126,8 @@ checked. See [[Master-Plan]] for the research program.
 
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Playback | ❌ (removed 2023) | ❌ | ❌ | ❌ | ❌ | P6 | BYO Lavalink only |
-| Queue / controls | ❌ | ❌ | ❌ | ❌ | ❌ | P6 | Buttons + `/music` |
+| Playback | ❌ (removed 2023) | ❌ | ❌ | ❌ | ❌ | P8 | BYO Lavalink only; not installed, so `play`/`skip`/`stop` refuse and say why (pass 32) |
+| Queue / controls | ❌ | ❌ | ❌ | ❌ | ❌ | P8 | `/music` add/queue/remove/clear/status over a durable row; no buttons yet; live pass 32 |
 | Bundled source | ❌ | ❌ | ❌ | ❌ | ❌ | — | Non-goal: legal risk |
 | Lyrics / autoplay | ❌ | ❌ | ❌ | ❌ | ❌ | — | Non-goal |
 
@@ -147,7 +147,7 @@ checked. See [[Master-Plan]] for the research program.
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Web dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | P6 | Node/render first; field widgets and fleet open |
-| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 16 roots / 100 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human) |
+| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 17 roots / 108 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human); `/music` pass 32 |
 | In-bot configuration | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/config` (list, get, set, export) over every module's own schema; shipped pass 30; live-proven. Competitor in-Discord config not verified (all surveyed bots also ship a web dashboard) |
 | Audit logging | ❔ | 💰 | ✅ | ❌ | ✅ | P7 | Five event toggles, one operator channel and an append-only ledger with retention; `/logging`; message edit/delete and moderation cases proven live, member join/leave adapter-only |
 | Multi-server fleet | ❔ | ❔ | ❔ | ✅ | ❔ | P6 | One view, per-guild authz |

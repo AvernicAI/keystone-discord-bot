@@ -90,6 +90,7 @@ async function main(): Promise<void> {
     export: runtime.export,
     exportFacts: createDiscordExportFacts(client),
     attachments: createDiscordAttachmentReader(),
+    music: runtime.music,
     usage: runtime.usage,
   };
 

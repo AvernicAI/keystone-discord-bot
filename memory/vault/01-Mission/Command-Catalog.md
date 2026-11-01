@@ -5,7 +5,7 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**16 roots · 100 subcommands · 116 total actions · 16/100 global roots used.**
+**17 roots · 108 subcommands · 125 total actions · 17/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
@@ -29,6 +29,7 @@ root, then choose a subcommand.
 | `/invites` | `invites` | 3 |
 | `/logging` | `logging` | 7 |
 | `/analytics` | `analytics` | 6 |
+| `/music` | `music` | 8 |
 
 ## `/ping`
 
@@ -236,6 +237,21 @@ Read-only guild analytics from the bot's own logs, cases, invites, tickets and c
 | `/analytics commands` | Command runs, outcomes and average latency. | `days` |
 | `/analytics tickets` | Ticket counts, open state and close times. | `days` |
 | `/analytics export` | Export the snapshot as JSON in an embed. | `days` |
+
+## `/music`
+
+Save tracks in a durable queue and inspect playback readiness.
+
+| Subcommand | Description | Options |
+| --- | --- | --- |
+| `/music play` | Ask the playback backend to play; refuses when none is installed. | `query` |
+| `/music queue` | Show the saved queue and whether audio is actually playing. | — |
+| `/music add` | Save a track for later; this never plays audio. | `query`, `title` |
+| `/music remove` | Remove one saved track by position. | `position` |
+| `/music clear` | Clear every saved track. Nothing is left playing. | — |
+| `/music skip` | Skip the current track; refuses when there is no player. | — |
+| `/music stop` | Stop playback; refuses when there is no player. | — |
+| `/music status` | Show module state, queue count and the exact playback blocker. | — |
 
 ## How to change this page
 

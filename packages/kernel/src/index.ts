@@ -5,6 +5,7 @@ export * from "./ai";
 export * from "./logging";
 export * from "./analytics";
 export * from "./export";
+export * from "./music";
 export * from "./errors";
 export * from "./logger";
 export * from "./manifest";

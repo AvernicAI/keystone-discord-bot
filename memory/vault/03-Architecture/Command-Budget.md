@@ -10,8 +10,8 @@ refuses to boot when it fails.
 ## Current ledger
 
 ```text
-16/100 global roots used (84 left)
-100 subcommands · 116 total actions
+17/100 global roots used (83 left)
+108 subcommands · 125 total actions
 status: OK
 
   /command    module       subs  opts  chars
@@ -28,6 +28,7 @@ status: OK
   /appeal     moderation      0     2    282
   /mod        moderation     14     4   3991
   /verify     moderation      0     0    120
+  /music      music           8     2   1322
   /config     setup           4     3   1106
   /export     setup           6     3   1445
   /setup      setup           0     0    130
@@ -78,13 +79,14 @@ would duplicate the hub and spend a command for no user benefit.
 | `/tools` | embeds, giveaways, reminders, feeds | `/tools embed edit` |
 | `/help` | discovery, generated from the registry | `/help moderation` |
 
-Sixteen roots today for a bot with dozens of implemented actions. The remaining
-84 slots are held for context menus, Activities, and features that genuinely
-need their own name. `/help`, `/setup`, `/logging`, `/analytics`, `/config` and
-`/export` are roots; `/music` arrives with its module, not as an empty
-advertisement. `/config` landed in pass 30 with four subcommands and no new
-settings store; `/export` landed in pass 31 with six subcommands and reuses the
-P5 portability service.
+Seventeen roots today for a bot with dozens of implemented actions. The remaining
+83 slots are held for context menus, Activities, and features that genuinely
+need their own name. `/help`, `/setup`, `/logging`, `/analytics`, `/config`,
+`/export` and `/music` are roots. `/config` landed in pass 30 with four
+subcommands and no new settings store; `/export` landed in pass 31 with six
+subcommands and reuses the P5 portability service; `/music` landed in pass 32
+with eight subcommands over the existing `community_records` table, and its
+playback seam refuses because no voice/Lavalink client is installed.
 
 ## Component budget (the other 100-limit)
 

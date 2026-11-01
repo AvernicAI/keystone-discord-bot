@@ -247,6 +247,8 @@ export interface CommandContext {
   readonly exportFacts?: import("./export").ExportFacts;
   /** Downloads a bundle the operator attached to an import command. */
   readonly attachments?: import("./export").AttachmentReader;
+  /** Present when the composition root wired the saved queue and playback status. */
+  readonly music?: import("./music").MusicPort;
 }
 
 export type GuardResult = { ok: true } | { ok: false; message: string };

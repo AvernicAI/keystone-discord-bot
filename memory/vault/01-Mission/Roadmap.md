@@ -182,7 +182,11 @@ The SQL adapter is the existing `PortabilityService`; the memory adapter reads
 the live stores and refuses destructive actions by name. Live: a 12.8 KB guild
 bundle was downloaded and parsed back to the printed counts and checksum; a 2 KB
 member bundle; drift went 1 missing → 0 missing; wrong-id delete and memory
-rollback were refused. The ledger is now **16 roots / 100 subcommands / 116
+rollback were refused. Pass 32 added the `/music` saved queue and its honest
+playback refusal: eight subcommands over a durable `community_records` row, with
+`play`, `skip` and `stop` naming the missing voice/Lavalink client. Live two adds
+reached 2/25, `queue` listed them, playback refused, `remove` left 1/25, and a
+disabled `add` was refused. The ledger is now **17 roots / 108 subcommands / 125
 actions**. The rest of this phase is open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
@@ -192,8 +196,9 @@ actions**. The rest of this phase is open.
   expiry, panic mode, case export and `command_usage` retention. Invites, the
   link, profanity and zalgo filters, auto-responders and analytics are done
   (above).
-- `/music` (BYO Lavalink only); `/export`, `/config` and `/help` shipped;
-  command-budget audit remains a gate.
+- `/export`, `/config`, `/help` and the `/music` saved queue shipped; BYO
+  Lavalink playback is the open half of `/music`; command-budget audit remains a
+  gate.
 - Split `modules/community` into domain folders, then extract a module only if the
   "add a feature in an afternoon" test still fails.
 - `packages/i18n`: typed keys, per-guild locale, command localizations; no machine
@@ -212,8 +217,11 @@ its gate, keep the exact index and mark the ANN row open.
 
 **Goal:** complete the union without legal risk.
 
-- Lavalink v4 through a thin adapter; BYO node; queue and controls; DJ role;
-  disabled by default; no bundled streamer.
+- The saved queue and its controls shipped in pass 32; `/music` is disabled by
+  default and every playback command refuses until a client exists.
+- Lavalink v4 through a thin adapter; BYO node; DJ role; no bundled streamer.
+  The queue adapter is already behind `MusicStore`; playback implements the
+  existing `MusicPlayback` port.
 - Activity spike behind a flag; verify Portal eligibility; drop if ineligible.
 
 **Exit demo:** an operator enables their own Lavalink and the controls work; the

@@ -1358,9 +1358,10 @@
             "wick-security": "❌"
           },
           "phase": "P8",
-          "status": "planned",
+          "status": "open",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "BYO Lavalink only",
+          "note": "Saved queue ships; play/skip/stop refuse with the exact missing backend (no voice or Lavalink client, no LAVALINK_URL).",
+          "openReason": "Streaming audio needs a Discord voice client or a BYO Lavalink endpoint; neither is installed or configured, and pass 32 was not authorized to add one. The refusal is live-proven; playback itself is not shipped.",
           "liveVerified": false
         },
         {
@@ -1374,10 +1375,14 @@
             "wick-security": "❌"
           },
           "phase": "P8",
-          "status": "planned",
+          "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "Buttons + `/music`",
-          "liveVerified": false
+          "note": "`/music queue | add | remove | clear | status` over a durable saved queue; no buttons yet. Live 2026-11-01 through the bridge.",
+          "evidence": [
+            "modules/music/src/music.test.ts",
+            "packages/db/src/music-store.test.ts"
+          ],
+          "liveVerified": true
         },
         {
           "id": "music.bundled-source",

@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**119 features** across 16 domains: **87 in repo**, **10 open**, **18 planned**. Live behaviour is marked separately; a green
+**119 features** across 16 domains: **88 in repo**, **11 open**, **16 planned**. Live behaviour is marked separately; a green
 box means the code and its tests exist, not that a live guild has run it.
 
 ## Domains
@@ -20,7 +20,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Community | 11 | 9 | 2 | 0 |
 | Tickets | 7 | 6 | 1 | 0 |
 | Content | 7 | 6 | 0 | 0 |
-| Music | 4 | 0 | 0 | 2 |
+| Music | 4 | 1 | 1 | 0 |
 | AI | 6 | 5 | 1 | 0 |
 | Operations | 11 | 5 | 3 | 3 |
 | Portability | 12 | 12 | 0 | 0 |
@@ -141,8 +141,8 @@ box means the code and its tests exist, not that a live guild has run it.
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Playback | P8 | ⏳ planned | BYO Lavalink only |
-| Queue / controls | P8 | ⏳ planned | Buttons + `/music` |
+| Playback | P8 | ◐ open | Streaming audio needs a Discord voice client or a BYO Lavalink endpoint; neither is installed or configured, and pass 32 was not authorized to add one. The refusal is live-proven; playback itself is not shipped. |
+| Queue / controls | P8 | ✅ in repo | `modules/music/src/music.test.ts`, `packages/db/src/music-store.test.ts` · live verified |
 | Bundled source | none | — non-goal | Non-goal: legal risk |
 | Lyrics / autoplay | none | — non-goal | Non-goal |
 

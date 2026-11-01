@@ -18,19 +18,21 @@ API tokens and webhooks are the remaining P6 work. P7 now has invite tracking as
 a sixth module (attribution, a joins/retention leaderboard and advisory
 suspicious-join flags), audit logging as a seventh module (five event kinds, one
 operator channel and a retained ledger), link/profanity/zalgo content filters,
-an auto-responder for exact, contains and regex triggers, and guild analytics as
-an eighth module. P7 also ships `/config list | get | set | export`, the in-bot
+an auto-responder for exact, contains and regex triggers, guild analytics as an
+eighth module, and `/music` as a ninth module: a durable saved queue whose
+playback commands refuse with the exact missing backend instead of showing a
+queue that pretends to be audio. P7 also ships `/config list | get | set | export`, the in-bot
 settings surface: it reads and writes any registered module's per-guild settings
 through the same `SettingsService` and Zod schema as the dashboard, with no
 second store. `/export guild | user | import | delete | drift | rollback` puts
 the P5 portability service inside Discord: real JSON file attachments, a
 dry-run-first import, a confirmation-gated delete and live drift facts from the
-gateway cache. The command ledger is **16/100 roots** with **100 real
-subcommands** and **116 actions**, there are **8 modules**, and `pnpm check`
-covers **322 tests across 50 files** without a Discord token, database or
-network. Live on 2026-11-01: the bot logged in and Discord reports **16 roots /
-100 subcommands**, answered a Qwen3:8b mention in `#ai-chat`, and ran real
-moderation, community, AI, invite, logging, analytics, configuration and
+gateway cache. The command ledger is **17/100 roots** with **108 real
+subcommands** and **125 actions**, there are **9 modules**, and `pnpm check`
+covers **339 tests across 52 files** without a Discord token, database or
+network. Live on 2026-11-01: the bot logged in and Discord reports **17 roots /
+108 subcommands**, answered a Qwen3:8b mention in `#ai-chat`, and ran real
+moderation, community, AI, invite, logging, analytics, configuration, music and
 content-filter commands through a development message bridge, including
 `/help`’s generated catalog. The dashboard was booted in memory mode and
 exercised over real HTTP, including authenticated settings writes against a fake
@@ -280,8 +282,11 @@ the same live registry.
 | `/invites` | `leaderboard`, `stats`, `who` | Invite attribution, joins/retention totals and who invited a member (`who` takes `user`) |
 | `/logging` | `setup`, `channel`, `events`, `status`, `retention`, `export`, `disable` | One audit channel for message, member and moderation events, with per-event toggles and retention pruning |
 | `/analytics` | `overview`, `members`, `messages`, `commands`, `tickets`, `export` | Read-only aggregates over the audit ledger, cases, invite joins, tickets and command usage; every view names its source rows |
+| `/music` | `play`, `queue`, `add`, `remove`, `clear`, `skip`, `stop`, `status` | A durable saved queue in `community_records`; `play`, `skip` and `stop` refuse with the exact missing backend because no voice/Lavalink client is installed |
 
-`/analytics`, `/config` and `/export` require `ManageGuild`. `/ticket summary` and
+`/analytics`, `/config` and `/export` require `ManageGuild`.
+`/music remove` and `/music clear` require `ManageGuild`; `/music status` works
+while the module is disabled. `/ticket summary` and
 `/ai summary` require `ManageGuild`. `/ai docs-*` and
 `/ai budget` require `ManageGuild`; `/ai classify` and `/ai deflect` require
 `ManageMessages`. AI is advisory: it never punishes, deletes or claims an action
@@ -342,7 +347,7 @@ Everything below is free. No feature is moved behind a paywall.
 
 ### Platform and operations
 
-- Module registry with a CI-enforced 100-root budget (currently 16 roots, 100
+- Module registry with a CI-enforced 100-root budget (currently 17 roots, 108
   subcommands).
 - In-bot configuration: `/config list | get | set | export` reads and writes every
   registered module's settings through `SettingsService` and the owning Zod
@@ -426,10 +431,11 @@ Everything below is free. No feature is moved behind a paywall.
   view/templates, token refresh/revocation, scoped public API tokens,
   per-token rate limits, idempotency, webhooks and OpenAPI.
 - **P7:** invite tracking, audit logging, the link/profanity/zalgo filters,
-  auto-responders, guild analytics, `/config` and `/export` are done; the rest is
-  parity completion (forms, events, role persistence, modmail), Components V2 UI
-  and i18n. `/music` is the remaining planned root.
-- **P8:** bring-your-own Lavalink music, disabled by default; no bundled streamer.
+  auto-responders, guild analytics, `/config`, `/export` and the `/music` saved
+  queue are done; the rest is parity completion (forms, events, role
+  persistence, modmail), Components V2 UI and i18n.
+- **P8:** `/music` queue control ships disabled by default; bring-your-own
+  Lavalink playback is the open piece (no bundled streamer).
 - **P9:** docs site, 14-lesson curriculum, release workflow, self-host kit.
 - **P10:** sharding, load tests, SLOs, Discord.js v15 migration.
 
@@ -448,17 +454,19 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
-| P7 Command tree | Done | 16 roots · 100 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
+| P7 Command tree | Done | 17 roots · 108 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
 | P7 Slash harness | Harness done | Synthetic nested `/mod ban` through the real adapter + dispatch; gateway `InteractionCreate` still human-only |
 | P7 Audit logging | Done | `/logging`; five event kinds, per-event toggles, append-only ledger, retention; message and moderation events live-proven |
 | P7 Analytics | Done | `/analytics`; six read-only views over audit, cases, invites, tickets and command usage; live counts cross-checked against the ledger |
 | P7 In-bot config | Done | `/config`; four subcommands over every module's own schema; live `alert → delete → alert` read-back and a rejected invalid value |
 | P7 Export surface | Done | `/export`; six subcommands, file attachments, dry-run import, exact-id delete, live drift; 12.8 KB live bundle parsed and checksum-verified |
-| P7 Parity completion | **In progress** | Invite tracking, audit logging, link/profanity/zalgo filters, auto-responders, analytics, in-bot config and `/export` shipped; forms, events, expiry, modmail, `/music` and UI/i18n open |
+| P8 Music queue | Done | `/music`; eight subcommands over a durable `community_records` queue; SQL row lock holds the cap; live add/queue/remove plus disabled refusal |
+| P8 Music playback | **Open** | `play`, `skip` and `stop` refuse with the exact missing pieces (no voice/Lavalink client, no `LAVALINK_URL`); the refusal is live-proven, streaming is not shipped |
+| P7 Parity completion | **In progress** | Invite tracking, audit logging, link/profanity/zalgo filters, auto-responders, analytics, in-bot config, `/export` and the music queue shipped; forms, events, expiry, modmail, real playback and UI/i18n open |
 
-Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 16
-global roots with 100 subcommands (including `/analytics`, `/config`, `/export`,
-`/help`, `/invites` and `/logging`) with no drift, and Qwen3:8b answered a mention in
+Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 17
+global roots with 108 subcommands (including `/analytics`, `/config`, `/export`,
+`/help`, `/invites`, `/logging` and `/music`) with no drift, and Qwen3:8b answered a mention in
 `#ai-chat`. A development `!`
 bridge ran `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
 query=ban`, `!ai status`, `!mod history`, `!rank leaderboard`, `!invites
@@ -529,7 +537,8 @@ the two MCP actions. `!analytics commands days=7` rose from 0 to 3 to 4 as bridg
 commands completed, because the current `/analytics` run is recorded after its
 reply. At pass 29 `pnpm commands:doctor` reported `Registry 14 roots · 90
 subcommands`; after pass 30's `/config` it reported 15 roots / 94 subcommands,
-and after pass 31's `/export` it is 16 roots / 100 subcommands. The MCP text reader
+pass 31's `/export` reached 16 roots / 100 subcommands, and pass 32's `/music`
+brought it to 17 roots / 108 subcommands. The MCP text reader
 does not render embeds, so the embed fields, top-command list and JSON export
 were covered by [the command test](modules/analytics/src/analytics.test.ts), not
 read back live. See [pass 29](memory/journal/2026-11-01-pass-29.md).
@@ -557,10 +566,19 @@ file was downloaded from Discord and parsed with the same verifier, which
 confirmed checksum `5cde59ae…` and those counts. `!export user user=1493685079468146808`
 uploaded a 2 KB member file. A stale
 `logging.channelId` made `!export drift` report **1 missing**; restoring the real
-channel made it **0 missing**. A wrong-id `!export delete` and a memory-mode
-`!export rollback` were refused with named reasons. `!export import` was not run
+channel made it **0 missing**. A wrong-id `!export delete` anda memory-mode `!export rollback` were refused with named reasons. `!export import` was not run
 live because the bridge cannot carry an attachment; it is covered by the PGlite
 round-trip test. See [pass 31](memory/journal/2026-11-01-pass-31.md).
+
+Music live evidence (2026-11-01, pass 32): one memory-mode process served the
+bridge. `!music status` reported **disabled · 0/25 · playback UNAVAILABLE** and
+named the missing voice/Lavalink client. `!config set module=music
+key=enabled value=true` enabled it; two `!music add` calls produced **1/25** and
+**2/25**; `!music queue` listed both tracks; `!music play` and `!music skip`
+refused with the same named reason; `!music remove position=1` left **1/25**; and
+after `enabled=false`, `!music add` was refused. The in-memory counts are the
+real queue length; the SQL row and its cap are covered by the PGlite test, not
+this live window. See [pass 32](memory/journal/2026-11-01-pass-32.md).
 
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and

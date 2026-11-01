@@ -239,6 +239,9 @@ importers:
       '@keystone/module-moderation':
         specifier: workspace:*
         version: link:../../modules/moderation
+      '@keystone/module-music':
+        specifier: workspace:*
+        version: link:../../modules/music
       '@keystone/module-setup':
         specifier: workspace:*
         version: link:../../modules/setup
@@ -398,6 +401,19 @@ importers:
         specifier: workspace:*
         version: link:../../packages/testing
 
+  modules/music:
+    dependencies:
+      '@keystone/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@keystone/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
+
   modules/setup:
     dependencies:
       '@keystone/kernel':
@@ -483,6 +499,9 @@ importers:
       '@keystone/module-moderation':
         specifier: workspace:*
         version: link:../../modules/moderation
+      '@keystone/module-music':
+        specifier: workspace:*
+        version: link:../../modules/music
       '@keystone/module-setup':
         specifier: workspace:*
         version: link:../../modules/setup

@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "updatedAt": "2026-11-01",
   "source": "packages/kernel ModuleRegistry catalog()",
-  "roots": 16,
-  "subcommands": 100,
-  "actions": 116,
+  "roots": 17,
+  "subcommands": 108,
+  "actions": 125,
   "limit": 100,
   "commands": [
     {
@@ -866,6 +866,61 @@
           "options": [
             "days"
           ]
+        }
+      ]
+    },
+    {
+      "name": "music",
+      "moduleId": "music",
+      "description": "Save tracks in a durable queue and inspect playback readiness.",
+      "options": [],
+      "subcommands": [
+        {
+          "name": "play",
+          "description": "Ask the playback backend to play; refuses when none is installed.",
+          "options": [
+            "query"
+          ]
+        },
+        {
+          "name": "queue",
+          "description": "Show the saved queue and whether audio is actually playing.",
+          "options": []
+        },
+        {
+          "name": "add",
+          "description": "Save a track for later; this never plays audio.",
+          "options": [
+            "query",
+            "title"
+          ]
+        },
+        {
+          "name": "remove",
+          "description": "Remove one saved track by position.",
+          "options": [
+            "position"
+          ]
+        },
+        {
+          "name": "clear",
+          "description": "Clear every saved track. Nothing is left playing.",
+          "options": []
+        },
+        {
+          "name": "skip",
+          "description": "Skip the current track; refuses when there is no player.",
+          "options": []
+        },
+        {
+          "name": "stop",
+          "description": "Stop playback; refuses when there is no player.",
+          "options": []
+        },
+        {
+          "name": "status",
+          "description": "Show module state, queue count and the exact playback blocker.",
+          "options": []
         }
       ]
     }

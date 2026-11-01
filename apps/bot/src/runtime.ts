@@ -24,6 +24,8 @@ import {
   type AnalyticsStore,
   type CommandUsageStore,
   type ExportPort,
+  type MusicPort,
+  type MusicStore,
   type CaseStore,
   type CommunityStore,
   type InviteStore,
@@ -40,6 +42,7 @@ import {
   createCommandUsageStore,
   createPostgresDatabase,
   createPortabilityStore,
+  createMusicStore,
   createSettingsRepository,
   probeDatabase,
   type PostgresHandle,
@@ -58,6 +61,7 @@ import {
   MemoryAnalyticsStore,
 } from "@keystone/module-analytics";
 import { AiService, InMemoryAiStore, createAiProvider } from "@keystone/module-ai";
+import { InMemoryMusicStore, UnavailableMusicPlayback } from "@keystone/module-music";
 import { createMemoryExportPort, createSqlExportPort } from "./export-port";
 import { createCooldownStore, type CooldownHandle } from "@keystone/cache";
 import { BullJobQueue, InProcessJobQueue } from "@keystone/queue";
@@ -80,6 +84,7 @@ export interface Runtime {
   logging: LoggingPort;
   analytics: AnalyticsStore;
   export: ExportPort;
+  music: MusicPort;
   usage: CommandUsageStore;
   security: SecurityCoordinator;
   mode: { database: DatabaseMode; cache: CacheMode; queue: QueueMode };
@@ -247,6 +252,12 @@ export async function createRuntime(
     logger: logger.child("security"),
   });
 
+  const musicStore: MusicStore = database ? createMusicStore(database) : new InMemoryMusicStore();
+  const music: MusicPort = {
+    store: musicStore,
+    playback: new UnavailableMusicPlayback(),
+  };
+
   let exportPort: ExportPort;
   if (database) {
     exportPort = createSqlExportPort(createPortabilityStore(database));
@@ -294,6 +305,7 @@ export async function createRuntime(
     logging,
     analytics,
     export: exportPort,
+    music,
     usage,
     security,
     mode: {
