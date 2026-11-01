@@ -2,6 +2,21 @@
 
 ## Now
 
+**P7 in-bot configuration is in repo and live-proven** (pass 30, 2026-11-01):
+`/config list | get | set | export` is the settings surface for guild admins
+inside Discord. It calls the same `SettingsService` the dashboard uses, so every
+write is merged with the current record and validated by the target module's own
+Zod schema before it is stored. The command is guild-only, requires
+`ManageGuild` and has one root-level cooldown. It adds one root and four
+subcommands, no module, no table and no second settings store. Live in
+`#ai-chat`: `moderation.automod.links` went `alert → delete → alert`, with a
+read-back after each write; `bogus` returned `automod.links: Invalid enum value`
+and the next read still returned `"alert"`. Discord now reports **15 roots / 94
+subcommands / 109 actions** including `config`. The MCP cannot invoke slash
+commands or render embeds, so the live proof is the message bridge with
+plain-text replies; list/export embeds are covered by a command test. See
+[[04-Modules/setup/Spec|Setup spec]] and [[04-Modules/setup/Status|Setup status]].
+
 **P7 guild analytics is in repo and live-proven** (pass 29, 2026-11-01): the
 eighth module adds `/analytics overview | members | messages | commands |
 tickets | export` as a read-only aggregate over rows other modules already own.
@@ -13,7 +28,8 @@ admin-only and capped at a 90-day window. Live: `/logging status` reported **2
 stored** rows, `/analytics overview` reported the same **2 logged events**, and
 one MCP edit plus one delete appeared as **1 edited / 1 deleted**. Command runs
 rose 0 → 3 → 4 as bridge commands completed; the current invocation is recorded
-after its reply. Discord reports **14 roots / 90 subcommands / 104 actions**.
+after its reply. At pass 29 Discord reported **14 roots / 90 subcommands / 104
+actions**; pass 30 added `/config`, so the current ledger is **15 / 94 / 109**.
 The MCP text reader does not render embeds, so the live transcript proves the
 summary text while the embed fields and JSON export are covered by a command
 test. See [[04-Modules/analytics/Spec|Analytics spec]] and
@@ -89,10 +105,11 @@ shape without writing. Two defects found during proof are fixed: the structural
 adapter now flattens nested subcommand options, and boot sync compares the whole
 option tree instead of names alone. Pass 28 added `/logging` with seven
 subcommands, bringing the ledger to **13 roots · 84 subcommands · 97 actions** at
-that point. Pass 29 added `/analytics` with six subcommands, so the current
-ledger is **14 roots · 90 subcommands · 104 actions**; Discord's REST command
-set after pass 29 reports 14 roots / 90 subcommands including `analytics` and
-`logging`. See
+that point. Pass 29 added `/analytics` with six subcommands, and pass 30 added
+`/config` with four, so the current ledger is **15 roots · 94 subcommands · 109
+actions**. After pass 30 the boot found `config` missing, cleared the global
+set once, re-registered it and `commands:doctor` reports 15 roots / 94
+subcommands including `analytics`, `logging` and `config`. See
 [[03-Architecture/Command-Budget|Command budget]] and
 [[03-Architecture/ADR/ADR-0003-command-budget]].
 
@@ -108,12 +125,15 @@ connection — a human `InteractionCreate` remains unobserved. The pass also fou
 and stopped two live bot process trees that were double-posting replies; one
 instance now answers each command once.
 
-**Live environment check (pass 27):** the updated `.env` sets `DATABASE_URL` and
-`REDIS_URL` to localhost:5432/6379, but this machine has no Docker, no
-Postgres/Redis service and no listener on either port. `pnpm db:migrate` fails
-with `AggregateError [ECONNREFUSED]`; a Redis ping fails with
-`Connection is closed`. The live window therefore remains the explicitly logged
-memory mode (`DATABASE_URL= REDIS_URL=`), and the fallback is not retired. Local
+**Live environment check (re-probed pass 30):** `.env` still sets
+`DATABASE_URL` and `REDIS_URL` to localhost:5432/6379, but this machine has no
+Docker, no Postgres/Redis service and no listener on either port. A TCP probe on
+2026-11-01 returned `DATABASE_URL: localhost:5432 -> ECONNREFUSED (19ms)` and
+`REDIS_URL: localhost:6379 -> ECONNREFUSED (1ms)`. Booting without overrides
+reaches `settings: postgres` and then fails loudly with `REDIS_URL is set but
+Redis is unreachable: Reached the max retries per request limit (which is 2).`
+The live window therefore remains the explicitly logged memory mode
+(`DATABASE_URL= REDIS_URL=`), and the fallback is not retired. Local
 Ollama is up (`qwen3:8b`, `qwen3-embedding:0.6b`); the first `!ai chat` after
 boot hit the provider's 30-second cold-start timeout, and a warm retry returned
 `keystone`.
@@ -151,12 +171,13 @@ invoke slash commands, so a **dev-only `!` bridge** now feeds the real dispatch
 pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
 `!rank leaderboard` all returned live Discord messages/embeds. Pass 19 added
 `!invites leaderboard` and `!invites who`. Pass 26 re-registered 12 roots /
-77 subcommands at the time; pass 28 added `/logging` and Discord's fetched shape
-now reports **14 roots / 90 subcommands** with no missing, extra or changed
-roots. The bridge added `!help commands`, `!help browse`, `!help search
-query=ban`, `!mod history`, `!ai status`, `!logging status`, `!logging events`,
-`!logging retention`, `!logging export`, `!analytics overview`, `!analytics
-commands` and `!analytics messages` to the live list. Pass 23
+77 subcommands at the time; pass 28 added `/logging`, pass 29 added
+`/analytics`, and pass 30 added `/config`, so Discord's fetched shape now reports
+**15 roots / 94 subcommands** with no missing, extra or changed roots. The bridge
+added `!help commands`, `!help browse`, `!help search query=ban`, `!mod history`,
+`!ai status`, `!logging status`, `!logging events`, `!logging retention`,
+`!logging export`, `!analytics overview`, `!analytics commands`, `!analytics
+messages`, `!config list`, `!config get` and `!config set` to the live list. Pass 23
 added `!mod links` and a live link-filter proof: three marked MCP messages
 produced a blocklisted
 subdomain case, an apex case and a punycode case; `!mod review case=2` marked one
@@ -188,13 +209,14 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 290 tests / 46 files · budget 14/100 roots (90 subcommands) · memory 2056/2056
+pnpm check        exit 0 · typecheck 0 · 298 tests / 47 files · budget 15/100 roots (94 subcommands) · memory 2077/2077
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 14 roots / 90 subcommands · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered
-live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export
+live              2026-11-01 · AI Team#5758 · 2 guilds · 15 roots / 94 subcommands · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back
+live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
-live env blocker 2026-11-01 · DATABASE_URL localhost:5432 → ECONNREFUSED · REDIS_URL localhost:6379 → Connection is closed · Docker/service absent
-live analytics    2026-11-01 · 2 stored audit rows = 2 logged events · 1 MCP edit + 1 delete = 1 edited / 1 deleted · command runs 0 → 3 → 4 · doctor 14 roots / 90 subcommands
+live env blocker 2026-11-01 · DATABASE_URL localhost:5432 → ECONNREFUSED (19ms) · REDIS_URL localhost:6379 → ECONNREFUSED (1ms) · Docker/service absent
+live analytics    2026-11-01 · 2 stored audit rows = 2 logged events · 1 MCP edit + 1 delete = 1 edited / 1 deleted · command runs 0 → 3 → 4 · doctor now 15 roots / 94 subcommands
+live config       2026-11-01 · moderation.automod.links alert → delete → alert read back · bogus rejected by the enum schema with no write · one reply per bridge command
 live content filters 2026-11-01 · link delete returned 10008 Unknown Message; profanity delete removed the pineapple message and kept its case; safe seed produced link/profanity/zalgo cases; one reviewed; example.com not flagged
 live auto-responder 2026-11-01 · hello keystone replied, 60s cooldown suppressed the next reply, then released
 live failure      !ticket stats → ManageGuild guard (MCP bot is not admin); branch fixed and unit-tested
@@ -204,6 +226,21 @@ public            2026-11-01 · https://github.com/RNGBubba/keystone-discord-bot
 A local `.env` exists in the working tree. Smoke commands pin
 `DOTENV_CONFIG_PATH=.env.absent` so the result is deterministic and does not
 read that file.
+
+## P7 in-bot configuration acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | One settings path, not a second store | `config.ts` calls only `ConfigPort`; `SettingsService` is implemented once and shared with the dashboard; no repository is exposed | Code inspection |
+| 2 | Every write is validated by the owning module's schema | `config.test.ts`: fixture `mode=bogus` returns an error and the repository stays empty; live `automod.links=bogus` returned the enum issue | Unit + **live bridge** |
+| 3 | A valid write is readable from the same service | `config.test.ts` nested write; live `alert → delete` then `get` returned `"delete"`, reset to `alert` and `get` returned `"alert"` | Unit + **live bridge** |
+| 4 | Dotted writes preserve siblings | `patchFor` clones each path and `config.test.ts` asserts `nested.flag=false` leaves `label="keep"` | Unit |
+| 5 | Snowflake ids are not rounded | `config.test.ts` asserts the exact 19-digit string survives | Unit |
+| 6 | Non-admin is rejected before any write | `config.test.ts`: `blocked`, repository empty | Dispatch |
+| 7 | Unknown modules fail with the valid ids | `config.test.ts`: `Unknown module` plus `fixture`/`setup` list | Unit |
+| 8 | One root, four subcommands, budget intact | `config.test.ts` and `pnpm budget`: 15/100 roots, 94 subcommands | Registry + budget |
+| 9 | The real surface runs once | Live 2026-11-01: seven `!config` bridge messages each produced exactly one reply (one was a deliberate bad-syntax check); `commands:doctor` reports 15 roots / 94 subcommands | **Live gateway + Discord API** |
+| 10 | List/export embeds were read live | **Not performed** — the MCP text reader does not render embeds; the command test covers their structure | Not claimed |
 
 ## P7 analytics acceptance evidence
 
@@ -217,8 +254,8 @@ read that file.
 | 6 | Current state is not disguised as a window count | `AnalyticsTicketStats` and the captions; test asserts open/closed current, opened/closed window | Unit |
 | 7 | Admin-only and guild-only | `analytics.test.ts`: non-admin `blocked`, store not called; live bridge ran under the MCP member with `ManageGuild` | Dispatch + **live bridge** |
 | 8 | A disabled module refuses instead of returning zeros | `analytics.test.ts`: disabled returns `error` and no snapshot | Unit |
-| 9 | One root, no extra slot | `/analytics` with six subcommands; budget **14/100** | Static registry |
-| 10 | The real surface runs | Live 2026-11-01: three `/analytics` views replied once each in `#ai-chat`; `commands:doctor` reports 14 roots / 90 subcommands | **Live gateway + Discord API** |
+| 9 | One root, no extra slot | `/analytics` with six subcommands; budget is now **15/100** after `/config` | Static registry |
+| 10 | The real surface runs | Live 2026-11-01: three `/analytics` views replied once each in `#ai-chat`; `commands:doctor` now reports 15 roots / 94 subcommands | **Live gateway + Discord API** |
 | 11 | Embed fields and JSON export were read live | **Not performed** — the MCP text reader does not render embeds; command test covers the parseable export | Not claimed |
 
 ## P7 audit-logging acceptance evidence

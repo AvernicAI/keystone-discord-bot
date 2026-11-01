@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "updatedAt": "2026-11-01",
   "source": "packages/kernel ModuleRegistry catalog()",
-  "roots": 14,
-  "subcommands": 90,
-  "actions": 104,
+  "roots": 15,
+  "subcommands": 94,
+  "actions": 109,
   "limit": 100,
   "commands": [
     {
@@ -66,6 +66,41 @@
       "description": "Check database, migrations, cache and module readiness.",
       "options": [],
       "subcommands": []
+    },
+    {
+      "name": "config",
+      "moduleId": "setup",
+      "description": "Inspect and change any module's per-guild settings through the bot's own schema.",
+      "options": [],
+      "subcommands": [
+        {
+          "name": "list",
+          "description": "List every module and whether it is enabled here.",
+          "options": []
+        },
+        {
+          "name": "get",
+          "description": "Show one module's effective settings, or one dotted key.",
+          "options": [
+            "module",
+            "key"
+          ]
+        },
+        {
+          "name": "set",
+          "description": "Validate and write one dotted key; the module's Zod schema is the gate.",
+          "options": [
+            "module",
+            "key",
+            "value"
+          ]
+        },
+        {
+          "name": "export",
+          "description": "Export every module's effective settings as JSON.",
+          "options": []
+        }
+      ]
     },
     {
       "name": "mod",

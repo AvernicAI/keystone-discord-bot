@@ -147,7 +147,8 @@ checked. See [[Master-Plan]] for the research program.
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Web dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | P6 | Node/render first; field widgets and fleet open |
-| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 14 roots / 90 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human) |
+| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 15 roots / 94 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human) |
+| In-bot configuration | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/config` (list, get, set, export) over every module's own schema; shipped pass 30; live-proven. Competitor in-Discord config not verified (all surveyed bots also ship a web dashboard) |
 | Audit logging | ❔ | 💰 | ✅ | ❌ | ✅ | P7 | Five event toggles, one operator channel and an append-only ledger with retention; `/logging`; message edit/delete and moderation cases proven live, member join/leave adapter-only |
 | Multi-server fleet | ❔ | ❔ | ❔ | ✅ | ❔ | P6 | One view, per-guild authz |
 | Config templates | ❔ | ❔ | ❔ | ❔ | ❔ | P6 | Apply to N guilds |
@@ -215,7 +216,7 @@ rule.
 | Music | 4 | 0 | 0 | 2 | BYO only |
 | AI | 6 | 0 | 6 | 6 | Advisory, capped, opt-in, zero-retention |
 | Invites | 3 | 0 | 0 | 3 | MEE6 is partly premium-gated; Dyno/Carl document none. Shipped in repo at pass 19; a live join is unperformed |
-| Operations | 12 | 0 | 0 | 12 | Export is the wedge; command tree, audit logging and analytics are live-proven |
+| Operations | 13 | 0 | 0 | 13 | Export is the wedge; command tree, in-bot configuration, audit logging and analytics are live-proven |
 
 Two rows are non-goals (global economy, translation) and two are music features we
 refuse to ship. Everything else is promised, free.

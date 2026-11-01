@@ -6,13 +6,13 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-01",
   "phase": "P7",
-  "lastPass": "journal/2026-11-01-pass-29.md",
+  "lastPass": "journal/2026-11-01-pass-30.md",
   "metrics": {
-    "commands": 14,
-    "subcommands": 90,
+    "commands": 15,
+    "subcommands": 94,
     "commandLimit": 100,
     "modules": 8,
-    "tests": 290
+    "tests": 298
   },
   "modules": [
     {
@@ -44,7 +44,8 @@
       "statusPath": "vault/04-Modules/setup/Status.md",
       "teachingPath": "vault/04-Modules/setup/Teaching.md",
       "commands": [
-        "setup"
+        "setup",
+        "config"
       ],
       "intents": [
         "Guilds"

@@ -1,3 +1,4 @@
+import type { ConfigModuleView, ConfigPort } from "./config";
 import type { ModuleRegistry } from "./registry";
 import type { ModuleSettings } from "./types";
 
@@ -38,11 +39,21 @@ export class InMemorySettingsRepository implements SettingsRepository {
  * cannot persist a value its own schema rejects, which is what keeps a bad
  * dashboard payload from corrupting a guild's config.
  */
-export class SettingsService {
+export class SettingsService implements ConfigPort {
   constructor(
     private readonly repository: SettingsRepository,
     private readonly registry: ModuleRegistry,
   ) {}
+
+  async list(guildId: string): Promise<ConfigModuleView[]> {
+    return Promise.all(
+      this.registry.listModules().map(async (module) => ({
+        id: module.id,
+        name: module.name,
+        settings: await this.get(guildId, module.id),
+      })),
+    );
+  }
 
   async get(guildId: string, moduleId: string): Promise<Record<string, unknown>> {
     const manifest = this.registry.requireModule(moduleId);

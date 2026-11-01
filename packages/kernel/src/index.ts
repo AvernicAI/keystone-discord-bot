@@ -13,6 +13,7 @@ export * from "./cooldowns";
 export * from "./idempotency";
 export * from "./guards";
 export * from "./settings";
+export * from "./config";
 export * from "./telemetry";
 export * from "./web";
 export * from "./dispatch";

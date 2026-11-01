@@ -32,7 +32,7 @@ command tests.
 ## Verified
 
 ```text
-pnpm check                            exit 0 · 290 tests / 46 files
+pnpm check                            exit 0 · 298 tests / 47 files
   responder.test.ts                   5 tests (auto-responder service)
   community.test.ts                  12 tests
   extras.test.ts                      7 tests
@@ -42,7 +42,7 @@ pnpm check                            exit 0 · 290 tests / 46 files
   apps/bot/src/prefix.test.ts         8 tests (dev bridge)
   packages/db/src/community.test.ts   5 tests (incl. responder reopen)
   packages/db/src/economy.test.ts     2 tests
-pnpm budget                           14/100 roots · 90 subcommands, status OK
+pnpm budget                           15/100 roots · 94 subcommands, status OK
 pnpm memory:check                     current (pass 25)
 ```
 

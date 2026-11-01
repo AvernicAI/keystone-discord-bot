@@ -7,6 +7,7 @@
 
 | Pass | Date | Phase | Summary | Journal |
 | --- | --- | --- | --- | --- |
+| pass-30 | 2026-11-01 | P7 | In-bot configuration: `/config list \| get \| set \| export` in the setup module reads and writes every registered module's per-guild settings through SettingsService and the owning Zod schema. One root, four subcommands, no second settings store. Live bridge proof set moderation.automod.links alert -> delete -> alert and rejected bogus without a write; Discord reports 15 roots / 94 subcommands. | [journal](../../journal/2026-11-01-pass-30.md) |
 | pass-29 | 2026-11-01 | P7 | Guild analytics: the eighth module adds /analytics overview\|members\|messages\|commands\|tickets\|export as a read-only aggregate over logging_events, cases, invite_joins, tickets and a new append-only command_usage ledger. Every printed number names its source table; SQL and in-memory adapters share one port. Live bridge proof matched 2 stored audit events to 2 logged events and one MCP edit/delete to exactly 1 edited/1 deleted; Discord reports 14 roots / 90 subcommands. | [journal](../../journal/2026-11-01-pass-29.md) |
 | pass-28 | 2026-11-01 | P7 | Audit logging: the seventh module adds /logging setup\|channel\|events\|status\|retention\|export\|disable, five event kinds written to an append-only ledger before best-effort Discord delivery, a case observer, SQL + in-memory stores and retention pruning. Live-proven for message edit/delete and moderation cases; member joins/leaves remain adapter-only. | [journal](../../journal/2026-11-01-pass-28.md) |
 | pass-27 | 2026-11-01 | P7 | Environment check plus synthetic slash harness: real nested /mod ban through asInteractionLike and dispatch, exact local Postgres/Redis blocker errors, Ollama warm retry, and a duplicate-process fix verified by one-reply MCP transcript. | [journal](../../journal/2026-11-01-pass-27.md) |
@@ -37,4 +38,4 @@
 | pass-02 | 2026-11-01 | P1 | Master plan, parity matrix and roadmap approved; the rejected plan shapes recorded. | [journal](../../journal/2026-11-01-pass-02.md) |
 | pass-01 | 2026-10-31 | P0 | Kernel, module contract, reference module, memory system, CI and ADR baseline. | [journal](../../journal/2026-10-31-pass-01.md) |
 
-Current phase: **P7**. 290 tests reported; 14/100 global roots (90 subcommands).
+Current phase: **P7**. 298 tests reported; 15/100 global roots (94 subcommands).

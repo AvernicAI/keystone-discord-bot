@@ -167,8 +167,13 @@ guild analytics as the eighth module: `/analytics overview | members | messages
 | commands | tickets | export` reads `logging_events`, `cases`, `invite_joins`,
 `tickets` and a new append-only `command_usage` ledger; it adds no analytics
 table. The live bridge matched 2 stored audit rows to 2 logged events and one MCP
-edit/delete to 1 edited / 1 deleted. The ledger is now **14 roots / 90
-subcommands / 104 actions**. The rest of this phase is open.
+edit/delete to 1 edited / 1 deleted. Pass 30 added in-bot configuration:
+`/config list | get | set | export` reads and writes any registered module's
+settings through `SettingsService` and the owning Zod schema, with no second
+store. The live bridge set `moderation.automod.links` alert → delete → alert,
+read each value back, and rejected `bogus` with the schema's own message. The
+ledger is now **15 roots / 94 subcommands / 109 actions**. The rest of this
+phase is open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.
@@ -177,7 +182,8 @@ subcommands / 104 actions**. The rest of this phase is open.
   expiry, panic mode, case export and `command_usage` retention. Invites, the
   link, profanity and zalgo filters, auto-responders and analytics are done
   (above).
-- `/config` hub; `/help` shipped in pass 26; command-budget audit remains a gate.
+- `/export` (surface the existing bundle above the CLI) and `/music` (BYO
+  Lavalink only); `/config` and `/help` shipped; command-budget audit remains a gate.
 - Split `modules/community` into domain folders, then extract a module only if the
   "add a feature in an afternoon" test still fails.
 - `packages/i18n`: typed keys, per-guild locale, command localizations; no machine

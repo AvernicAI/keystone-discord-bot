@@ -33,6 +33,12 @@ https://github.com/RNGBubba/keystone-discord-bot
 
 ## Current state
 
+- **In-bot configuration** in repo and live-proven (pass 30): `/config list |
+  get | set | export` reads and writes every registered module's per-guild
+  settings through `SettingsService` and the owning Zod schema. One root, four
+  subcommands, no second store. Live: `moderation.automod.links` alert → delete
+  → alert, read back after each write; `bogus` was rejected by the schema and
+  nothing was stored. See [[04-Modules/setup/Spec|Setup spec]].
 - **Guild analytics** in repo (pass 29): `/analytics overview | members |
   messages | commands | tickets | export` is a read-only aggregate over the
   audit ledger, cases, invite joins, tickets and an append-only `command_usage`
@@ -72,11 +78,12 @@ https://github.com/RNGBubba/keystone-discord-bot
   through the case observer, and `!logging status | events | retention | export`
   ran through the real bridge. Member events are adapter-tested only. See
   [[04-Modules/logging/Spec|Logging spec]].
-- **Command tree** in repo (pass 26): real Discord subcommands replaced the flat
-  `action` option across every existing hub — 14 roots, 90 subcommands, 104
-  actions. `/help` is generated from the live registry; `pnpm commands:catalog`
-  writes [[Command-Catalog]] and `pnpm commands:doctor` checks the live shape.
-  A human slash invocation remains the one unobserved surface.
+- **Command tree** in repo (passes 26 and 30): real Discord subcommands replaced
+  the flat `action` option across every existing hub — 15 roots, 94 subcommands,
+  109 actions. `/help` is generated from the live registry;
+  `pnpm commands:catalog` writes [[Command-Catalog]] and
+  `pnpm commands:doctor` checks the live shape. A human slash invocation remains
+  the one unobserved surface.
 - Phase **P6** foundation in repo: Discord OAuth2/PKCE, opaque Postgres-backed
   sessions, BigInt per-guild authorization with a bot-membership check, a
   server-rendered dashboard, `/api/v1` reads and schema-validated module settings
@@ -97,15 +104,16 @@ https://github.com/RNGBubba/keystone-discord-bot
   stopped, leaving one bot and one reply per command. The updated `.env` points
   at localhost Postgres/Redis, but neither service is installed here, so the live
   window remains memory mode.
-- **Live 2026-11-01:** AI Team#5758 logged in, re-registered 14 roots with 90
+- **Live 2026-11-01:** AI Team#5758 logged in, re-registered 15 roots with 94
   subcommands (then fetched Discord's shape to prove it), and
   qwen3:8b via Ollama answered mentions in `#ai-chat`. A dev-only `!` bridge
   proved `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
   query=ban`, `!ai status`, `!mod history`, `!mod links`, `!mod filters`,
   `!rank leaderboard`, `!invites leaderboard`, `!invites who`, `!logging status`,
   `!logging events`, `!logging retention`, `!logging export`, `!analytics
-  overview`, `!analytics commands` and `!analytics messages` through the real
-  dispatch pipeline. Audit logging also delivered live message-edit,
+  overview`, `!analytics commands`, `!analytics messages`, `!config list`,
+  `!config get` and `!config set` through the real dispatch pipeline; `/config
+  export` is covered by the command test, not the live bridge. Audit logging also delivered live message-edit,
   message-delete and moderation-case embeds to the configured channel. The content filters produced live link, delete, profanity
   and zalgo cases; `!mod filters` listed them, `!mod review` closed one, and
   `example.com` produced none. The auto-responder trigger replied, its cooldown
@@ -117,7 +125,7 @@ https://github.com/RNGBubba/keystone-discord-bot
 - Phase **P4** shipped the AI layer and the ledger-backed economy hardening.
 - Phase **P3** shipped the community suite: leveling, reaction roles, welcome,
   starboard, tickets, giveaways, temp voice, content and seasons.
-- 14 of Discord's 100 global roots used, with 90 subcommands; 8 modules registered.
+- 15 of Discord's 100 global roots used, with 94 subcommands; 8 modules registered.
 - The full suite covers the 5,000-row portability round trip and the failure,
   rollback and deletion paths; `pnpm check` also runs the intent, channel and
   memory audits.

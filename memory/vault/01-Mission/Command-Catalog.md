@@ -5,7 +5,7 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**14 roots · 90 subcommands · 104 total actions · 14/100 global roots used.**
+**15 roots · 94 subcommands · 109 total actions · 15/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
@@ -17,6 +17,7 @@ root, then choose a subcommand.
 | `/about` | `diagnostics` | 0 |
 | `/help` | `diagnostics` | 5 |
 | `/setup` | `setup` | 0 |
+| `/config` | `setup` | 4 |
 | `/mod` | `moderation` | 14 |
 | `/appeal` | `moderation` | 0 |
 | `/verify` | `moderation` | 0 |
@@ -57,6 +58,17 @@ Browse every Keystone command, search the catalog and check data retention.
 Check database, migrations, cache and module readiness.
 
 No subcommands; the root has its own options.
+
+## `/config`
+
+Inspect and change any module's per-guild settings through the bot's own schema.
+
+| Subcommand | Description | Options |
+| --- | --- | --- |
+| `/config list` | List every module and whether it is enabled here. | — |
+| `/config get` | Show one module's effective settings, or one dotted key. | `module`, `key` |
+| `/config set` | Validate and write one dotted key; the module's Zod schema is the gate. | `module`, `key`, `value` |
+| `/config export` | Export every module's effective settings as JSON. | — |
 
 ## `/mod`
 

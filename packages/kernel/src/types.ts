@@ -211,6 +211,8 @@ export interface CommandContext {
   /** Every registered root and subcommand, injected by dispatch for /help. */
   readonly catalog: readonly CommandCatalogEntry[];
   readonly settings: ModuleSettings;
+  /** Present when the composition root wired the shared settings service. */
+  readonly config?: import("./config").ConfigPort;
   readonly logger: Logger;
   /** Injected clock so cooldowns and latency are deterministic in tests. */
   readonly now: () => number;

@@ -74,6 +74,7 @@ async function main(): Promise<void> {
   const dispatchDeps: DispatchDeps = {
     registry,
     settings: runtime.settings,
+    config: runtime.settings,
     logger,
     cooldowns: runtime.cooldowns,
     queue: runtime.queue,

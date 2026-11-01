@@ -1571,13 +1571,34 @@
           "phase": "P7",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "14 global roots expose 90 real Discord subcommands instead of hidden flat action options. `/help` reads the live registry, the catalog is generated, boot sync compares the full option tree, `commands:doctor` reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for `/mod ban`. Gateway `InteractionCreate` remains human-only.",
+          "note": "15 global roots expose 94 real Discord subcommands instead of hidden flat action options. `/help` reads the live registry, the catalog is generated, boot sync compares the full option tree, `commands:doctor` reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for `/mod ban`. Gateway `InteractionCreate` remains human-only.",
           "evidence": [
             "packages/kernel/src/registry.test.ts",
             "apps/bot/src/adapt.test.ts",
             "apps/bot/src/command-sync.test.ts",
             "apps/bot/src/interaction-harness.test.ts",
             "modules/diagnostics/src/diagnostics.test.ts"
+          ],
+          "liveVerified": true
+        },
+        {
+          "id": "operations.in-bot-config",
+          "name": "In-bot configuration",
+          "competitors": {
+            "mee6": "❔",
+            "dyno": "❔",
+            "carl": "❔",
+            "ticket-tool": "❔",
+            "wick-security": "❔"
+          },
+          "phase": "P7",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "`/config list | get | set | export` reads and writes every registered module's per-guild settings through SettingsService and the owning Zod schema. One root and four subcommands, no second settings store. Live: set `moderation.automod.links` alert -> delete -> alert, and `bogus` was rejected by the schema without a write.",
+          "evidence": [
+            "modules/setup/src/config.test.ts",
+            "modules/setup/src/commands/config.ts",
+            "packages/kernel/src/config.ts"
           ],
           "liveVerified": true
         },

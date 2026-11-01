@@ -8,7 +8,7 @@ modules own.
 
 - `/analytics` is registered through the shared catalog with `overview`,
   `members`, `messages`, `commands`, `tickets` and `export`. The command ledger is
-  **14 roots / 90 subcommands / 104 actions**.
+  **15 roots / 94 subcommands / 109 actions** after `/config` landed in pass 30.
 - Every view is admin-only (`ManageGuild`), guild-scoped, read-only and cooled
   down for three seconds. There is no mutation path.
 - `AnalyticsStore` is one port. Postgres uses `DrizzleAnalyticsStore`; local mode
@@ -68,8 +68,8 @@ The cross-checks are direct: the logging status read **2 stored** rows and the
 overview read **2 logged events**; one MCP edit and one MCP delete produced
 exactly **1 edited** and **1 deleted**; the command count rose **0 → 3 → 4** as
 the bridge commands completed, because the current command records after its
-reply. `pnpm commands:doctor` reported `Registry 14 roots · 90 subcommands` and
-`Discord 14 global chat-input commands · 90 subcommands`.
+reply. At pass 29 `pnpm commands:doctor` reported `Registry 14 roots · 90
+subcommands`; after pass 30's `/config` it reports 15 roots / 94 subcommands.
 
 ## Known limitations
 

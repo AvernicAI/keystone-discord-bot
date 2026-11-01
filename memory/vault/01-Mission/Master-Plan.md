@@ -143,7 +143,7 @@ same interfaces. No module changes when a port changes.
 
 ### Command allocation
 
-The target is 18 roots. Thirteen are live today with 84 real subcommands; the
+The target is 18 roots. Fifteen are live today with 94 real subcommands; the
 remaining roots land with their modules, not as empty placeholders. Subcommands
 are free inside a root, so most growth should not spend another slot.
 

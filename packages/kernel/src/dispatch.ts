@@ -16,6 +16,8 @@ import type {
 export interface DispatchDeps {
   registry: ModuleRegistry;
   settings: SettingsService;
+  /** Same service, exposed to `/config` through the narrow ConfigPort. */
+  config?: import("./config").ConfigPort;
   logger: Logger;
   /** Injected so the guard and the store cannot drift apart. */
   cooldowns: CooldownStore;
@@ -109,6 +111,7 @@ export async function dispatchCommand(
     commandPath,
     catalog: deps.registry.catalog(),
     settings: deps.settings.forModule(registered.moduleId),
+    config: deps.config,
     logger: deps.logger.child(registered.moduleId),
     now: deps.now ?? Date.now,
     cooldowns: deps.cooldowns,

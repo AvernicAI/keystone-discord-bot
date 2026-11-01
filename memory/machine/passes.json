@@ -378,6 +378,19 @@
         "budget": "14/100 roots · 90 subcommands",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-30",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "In-bot configuration: `/config list | get | set | export` in the setup module reads and writes every registered module's per-guild settings through SettingsService and the owning Zod schema. One root, four subcommands, no second settings store. Live bridge proof set moderation.automod.links alert -> delete -> alert and rejected bogus without a write; Discord reports 15 roots / 94 subcommands.",
+      "journal": "journal/2026-11-01-pass-30.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "298",
+        "budget": "15/100 roots · 94 subcommands",
+        "memory": "current"
+      }
     }
   ]
 }
