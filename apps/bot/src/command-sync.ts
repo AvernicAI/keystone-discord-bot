@@ -72,12 +72,3 @@ export function commandDrift(
 export function hasDrift(drift: CommandDrift): boolean {
   return drift.missing.length > 0 || drift.extra.length > 0 || drift.changed.length > 0;
 }
-
-/**
- * The one conversion point from discord.js command objects to the slim shape
- * the comparator reads. `toJSON()` also drops the class methods; the cast is
- * limited to this adapter, like every other discord.js boundary.
- */
-export function toCommandJson(command: { toJSON(): unknown }): CommandJson {
-  return command.toJSON() as CommandJson;
-}

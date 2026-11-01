@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Events } from "discord.js";
+import { Events, Routes } from "discord.js";
 import {
   ModuleRegistry,
   UserError,
@@ -11,7 +11,7 @@ import {
 } from "@keystone/kernel";
 import { loadEnv, requireToken } from "@keystone/config";
 import { asInteractionLike, buildCommandJson } from "./adapt";
-import { commandDrift, hasDrift, toCommandJson } from "./command-sync";
+import { commandDrift, hasDrift, type CommandJson } from "./command-sync";
 import { createClient } from "./client";
 import { modules } from "./modules";
 import { createRuntime } from "./runtime";
@@ -96,8 +96,15 @@ async function main(): Promise<void> {
       // cycle and read the result back. `pnpm commands:resync` runs the same
       // cycle on demand after a payload-only change.
       const payload = registry.listCommands().map((c) => buildCommandJson(c.definition));
+      // Compare Discord's raw REST representation, not discord.js wrappers:
+      // a wrapper may normalise fields and report drift forever after a
+      // successful registration. `commands:doctor` reads the same endpoint.
+      const readServerCommands = async (): Promise<CommandJson[]> =>
+        (await ready.rest.get(
+          Routes.applicationCommands(ready.application.id),
+        )) as CommandJson[];
       let synced = await ready.application.commands.fetch();
-      const drift = commandDrift(payload, [...synced.values()].map(toCommandJson));
+      const drift = commandDrift(payload, await readServerCommands());
 
       if (hasDrift(drift)) {
         logger.warn("command set drift; clearing before re-register", { ...drift });
@@ -109,7 +116,7 @@ async function main(): Promise<void> {
         logger.info("commands current", { count: synced.size });
       }
 
-      const finalDrift = commandDrift(payload, [...synced.values()].map(toCommandJson));
+      const finalDrift = commandDrift(payload, await readServerCommands());
       if (hasDrift(finalDrift)) {
         logger.error("command sync mismatch", { ...finalDrift });
       }
