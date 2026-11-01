@@ -145,14 +145,19 @@ flags. Live: 11 commands registered and the `!invites` bridge ran in `#ai-chat`;
 a live member join remains unperformed. The link / phishing filter shipped in
 pass 23 — a local host blocklist plus punycode detection in `alert` or `delete`
 mode, `/mod links` as its review queue, and a live MCP proof of three findings
-and one review in `#ai-chat`. The rest of this phase is open.
+and one review in `#ai-chat`. The profanity/zalgo filter shipped in pass 24 — an
+operator-owned word list matched on Unicode word edges, a configurable
+combining-mark threshold, `/mod filters` as the combined review queue, and a
+live safe-seed proof of both finding types. The link delete branch was also
+proven live once with a temporary `dryRun: false` seed. The rest of this phase is
+open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.
 - New domains: forms/applications, events/RSVP, role persistence, modmail,
   auto-responders, analytics; plus goodbye messages, YouTube/Twitch/RSS feeds,
   temp ban/role expiry, join-gate expiry, panic mode and case export. Invites and
-  the link/phishing filter are done (above).
+  the link, profanity and zalgo filters are done (above).
 - `/config` and `/help` hubs; command-budget audit.
 - Split `modules/community` into domain folders, then extract a module only if the
   "add a feature in an afternoon" test still fails.

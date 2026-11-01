@@ -129,9 +129,15 @@ export async function createRuntime(
   if (env.DEV_GUILD_ID && env.NODE_ENV !== "production" && !database) {
     await settings.update(env.DEV_GUILD_ID, "ai", { enabled: true, chat: true });
     await settings.update(env.DEV_GUILD_ID, "moderation", {
-      automod: { links: "alert", linkBlocklist: ["phish.test"] },
+      automod: {
+        links: "alert",
+        linkBlocklist: ["phish.test"],
+        profanity: "alert",
+        bannedWords: ["pineapple"],
+        zalgo: "alert",
+      },
     });
-    logger.warn("DEV_GUILD_ID: AI chat and the link filter are enabled in process memory", {
+    logger.warn("DEV_GUILD_ID: AI chat and the content filters are enabled in process memory", {
       guildId: env.DEV_GUILD_ID,
     });
   }

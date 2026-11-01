@@ -53,6 +53,23 @@ The list is local settings data, not a downloaded reputation feed. That keeps
 the feature testable, private and free. The cost is that somebody has to maintain
 the list, and punycode is a heuristic rather than proof.
 
+## Profanity and zalgo, as a second worked example
+
+The word filter is a small compiler lesson. `bannedWordMatch` first escapes each
+operator-supplied word, then turns internal whitespace into `\s+`, then joins the
+alternatives inside Unicode-aware edges. Escaping before compiling is what keeps
+a word like `c++` from becoming a regex; the edges are what keep `ass` from
+matching `class`.
+
+The zalgo check is deliberately not a regex. It counts `\p{M}` code points and
+compares the count with a threshold. That is easy to explain, easy to test, and
+hard to fool with a long string of combining marks. It is still a heuristic:
+some scripts use many marks legitimately, which is why the rule has its own mode
+and threshold.
+
+The default word list is empty. A bot should not ship somebody else's idea of
+offensive; the operator owns the policy and can enable `alert` before `delete`.
+
 ## Exercise
 
 Add an `appeal` rate limit and a `case export` action.
@@ -73,6 +90,16 @@ Add an `appeal` rate limit and a `case export` action.
    before `@` is not the host.
 3. Keep the finding evidence to `{ host, match }`. If you are tempted to store
    the message, re-read the retention rule in [[Spec]].
+
+## Word-filter exercise
+
+1. Add an allow-list for the Scunthorpe problem and decide whether it wins over
+   the blocklist. Write the order down before the test.
+2. Add fixtures for `class`/`ass`, `pineapple`/`pineapples` and a phrase with
+   three spaces. If a fixture is surprising, the rule is not documented enough.
+3. Measure a 200-word list against a 2,000-character message. If compilation is
+   visible in a profile, cache the compiled pattern instead of rebuilding it for
+   every event; keep the cache keyed by the actual list, not the guild.
 
 ## The mistake you will probably make
 

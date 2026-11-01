@@ -198,6 +198,35 @@ describe("moderation module", () => {
     expect(ctx.interaction.lastReply?.content).toContain("#1");
   });
 
+  it("lists profanity and zalgo cases through /mod filters", async () => {
+    const { ctx, cases, actions } = buildContext({ action: "filters" });
+    await cases.open({
+      guildId: "guild-1",
+      actorId: "keystone",
+      targetId: "target-1",
+      action: "security.alert",
+      reason: "The message contains a blocked word or phrase.",
+      rule: "automod.profanity",
+      state: "alerted",
+    });
+    await cases.open({
+      guildId: "guild-1",
+      actorId: "keystone",
+      targetId: "target-1",
+      action: "security.alert",
+      reason: "The message contains 12 combining marks.",
+      rule: "automod.zalgo",
+      state: "alerted",
+    });
+
+    await mod.execute(ctx);
+
+    expect(actions.calls).toEqual([]);
+    expect(ctx.interaction.lastReply?.content).toContain("Content-filter findings");
+    expect(ctx.interaction.lastReply?.content).toContain("automod.profanity");
+    expect(ctx.interaction.lastReply?.content).toContain("automod.zalgo");
+  });
+
   it("requires a reason for a punitive action", async () => {
     const { ctx } = buildContext({ action: "kick", user: "target-1" });
     await expect(mod.execute(ctx)).rejects.toThrow(/reason is required/i);

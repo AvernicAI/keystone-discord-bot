@@ -300,6 +300,19 @@
         "budget": "11/100",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-24",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Profanity/zalgo filter: operator-owned banned words on Unicode word edges, a combining-mark threshold, /mod filters review action, and the live delete-mode link proof.",
+      "journal": "journal/2026-11-01-pass-24.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "224",
+        "budget": "11/100",
+        "memory": "current"
+      }
     }
   ]
 }

@@ -37,7 +37,7 @@ checked. See [[Master-Plan]] for the research program.
 | Spam / caps / mentions | 💰 | ✅ | ✅ | ❌ | ✅ | P2 | Heat decay, not a binary trip |
 | Invite links | 💰 | ✅ | ✅ | ❌ | ✅ | P2 | Allow-list per guild |
 | Link / phishing filter | 💰 | ✅ | ✅ | ❌ | ✅ | P2 | Local host list + punycode; `/mod links`; shipped pass 23 |
-| Profanity / zalgo | 💰 | ✅ | ✅ | ❌ | ❔ | P2 | Word-boundary aware |
+| Profanity / zalgo | 💰 | ✅ | ✅ | ❌ | ❔ | P2 | Unicode word edges + mark threshold; `/mod filters`; shipped pass 24 |
 | Duplicate / crosspost | 💰 | ✅ | ❔ | ❌ | ❔ | P2 | Hash window |
 | Native AutoMod sync | ❌ | ❔ | ❔ | ❌ | ❔ | P2 | We manage Discord's rules too |
 | AI classification | 💰 (separate) | ❌ | ❌ | ❌ | ❔ | P4 | Advisory label only; no action path |
@@ -196,7 +196,7 @@ rule.
 | Domain | Rows | P3 | P4 adds | Ours by P8 | Note |
 | --- | --- | --- | --- | --- | --- |
 | Moderation | 11 | 8 | 0 | 11 | Case model is the spine; temp-ban/role expiry and case export open |
-| Automod | 10 | 5 | 0 | 10 | Invite, mentions, duplicates, native-plan and test mode; link/profanity filters open |
+| Automod | 10 | 5 | 0 | 10 | Invite, mentions, duplicates, links, profanity/zalgo, native-plan and test mode; false-positive report open |
 | Security | 9 | 7 | 0 | 9 | Anti-nuke, anti-raid, quarantine, join gate and shared cases; panic mode open |
 | Leveling | 7 | 6 | 0 | 7 | XP, rewards, rank, leaderboard, multiplier and archived seasonal reset; MEE6 import is P5 |
 | Economy | 6 | 5 | 0 | 6 | Daily, shop, transfers, gambling and the audit ledger; P4 added the lock/idempotency hardening, not a new row |

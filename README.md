@@ -18,7 +18,7 @@ API tokens and webhooks are the remaining P6 work. P7 now has invite tracking as
 a sixth module (attribution, a joins/retention leaderboard and advisory
 suspicious-join flags) and a link/phishing filter (local host blocklist, punycode
 detection and `/mod links`). The command ledger is **11/100**, there are **6
-modules**, and `pnpm check` covers **217 tests across 36 files** without a Discord
+modules**, and `pnpm check` covers **224 tests across 36 files** without a Discord
 token, database or network. Live on 2026-11-01: the bot logged in, registered 11
 commands through Discord, answered a Qwen3:8b mention in `#ai-chat`, and ran real
 moderation, community, AI, invite and link-filter commands through a development
@@ -247,7 +247,7 @@ message-only harnesses.
 | `/ping` | — | Confirm the gateway is alive and show uptime |
 | `/about` | — | Version, module state, teaching link |
 | `/setup` | — | Database, migrations, cache, intents and next-step report |
-| `/mod` | `ban`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `links`, `review` | Moderation with cases, reasons, evidence, a link-filter review queue and a case queue |
+| `/mod` | `ban`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `links`, `filters`, `review` | Moderation with cases, reasons, evidence, a content-filter review queue and a case queue |
 | `/appeal` | `case`, `message` | Open an appeal for your own case |
 | `/verify` | — | Complete the join gate and leave quarantine |
 | `/rank` | `view`, `leaderboard`, `rewards`, `admin`, `balance`, `daily`, `pay`, `shop`, `buy`, `gamble`, `ledger`, `season` | XP, levels, ledger-backed currency, shop and seasons |
@@ -336,6 +336,9 @@ Everything below is free. No feature is moved behind a paywall.
 - `/mod` actions plus dry-run-first message scanning.
 - Link / phishing filter: a local host blocklist plus punycode detection, with
   `alert` or `delete` mode and `/mod links` as its review queue. No remote feed.
+- Profanity / zalgo filter: an operator-owned word list matched on Unicode word
+  edges, a configurable combining-mark threshold, and `/mod filters` as the
+  combined content-filter review queue.
 - Native AutoMod plan and `Keystone ·` rule ownership.
 - Anti-nuke, anti-raid, quarantine, join gate and `/verify`.
 - Action logging and an appeal button on case cards.
@@ -372,9 +375,9 @@ Everything below is free. No feature is moved behind a paywall.
 - **P6 remaining:** schema-driven field widgets, the Next.js shell, fleet
   view/templates, token refresh/revocation, scoped public API tokens,
   per-token rate limits, idempotency, webhooks and OpenAPI.
-- **P7:** invite tracking and the link/phishing filter are done; the rest is
-  parity completion (forms, events, role persistence, modmail, auto-responders,
-  analytics), Components V2 UI and i18n.
+- **P7:** invite tracking, the link/phishing filter and the profanity/zalgo
+  filter are done; the rest is parity completion (forms, events, role
+  persistence, modmail, auto-responders, analytics), Components V2 UI and i18n.
 - **P8:** bring-your-own Lavalink music, disabled by default; no bundled streamer.
 - **P9:** docs site, 14-lesson curriculum, release workflow, self-host kit.
 - **P10:** sharding, load tests, SLOs, Discord.js v15 migration.
@@ -388,13 +391,13 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | --- | --- | --- |
 | P0 Foundation | Done | Kernel, module contract, diagnostics, memory, CI |
 | P1 Substrate | Done | Postgres, Redis, BullMQ, telemetry, `/setup` |
-| P2 Moderation | Done | Cases, scanner (invite/mention/duplicate/link), appeals, verify, action logging |
+| P2 Moderation | Done | Cases, scanner (invite/mention/duplicate/link/profanity/zalgo), appeals, verify, action logging |
 | P3 Community | Done | XP, economy, tickets, tools, events |
 | P4 AI + economy | Done | Provider, caps, RAG, chat, explanations, summaries |
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
-| P7 Parity completion | **In progress** | Invite tracking and link/phishing filter shipped; forms, events, expiry, modmail and UI/i18n open |
+| P7 Parity completion | **In progress** | Invite tracking and link/profanity/zalgo filters shipped; forms, events, expiry, modmail and UI/i18n open |
 
 Live evidence (2026-11-01): `AI Team#5758` connected, cleared and re-registered
 11 global commands (including `/invites`), and Qwen3:8b answered a mention in
@@ -404,12 +407,17 @@ through the real dispatch pipeline. `/ticket stats` reached
 the `ManageGuild` guard (the MCP bot is not an admin); that check exposed a real
 ordering bug, now fixed and unit-tested.
 
-Link-filter live evidence (2026-11-01): in memory mode, a marked MCP message
+Link-filter and content-filter live evidence (2026-11-01): a marked MCP message
 with `https://login.phish.test/verify` created case #1 (`alerted`, blocklist);
 `https://www.phish.test/account` created #2; `!mod review case=2` changed #2 to
 `reviewed`; `https://xn--pple-43d.test/login` created #3 (punycode); and
-`https://example.com/docs` created no case. See
-[pass 23](memory/journal/2026-11-01-pass-23.md).
+`https://example.com/docs` created no case. Later, with a temporary
+`dryRun: false` / `delete` seed, the blocked message returned `10008: Unknown
+Message` after the bot handled it. The safe seed then produced a profanity case
+for `pineapple` and a zalgo case for a 16-mark string; `!mod filters` listed all
+three content-filter cases and `!mod review` closed the profanity one. See
+[pass 23](memory/journal/2026-11-01-pass-23.md) and
+[pass 24](memory/journal/2026-11-01-pass-24.md).
 
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and
@@ -525,6 +533,7 @@ message bridge that feeds the same registry, guards, cooldowns and reply adapter
 !ai status
 !mod history
 !mod links
+!mod filters
 !rank leaderboard
 ```
 

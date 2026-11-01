@@ -115,7 +115,17 @@ including the small calls that did not deserve an ADR.
 | 66 | The link filter is a local host blocklist plus a punycode heuristic; no remote threat feed, network call or paid reputation service | [[04-Modules/moderation/Spec\|Moderation spec]] |
 | 67 | `/mod links` is an action under the existing root, not a new command; review uses the existing `/mod review case=N` path | [[04-Modules/moderation/Spec\|Moderation spec]] |
 | 68 | The only bot-author exception in the security adapter is a `keystone-test:` marker in `DEV_GUILD_ID`, stripped before evaluation; production has no marker path | [[Live-Testing]] |
-| 69 | The live proof used `alert` mode; `delete` shares the coordinator path but is not claimed as live-run until a staging deletion is recorded | [[04-Modules/moderation/Status\|Moderation status]] |
+| 69 | The first live proof used `alert` mode; `delete` shares the coordinator path but was not claimed as live-run in pass 23 | [[04-Modules/moderation/Status\|Moderation status]] |
+
+## 2026-11-01 — P7 content filters
+
+| # | Decision | Where |
+| --- | --- | --- |
+| 70 | Banned words match on Unicode word edges, never as substrings; escaping happens before the regex is compiled | [[04-Modules/moderation/Spec\|Moderation spec]] |
+| 71 | Profanity and zalgo are separate modes with separate settings; combining marks are legitimate in many scripts | [[04-Modules/moderation/Spec\|Moderation spec]] |
+| 72 | `/mod filters` is an action under the existing root; `/mod links` remains the link-only view | [[04-Modules/moderation/Spec\|Moderation spec]] |
+| 73 | The default word list is empty and both rules are off; the operator owns the policy | [[04-Modules/moderation/Spec\|Moderation spec]] |
+| 74 | The link filter's delete branch was proven live with a temporary `dryRun: false` seed; the committed dev seed and production default stay `alert`/dry-run | [[04-Modules/moderation/Status\|Moderation status]] |
 
 ## How to add a decision
 

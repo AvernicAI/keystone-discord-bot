@@ -49,6 +49,7 @@ Examples that were actually run against AI Team:
 !ai status
 !mod history
 !mod links
+!mod filters
 !rank leaderboard
 !ticket stats
 !invites leaderboard
@@ -67,14 +68,23 @@ without a second human account, a bot message in `DEV_GUILD_ID` that starts with
 ```text
 keystone-test: https://login.phish.test/verify
 !mod links
+
+keystone-test: I really like pineapple pizza
+keystone-test: z̸̸̸̸a̸̸̸̸l̸̸̸̸g̸̸̸̸o
+!mod filters
 ```
 
 The event still travels the real gateway `MessageCreate` → `SecurityCoordinator`
 → `SecurityEngine` → case store path. The only development exception is the
 author guard. `apps/bot/src/runtime.ts` seeds the in-memory dev guild with
-`automod.links: "alert"` and a local `phish.test` example, so the fixture is
-deterministic and never needs a remote list. Production gets no marker option
-and no seed.
+`links: "alert"`, a local `phish.test` example, `profanity: "alert"` with the
+benign word `pineapple`, and `zalgo: "alert"`, so the fixture is deterministic
+and never needs a remote list. Production gets no marker option and no seed.
+
+The delete branch was also driven live once: the temporary seed used
+`dryRun: false` and `links: "delete"`, and the MCP's message ID returned
+`10008: Unknown Message` after the bot handled it. The committed seed stays
+`alert`; the destructive proof is deliberately not the default.
 
 ## What a live prefix run proves
 
@@ -88,8 +98,9 @@ and no seed.
 
 - `InteractionCreate` handling, slash option parsing by Discord, autocomplete or
   ephemeral replies. Those need an interaction harness or a human click.
-- A `delete`-mode finding actually removing a message: the marker fixture seeds
-  `alert` mode, so the live run leaves the message in place.
+- Profanity/zalgo `delete` mode: only link delete mode was exercised with the
+  temporary `dryRun: false` seed; the safe seed is `alert` and leaves messages in
+  place. The coordinator path is shared, but the live run does not claim it.
 - Application-command registration beyond the REST response already observed in
   the ready log.
 - Production behaviour of the dev seam, because it is not registered there.

@@ -27,8 +27,12 @@ const ACTIONS = [
   "note",
   "history",
   "links",
+  "filters",
   "review",
 ] as const;
+
+const LINK_RULES = new Set(["automod.link"]);
+const FILTER_RULES = new Set(["automod.link", "automod.profanity", "automod.zalgo"]);
 
 type ModAction = (typeof ACTIONS)[number];
 
@@ -175,12 +179,15 @@ export const mod = defineCommand({
       return;
     }
 
-    if (action === "links") {
+    if (action === "links" || action === "filters") {
+      const rules = action === "links" ? LINK_RULES : FILTER_RULES;
       const records = await ports.cases.list(guildId, { limit: 25 });
-      const findings = records.filter((record) => record.rule === "automod.link");
+      const findings = records.filter(
+        (record) => record.rule !== undefined && rules.has(record.rule),
+      );
       if (findings.length === 0) {
         await ctx.interaction.reply({
-          content: "No link-filter findings in the last 25 cases.",
+          content: `No ${action === "links" ? "link-filter" : "content-filter"} findings in the last 25 cases.`,
           ephemeral: true,
         });
         return;
@@ -189,10 +196,10 @@ export const mod = defineCommand({
         .slice(0, 10)
         .map(
           (record) =>
-            `#${record.caseNumber} · ${record.state} · <@${record.targetId}> · ${record.reason}`,
+            `#${record.caseNumber} · ${record.state} · ${record.rule} · <@${record.targetId}> · ${record.reason}`,
         );
       await ctx.interaction.reply({
-        content: `Link-filter findings (newest first):\n${lines.join("\n")}`.slice(0, 2_000),
+        content: `${action === "links" ? "Link-filter" : "Content-filter"} findings (newest first):\n${lines.join("\n")}`.slice(0, 2_000),
         ephemeral: true,
       });
       return;
@@ -320,7 +327,7 @@ export const mod = defineCommand({
     await replyResult(ctx, record, result);
   },
   notes:
-    "One hub command for manual moderation. Every enforced action creates a case before the external call, so a failed ban still leaves a reviewable record. `links` reads the newest local link-filter findings without widening the command budget.",
+    "One hub command for manual moderation. Every enforced action creates a case before the external call, so a failed ban still leaves a reviewable record. `links` and `filters` read the newest local content-filter findings without widening the command budget.",
 });
 
 function describeAction(ctx: CommandContext, action: ModAction): string {

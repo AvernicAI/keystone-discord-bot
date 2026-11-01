@@ -93,6 +93,7 @@ const INVITE = /(?:discord\.gg|discord\.com\/invite|discordapp\.com\/invite)\//i
 const MENTION = /<@!?\d+>/g;
 const LINK = /https?:\/\/[^\s<>]+/gi;
 const LINK_TRAILING = /[)\].,;!?'"]+$/;
+const COMBINING = /\p{M}/gu;
 
 interface SuspiciousLink {
   readonly host: string;
@@ -142,6 +143,38 @@ function suspiciousLink(
     }
   }
   return undefined;
+}
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Match an operator-owned word or phrase on word edges, not as a substring.
+ * `ass` must not match `class`, and a phrase keeps its internal whitespace
+ * flexible. The expression is compiled per evaluation because the settings
+ * object is parsed per event; the list is capped at 200 entries by the schema.
+ */
+function bannedWordMatch(content: string, words: readonly string[]): string | undefined {
+  const parts = words
+    .map((word) => escapeRegex(word.trim()).replace(/\s+/g, "\\s+"))
+    .filter(Boolean)
+    .sort((a, b) => b.length - a.length);
+  if (parts.length === 0) return undefined;
+
+  try {
+    const pattern = new RegExp(
+      `(?<![\\p{L}\\p{N}_])(?:${parts.join("|")})(?![\\p{L}\\p{N}_])`,
+      "iu",
+    );
+    return pattern.exec(content)?.[0];
+  } catch {
+    return undefined;
+  }
+}
+
+function combiningMarks(content: string): number {
+  return content.match(COMBINING)?.length ?? 0;
 }
 
 function freshState(): GuildState {
@@ -341,6 +374,38 @@ export class SecurityEngine {
               ? "blocklist"
               : "punycode",
           },
+        });
+      }
+    }
+
+    const profanityMode = settings.automod.profanity;
+    if (profanityMode !== "off") {
+      const blocked = bannedWordMatch(event.content, settings.automod.bannedWords);
+      if (blocked) {
+        findings.push({
+          kind: profanityMode === "alert" ? "alert" : "delete-message",
+          rule: "automod.profanity",
+          reason: "The message contains a blocked word or phrase.",
+          targetId: event.userId,
+          channelId: event.channelId,
+          messageId: event.messageId,
+          evidence: { match: blocked.slice(0, 64) },
+        });
+      }
+    }
+
+    const zalgoMode = settings.automod.zalgo;
+    if (zalgoMode !== "off") {
+      const marks = combiningMarks(event.content);
+      if (marks >= settings.automod.zalgoThreshold) {
+        findings.push({
+          kind: zalgoMode === "alert" ? "alert" : "delete-message",
+          rule: "automod.zalgo",
+          reason: `The message contains ${marks} combining marks; the limit is ${settings.automod.zalgoThreshold}.`,
+          targetId: event.userId,
+          channelId: event.channelId,
+          messageId: event.messageId,
+          evidence: { combiningMarks: marks, threshold: settings.automod.zalgoThreshold },
         });
       }
     }

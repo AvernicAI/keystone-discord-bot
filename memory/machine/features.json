@@ -275,7 +275,7 @@
           "phase": "P7",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "Local host blocklist plus punycode detection; /mod links review queue. Live 2026-11-01 via the dev marker: subdomain, apex and punycode cases in #ai-chat, reviewed through !mod review.",
+          "note": "Local host blocklist plus punycode detection; /mod links review queue. Live 2026-11-01 via the dev marker: subdomain, apex and punycode cases in #ai-chat, reviewed through !mod review; a temporary dryRun:false seed returned 10008 Unknown Message for delete mode.",
           "evidence": [
             "modules/moderation/src/security.test.ts",
             "modules/moderation/src/mod.test.ts",
@@ -294,14 +294,14 @@
             "wick-security": "❔"
           },
           "phase": "P7",
-          "status": "open",
+          "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "Word-boundary aware",
+          "note": "Operator-owned banned words matched on Unicode word edges; separate zalgo threshold. Live 2026-11-01: pineapple and 16-mark zalgo cases, listed by /mod filters and reviewed through /mod review.",
           "evidence": [
-            "modules/moderation/src/security.test.ts"
+            "modules/moderation/src/security.test.ts",
+            "modules/moderation/src/mod.test.ts"
           ],
-          "openReason": "Word-boundary filter is named as open in the P3 status.",
-          "liveVerified": false
+          "liveVerified": true
         },
         {
           "id": "automod.duplicate-crosspost",

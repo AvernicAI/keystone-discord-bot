@@ -40,11 +40,13 @@ https://github.com/RNGBubba/keystone-discord-bot
   advisory evidence only. The gateway state (cache, per-guild join queue) is
   owned by `apps/bot/src/invite-tracker.ts`; `invite-events.ts` only translates
   discord.js events. See [[04-Modules/invites/Spec|Invites spec]].
-- **Link / phishing filter** in repo (pass 23): a local host blocklist plus
-  punycode detection in `alert` or `delete` mode, `/mod links` as the review
-  queue, and a dev-only `keystone-test:` marker for live MCP proof. Live cases
-  #1–#3 were a blocklisted subdomain, an apex host and a punycode host; #2 was
-  reviewed, and `example.com` produced no case. See
+- **Content filters** in repo: the link/phishing filter (pass 23) uses a local
+  host blocklist plus punycode detection; the profanity/zalgo filter (pass 24)
+  uses an operator-owned word list on Unicode word edges plus a combining-mark
+  threshold. Both support `alert` or `delete`; `/mod links` and `/mod filters`
+  are the review queues. A dev-only `keystone-test:` marker makes the MCP proof
+  possible. Live: link, delete, profanity and zalgo cases; `!mod filters` listed
+  them and `!mod review` closed one; `example.com` produced no case. See
   [[04-Modules/moderation/Spec|Moderation spec]].
 - Phase **P6** foundation in repo: Discord OAuth2/PKCE, opaque Postgres-backed
   sessions, BigInt per-guild authorization with a bot-membership check, a
@@ -63,9 +65,10 @@ https://github.com/RNGBubba/keystone-discord-bot
 - **Live 2026-11-01:** AI Team#5758 logged in, cleared and re-registered all 11
   commands (then fetched Discord's list to prove it), and qwen3:8b via Ollama
   answered mentions in `#ai-chat`. A dev-only `!` bridge proved `!ping`, `!about`,
-  `!ai status`, `!mod history`, `!mod links`, `!rank leaderboard`,
-  `!invites leaderboard` and `!invites who` through the real dispatch pipeline. The link
-  filter produced three live cases from marked MCP messages and one review;
+  `!ai status`, `!mod history`, `!mod links`, `!mod filters`,
+  `!rank leaderboard`, `!invites leaderboard` and `!invites who` through the real
+  dispatch pipeline. The content filters produced live link, delete, profanity
+  and zalgo cases; `!mod filters` listed them, `!mod review` closed one, and
   `example.com` produced none. Slash execution still needs a human client; the
   MCP cannot invoke application commands or render embeds.
 - Phase **P4.5** made channel obfuscation a typed outcome at every fetch site,

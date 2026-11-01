@@ -7,11 +7,15 @@ P2 core shipped in pass 05 (2026-11-01).
 - Cases, case events and atomic per-guild numbering are wired to Postgres.
 - `/mod` supports ban, kick, timeout, warn, purge, lock/unlock, slowmode, case,
   note, history and review.
-- The scanner handles invites, mention spam, duplicates and links; anti-raid,
-  anti-nuke and the join gate feed the same case coordinator.
+- The scanner handles invites, mention spam, duplicates, links, profanity and
+  zalgo; anti-raid, anti-nuke and the join gate feed the same case coordinator.
 - The link filter (pass 23) checks a local host blocklist and punycode labels,
   in `alert` or `delete` mode. `/mod links` lists the newest findings and
   `/mod review` closes one; no new command root.
+- The profanity/zalgo filter (pass 24) matches an operator-owned word list on
+  Unicode word edges and counts combining marks against a configurable
+  threshold. `/mod filters` is the content-filter review queue (link, profanity
+  and zalgo).
 - `/appeal` and the case-button appeal path add events; `/verify` clears
   quarantine.
 - Native AutoMod rules are built and synced only when explicitly enabled.
@@ -20,8 +24,8 @@ P2 core shipped in pass 05 (2026-11-01).
 ## Verified
 
 ```
-pnpm test                                  # 217 tests / 36 files, 36 suites
-pnpm vitest run modules/moderation        # 17 tests: link filter, raid, dry-run, /mod, appeal, verify, native plan
+pnpm test                                  # 224 tests / 36 files, 36 suites
+pnpm vitest run modules/moderation        # 24 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal, verify, native plan
 pnpm test -- packages/db/src/cases.test.ts # 2 PGlite case-store tests
 pnpm budget                                # 11/100, status OK
 pnpm build                                 # bot, worker, migrate artefacts
@@ -60,6 +64,23 @@ P7 link-filter evidence (pass 23):
   `https://example.com/docs` produced no #4. The process was in memory mode with
   the link filter seeded to `alert`.
 
+P7 profanity/zalgo evidence (pass 24):
+
+- `security.test.ts` covers off mode, whole-word matching (`ass` not `class`),
+  case-insensitive phrases with flexible whitespace, delete mode, a zalgo
+  threshold hit, and below-threshold/disabled zalgo.
+- `mod.test.ts` proves `/mod filters` lists `automod.profanity` and
+  `automod.zalgo` cases without calling an action.
+- **Live 2026-11-01 (safe seed):** `pineapple` produced a profanity case and a
+  16-mark string produced a zalgo case; both were `alerted`, `!mod filters`
+  listed them, and `!mod review case=2` changed the profanity case to
+  `reviewed`. An ordinary `classic assignment and apple pie` message produced no
+  case. The blocklisted link in the same run stayed in the channel.
+- **Live delete proof (temporary seed):** with `dryRun: false` and
+  `links: "delete"`, the blocked message ID returned `10008: Unknown Message`
+  after the bot handled it, while `!mod links` still showed the open case. The
+  final seed is restored to `alert`.
+
 ## Proven vs still needs a live gateway
 
 | Claim | Proven here? | How to close |
@@ -70,9 +91,11 @@ P7 link-filter evidence (pass 23):
 | Postgres case numbering/events | Yes, PGlite | Run against a Postgres server |
 | Discord ban/kick/timeout/purge/lock | No | A live guild with the bot's permissions |
 | Native AutoMod sync | Plan tested; adapter not run | Enable `nativeAutoMod.sync` in staging |
-| Gateway joins/messages/audit events | Messages yes (link filter live); joins/audit no | A live guild with privileged intents |
+| Gateway joins/messages/audit events | Messages yes (link/profanity/zalgo live); joins/audit no | A live guild with privileged intents |
 | Link filter on a real message | Yes, live with the dev marker in `#ai-chat` | Repeat with a human author in staging |
-| Link-filter delete action | No; live run used `alert` mode | Send a disposable blocked link in staging with `links: "delete"` |
+| Link-filter delete action | Yes: temporary `dryRun: false` + `links: "delete"`; Discord returned `10008: Unknown Message` and the case survived | Re-run on a staging guild with a disposable message |
+| Profanity / zalgo findings | Yes, live with the safe alert seed; `/mod filters` and `/mod review` | Repeat with a human author in staging |
+| Profanity/zalgo delete action | No; live run used `alert` mode | Send a disposable fixture in staging with `dryRun: false` |
 | Bot authors ignored outside the marker | Yes, adapter test | Production has no marker option at all |
 | Join-gate timeout expiry | Not wired | Scheduled job; see known limitations |
 
@@ -93,18 +116,25 @@ No document claims a live Discord run for the unproven rows.
 - The link blocklist is host-only: no paths, wildcards, regex, remote reputation,
   allow-list or bare-domain parsing. A legitimate internationalised domain is
   flagged as punycode until an allow-list exists.
-- `/mod links` reads the newest 25 cases; it is a review aid, not an export.
-- The live link-filter run used `alert` mode; the `delete` branch shares the
-  coordinator path with the live-tested invite filter but was not itself run live.
+- `/mod links` and `/mod filters` read the newest 25 cases; they are review aids,
+  not exports.
+- Word matching is boundary-aware by design: `pineapple` does not match
+  `pineapples`, and leetspeak or homoglyph obfuscation is not normalised.
+- The zalgo threshold is a heuristic; scripts with many legitimate combining
+  marks can trip it. It is configurable and can be disabled separately.
+- Profanity and zalgo were live-tested in `alert` mode; their `delete` branch
+  shares the coordinator path with the live link delete proof but was not itself
+  run live.
+- There is no false-positive report or per-rule analytics yet.
 - Live ban/kick/timeout/purge API calls, button interactions and join/audit
-  gateway events remain unverified; message events now have a live link-filter
-  run.
+  gateway events remain unverified; message events now have live link, delete,
+  profanity and zalgo runs.
 
 ## Next
 
 - Staging run with a token: replay joins/messages/webhook and record receipts.
-- Run the link filter in `delete` mode with a disposable message and record the
-  case; consider an allow-list for legitimate punycode domains.
+- Consider an allow-list for legitimate punycode domains and a per-guild word
+  policy; `automod.false-positive-report` is the next review gap.
 - Add the join-gate expiry job and temp-ban/temp-role expiry on the worker.
 - P3: link tickets and levels to the same case/case-event service.
 

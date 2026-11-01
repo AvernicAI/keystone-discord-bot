@@ -270,6 +270,91 @@ describe("link filter", () => {
   });
 });
 
+describe("profanity and zalgo filter", () => {
+  const event = (content: string) =>
+    ({
+      type: "message.create" as const,
+      guildId: `guild-words-${Math.random()}`,
+      channelId: "general",
+      messageId: "message-2",
+      userId: "member-2",
+      content,
+    }) as const;
+
+  it("does nothing when profanity is off", () => {
+    const engine = new SecurityEngine();
+    const settings = moderationSettingsSchema.parse({
+      automod: { bannedWords: ["pineapple"] },
+    });
+    expect(engine.evaluate(event("pineapple pizza"), settings, 1_000)).toEqual([]);
+  });
+
+  it("matches whole words, not substrings", () => {
+    const engine = new SecurityEngine();
+    const settings = moderationSettingsSchema.parse({
+      automod: { profanity: "alert", bannedWords: ["ass"] },
+    });
+    expect(engine.evaluate(event("a classic assignment"), settings, 1_000)).toEqual([]);
+
+    const findings = engine.evaluate(event("you ass"), settings, 1_000);
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      kind: "alert",
+      rule: "automod.profanity",
+      evidence: { match: "ass" },
+    });
+  });
+
+  it("is case-insensitive and keeps a phrase flexible", () => {
+    const engine = new SecurityEngine();
+    const settings = moderationSettingsSchema.parse({
+      automod: { profanity: "alert", bannedWords: ["bad phrase"] },
+    });
+    const findings = engine.evaluate(event("A BAD   phrase appears"), settings, 1_000);
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.evidence.match).toBe("BAD   phrase");
+  });
+
+  it("deletes in delete mode", () => {
+    const engine = new SecurityEngine();
+    const settings = moderationSettingsSchema.parse({
+      automod: { profanity: "delete", bannedWords: ["pineapple"] },
+    });
+    const findings = engine.evaluate(event("pineapple"), settings, 1_000);
+    expect(findings[0]).toMatchObject({
+      kind: "delete-message",
+      rule: "automod.profanity",
+      channelId: "general",
+      messageId: "message-2",
+    });
+  });
+
+  it("flags excessive combining marks as zalgo", () => {
+    const engine = new SecurityEngine();
+    const settings = moderationSettingsSchema.parse({
+      automod: { zalgo: "alert", zalgoThreshold: 3 },
+    });
+    const findings = engine.evaluate(event("z\u0338\u0338\u0338a"), settings, 1_000);
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      kind: "alert",
+      rule: "automod.zalgo",
+      evidence: { combiningMarks: 3, threshold: 3 },
+    });
+  });
+
+  it("leaves zalgo alone when the threshold is not met or the filter is off", () => {
+    const engine = new SecurityEngine();
+    const alerting = moderationSettingsSchema.parse({
+      automod: { zalgo: "alert", zalgoThreshold: 8 },
+    });
+    expect(engine.evaluate(event("z\u0338a"), alerting, 1_000)).toEqual([]);
+
+    const off = moderationSettingsSchema.parse({ automod: {} });
+    expect(engine.evaluate(event("z\u0338\u0338\u0338\u0338a"), off, 1_000)).toEqual([]);
+  });
+});
+
 describe("native AutoMod plan", () => {
   it("only manages prefixed rules and includes an alert action when a log channel is set", () => {
     const settings = moderationSettingsSchema.parse({
