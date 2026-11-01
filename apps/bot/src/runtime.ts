@@ -27,6 +27,7 @@ import {
   type MusicPort,
   type MusicStore,
   type CaseStore,
+  type MemberStore,
   type CommunityStore,
   type InviteStore,
 } from "@keystone/kernel";
@@ -34,6 +35,7 @@ import type { Env } from "@keystone/config";
 import {
   createIdempotencyStore,
   createCaseStore,
+  createMemberStore,
   createCommunityStore,
   createAiStore,
   createInviteStore,
@@ -50,6 +52,7 @@ import {
 import {
   CaseService,
   InMemoryCaseStore,
+  InMemoryMemberStore,
   SecurityCoordinator,
   SecurityEngine,
 } from "@keystone/module-moderation";
@@ -190,7 +193,10 @@ export async function createRuntime(
       },
     },
   );
-  const moderation: ModerationPort = { cases, actions: moderationActions };
+  const memberStore: MemberStore = database
+    ? createMemberStore(database)
+    : new InMemoryMemberStore();
+  const moderation: ModerationPort = { cases, actions: moderationActions, members: memberStore };
   const communityStore: CommunityStore = database
     ? createCommunityStore(database)
     : new InMemoryCommunityStore();

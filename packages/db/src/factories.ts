@@ -3,6 +3,7 @@ import type { PostgresHandle } from "./client";
 import { DrizzleSettingsRepository } from "./settings-repository";
 import { PostgresIdempotencyStore } from "./idempotency";
 import { DrizzleCaseStore } from "./case-store";
+import { DrizzleMemberStore } from "./member-store";
 import { DrizzleCommunityStore } from "./community-store";
 import { DrizzleAiStore } from "./ai-store";
 import { DrizzlePortabilityStore } from "./portability-store";
@@ -32,6 +33,10 @@ export function createIdempotencyStore(handle: PostgresHandle): PostgresIdempote
 
 export function createCaseStore(handle: PostgresHandle): DrizzleCaseStore {
   return new DrizzleCaseStore(handle.db as never);
+}
+
+export function createMemberStore(handle: PostgresHandle): DrizzleMemberStore {
+  return new DrizzleMemberStore(handle.db as never);
 }
 
 export function createCommunityStore(handle: PostgresHandle): DrizzleCommunityStore {

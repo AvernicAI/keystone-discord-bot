@@ -5,7 +5,7 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**17 roots · 115 subcommands · 132 total actions · 4 context menus · 17/100 global roots used.**
+**17 roots · 117 subcommands · 134 total actions · 4 context menus · 17/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
@@ -22,7 +22,7 @@ and appear under right-click → Apps.
 | `/export` | `setup` | 6 |
 | `/mod` | `moderation` | 14 |
 | `/appeal` | `moderation` | 2 |
-| `/verify` | `moderation` | 0 |
+| `/verify` | `moderation` | 2 |
 | `/rank` | `community` | 12 |
 | `/ticket` | `community` | 8 |
 | `/tools` | `community` | 24 |
@@ -124,9 +124,12 @@ Appeal a case against you, or check an appeal's status.
 
 ## `/verify`
 
-Complete the join gate and leave quarantine.
+Start the join gate or check your persisted verification status.
 
-No subcommands; the root has its own options.
+| Subcommand | Description | Options |
+| --- | --- | --- |
+| `/verify start` | Send yourself the verification button by DM. | — |
+| `/verify status` | Read your persisted verification and quarantine state. | — |
 
 ## `/rank`
 

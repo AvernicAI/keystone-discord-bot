@@ -117,8 +117,8 @@ export function appealCustomId(caseId: string): string {
   return `keystone:appeal:${caseId}`;
 }
 
-export function verifyCustomId(userId: string): string {
-  return `keystone:verify:${userId}`;
+export function verifyCustomId(guildId: string, userId: string): string {
+  return `keystone:verify:${guildId}:${userId}`;
 }
 
 export function appealButton(caseId: string): ActionRow {
@@ -135,13 +135,13 @@ export function appealButton(caseId: string): ActionRow {
   };
 }
 
-export function verifyButton(userId: string): ActionRow {
+export function verifyButton(guildId: string, userId: string): ActionRow {
   return {
     type: "action-row",
     components: [
       {
         type: "button",
-        customId: verifyCustomId(userId),
+        customId: verifyCustomId(guildId, userId),
         label: "Verify and join",
         style: "success",
       },

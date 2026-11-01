@@ -5,6 +5,8 @@ import {
   SettingsService,
   auditBudget,
   dispatchCommand,
+  type CommunityActions,
+  type CommunityStore,
   type ModerationActions,
   type ModerationActionResult,
   type ModerationNotice,
@@ -14,6 +16,7 @@ import { appeal } from "./commands/appeal";
 import { mod } from "./commands/mod";
 import { verify } from "./commands/verify";
 import { CaseService, InMemoryCaseStore, appealCustomId } from "./cases";
+import { InMemoryMemberStore } from "./members";
 import { moderationModule } from "./manifest";
 
 class RecordingActions implements ModerationActions {
@@ -83,6 +86,7 @@ function buildContext(options: OptionValues, userId = "mod-1") {
   const store = new InMemoryCaseStore();
   const cases = new CaseService(store);
   const actions = new RecordingActions();
+  const members = new InMemoryMemberStore();
   const interaction = new FakeInteraction({
     commandName: "mod",
     guildId: "guild-1",
@@ -95,9 +99,27 @@ function buildContext(options: OptionValues, userId = "mod-1") {
     interaction,
     moduleId: "moderation",
     settings: { dryRun: false, ...options },
-    moderation: { cases, actions },
+    moderation: { cases, actions, members },
   });
-  return { ctx, cases, actions, store };
+  return { ctx, cases, actions, store, members };
+}
+
+function communityWithDm(result: { ok: boolean; detail?: string } = { ok: true }) {
+  const dms: { userId: string; content?: string; customId?: string }[] = [];
+  const actions = {
+    async sendDM(
+      userId: string,
+      message: { content?: string; components?: { components: { customId: string }[] }[] },
+    ) {
+      dms.push({
+        userId,
+        content: message.content,
+        customId: message.components?.[0]?.components[0]?.customId,
+      });
+      return result.ok ? { ok: true, id: "dm-1" } : { ok: false, detail: result.detail };
+    },
+  } as unknown as CommunityActions;
+  return { port: { actions, store: {} as CommunityStore }, dms };
 }
 
 describe("moderation module", () => {
@@ -174,7 +196,7 @@ describe("moderation module", () => {
       interaction,
       moduleId: "moderation",
       settings: {},
-      moderation: { cases, actions },
+      moderation: { cases, actions, members: new InMemoryMemberStore() },
     });
 
     await mod.execute(ctx);
@@ -254,7 +276,7 @@ describe("moderation module", () => {
       interaction: targetInteraction,
       moduleId: "moderation",
       settings: { appealsEnabled: true },
-      moderation: { cases, actions: new RecordingActions() },
+      moderation: { cases, actions: new RecordingActions(), members: new InMemoryMemberStore() },
     });
     await appeal.execute(targetCtx);
 
@@ -272,7 +294,7 @@ describe("moderation module", () => {
       interaction: otherInteraction,
       moduleId: "moderation",
       settings: { appealsEnabled: true },
-      moderation: { cases, actions: new RecordingActions() },
+      moderation: { cases, actions: new RecordingActions(), members: new InMemoryMemberStore() },
     });
     await expect(appeal.execute(otherCtx)).rejects.toThrow(/only appeal a case against you/i);
   });
@@ -292,7 +314,7 @@ describe("moderation module", () => {
       }),
       moduleId: "moderation",
       settings: { appealsEnabled: true },
-      moderation: { cases, actions: new RecordingActions() },
+      moderation: { cases, actions: new RecordingActions(), members: new InMemoryMemberStore() },
     });
     await appeal.execute(openCtx);
     await cases.review(record.id, "mod-1");
@@ -308,7 +330,7 @@ describe("moderation module", () => {
       createTestContext({
         interaction: status,
         moduleId: "moderation",
-        moderation: { cases, actions: new RecordingActions() },
+        moderation: { cases, actions: new RecordingActions(), members: new InMemoryMemberStore() },
       }),
     );
 
@@ -332,7 +354,7 @@ describe("moderation module", () => {
       createTestContext({
         interaction: status,
         moduleId: "moderation",
-        moderation: { cases, actions: new RecordingActions() },
+        moderation: { cases, actions: new RecordingActions(), members: new InMemoryMemberStore() },
       }),
     );
     expect(status.lastReply?.content).toContain("No appeal events are on record");
@@ -356,30 +378,96 @@ describe("moderation module", () => {
         createTestContext({
           interaction: status,
           moduleId: "moderation",
-          moderation: { cases, actions: new RecordingActions() },
+          moderation: { cases, actions: new RecordingActions(), members: new InMemoryMemberStore() },
         }),
       ),
     ).rejects.toThrow(/not one of your cases/i);
   });
 
-  it("verifies a quarantined member through the join gate", async () => {
-    const { ctx, actions } = buildContext({});
+  it("starts verification with a DM button and leaves the member unverified", async () => {
+    const members = new InMemoryMemberStore();
+    const { port, dms } = communityWithDm();
     const verifyInteraction = new FakeInteraction({
       commandName: "verify",
       guildId: "guild-1",
       userId: "new-member",
-      options: {},
-    });
-    const verifyCtx = createTestContext({
-      interaction: verifyInteraction,
-      moduleId: "moderation",
-      settings: { joinGate: { enabled: true } },
-      moderation: { cases: new CaseService(new InMemoryCaseStore()), actions },
+      subcommand: "start",
     });
 
-    await verify.execute(verifyCtx);
-    expect(actions.calls).toContain("unquarantine");
-    expect(verifyInteraction.lastReply?.content).toContain("Verified");
-    expect(ctx.interaction.commandName).toBe("mod");
+    await verify.execute(
+      createTestContext({
+        interaction: verifyInteraction,
+        moduleId: "moderation",
+        settings: { joinGate: { enabled: true } },
+        moderation: {
+          cases: new CaseService(new InMemoryCaseStore()),
+          actions: new RecordingActions(),
+          members,
+        },
+        community: port,
+      }),
+    );
+
+    expect(dms).toHaveLength(1);
+    expect(dms[0]?.userId).toBe("new-member");
+    expect(dms[0]?.customId).toMatch(/^keystone:verify:guild-1:new-member$/);
+    expect(verifyInteraction.lastReply?.content).toContain("DMs");
+    expect(await members.get("guild-1", "new-member")).toBeUndefined();
+  });
+
+  it("refuses to start when the member's DMs are closed", async () => {
+    const { port } = communityWithDm({ ok: false, detail: "Cannot send messages to this user" });
+    const verifyInteraction = new FakeInteraction({
+      commandName: "verify",
+      guildId: "guild-1",
+      userId: "new-member",
+      subcommand: "start",
+    });
+
+    await expect(
+      verify.execute(
+        createTestContext({
+          interaction: verifyInteraction,
+          moduleId: "moderation",
+          settings: { joinGate: { enabled: true } },
+          moderation: {
+            cases: new CaseService(new InMemoryCaseStore()),
+            actions: new RecordingActions(),
+            members: new InMemoryMemberStore(),
+          },
+          community: port,
+        }),
+      ),
+    ).rejects.toThrow(/could not DM you.*Cannot send messages to this user/i);
+  });
+
+  it("reports the persisted status row rather than gateway presence", async () => {
+    const members = new InMemoryMemberStore();
+    await members.markVerified("guild-1", "new-member", "2026-11-01T00:00:00.000Z");
+    const status = new FakeInteraction({
+      commandName: "verify",
+      guildId: "guild-1",
+      userId: "new-member",
+      subcommand: "status",
+    });
+
+    await verify.execute(
+      createTestContext({
+        interaction: status,
+        moduleId: "moderation",
+        settings: { joinGate: { enabled: true } },
+        moderation: {
+          cases: new CaseService(new InMemoryCaseStore()),
+          actions: new RecordingActions(),
+          members,
+        },
+      }),
+    );
+
+    expect(status.lastReply?.content).toContain("Verified at 2026-11-01T00:00:00.000Z");
+    expect(status.lastReply?.embeds?.[0]?.footer?.text).toContain("members table");
+    expect(status.lastReply?.embeds?.[0]?.fields?.find((field) => field.name === "Quarantine record")?.value).toBe(
+      "not quarantined",
+    );
   });
 });

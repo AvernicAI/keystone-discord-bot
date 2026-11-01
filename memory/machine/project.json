@@ -6,13 +6,13 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-01",
   "phase": "P7",
-  "lastPass": "journal/2026-11-01-pass-35.md",
+  "lastPass": "journal/2026-11-01-pass-36.md",
   "metrics": {
     "commands": 17,
-    "subcommands": 115,
+    "subcommands": 117,
     "commandLimit": 100,
     "modules": 9,
-    "tests": 368
+    "tests": 371
   },
   "modules": [
     {

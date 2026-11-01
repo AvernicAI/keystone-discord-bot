@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ModerationActions } from "@keystone/kernel";
 import { createTestContext, FakeInteraction } from "@keystone/testing";
 import { CaseService, InMemoryCaseStore } from "./cases";
+import { InMemoryMemberStore } from "./members";
 import { reportMessage } from "./commands/report-message";
 import { caseHistory } from "./commands/case-history";
 
@@ -24,7 +25,7 @@ function buildReport(target: Partial<ConstructorParameters<typeof FakeInteractio
     interaction,
     moduleId: "moderation",
     settings: {},
-    moderation: { cases, actions },
+    moderation: { cases, actions, members: new InMemoryMemberStore() },
   });
   return { cases, interaction, ctx };
 }
@@ -85,7 +86,7 @@ describe("moderation context menus", () => {
       interaction,
       moduleId: "moderation",
       settings: {},
-      moderation: { cases, actions },
+      moderation: { cases, actions, members: new InMemoryMemberStore() },
     });
     await caseHistory.execute(ctx);
     expect(interaction.lastReply?.embeds?.[0]?.title).toContain("<@author-1>");

@@ -28,7 +28,11 @@ import { registerAiEvents } from "./ai-events";
 import { registerPrefixCommands } from "./prefix";
 import { createDiscordAttachmentReader, createDiscordExportFacts } from "./export-discord";
 import { LoggingService } from "@keystone/module-logging";
-import { buildNativeAutoModPlan, moderationSettingsSchema } from "@keystone/module-moderation";
+import {
+  buildNativeAutoModPlan,
+  completeVerification,
+  moderationSettingsSchema,
+} from "@keystone/module-moderation";
 
 async function main(): Promise<void> {
   const env = loadEnv();
@@ -188,10 +192,11 @@ async function main(): Promise<void> {
   });
 
   client.on(Events.InteractionCreate, (interaction) => {
-    if (!interaction.isButton() || !interaction.guildId) return;
+    if (!interaction.isButton()) return;
     const guildId = interaction.guildId;
 
     if (interaction.customId.startsWith("keystone:appeal:")) {
+      if (!guildId) return;
       const caseId = interaction.customId.slice("keystone:appeal:".length);
       void (async () => {
         try {
@@ -222,32 +227,41 @@ async function main(): Promise<void> {
     }
 
     if (interaction.customId.startsWith("keystone:verify:")) {
-      const userId = interaction.customId.slice("keystone:verify:".length);
+      const rest = interaction.customId.slice("keystone:verify:".length);
+      const parts = rest.split(":");
+      // New buttons carry the guild id so the same button works in a DM; the
+      // one-part form is the legacy in-guild button and falls back to the
+      // interaction's guild.
+      const encodedGuildId = parts.length === 2 ? parts[0] : guildId;
+      const userId = parts.length === 2 ? parts[1] : parts[0];
+      if (!encodedGuildId || !userId) return;
+      const ephemeral = interaction.guildId !== null;
+
       if (interaction.user.id !== userId) {
-        void interaction.reply({ content: "This verification belongs to another member.", ephemeral: true });
+        void interaction.reply({
+          content: "This verification belongs to another member.",
+          ephemeral,
+        });
         return;
       }
       void (async () => {
         try {
           const settings = moderationSettingsSchema.parse(
-            await runtime.settings.get(guildId, "moderation"),
+            await runtime.settings.get(encodedGuildId, "moderation"),
           );
-          const result = await runtime.moderation.actions.unquarantine(
-            guildId,
+          const outcome = await completeVerification({
+            guildId: encodedGuildId,
             userId,
-            "Verification button completed",
-            settings.quarantineRoleId,
-          );
-          await interaction.reply({
-            content: result.ok
-              ? "Verified. Quarantine has been lifted."
-              : `Could not verify: ${result.detail ?? "unknown error"}`,
-            ephemeral: true,
+            actorId: interaction.user.id,
+            settings,
+            members: runtime.moderation.members,
+            actions: runtime.moderation.actions,
           });
+          await interaction.reply({ content: outcome.message, ephemeral });
         } catch (error) {
           await interaction.reply({
             content: error instanceof Error ? error.message : "Could not verify you.",
-            ephemeral: true,
+            ephemeral,
           });
         }
       })();

@@ -24,9 +24,9 @@ P1 complete; `/config` added in pass 30 and `/export` in pass 31 (2026-11-01).
 ```text
 pnpm typecheck
 pnpm vitest run modules/setup/src   # 27 tests / 3 files
-pnpm test                           # 360 tests / 56 files
-pnpm budget                         # 17/100 roots · 115 subcommands · 4 context menus
-pnpm commands:doctor                # Registry 17 roots · 115 subcommands · 4 context menus
+pnpm test                           # 371 tests / 57 files
+pnpm budget                         # 17/100 roots · 117 subcommands · 4 context menus
+pnpm commands:doctor                # Registry 17 roots · 117 subcommands · 4 context menus
 ```
 
 P1 exit evidence for `/setup`:

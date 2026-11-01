@@ -456,6 +456,19 @@
         "budget": "17/100 roots · 115 subcommands · 4 context menus",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-36",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Verify hub, the saved plan's last two names: `/verify start | status` replaces the optionless root. `start` parses the join-gate settings, refuses an already-verified member, refuses a record that is not quarantined, and sends the existing verification button by DM; a DM failure is an explicit refusal that names the cause. `status` reads a new `MemberStore` over the existing `members` table (`guild_id`, `user_id`, `joined_at`, `quarantined`, `verified_at`) instead of gateway roles. The shared `completeVerification` path performs the quarantine action first and writes `verified_at` only after it succeeds; the in-guild legacy button and the DM button use the same path. One in-memory store, one Drizzle store, no migration. Live memory mode: `!verify status` read no record, `!verify start` refused with the exact DM error, a second status still read no record; `commands:doctor` reports 17 roots / 117 subcommands / 4 menus with no drift. The MCP bot cannot receive the DM or click the button, so completion is test-covered and not claimed live. Tests 371 / 57 files; .env DATABASE_URL and REDIS_URL still ECONNREFUSED.",
+      "journal": "journal/2026-11-01-pass-36.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "371",
+        "budget": "17/100 roots · 117 subcommands · 4 context menus",
+        "memory": "current"
+      }
     }
   ]
 }

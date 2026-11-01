@@ -146,12 +146,12 @@ same interfaces. No module changes when a port changes.
 **Gap audit (passes 34–35, 2026-11-01):** the "18 roots / 160 subcommands" figure
 in the plan handoff has no per-root list in this repository. This table is the
 only saved allocation list; it names **12 roots / 59 subcommands**, not 160, and
-does not name an 18th root. The live registry now has **17 roots / 115
+does not name an 18th root. The live registry now has **17 roots / 117
 subcommands** (see [[01-Mission/Command-Catalog|Command-Catalog]]); 47 names in
-the 160 figure remain unaccounted for. `/setup` and `/appeal` are complete; the
-only named plan gap left is `/verify start | status` (two names). Do not invent
-the missing names or an 18th root: the generated catalog and this table are the
-evidence.
+the 160 figure remain unaccounted for. Every name in this saved table is now
+registered: `/setup`, `/appeal` and `/verify` were the last gaps, and `/verify
+start | status` shipped in pass 36. Do not invent the missing 47 names or an
+18th root: the generated catalog and this table are the evidence.
 
 | Root | Subcommands | Replaces |
 | --- | --- | --- |
@@ -165,7 +165,7 @@ evidence.
 | `/logging` | setup, channel, events, status, retention, export, disable | Dyno/Carl audit logging |
 | `/appeal` | open, status | nobody (our edge) — **shipped pass 35** |
 | `/export` | guild, user, import, delete, drift, rollback | nobody (our edge) |
-| `/verify` | start, status | Security Bot |
+| `/verify` | start, status | Security Bot — **shipped pass 36** |
 | `/music` | play, queue, stop | BYO Lavalink |
 
 ## Phases

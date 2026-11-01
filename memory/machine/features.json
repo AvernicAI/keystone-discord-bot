@@ -551,9 +551,10 @@
           "phase": "P2",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "Button + timeout",
+          "note": "Persisted members row; /verify start sends the DM button after prerequisite checks, status reads the row; completion not live-proven",
           "evidence": [
-            "modules/moderation/src/security.test.ts"
+            "modules/moderation/src/mod.test.ts",
+            "packages/db/src/member-store.test.ts"
           ],
           "liveVerified": false
         },
@@ -1653,7 +1654,7 @@
           "phase": "P7",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "17 roots expose 115 real Discord subcommands instead of hidden flat action options. /help reads the live registry, the catalog is generated, boot sync compares the full option tree, commands:doctor reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for /mod ban. /appeal open | status shipped in pass 35. Gateway InteractionCreate remains human-only.",
+          "note": "17 roots expose 117 real Discord subcommands instead of hidden flat action options. /help reads the live registry, the catalog is generated, boot sync compares the full option tree, commands:doctor reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for /mod ban. /appeal open | status and /verify start | status shipped in passes 35-36. Gateway InteractionCreate remains human-only.",
           "evidence": [
             "packages/kernel/src/registry.test.ts",
             "apps/bot/src/adapt.test.ts",

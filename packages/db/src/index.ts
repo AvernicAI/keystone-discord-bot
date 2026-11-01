@@ -4,6 +4,7 @@ export * from "./migrator";
 export * from "./settings-repository";
 export * from "./idempotency";
 export * from "./case-store";
+export * from "./member-store";
 export * from "./community-store";
 export * from "./ai-store";
 export * from "./health";

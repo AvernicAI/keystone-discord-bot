@@ -12,9 +12,13 @@
    `status` reads the event log, not the case state.
 5. `packages/db/src/case-store.ts` + `migrations/0003-case-counters.ts` — the
    atomic case-number allocation and `listEvents`, the append-only history read.
-6. `apps/bot/src/moderation-actions.ts` — permission prechecks and the only file
+6. `modules/moderation/src/commands/verify.ts` + `verification.ts` + `members.ts`
+   — the two-subcommand hub, the one completion path, and the state port.
+7. `packages/db/src/member-store.ts` — the SQL upsert over the existing
+   `members` table, including why the join time is preserved.
+8. `apps/bot/src/moderation-actions.ts` — permission prechecks and the only file
    that turns a case action into a Discord call.
-7. `apps/bot/src/moderation-events.ts` — the gateway-to-structural-event seam.
+9. `apps/bot/src/moderation-events.ts` — the gateway-to-structural-event seam.
 
 ## The idea to take away
 
@@ -121,6 +125,36 @@ action with no record — exactly the failure the case model exists to prevent.
 The second likely mistake is treating a JSON evidence blob as an archive. Keep
 the trigger slice; do not start storing every message "just in case". The
 retention table and the data-ownership promise are part of the design.
+
+## Verification is a state machine, not a role lookup
+
+A join gate is easy to fake. The tempting implementation is: if the member has
+the quarantine role, remove it and say "verified". That reads the gateway, is
+wrong after a role rename, and leaves no record of when verification happened.
+
+Keystone treats verification as **persisted state with one completion path**.
+`members` already existed in the portability schema, so the new `MemberStore` is
+a narrow port over it rather than a new table: read one row, and upsert
+`verified_at` while clearing `quarantined`. The in-memory and SQL versions are
+the same contract, which is why the command tests and the PGlite test assert the
+same fields.
+
+`completeVerification` enforces the order that matters: check the actor and
+settings, perform the quarantine action, **then** write `verified_at`. If the
+role removal fails, the write never happens and `/verify status` keeps telling
+the truth. The DM button and the legacy in-guild button both call this function,
+so there is no second path that can drift.
+
+`/verify start` is deliberately not the completion. It exists to answer "can
+this member actually complete the flow right now?" It parses the settings,
+checks the persisted state, and sends the button by DM. A closed DM becomes a
+specific refusal that names the fix (`Open DMs from server members`), which is
+far more useful than a silent failure. `/verify status` then reads the row; it
+does not re-derive the answer from roles, and its footer says so.
+
+If you extend this, add a `quarantined_at` timestamp rather than inferring when
+the gate started. Do not let the timeout job call `markVerified`; expiry is a
+different outcome and needs its own event.
 
 ## Context menus are commands with a target
 

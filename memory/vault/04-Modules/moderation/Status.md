@@ -24,17 +24,23 @@ P2 core shipped in pass 05 (2026-11-01).
   and appends the existing `appealed` event; `status` reads the append-only
   `case_events` rows through `CaseStore.listEvents`, so a review that changes the
   case state cannot erase the appeal. The case-button path still calls
-  `appealById`; `/verify` clears quarantine.
+  `appealById`.
+- `/verify start | status` is a hub (pass 36). `start` checks the join gate,
+  persisted state and DM-ability, then sends the existing verification button
+  by DM; `status` reads the persisted `members` row through `MemberStore`, not
+  gateway roles. The in-guild and DM buttons share `completeVerification`, which
+  performs the quarantine action before writing `verified_at`.
 - Native AutoMod rules are built and synced only when explicitly enabled.
 - Dry-run is the default and produces alerts/cases without punitive calls.
 
 ## Verified
 
 ```
-pnpm test                                  # 368 tests / 56 files
-pnpm vitest run modules/moderation        # 31 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal/status, verify, native plan, context menus
+pnpm test                                  # 371 tests / 57 files
+pnpm vitest run modules/moderation        # 33 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal/status, verify start/status, native plan, context menus
 pnpm test -- packages/db/src/cases.test.ts # 2 PGlite case-store tests, including listEvents
-pnpm budget                                # 17/100 roots · 115 subcommands · 4 context menus, status OK
+pnpm test -- packages/db/src/member-store.test.ts # PGlite member row + verification upsert
+pnpm budget                                # 17/100 roots · 117 subcommands · 4 context menus, status OK
 pnpm build                                 # bot, worker, migrate artefacts
 ```
 
@@ -52,7 +58,10 @@ P2 exit evidence:
 - `/appeal open` only accepts the target's own case and appends an `appealed`
   event. `/appeal status` keeps reporting that event after `CaseService.review`
   changes the case state, and refuses a case that is not the caller's.
-  `/verify` calls the same quarantine action the button uses.
+  `/verify start` sends exactly one DM with the `keystone:verify:<guild>:<user>`
+  button and leaves the member unverified; a closed DM is refused with the
+  provider's detail. `/verify status` reads a persisted row, including a
+  completed verification.
 - `DrizzleCaseStore` allocates 1..8 without duplicates under `Promise.all` on
   PGlite, persists cases/events/state and isolates guilds.
 
@@ -119,6 +128,25 @@ P7 profanity/zalgo evidence (pass 24):
   subcommand is rejected before any side effect. This is not a gateway run and
   does not replace a live ban.
 
+P7 verify-hub evidence (pass 36):
+
+- `mod.test.ts` proves `start` sends one DM with the guild-scoped verify button
+  and writes no member row, a closed DM throws the explicit refusal, and
+  `status` reads `2026-11-01T00:00:00.000Z` from the row and reports
+  `not quarantined` with the `members table` footer.
+- `packages/db/src/member-store.test.ts` proves the SQL adapter upserts one
+  `members` row, clears `quarantined`, preserves `joined_at`, and advances
+  `verified_at` on a second completion.
+- **Live 2026-11-01:** `!config set module=moderation key=joinGate.enabled
+  value=true` enabled the gate; `!verify status` returned
+  `Verification status · No verification record.`; `!verify start` returned
+  `I could not DM you (Cannot send messages to this user). Open DMs from server
+  members and run /verify start again.`; a second `!verify status` still
+  returned no record. The MCP account is a bot and cannot receive a DM or click
+  the button, so completion was **not** invoked live.
+- `pnpm commands:doctor` read Discord and reported 17 roots / 117 subcommands /
+  4 context menus with no drift.
+
 P7 appeal-hub evidence (pass 35):
 
 - `mod.test.ts` registers `/appeal` with exactly `open` and `status`, opens an
@@ -148,6 +176,7 @@ P7 appeal-hub evidence (pass 35):
 | Gateway joins/messages/audit events | Messages yes (link/profanity/zalgo live); joins/audit no | A live guild with privileged intents |
 | Link filter on a real message | Yes, live with the dev marker in `#ai-chat` | Repeat with a human author in staging |
 | Appeal status after review | Yes, live: `#1` stayed `1 appeal` after `!mod review` changed its state to `reviewed`; another member's case was refused | Repeat with a human appellant and moderator |
+| Join-gate start/status and DM refusal | Yes, live in memory mode; the persisted row is PGlite-tested | Repeat `/verify start` with a human member who has DMs open |
 | Link-filter delete action | Yes: temporary `dryRun: false` + `links: "delete"`; Discord returned `10008: Unknown Message` and the case survived | Re-run on a staging guild with a disposable message |
 | Profanity / zalgo findings | Yes, live with the safe alert seed; `/mod filters` and `/mod review` | Repeat with a human author in staging |
 | Profanity/zalgo delete action | Profanity yes (live 2026-11-01, message gone, case kept); zalgo no | Send a disposable zalgo fixture in staging with `dryRun: false` |
@@ -159,7 +188,9 @@ No document claims a live Discord run for the unproven rows.
 ## Known limitations
 
 - `joinGate.timeoutMinutes` is stored and shown, but no expiry job yet; a
-  quarantined member stays until `/verify` or a moderator acts.
+  quarantined member stays until the verification button is clicked or a
+  moderator acts. The MCP bot cannot complete the DM flow, so that click is not
+  live-proven.
 - Temporary bans and temporary roles are not separate actions yet. The case
   model is ready for an expiry job; P2's exit demo does not require it.
 - Case export (JSON/CSV) is not built; the ledger is queryable and P5 owns the
@@ -181,9 +212,9 @@ No document claims a live Discord run for the unproven rows.
   then proven live with a temporary seed. Zalgo `delete` still shares the
   coordinator path but has not itself been run live.
 - There is no false-positive report or per-rule analytics yet.
-- Live ban/kick/timeout/purge API calls, button interactions and join/audit
-  gateway events remain unverified; message events now have live link/profanity
-  delete and alert runs for link, profanity and zalgo.
+- Live ban/kick/timeout/purge API calls, verification button clicks and
+  join/audit gateway events remain unverified; message events now have live
+  link/profanity delete and alert runs for link, profanity and zalgo.
 - The two context menus are registered but were not right-clicked live; their
   handlers are covered by adapter and command tests. An `alert`-only view of a
   case is not the same as a Discord client invocation.

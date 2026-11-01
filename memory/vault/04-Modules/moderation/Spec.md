@@ -14,11 +14,12 @@ reason, evidence and an appeal path. The default is dry-run.
 | --- | --- | --- | --- |
 | `/mod` | subcommands `ban`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `links`, `filters`, `review`; each declares only the options it needs (`user`, `reason`, `case`, `duration`, `limit`, `channel`, `dry_run`) | guild-only, `ModerateMembers` | Executes one manual action or reads the case/review queue. `links` lists link findings, `filters` lists link/profanity/zalgo findings, and `review` closes the loop. Every enforced action opens a case before the external call. |
 | `/appeal` | subcommands `open` (`case` required, `message`) and `status` (optional `case`) | guild-only, 5 s cooldown | `open` appends an `appealed` event to the caller's own case; never edits history or reverses automatically. `status` reads the append-only appeal events and the current case state, and refuses a case that is not the caller's. |
-| `/verify` | none | guild-only | Completes the join gate by removing the quarantine role. A command fallback for the verification button. |
+| `/verify` | subcommands `start` and `status` | guild-only, 5 s cooldown | `start` checks the join gate, persisted state and DM-ability, then sends the existing verification button by DM; `status` reads the persisted `members` row. Neither subcommand marks a member verified directly. |
 
 `/mod` is a hub: those fourteen subcommands cost **one** global root. The module
 spends 3 of Discord's 100 roots (`/mod`, `/appeal`, `/verify`); `/appeal`'s two
-subcommands and `/mod`'s fourteen cost no extra slots.
+subcommands, `/verify`'s two subcommands and `/mod`'s fourteen cost no extra
+slots.
 
 ### Context menus
 
@@ -95,6 +96,27 @@ source of truth.
   truncated to 500 characters; a profanity finding keeps only the matched word;
   a zalgo finding keeps only the mark count. No general message archive is
   created.
+
+## Join gate and verification
+
+The join gate is state, not a role check. `members` stores one row per guild and
+member: `joined_at`, `quarantined` and `verified_at`. `MemberStore` is the only
+port over it; the SQL adapter is a real upsert on `(guild_id, user_id)` and the
+in-memory adapter is the local-mode implementation.
+
+There is exactly **one completion path**: `completeVerification`. The DM button
+and the legacy in-guild button both call it. It checks the actor, the gate
+setting and the existing `verified_at`, performs the existing quarantine action,
+and only then writes `verified_at` and clears the flag. If Discord fails, no
+row is written, so `/verify status` cannot report a verification that never
+happened.
+
+`/verify start` is a prerequisite check plus delivery, not a bypass. It rejects
+an already-verified member, rejects a record that is not quarantined, refuses
+when the join gate is off, and turns a closed-DM error into a specific sentence
+instead of a generic failure. `/verify status` reads the row and prints the join
+gate state, quarantine flag, join time and next step; the footer says the
+`members` table is the source. Gateway roles are deliberately not consulted.
 
 ## Link filter
 
@@ -188,5 +210,7 @@ permission **before** the Discord call.
   stripped; ordinary member messages still reach the coordinator.
 - `packages/db/src/cases.test.ts` — PGlite case numbering, events, state and
   concurrent allocation.
-- `pnpm budget` — 17/100 roots with all shipped commands (115 subcommands) and
+- `packages/db/src/member-store.test.ts` — PGlite proves one `members` row, the
+  verification upsert, the preserved join time and the cleared quarantine flag.
+- `pnpm budget` — 17/100 roots with all shipped commands (117 subcommands) and
   4 context menus on their own 15 + 15 budget.

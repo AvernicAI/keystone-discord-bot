@@ -2,6 +2,8 @@ export { moderationModule } from "./manifest";
 export { mod } from "./commands/mod";
 export { appeal } from "./commands/appeal";
 export { verify } from "./commands/verify";
+export { InMemoryMemberStore } from "./members";
+export { completeVerification, type VerificationOutcome } from "./verification";
 export {
   CaseService,
   InMemoryCaseStore,

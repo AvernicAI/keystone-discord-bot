@@ -418,6 +418,26 @@ export interface CaseStore {
   updateState(caseId: string, state: ModerationCaseState): Promise<void>;
 }
 
+/**
+ * Persisted member state for the join gate. `members` is deliberately small:
+ * whether the member is quarantined and when verification last happened. It is
+ * not a gateway presence cache and must not be rebuilt from roles on read.
+ */
+export interface MemberVerification {
+  readonly guildId: string;
+  readonly userId: string;
+  readonly joinedAt?: string;
+  readonly quarantined: boolean;
+  readonly verifiedAt?: string;
+  readonly updatedAt?: string;
+}
+
+export interface MemberStore {
+  get(guildId: string, userId: string): Promise<MemberVerification | undefined>;
+  /** Upsert a completed verification; clears the persisted quarantine flag. */
+  markVerified(guildId: string, userId: string, verifiedAt: string): Promise<MemberVerification>;
+}
+
 export interface ModerationActionResult {
   readonly ok: boolean;
   readonly detail?: string;
@@ -454,6 +474,7 @@ export interface ModerationActions {
 export interface ModerationPort {
   readonly cases: CaseServicePort;
   readonly actions: ModerationActions;
+  readonly members: MemberStore;
 }
 
 /** The case operations commands, security rules and appeals share. */

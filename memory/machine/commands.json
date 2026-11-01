@@ -3,8 +3,8 @@
   "updatedAt": "2026-11-01",
   "source": "packages/kernel ModuleRegistry catalog()",
   "roots": 17,
-  "subcommands": 115,
-  "actions": 132,
+  "subcommands": 117,
+  "actions": 134,
   "contextMenus": 4,
   "userContextMenus": 2,
   "messageContextMenus": 2,
@@ -335,9 +335,20 @@
     {
       "name": "verify",
       "moduleId": "moderation",
-      "description": "Complete the join gate and leave quarantine.",
+      "description": "Start the join gate or check your persisted verification status.",
       "options": [],
-      "subcommands": []
+      "subcommands": [
+        {
+          "name": "start",
+          "description": "Send yourself the verification button by DM.",
+          "options": []
+        },
+        {
+          "name": "status",
+          "description": "Read your persisted verification and quarantine state.",
+          "options": []
+        }
+      ]
     },
     {
       "name": "rank",

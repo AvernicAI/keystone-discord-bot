@@ -2,21 +2,29 @@
 
 ## Now
 
-**P7 `/appeal` is a real two-subcommand hub and live-proven** (pass 35,
-2026-11-01): the saved plan's last-but-one named gap, `/appeal open | status`, is
-closed. `open` keeps the same target-only guard and appends the existing
-`appealed` event; `status` reads those events through the new
-`CaseStore.listEvents`, so a review that changes the case state cannot erase the
-appeal. The root keeps its global slot, adds two real subcommands and no table.
-Live in `#ai-chat`: a warning case against the MCP author was opened, `!appeal
-open case=1` appended the event, `!appeal status case=1` printed **#1 · warn ·
-appealed · 1 appeal**, `!mod review case=1` changed the state, and the next
-status printed **#1 · warn · reviewed · 1 appeal**. A case against the bot was
-refused with **Case #2 is not one of your cases.**; `commands:doctor` read
-Discord and reported **17 roots / 115 subcommands**. The MCP cannot invoke slash
-or render embeds; the embed fields are covered by `mod.test.ts`, while the
-plain-text summary is the live-read part. The only named plan gap left is
-`/verify start | status`. See [[04-Modules/moderation/Status|Moderation status]].
+**P7 `/verify` is a real two-subcommand hub and live-proven for its checks**
+(pass 36, 2026-11-01): the saved plan's last two names, `/verify start | status`,
+are registered, so the plan table is complete at **59 of 59**. `start` parses the
+join gate, refuses an already-verified member, refuses a record that is not
+quarantined, and sends the existing verification button by DM; a closed DM is a
+specific refusal. `status` reads a persisted `members` row through the new
+`MemberStore` instead of gateway roles. The in-guild and DM buttons share one
+`completeVerification` path, which performs the quarantine action before it
+writes `verified_at`. No new table or migration; the row already existed.
+Live in `#ai-chat`: `!verify status` read **No verification record**,
+`!verify start` returned the exact DM refusal, and a second status still read no
+record. The MCP account is a bot and cannot receive the DM or click the button,
+so completion is covered by command and PGlite tests, not claimed live.
+`commands:doctor` read Discord and reported **17 roots / 117 subcommands / 4
+context menus** with no drift. See
+[[04-Modules/moderation/Status|Moderation status]].
+
+**P7 `/appeal` remains live-proven** (pass 35): `open` keeps the target-only
+guard and appends the existing `appealed` event; `status` reads those events
+through `CaseStore.listEvents`, so a review that changes the case state cannot
+erase the appeal. Live: case #1 read `#1 · warn · appealed · 1 appeal`, then
+`#1 · warn · reviewed · 1 appeal` after `!mod review`; a case against the bot was
+refused with `Case #2 is not one of your cases.`
 
 **P7 `/setup` is a real onboarding hub; the 160-subcommand target is corrected**
 (pass 34, 2026-11-01): `/setup status | module | verify | import | reset` replaces
@@ -104,9 +112,10 @@ subcommands, no module, no table and no second settings store. Live in
 `#ai-chat`: `moderation.automod.links` went `alert → delete → alert`, with a
 read-back after each write; `bogus` returned `automod.links: Invalid enum value`
 and the next read still returned `"alert"`. Pass 31 added `/export` and pass 32 added
-`/music` and pass 35 split `/appeal` into two, so Discord now reports **17 roots /
-115 subcommands / 132 actions** including `config`, `export`, `music`, the five
-`/setup` actions and the two `/appeal` actions. The MCP cannot invoke slash
+`/music`, pass 35 split `/appeal` into two and pass 36 split `/verify` into two,
+so Discord now reports **17 roots / 117 subcommands / 134 actions** including
+`config`, `export`, `music`, the five `/setup` actions, the two `/appeal`
+actions and the two `/verify` actions. The MCP cannot invoke slash
 commands or render embeds, so the live proof is the message bridge with
 plain-text replies; list/export embeds are covered by a command test. See
 [[04-Modules/setup/Spec|Setup spec]] and [[04-Modules/setup/Status|Setup status]].
@@ -124,8 +133,8 @@ one MCP edit plus one delete appeared as **1 edited / 1 deleted**. Command runs
 rose 0 → 3 → 4 as bridge commands completed; the current invocation is recorded
 after its reply. At pass 29 Discord reported **14 roots / 90 subcommands / 104
 actions**; pass 30 added `/config`, pass 31 added `/export` and pass 32 added
-`/music` and pass 35 split `/appeal` into two, so the current ledger is **17 /
-115 / 132**.
+`/music`, pass 35 split `/appeal` into two and pass 36 split `/verify` into two,
+so the current ledger is **17 / 117 / 134**.
 The MCP text reader does not render embeds, so the live transcript proves the
 summary text while the embed fields and JSON export are covered by a command
 test. See [[04-Modules/analytics/Spec|Analytics spec]] and
@@ -203,15 +212,16 @@ option tree instead of names alone. Pass 28 added `/logging` with seven
 subcommands, bringing the ledger to **13 roots · 84 subcommands · 97 actions** at
 that point. Pass 29 added `/analytics` with six subcommands, pass 30 added
 `/config` with four, pass 31 added `/export` with six and pass 32 added `/music`
-with eight, pass 34 split `/setup` into five, and pass 35 split `/appeal` into
-two, so the current ledger is **17 roots · 115 subcommands · 132 actions**. After pass 30 the boot found
+with eight, pass 34 split `/setup` into five, pass 35 split `/appeal` into two,
+and pass 36 split `/verify` into two, so the current ledger is **17 roots · 117
+subcommands · 134 actions**. After pass 30 the boot found
 `config` missing, cleared the global set once and re-registered it; pass 31's
 boot found only `export` missing and did the same. Pass 33 now models context
 menus as application commands with their own type and budget, and its boot found
 all four menus missing and re-registered 21 commands. `commands:doctor` now
-reports 17 roots / 115 subcommands plus 2 user and 2 message menus, including
-`analytics`, `logging`, `config`, `export`, `music`, the five `/setup` actions
-and the two `/appeal` actions. See
+reports 17 roots / 117 subcommands plus 2 user and 2 message menus, including
+`analytics`, `logging`, `config`, `export`, `music`, the five `/setup` actions,
+the two `/appeal` actions and the two `/verify` actions. See
 [[03-Architecture/Command-Budget|Command budget]] and
 [[03-Architecture/ADR/ADR-0003-command-budget]].
 
@@ -275,15 +285,15 @@ pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
 `!invites leaderboard` and `!invites who`. Pass 26 re-registered 12 roots /
 77 subcommands at the time; pass 28 added `/logging`, pass 29 added
 `/analytics`, pass 30 added `/config`, pass 31 added `/export` and pass 32 added
-`/music`, pass 34's `/setup` hub and pass 35's `/appeal` hub, so Discord's
-fetched shape now reports **17 roots / 115 subcommands** with no missing, extra
-or changed roots. The bridge
+`/music`, pass 34's `/setup` hub, pass 35's `/appeal` hub and pass 36's `/verify`
+hub, so Discord's fetched shape now reports **17 roots / 117 subcommands** with no
+missing, extra or changed roots. The bridge
 added `!help commands`, `!help browse`, `!help search query=ban`, `!mod history`,
 `!ai status`, `!logging status`, `!logging events`, `!logging retention`,
 `!logging export`, `!analytics overview`, `!analytics commands`, `!analytics
 messages`, `!config list`, `!config get`, `!config set`, `!export guild`, `!export user`,
-`!export drift`, `!music status | add | queue | play | remove | skip` and
-`!appeal open | status` to the live list. Pass 23
+`!export drift`, `!music status | add | queue | play | remove | skip`,
+`!appeal open | status` and `!verify start | status` to the live list. Pass 23
 added `!mod links` and a live link-filter proof: three marked MCP messages
 produced a blocklisted
 subdomain case, an apex case and a punycode case; `!mod review case=2` marked one
@@ -315,11 +325,11 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 368 tests / 56 files · budget 17/100 roots (115 subcommands · 132 actions · 4 context menus) · memory current
+pnpm check        exit 0 · typecheck 0 · 371 tests / 57 files · budget 17/100 roots (117 subcommands · 134 actions · 4 context menus) · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 17 roots / 115 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused
+live              2026-11-01 · AI Team#5758 · 2 guilds · 17 roots / 117 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start DM refusal → status still no record
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)
-live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set · !export guild · !export user · !export drift · !music status · !music add · !music queue · !music play · !music remove · !music skip · !appeal open · !appeal status
+live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set · !export guild · !export user · !export drift · !music status · !music add · !music queue · !music play · !music remove · !music skip · !appeal open · !appeal status · !verify start · !verify status
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
 live env blocker 2026-11-01 · DATABASE_URL localhost:5432 → ECONNREFUSED (4ms) · REDIS_URL localhost:6379 → ECONNREFUSED (1ms) · Docker/service absent
 live analytics    2026-11-01 · 2 stored audit rows = 2 logged events · 1 MCP edit + 1 delete = 1 edited / 1 deleted · command runs 0 → 3 → 4
@@ -376,9 +386,22 @@ read that file.
 | 3 | Status is member-scoped | `mod.test.ts`: another member's case throws `not one of your cases`; live `case=2` against the bot returned exactly that refusal | Unit + **live bridge** |
 | 4 | No appeal event means no invented appeal | `mod.test.ts`: a member with no appeals gets `No appeal events are on record`; the embed path renders `Appeals on record: 0` for a case that was never appealed | Unit |
 | 5 | The SQL history is append-only and ordered | `packages/db/src/cases.test.ts`: `DrizzleCaseStore.listEvents` returns the appended `appealed` event | **PGlite** |
-| 6 | One root, two subcommands, budget intact | `mod.test.ts` registry shape; `pnpm budget`: 17/100 roots, 115 subcommands | Registry + budget |
-| 7 | The live counts match Discord | `commands:doctor` read **17 roots / 115 subcommands / 4 context menus** with no drift | **Live Discord REST read** |
+| 6 | One root, two subcommands, budget intact | `mod.test.ts` registry shape; `pnpm budget`: 17/100 roots, 117 subcommands | Registry + budget |
+| 7 | The live counts match Discord | `commands:doctor` read **17 roots / 117 subcommands / 4 context menus** with no drift | **Live Discord REST read** |
 | 8 | The embed fields were read live | **Not performed** — the MCP text reader cannot render embeds; the plain-text summary was read back and the fields are covered by `mod.test.ts` | Not claimed |
+
+## P7 verify hub acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | `start` sends the button but never marks verified | `mod.test.ts`: one DM to the caller with `keystone:verify:guild-1:new-member`; `members.get` is still undefined | In-memory member store |
+| 2 | A closed DM is an explicit refusal | `mod.test.ts`: a failed `sendDM` throws `could not DM you` with the provider detail; live printed **Cannot send messages to this user** and the fix | Unit + **live bridge** |
+| 3 | `status` reads persisted state, not roles | `mod.test.ts`: a pre-written row is reported as `Verified at …` and `not quarantined`, with the `members table` footer | In-memory row |
+| 4 | The SQL adapter is a real upsert | `member-store.test.ts`: one `members` row, verification clears `quarantined`, `joined_at` is preserved, a second completion advances `verified_at` | **PGlite** |
+| 5 | One completion path | `verification.ts` is imported by the DM/in-guild button handler in `apps/bot/src/index.ts`; it performs `unquarantine` before writing the row | Code path + tests |
+| 6 | One root, two subcommands, budget intact | `mod.test.ts` registry shape; `pnpm budget`: 17/100 roots, 117 subcommands | Registry + budget |
+| 7 | The live counts match Discord | `commands:doctor` read **17 roots / 117 subcommands / 4 context menus** with no drift | **Live Discord REST read** |
+| 8 | A member completed verification live | **Not performed** — the MCP account is a bot; it cannot receive the DM or click the button. Tests cover the write path. | Not claimed |
 
 ## P8 music acceptance evidence
 
@@ -545,7 +568,7 @@ scoped API tokens remain open.
 | 3 | Core works without privileged intents | `INTENT_PROFILE=minimal` returns only non-privileged intents; `pnpm audit:intents` prints the disabled features | Registry + manifest tests |
 | 4 | `/setup` names disabled features | `modules/setup/src/setup.test.ts`: minimal profile shows `GuildMembers` consequence and the `INTENT_PROFILE=full` next step | Fake health probe, zero writes |
 | 5 | Optional intent contract is validated | `packages/kernel/src/registry.test.ts`: required/optional split, fallback join, duplicate rejection | Registry |
-| 6 | Memory cannot silently drift | `pnpm memory:check`: 115 features, 20 claims, 25 passes, 17 decisions, 4 generated pages, 347 wikilinks | Machine files + generated pages |
+| 6 | Memory cannot silently drift | `pnpm memory:check`: 123 features, 20 claims, 36 passes, 18 decisions, 4 generated pages, 388 wikilinks | Machine files + generated pages |
 | 7 | The plan is recorded | [[ADR-0012-required-and-optional-intents]], [[ADR-0013-roadmap-v2-portability-first]], [[ADR-0014-memory-v2-machine-truth]] | Vault check |
 
 ## P3 acceptance evidence
@@ -600,7 +623,7 @@ remain open.
 | 3 | Every action has reason and appeal | The same test asserts every case has a reason and every notification has a `keystone:appeal:` button; `/mod` test asserts the custom id | Recorder, not a live Discord button |
 | 4 | Dry-run is default and takes no punitive action | Default-settings test: zero action calls, every case `alerted`; `/mod` dry-run test: zero cases and zero action calls | Recorder |
 | 5 | `/mod` guarded and case-first | `modules/moderation/src/mod.test.ts`: dispatch blocks without `ModerateMembers`; enforced ban creates case/reason before the action; missing reason throws | Dispatch + fake action port |
-| 6 | Appeals and verification | `mod.test.ts`: target opens an appeal, event appended, other user rejected; `status` survives a state change and refuses another member's case; `/verify` calls `unquarantine` | In-memory case store + recorder + **live bridge** |
+| 6 | Appeals and verification | `mod.test.ts`: target opens an appeal, event appended, other user rejected; `status` survives a state change and refuses another member's case; `/verify start` sends the button without writing a row, `status` reads a persisted row | In-memory case/member stores + recorder + **live bridge** |
 | 7 | Native AutoMod plan | `security.test.ts`: two prefixed rules, alert action, disabled by default | Pure plan; Discord sync adapter unrun |
 | 8 | Records | this page, [[Roadmap]], [[ADR-0007-moderation-capability-port]], journal pass 05, `project.json` | Vault check |
 

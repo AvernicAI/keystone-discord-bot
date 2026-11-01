@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   CaseService,
   InMemoryCaseStore,
+  InMemoryMemberStore,
 } from "@keystone/module-moderation";
 import { aiDefaultSettings } from "./settings";
 import { InMemoryAiStore } from "./store";
@@ -109,7 +110,10 @@ describe("ai commands", () => {
       ["ManageGuild"],
       { enabled: true, explanations: true },
     );
-    await execute({ ...ctx, moderation: { cases, actions: {} as never } });
+    await execute({
+      ...ctx,
+      moderation: { cases, actions: {} as never, members: new InMemoryMemberStore() },
+    });
     expect(interaction.lastReply?.embeds?.[0]?.title).toContain(`Case #${record.caseNumber}`);
     expect((await cases.get("guild-a", record.caseNumber))?.state).toBe("open");
   });

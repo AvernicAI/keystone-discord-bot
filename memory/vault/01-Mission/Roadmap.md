@@ -206,9 +206,12 @@ split `/appeal` into `open | status`: `open` appends the existing appeal event,
 and `status` reads the append-only events through `CaseStore.listEvents`, so a
 review that changes the case state cannot erase the appeal. Live: case #1 read
 `warn · appealed · 1 appeal`, then `warn · reviewed · 1 appeal` after `!mod
-review`; another member's case was refused. The ledger is now **17 roots / 115
-subcommands / 132 actions / 4 context menus**. The only named plan gap left is
-`/verify start | status`. The rest of this phase is open.
+review`; another member's case was refused. Pass 36 then closed the last two
+named plan gaps: `/verify start` sends the verification button by DM after
+checking the join gate, persisted state and DM-ability, and `/verify status`
+reads the `members` row instead of gateway roles. The ledger is now **17 roots /
+117 subcommands / 134 actions / 4 context menus**, and every name in the saved
+plan table (59 of 59) is registered. The rest of this phase is open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.
@@ -216,7 +219,8 @@ subcommands / 132 actions / 4 context menus**. The only named plan gap left is
   goodbye messages, YouTube/Twitch/RSS feeds, temp ban/role expiry, join-gate
   expiry, panic mode, case export and `command_usage` retention. Invites, the
   link, profanity and zalgo filters, auto-responders, analytics and the four
-  context menus, the `/setup` hub and the `/appeal` hub are done (above).
+  context menus, the `/setup` hub, the `/appeal` hub and the `/verify` hub are
+  done (above).
 - `/export`, `/config`, `/help` and the `/music` saved queue shipped; BYO
   Lavalink playback is the open half of `/music`; command-budget audit remains a
   gate, now covering the separate context-menu budgets.

@@ -115,10 +115,16 @@ https://github.com/RNGBubba/keystone-discord-bot
   `case_events` through `CaseStore.listEvents`, so it still reports an appeal
   after a moderator changes the case state. Live: `#1 · warn · appealed · 1
   appeal` became `#1 · warn · reviewed · 1 appeal` after `!mod review`; another
-  member's case was refused. `/verify start | status` is the last named plan gap.
-- **Command tree** in repo (passes 26, 30, 31, 32, 33, 34 and 35): real Discord
+  member's case was refused.
+- **Verify hub** in repo and live-proven for its checks (pass 36): `/verify start
+  | status`. `start` checks the join gate, persisted state and DM-ability before
+  sending the existing verification button by DM; `status` reads the `members`
+  row, not gateway roles. Live: no record, then the exact DM refusal, then still
+  no record. The DM button click is covered by tests; the MCP bot cannot receive
+  it. The saved plan table is now complete at 59 of 59 names.
+- **Command tree** in repo (passes 26, 30, 31, 32, 33, 34, 35 and 36): real Discord
   subcommands replaced the flat `action` option across every existing hub — 17
-  roots, 115 subcommands, 132 actions, 4 context menus. `/help` is generated
+  roots, 117 subcommands, 134 actions, 4 context menus. `/help` is generated
   from the live registry; `pnpm commands:catalog` writes [[Command-Catalog]] and
   `pnpm commands:doctor` checks the live shape. A human slash or right-click
   invocation remains the unobserved surface.
@@ -145,8 +151,9 @@ https://github.com/RNGBubba/keystone-discord-bot
 - **Live 2026-11-01:** AI Team#5758 logged in, found four context menus missing,
   re-registered 17 roots with 108 subcommands plus 2 user and 2 message menus
   (then fetched Discord's shape to prove it); pass 34 split `/setup` into five
-  subcommands and pass 35 split `/appeal` into two, bringing the live ledger to
-  115, and drove both hubs through the bridge. Also
+  subcommands, pass 35 split `/appeal` into two, and pass 36 split `/verify`
+  into `start | status`, bringing the live ledger to 117; all three hubs were
+  driven through the bridge. Also
   qwen3:8b via Ollama answered mentions in `#ai-chat`. A dev-only `!` bridge
   proved `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
   query=ban`, `!ai status`, `!mod history`, `!mod links`, `!mod filters`,
@@ -168,7 +175,7 @@ https://github.com/RNGBubba/keystone-discord-bot
 - Phase **P4** shipped the AI layer and the ledger-backed economy hardening.
 - Phase **P3** shipped the community suite: leveling, reaction roles, welcome,
   starboard, tickets, giveaways, temp voice, content and seasons.
-- 17 of Discord's 100 global roots used, with 115 subcommands and 4 context
+- 17 of Discord's 100 global roots used, with 117 subcommands and 4 context
   menus (separate 15 + 15 budget); 9 modules registered.
 - The full suite covers the 5,000-row portability round trip and the failure,
   rollback and deletion paths; `pnpm check` also runs the intent, channel and

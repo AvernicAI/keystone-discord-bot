@@ -12,7 +12,7 @@ import {
 } from "@keystone/kernel";
 import { noopQueue, staticHealth } from "@keystone/testing";
 import { createSilentLogger } from "@keystone/kernel";
-import { CaseService, InMemoryCaseStore } from "@keystone/module-moderation";
+import { CaseService, InMemoryCaseStore, InMemoryMemberStore } from "@keystone/module-moderation";
 import { modules } from "./modules";
 import { asInteractionLike } from "./adapt";
 
@@ -146,7 +146,7 @@ describe("synthetic slash interaction", () => {
         cooldowns: new InMemoryCooldownStore(),
         queue: noopQueue,
         health: staticHealth(),
-        moderation: { cases, actions },
+        moderation: { cases, actions, members: new InMemoryMemberStore() },
         now: () => 1_700_000_000_000,
       },
       asInteractionLike(interaction),
@@ -184,7 +184,11 @@ describe("synthetic slash interaction", () => {
         cooldowns: new InMemoryCooldownStore(),
         queue: noopQueue,
         health: staticHealth(),
-        moderation: { cases: new CaseService(new InMemoryCaseStore()), actions },
+        moderation: {
+          cases: new CaseService(new InMemoryCaseStore()),
+          actions,
+          members: new InMemoryMemberStore(),
+        },
       },
       asInteractionLike(interaction),
     );

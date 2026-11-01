@@ -647,7 +647,9 @@ export class SecurityCoordinator {
   ): Promise<void> {
     const components: import("@keystone/kernel").ActionRow[] = [];
     if (settings.appealsEnabled && record.targetId) components.push(appealButton(record.id));
-    if (finding.kind === "quarantine" && record.targetId) components.push(verifyButton(record.targetId));
+    if (finding.kind === "quarantine" && record.targetId) {
+      components.push(verifyButton(record.guildId, record.targetId));
+    }
 
     try {
       await this.options.actions.notify(guildId, settings.modLogChannelId, {
