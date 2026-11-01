@@ -81,9 +81,10 @@ covers tampering, versions, MEE6, CSV, transcripts and merge modes.
 registered 10 commands, and got qwen3:8b replies in `#ai-chat`. Pass 15 added a
 dev-only `!` bridge because SaseQ's MCP cannot invoke slash commands; `!ping`,
 `!about`, `!ai status`, `!mod history` and `!rank leaderboard` then ran through
-the real registry, guards and reply adapter. The ready path now clears global
-commands, re-registers them and fetches the server-side list to prove the sync.
-The slash `InteractionCreate` path still needs a human client.
+the real registry, guards and reply adapter. The ready path fetches the global
+command set and only clears and re-registers when the names drift; otherwise it
+logs that the set is current. `pnpm commands:resync` is the explicit cycle. The
+slash `InteractionCreate` path still needs a human client.
 
 **Public release (pass 16):** the repo is public at
 https://github.com/RNGBubba/keystone-discord-bot under AGPL-3.0-or-later. The
@@ -107,8 +108,9 @@ framework-free Node HTTP service so the authorization matrix could be proven
 before a UI framework was added; settings writes followed through the same gate.
 
 - [x] OAuth2 code + PKCE, sealed `state`, `iss` and exact redirect validation.
-- [x] Opaque Postgres-backed sessions; Discord access/refresh tokens sealed
-  server-side and never sent to the browser.
+- [x] Opaque Postgres-backed sessions; the Discord access token sealed
+  server-side and never sent to the browser. No refresh token is stored until
+  refresh/rotation exists.
 - [x] `GuildAccessService` with BigInt permissions and a bot-token membership
   check; CSP, CSRF and `no-store` on authenticated responses.
 - [x] Read-only dashboard and `/api/v1` reads through the kernel

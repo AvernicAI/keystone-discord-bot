@@ -25,7 +25,6 @@ const GUILD_C = "333333333333333333";
 const GUILD_Z = "999999999999999999";
 const USER = "444444444444444444";
 const ACCESS_TOKEN = "discord-access-token-should-never-reach-browser";
-const REFRESH_TOKEN = "discord-refresh-token-should-never-reach-browser";
 
 class FakeOAuth implements DiscordOAuth {
   exchanges = 0;
@@ -40,9 +39,9 @@ class FakeOAuth implements DiscordOAuth {
     return `https://discord.test/oauth?state=${encodeURIComponent(input.state)}`;
   }
 
-  async exchangeCode(): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
+  async exchangeCode(): Promise<{ accessToken: string }> {
     this.exchanges += 1;
-    return { accessToken: ACCESS_TOKEN, refreshToken: REFRESH_TOKEN, expiresIn: 3600 };
+    return { accessToken: ACCESS_TOKEN };
   }
 
   async fetchUser(): Promise<{ id: string; username: string }> {
@@ -243,7 +242,6 @@ describe("P6 web auth and authorization", () => {
       expect(page).toContain("Alpha");
       expect(page).toContain("Cases");
       expect(page).not.toContain(ACCESS_TOKEN);
-      expect(page).not.toContain(REFRESH_TOKEN);
       expect(page).toContain("&lt;script&gt;");
       expect(html.headers.get("content-security-policy")).toContain("default-src 'none'");
       expect(html.headers.get("cache-control")).toBe("no-store");
@@ -469,10 +467,8 @@ describe("session storage", () => {
       userId: USER,
       username: "Admin",
       accessToken: "sealed-a",
-      refreshToken: "sealed-r",
       csrfHash: sha256("csrf"),
       createdAt: new Date().toISOString(),
-      rotatedAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 60_000).toISOString(),
     });
     expect(await store.get(raw)).toBeUndefined();

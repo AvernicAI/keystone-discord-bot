@@ -47,7 +47,10 @@ small, but only if you know why it is there.
 The second mistake is treating `invite.uses` as owned by Keystone. It is a
 Discord counter that also moves for invites created by other bots and for
 integrations. Never assume your cache is complete; an unchanged diff is a valid
-answer and should produce a row with no inviter, not an exception.
+answer and should produce a row with no inviter, not an exception. A missing
+cache is different from an empty cache: with no baseline, skip attribution
+entirely and record the join as unknown. Diffing against an empty map turns the
+most-used invite into a false attribution.
 
 ## Stretch
 

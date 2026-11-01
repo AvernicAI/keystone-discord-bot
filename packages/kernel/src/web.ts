@@ -14,26 +14,15 @@ export interface WebSession {
   readonly username: string;
   /** Sealed (AES-256-GCM) Discord access token; never sent to the browser. */
   readonly accessToken: string;
-  /** Sealed Discord refresh token, or null when Discord did not issue one. */
-  readonly refreshToken: string | null;
   /** SHA-256 hash of the browser CSRF token. */
   readonly csrfHash: string;
   readonly createdAt: string;
-  readonly rotatedAt: string;
   readonly expiresAt: string;
-}
-
-export interface SessionPatch {
-  accessToken?: string;
-  refreshToken?: string | null;
-  rotatedAt?: string;
-  expiresAt?: string;
 }
 
 export interface SessionStore {
   create(session: WebSession): Promise<void>;
   get(id: string): Promise<WebSession | undefined>;
-  update(id: string, patch: SessionPatch): Promise<void>;
   delete(id: string): Promise<void>;
 }
 
@@ -89,12 +78,6 @@ export class InMemorySessionStore implements SessionStore {
   async get(id: string): Promise<WebSession | undefined> {
     const session = this.#sessions.get(id);
     return session ? { ...session } : undefined;
-  }
-
-  async update(id: string, patch: SessionPatch): Promise<void> {
-    const current = this.#sessions.get(id);
-    if (!current) return;
-    this.#sessions.set(id, { ...current, ...patch });
   }
 
   async delete(id: string): Promise<void> {

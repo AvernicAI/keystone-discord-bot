@@ -30,9 +30,11 @@ that does not load every join into the bot process.
 2. **Joins are serialized per guild.** `apps/bot/src/invite-events.ts` keeps one
    promise chain per guild, so a second join waits for the first diff and cache
    update. Different guilds do not block each other.
-3. **The cache is process-local for now.** A restart between two joins can lose
-   one attribution. That limitation is explicit; persisting counter snapshots is
-   a later optimization, not a hidden assumption.
+3. **The cache is process-local for now.** A restart between two joins can leave
+   a join unattributed. The adapter treats a missing cache as “no baseline” and
+   records the join without an inviter; it never diffs historical totals as if
+   they were increments. Persisting counter snapshots is a later optimization,
+   not a hidden assumption.
 4. **One row per join, with a unique key.** `invite_joins` is unique on
    `(guild_id, user_id, joined_at)`; a repeated gateway delivery is a no-op. A
    leave marks the newest open row instead of deleting history. Leaderboard
@@ -68,8 +70,9 @@ that does not load every join into the bot process.
 
 **Costs and limits**
 
-- Process-local cache: a restart can lose one attribution, and there is no
-  backfill before the first successful refresh.
+- Process-local cache: a restart can leave a join unattributed, and there is no
+  backfill before the first successful refresh. The cold-cache path is explicit
+  and tested; it cannot misattribute from historical totals.
 - `ManageGuild` is required to list invites; without it joins are recorded with
   no inviter and one warning per guild.
 - The live proof covers the command and the cache fetch, not a real
@@ -80,6 +83,8 @@ that does not load every join into the bot process.
 
 - Attribution is deterministic for increment, new-code, unchanged, missing
   inviter and tie cases.
+- The gateway adapter records no inviter on a cold cache, even when one existing
+  invite has a large historical `uses` total.
 - A duplicate join writes once in memory and on PGlite.
 - Leaves reduce `retained` and the totals survive a close/reopen.
 - A flagged join sends exactly one advisory embed; a disabled module records

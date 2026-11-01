@@ -96,7 +96,6 @@ export function createWebRuntime(env: Env): WebRuntime {
           clientId: env.DISCORD_CLIENT_ID,
           clientSecret: env.DISCORD_CLIENT_SECRET,
           botToken: env.DISCORD_TOKEN,
-          issuer: env.DISCORD_OAUTH_ISSUER,
         })
       : undefined;
   if (!oauth) {

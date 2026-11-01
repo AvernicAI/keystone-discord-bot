@@ -2,21 +2,26 @@
 
 ## Now
 
-**P7 invite tracking is in repo** (pass 19, 2026-11-01): the sixth module adds
-`/invites leaderboard | stats | who`, durable `invite_joins` attribution with a
-unique `(guild, user, joined_at)` key, SQL join/leave/retention totals, and
-advisory account-age / no-avatar flags that never punish. The bot receives
-`GuildInvites` and requests `GuildMembers` optionally; a live join could not be
-performed because no second Discord account was available. MEE6 sells this as a
-paid plugin and neither Dyno nor Carl-bot ships it. Distinguish this from P6,
-which remains open below.
+**P7 invite tracking is in repo** (pass 19; cold-cache fix in pass 20,
+2026-11-01): the sixth module adds `/invites leaderboard | stats | who`,
+durable `invite_joins` attribution with a unique
+`(guild, user, joined_at)` key, SQL join/leave/retention totals, and advisory
+account-age / no-avatar flags that never punish. A cold cache now records no
+inviter and seeds the cache instead of diffing historical totals; the adapter
+regression test covers that path. The bot receives `GuildInvites` and requests
+`GuildMembers` optionally; a live join could not be performed because no second
+Discord account was available. MEE6's invite tracker is partly premium-gated
+(its wiki says parts or the entirety may require Premium); neither Dyno nor
+Carl-bot documents it. Distinguish this from P6, which
+remains open below.
 
 **P6 authorization and settings-write foundation is in repo** (passes 17–18,
 2026-11-01): Discord OAuth2 code + PKCE, sealed state, opaque Postgres-backed
 sessions, BigInt guild authorization with a bot-token membership check, a
 server-rendered dashboard, `/api/v1` reads and schema-validated module settings
 writes from both the HTML form and `PATCH /api/v1`. The browser never receives a
-Discord token. This is the read-only auth step plus a narrow write path, not the
+Discord token; the session stores one sealed access token and no refresh token.
+This is the read-only auth step plus a narrow write path, not the
 full P6 exit demo: field widgets, fleet actions and scoped API tokens are still
 open. See [[Dashboard]] and [[ADR-0016-dashboard-foundation]].
 
@@ -42,18 +47,20 @@ pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
 `!invites leaderboard` and `!invites who`; the bot re-registered **11** commands
 and Discord's server set included `invites`. `!ticket stats`
 exposed a real ordering bug (guild stats required a ticket first), now fixed and
-tested. On ready the bot now clears application commands, re-registers the full
-set, and fetches Discord's list to log missing/extra names. Slash interaction
-handling from a human client is still unproven; obscured channels, live role
-grants, live Postgres and a MEE6 pull remain unverified. The P6 auth foundation
-now follows this work. The baseline, P4.5, P5 and P6 foundation are published at
+tested. On ready the bot fetches Discord's command set and only clears and
+re-registers when the names drift; otherwise it logs that the set is current.
+`pnpm commands:resync` is the explicit clear → register → verify cycle. Slash
+interaction handling from a human client is still unproven; obscured channels,
+live role grants, live Postgres and a MEE6 pull remain unverified. The P6 auth
+foundation is documented above. The baseline, P4.5, P5 and P6 foundation are
+published at
 https://github.com/RNGBubba/keystone-discord-bot under AGPL-3.0-or-later; the
 public packaging pass also added the README and `AGENTS.md` read paths.
 
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 206 tests / 33 files · budget 11/100 · memory 1853/1853
+pnpm check        exit 0 · typecheck 0 · 207 tests / 34 files · budget 11/100 · memory 1863/1863
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 11 commands · qwen3:8b reply in #ai-chat
 live commands     2026-11-01 · !ping · !about · !ai status · !mod history · !rank leaderboard · !invites leaderboard · !invites who
@@ -69,9 +76,9 @@ read that file.
 
 | # | Criterion | Where it is asserted | Proven against |
 | --- | --- | --- | --- |
-| 1 | Attribution is a deterministic diff, not a guess | `invites.test.ts`: increment, new code, unchanged, missing inviter, code tie-break | Pure functions |
+| 1 | Attribution is a deterministic diff, not a guess | `invites.test.ts`: increment, new code, unchanged, missing inviter, code tie-break; `invite-events.test.ts`: a cold cache records no inviter | Pure functions + adapter |
 | 2 | A repeated gateway delivery cannot double-count | `invites.test.ts` and `invite-store.test.ts`: second identical join returns false; the unique key is `(guild, user, joined_at)` | In-memory + **PGlite** |
-| 3 | Concurrent joins are serialized per guild | `apps/bot/src/invite-events.ts`: one promise chain per guild; no queue is shared across guilds | Code inspection; the race test is the two-join unit case |
+| 3 | Concurrent joins are serialized per guild | `apps/bot/src/invite-events.ts`: one promise chain per guild; no queue is shared across guilds | Code inspection only; no dedicated adapter race test yet |
 | 4 | Joins, leaves and retention are computed in SQL | `invite-store.test.ts`: two joins and one leave produce `{joins: 2, leaves: 1, retained: 1}` | **PGlite** |
 | 5 | Flags are advisory | `invites.test.ts`: one log embed, footer "Advisory only"; the port has no ban/kick/timeout method | In-memory + recorder |
 | 6 | Settings are the module's own schema | `inviteSettingsSchema`; the dashboard uses the same catalog, no web-only schema | Shared catalog |
@@ -84,8 +91,8 @@ read that file.
 | # | Criterion | Where it is asserted | Proven against |
 | --- | --- | --- | --- |
 | 1 | OAuth2 code + PKCE, sealed state and `iss` validation | `apps/web/src/web.test.ts`: missing state cookie, wrong issuer and wrong state all `400` before exchange | Real local HTTP + fake OAuth |
-| 2 | Opaque server-side session, not a browser token | `packages/db/src/web-store.test.ts`: round trip and update; `web.test.ts`: raw session id is not a key | **PGlite** + in-memory store |
-| 3 | Discord tokens never reach the browser | `web.test.ts`: HTML/JSON bodies do not contain the access or refresh token; sealed values only | Real HTTP response assertions |
+| 2 | Opaque server-side session, not a browser token | `packages/db/src/web-store.test.ts`: round trip; `web.test.ts`: raw session id is not a key | **PGlite** + in-memory store |
+| 3 | No Discord credential reaches the browser | `web.test.ts`: HTML/JSON bodies do not contain the access token; the session stores only a sealed access token, with no refresh token | Real HTTP response assertions |
 | 4 | Per-guild authorization, two checks | `web.test.ts`: non-admin `403`, cross-guild id `403`, guild without the bot `403`; `access.ts` BigInt tests | Real HTTP + fake OAuth/bot membership |
 | 5 | BigInt permission parsing | `web.test.ts`: bit 40 `MODERATE_MEMBERS` is not Manage Guild; invalid bitfield is false | Unit |
 | 6 | One real read path through repository seams | `web.test.ts`: `/api/v1/guilds/:id/overview` and the HTML page show guild-scoped counts; `packages/db/src/web-store.test.ts` proves a second guild does not leak | Real HTTP + **PGlite** |

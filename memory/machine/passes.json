@@ -248,6 +248,19 @@
         "budget": "11/100",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-20",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Cold-cache invite attribution records no inviter; unused refresh-token storage removed; command-sync and MEE6 claims corrected.",
+      "journal": "journal/2026-11-01-pass-20.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "207",
+        "budget": "11/100",
+        "memory": "current"
+      }
     }
   ]
 }

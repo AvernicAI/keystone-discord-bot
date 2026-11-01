@@ -190,7 +190,7 @@ box means the code and its tests exist, not that a live guild has run it.
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Invite attribution | P7 | ✅ in repo | `modules/invites/src/invites.test.ts`, `packages/db/src/invite-store.test.ts` · live unverified |
+| Invite attribution | P7 | ✅ in repo | `modules/invites/src/invites.test.ts`, `apps/bot/src/invite-events.test.ts`, `packages/db/src/invite-store.test.ts` · live unverified |
 | Fake invite detection | P7 | ✅ in repo | `modules/invites/src/invites.test.ts` · live unverified |
 | Invite leaderboard | P7 | ✅ in repo | `modules/invites/src/commands.test.ts`, `packages/db/src/invite-store.test.ts` · live unverified |
 

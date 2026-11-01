@@ -22,8 +22,6 @@ export interface DiscordGuild {
 
 export interface OAuthTokens {
   accessToken: string;
-  refreshToken: string | null;
-  expiresIn: number;
 }
 
 export interface AuthorizationInput {
@@ -50,7 +48,6 @@ export interface DiscordOAuthOptions {
   clientId: string;
   clientSecret: string;
   botToken: string;
-  issuer?: string;
 }
 
 const DISCORD_AUTHORIZE = "https://discord.com/oauth2/authorize";
@@ -66,11 +63,7 @@ async function requestJson<T>(url: string, init: RequestInit): Promise<T> {
 }
 
 export class DiscordOAuthClient implements DiscordOAuth {
-  private readonly issuer: string;
-
-  constructor(private readonly options: DiscordOAuthOptions) {
-    this.issuer = options.issuer ?? "https://discord.com";
-  }
+  constructor(private readonly options: DiscordOAuthOptions) {}
 
   authorizationUrl(input: AuthorizationInput): string {
     const url = new URL(DISCORD_AUTHORIZE);
@@ -84,10 +77,6 @@ export class DiscordOAuthClient implements DiscordOAuth {
     return url.toString();
   }
 
-  getIssuer(): string {
-    return this.issuer;
-  }
-
   async exchangeCode(input: ExchangeInput): Promise<OAuthTokens> {
     const body = new URLSearchParams({
       client_id: this.options.clientId,
@@ -97,20 +86,12 @@ export class DiscordOAuthClient implements DiscordOAuth {
       redirect_uri: input.redirectUri,
       code_verifier: input.codeVerifier,
     });
-    const tokens = await requestJson<{
-      access_token: string;
-      refresh_token?: string;
-      expires_in: number;
-    }>(`${DISCORD_API}/oauth2/token`, {
+    const tokens = await requestJson<{ access_token: string }>(`${DISCORD_API}/oauth2/token`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body,
     });
-    return {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token ?? null,
-      expiresIn: tokens.expires_in,
-    };
+    return { accessToken: tokens.access_token };
   }
 
   async fetchUser(accessToken: string): Promise<DiscordUser> {

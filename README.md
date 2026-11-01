@@ -17,7 +17,7 @@ from the dashboard and a `PATCH /api/v1` route. Fleet actions, templates, scoped
 API tokens and webhooks are the remaining P6 work. P7 invite tracking is now in
 repo as a sixth module: attribution, a joins/retention leaderboard and advisory
 suspicious-join flags. The command ledger is **11/100**, there are **6 modules**,
-and `pnpm check` covers **206 tests across 33 files** without a Discord token,
+and `pnpm check` covers **207 tests across 34 files** without a Discord token,
 database or network. Live on 2026-11-01: the bot logged in, registered 11 commands
 through Discord, answered a Qwen3:8b mention in `#ai-chat`, and ran real
 moderation, community, AI and invite commands through a development message
@@ -285,8 +285,10 @@ Every guild route performs **two checks**: the OAuth user must be owner or hold
 `ADMINISTRATOR` / `MANAGE_GUILD` (parsed as `BigInt`, because bit 40 is
 `MODERATE_MEMBERS`), **and** the bot token must confirm the bot is in the guild.
 The `:guildId` in a URL is never trusted. Sessions are opaque random values;
-only their SHA-256 hash is stored. Discord tokens are AES-256-GCM sealed before
-they reach Postgres and never appear in HTML or JSON. Responses carry a strict
+only their SHA-256 hash is stored. The Discord access token is AES-256-GCM
+sealed before it reaches Postgres and never appears in HTML or JSON. No refresh
+token is stored: refresh is still open, so a session re-authenticates when its
+Discord access token expires. Responses carry a strict
 CSP, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` and
 `Cache-Control: no-store`.
 
@@ -341,9 +343,10 @@ Everything below is free. No feature is moved behind a paywall.
 - Ledger-backed currency, daily, pay, shop, buying, gambling and an audit ledger.
 - Button and select reaction roles, welcome and delayed autoroles.
 - Starboard with per-channel overrides and sticky messages.
-- Invite tracking: attribution from cached invite counters, a joins/retention
-  leaderboard, and advisory flags for new or avatar-less accounts. No punishment
-  is attached to a flag.
+- Invite tracking: attribution from cached invite counters when a baseline
+  exists (a cold cache records an unknown inviter rather than guessing), a
+  joins/retention leaderboard, and advisory flags for new or avatar-less
+  accounts. No punishment is attached to a flag.
 - Thread tickets: panel, open, claim, add, transcript, close, stats and AI summary.
 - Giveaways, polls, reminders, schedules, feeds and stat channels.
 - Birthdays, suggestions and temporary voice rooms.

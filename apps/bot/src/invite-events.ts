@@ -85,7 +85,10 @@ export function registerInviteEvents(
       const config = await configFor(member.guild.id);
       if (!config.enabled) return;
 
-      const before = caches.get(member.guild.id) ?? new Map<string, InviteSource>();
+      // No baseline means a cold cache. Never diff historical `uses` totals as
+      // if they were increments from this join; record the join as unattributed
+      // and seed the cache for the next one.
+      const baseline = caches.get(member.guild.id);
       let after: Map<string, InviteSource> | undefined;
       try {
         after = await fetchInvites(member.guild);
@@ -94,9 +97,10 @@ export function registerInviteEvents(
         warnOnce(member.guild.id, error);
       }
 
-      const attribution = after
-        ? attributeInvite([...before.values()], [...after.values()])
-        : undefined;
+      const attribution =
+        baseline && after
+          ? attributeInvite([...baseline.values()], [...after.values()])
+          : undefined;
       const joinedAt = new Date(member.joinedTimestamp ?? Date.now()).toISOString();
       const accountAgeDays = Math.max(
         0,

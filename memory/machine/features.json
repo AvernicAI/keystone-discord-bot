@@ -1845,10 +1845,11 @@
           "phase": "P7",
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "Cached invite uses diffed after each join, serialized per guild; the join row is unique on (guild, member, joined_at).",
+          "note": "Cached invite uses diffed after each join only when a baseline exists; a cold cache records no inviter and seeds the cache. Joins are serialized per guild; the join row is unique on (guild, member, joined_at).",
           "liveVerified": false,
           "evidence": [
             "modules/invites/src/invites.test.ts",
+            "apps/bot/src/invite-events.test.ts",
             "packages/db/src/invite-store.test.ts"
           ]
         },

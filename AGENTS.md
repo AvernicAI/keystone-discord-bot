@@ -123,8 +123,9 @@ by a rate-limited register leaves the app with no commands.
   reads and schema-validated module settings writes with CSRF.
 - P7 invite tracking is in repo as the sixth module: `/invites` leaderboard,
   stats and who-invited-whom, backed by `invite_joins` and advisory fake-join
-  flags. The rest of P7 (forms, events, modmail, expiry jobs, UI/i18n) is open.
-- 6 modules, 11 global command roots, 206 tests in 33 files.
+  flags. A cold cache records an unknown inviter; the adapter test covers it.
+  The rest of P7 (forms, events, modmail, expiry jobs, UI/i18n) is open.
+- 6 modules, 11 global command roots, 207 tests in 34 files.
 - Live: AI Team#5758 connected; 11 commands registered; Qwen3:8b replied in
   `#ai-chat`; `!ping`, `!about`, `!ai status`, `!mod history`,
   `!rank leaderboard`, `!invites leaderboard` and `!invites who` ran through the

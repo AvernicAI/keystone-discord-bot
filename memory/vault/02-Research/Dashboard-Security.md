@@ -22,13 +22,16 @@
 
 - **Postgres-backed opaque session IDs**, not a JWT-only session. A guild admin
   can be demoted in Discord at any moment; the session must be revocable now.
-- **Discord access and refresh tokens stay server-side, encrypted at rest.** The
-  browser never receives a Discord token. An XSS bug must not become a seven-day
-  account takeover.
-- Refresh lazily inside the request path with a per-session single-flight lock,
-  so two concurrent requests do not invalidate each other. Revoking either token
-  kills the whole authorization; logout should revoke and delete the session.
-- Idle timeout and rotation; a `sessions` row records created/rotated/expires.
+- **The Discord access token stays server-side, encrypted at rest.** The browser
+  never receives a Discord token. An XSS bug must not become a seven-day account
+  takeover. The current foundation stores no refresh token because it has no
+  refresh path; do not store one until rotation and single-flight exist.
+- When refresh is implemented, refresh lazily inside the request path with a
+  per-session single-flight lock, so two concurrent requests do not invalidate
+  each other. Revoking either token kills the whole authorization; logout should
+  revoke and delete the session.
+- Idle timeout and rotation when refresh exists; the current row records
+  created/expires only. Do not add a rotation column before the path uses it.
 
 ## Per-guild authorization: two checks, not one
 

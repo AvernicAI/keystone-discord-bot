@@ -42,7 +42,6 @@ export interface CompleteInput {
 }
 
 export interface CompleteResult {
-  session: WebSession;
   sessionToken: string;
   csrfToken: string;
 }
@@ -52,8 +51,10 @@ export interface CompleteResult {
  *
  * `state` and the PKCE verifier live in an HttpOnly, AEAD-sealed cookie bound
  * to this one attempt. The session cookie is a random value; only its SHA-256
- * hash is stored. Discord tokens are sealed before they reach the session
- * store and are never returned by any route.
+ * hash is stored. The Discord access token is sealed before it reaches the
+ * session store and is never returned by any route. No refresh token is kept:
+ * the dashboard has no refresh path, so a session simply expires and the user
+ * signs in again.
  */
 export class AuthService {
   private readonly now: () => number;
@@ -141,14 +142,12 @@ export class AuthService {
       userId: user.id,
       username: user.username,
       accessToken: this.deps.box.seal(tokens.accessToken),
-      refreshToken: tokens.refreshToken ? this.deps.box.seal(tokens.refreshToken) : null,
       csrfHash: sha256(csrfToken),
       createdAt,
-      rotatedAt: createdAt,
       expiresAt: new Date(this.now() + this.deps.config.sessionTtlMs).toISOString(),
     };
     await this.deps.sessions.create(session);
-    return { session, sessionToken, csrfToken };
+    return { sessionToken, csrfToken };
   }
 
   async session(sessionToken: string | undefined): Promise<WebSession | undefined> {

@@ -90,7 +90,7 @@ including the small calls that did not deserve an ADR.
 | # | Decision | Where |
 | --- | --- | --- |
 | 53 | The P6 foundation is framework-free Node HTTP over kernel ports; the Next.js shell is a later UI decision | [[ADR-0016-dashboard-foundation]] |
-| 54 | Sessions are opaque random values; only a SHA-256 hash is stored, and Discord tokens are sealed before Postgres | [[Dashboard-Security]] |
+| 54 | Sessions are opaque random values; only a SHA-256 hash is stored, and the Discord access token is sealed before Postgres. Unused refresh-token storage was removed in pass 20 | [[Dashboard-Security]] |
 | 55 | Every guild route checks both the user's BigInt permissions and bot membership; a URL guild id is never trusted | [[Dashboard-Security]] |
 | 56 | Web reads go through `SettingsService` and the `DashboardStore` port, not ad-hoc SQL in a handler | [[Dashboard]] |
 | 57 | Read-only first: settings writes, fleet actions and scoped tokens are deferred until the authz matrix is proven | [[Roadmap]] |

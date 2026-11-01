@@ -7,8 +7,10 @@ parity slice.
 
 - `/invites` is registered through the shared catalog with `leaderboard`, `stats`
   and `who`; the command ledger is **11/100**.
-- Attribution diffs cached invite counters after every join, serialized per
-  guild. A join row is unique on `(guild, user, joined_at)`.
+- Attribution diffs cached invite counters after every join **when a baseline
+  exists**, serialized per guild. A cold cache records the join without an
+  inviter and seeds the cache; historical `uses` totals are never treated as new
+  increments. A join row is unique on `(guild, user, joined_at)`.
 - Suspicious joins are advisory only: account-age and no-avatar flags, an
   optional log-channel embed, never an automatic action.
 - Postgres storage is a first-class adapter (`invite_joins`) with a PGlite test;
@@ -17,11 +19,14 @@ parity slice.
 ## Verified
 
 ```text
+pnpm vitest run apps/bot/src/invite-events.test.ts
 pnpm vitest run modules/invites/src/invites.test.ts modules/invites/src/commands.test.ts
 pnpm vitest run packages/db/src/invite-store.test.ts
 ```
 
 - Pure diff: increment, new code, unchanged, missing inviter, deterministic tie.
+- Adapter: a join before the first successful cache refresh records no inviter,
+  even when an existing invite has a much larger historical `uses` total.
 - Flags: new account + no avatar, established account, each check disabled.
 - Service: duplicate gateway delivery records once; leave reduces retained
   count; flagged join notifies exactly once; disabled module records nothing.
@@ -52,14 +57,17 @@ about without a gateway.
 - The MCP bot cannot invoke slash commands and does not render message embeds;
   the live check used the dev `!` bridge. Slash `InteractionCreate` still needs a
   human client.
-- The invite cache is process-local. A restart between the join and the next
-  fetch can lose one attribution; the next invite fetch repairs the counters but
-  cannot recover a join that already happened. Durable per-invite counter
-  snapshots are a later optimization.
+- The invite cache is process-local. A join before the first successful refresh,
+  or after a refresh failure, is recorded **without an inviter** so it cannot be
+  misattributed; the next successful fetch seeds the cache. Durable per-invite
+  counter snapshots are a later optimization.
+- The cold-cache path is covered by
+  `apps/bot/src/invite-events.test.ts`; the per-guild serialization is
+  code-inspected and does not yet have a dedicated adapter race test.
 - If the bot lacks `ManageGuild`, joins are recorded without an inviter and one
   warning is logged per guild.
-- No backfill: joins before the first successful cache refresh are not
-  attributable.
+- No backfill: joins before the first successful cache refresh stay
+  unattributed; they are not guessed from historical totals.
 
 ## Next
 

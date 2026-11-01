@@ -34,9 +34,10 @@ https://github.com/RNGBubba/keystone-discord-bot
 ## Current state
 
 - Phase **P7** has started: invite tracking is the sixth module. It records
-  attribution by diffing cached invite counters, stores joins/leaves in
-  `invite_joins`, exposes `/invites leaderboard | stats | who`, and flags new or
-  avatar-less accounts as advisory evidence only. See [[04-Modules/invites/Spec|Invites spec]].
+  attribution by diffing cached invite counters when a baseline exists (a cold
+  cache records no inviter), stores joins/leaves in `invite_joins`, exposes
+  `/invites leaderboard | stats | who`, and flags new or avatar-less accounts as
+  advisory evidence only. See [[04-Modules/invites/Spec|Invites spec]].
 - Phase **P6** foundation in repo: Discord OAuth2/PKCE, opaque Postgres-backed
   sessions, BigInt per-guild authorization with a bot-membership check, a
   server-rendered dashboard, `/api/v1` reads and schema-validated module settings

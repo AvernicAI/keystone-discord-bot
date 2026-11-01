@@ -6,10 +6,11 @@ this join look like a throwaway account?".
 
 ## Purpose
 
-Invite tracking is the one community feature MEE6 sells as a separate paid
-plugin. Keystone ships it free, and it is also the join-side data that the
-anti-raid scanner cannot infer on its own: a burst of joins is much easier to
-read when every join names the invite and the inviter behind it.
+Invite tracking is the one community feature MEE6 offers behind a
+partly-premium plugin: its wiki says parts or the entirety may require Premium.
+Keystone ships it free, and it is also the join-side data that the anti-raid
+scanner cannot infer on its own: a burst of joins is much easier to read when
+every join names the invite and the inviter behind it.
 
 ## Commands
 
@@ -40,7 +41,9 @@ invite's `uses` counter. The gateway adapter therefore:
 1. Caches `code → {uses, inviterId}` on ready, on `GuildCreate`, and on every
    `InviteCreate` / `InviteDelete`.
 2. On `GuildMemberAdd`, fetches the guild's invites again and diffs the counters
-   through `attributeInvite(before, after)`.
+   through `attributeInvite(before, after)` **only when the cache already has a
+   baseline**. A cold cache is not a baseline of zero: the join is recorded with
+   no inviter and the fresh fetch seeds the cache for the next join.
 3. Picks the invite with the largest increase; ties break on the invite code so
    the answer is deterministic. If nothing increased, the join is recorded with
    no inviter (vanity URL, bot invite, or an invite created before tracking).
@@ -103,5 +106,6 @@ row; history is never deleted. Leaderboard totals are computed in SQL
 ## Verified by
 
 `modules/invites/src/invites.test.ts` (diff, flags, service, idempotency),
+`apps/bot/src/invite-events.test.ts` (cold-cache adapter path),
 `modules/invites/src/commands.test.ts` (registry, budget, all three actions) and
 `packages/db/src/invite-store.test.ts` (SQL totals, leave marking, restart).

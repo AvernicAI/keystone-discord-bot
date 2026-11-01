@@ -183,12 +183,13 @@ the reason P5 comes before the dashboard.
 | Fake invite detection | 💰 (limited) | ❌ | ❌ | ❌ | ❔ | P7 | Advisory only; account age + avatar |
 | Invite leaderboard | 💰 | ❌ | ❌ | ❌ | ❔ | P7 | Joins, leaves and retained |
 
-MEE6's invite tracker is the only paid-plugin parity row here; its public wiki
-says only invites created through its own `/invites` flow are tracked. Dyno's
-module list and Carl-bot's logging docs contain no invite attribution, no invite
-leaderboard and no fake-invite detection (verified 2026-11-01). Keystone now
-ships the attribution and leaderboard free, with advisory flags rather than
-MEE6's 24-hour invalidation rule.
+MEE6's invite tracker is partly premium-gated: its public wiki says parts or
+the entirety may require Premium and describes personalized invite links per
+member, not a documented free attribution path. Dyno's module list and Carl-bot's
+logging docs contain no invite attribution, no invite leaderboard and no
+fake-invite detection (verified 2026-11-01). Keystone now ships the attribution
+and leaderboard free, with advisory flags rather than MEE6's 24-hour invalidation
+rule.
 
 ## Tally
 
@@ -204,7 +205,7 @@ MEE6's 24-hour invalidation rule.
 | Content | 7 | 6 | 0 | 6 | Embed, tags, schedules, reminders, feeds and sticky messages; translation non-goal |
 | Music | 4 | 0 | 0 | 2 | BYO only |
 | AI | 6 | 0 | 6 | 6 | Advisory, capped, opt-in, zero-retention |
-| Invites | 3 | 0 | 0 | 3 | MEE6 sells it as a paid plugin; Dyno/Carl document none. Shipped in repo at pass 19; a live join is unperformed |
+| Invites | 3 | 0 | 0 | 3 | MEE6 is partly premium-gated; Dyno/Carl document none. Shipped in repo at pass 19; a live join is unperformed |
 | Operations | 10 | 0 | 0 | 10 | Export is the wedge |
 
 Two rows are non-goals (global economy, translation) and two are music features we

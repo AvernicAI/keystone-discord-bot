@@ -25,8 +25,8 @@ Ship the P6 foundation as a **framework-free Node HTTP service** in `apps/web`,
 with the same ports-and-adapters shape as the bot:
 
 - `AuthService` owns OAuth2 code + PKCE, sealed state, opaque session IDs and
-  CSRF. Discord tokens are AES-256-GCM sealed before storage and never leave the
-  server.
+  CSRF. The Discord access token is AES-256-GCM sealed before storage and never
+  leaves the server; no refresh token is stored until a refresh path exists.
 - `GuildAccessService` owns the two-check rule: the OAuth user must be owner or
   hold `ADMINISTRATOR` / `MANAGE_GUILD` (parsed with `BigInt`), **and** the bot
   token must confirm membership. A `:guildId` from the URL is never trusted.
@@ -71,7 +71,9 @@ fleet view. It will consume this authorization layer, not replace it.
 - Plain HTML is intentionally minimal; schema-driven forms, modal editing and
   fleet actions are still open.
 - No token refresh yet: a session that outlives the Discord access token needs a
-  re-login. Rotation/refresh is a P6 follow-up.
+  re-login. The unused refresh-token and rotation columns were removed in pass
+  20 rather than storing a credential no code uses. Rotation/refresh is a P6
+  follow-up.
 - No per-token rate limit or public API tokens yet; `Idempotency-Key`, webhooks
   and OpenAPI remain P6.
 - The live OAuth redirect has not been exercised against Discord; the tests use a

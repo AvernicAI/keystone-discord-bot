@@ -36,7 +36,7 @@ browser
   │  keystone_session cookie (random opaque value)
   ▼
 AuthService.session(sha256(cookie))
-  │  WebSession { sealed Discord tokens, csrf hash, expiry }
+  │  WebSession { sealed Discord access token, csrf hash, expiry }
   ▼
 GuildAccessService.authorize(accessToken, :guildId)
   │  1. user owner/admin/manage-guild?  (BigInt bitfield)
@@ -115,6 +115,8 @@ server or a browser.
   settings concept.
 - A fleet view with bulk actions and templates.
 - Token refresh/rotation, Discord token revocation on logout, idle timeout.
+  No refresh token is stored until that path exists; the session re-authenticates
+  when its access token expires.
 - Public API tokens (`keystone_…`), scopes, per-token rate limits,
   `Idempotency-Key`, webhooks and an OpenAPI document.
 - Live OAuth against Discord and a Postgres-backed session smoke.

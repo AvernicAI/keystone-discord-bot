@@ -14,16 +14,14 @@ function session(): WebSession {
     userId: "444444444444444444",
     username: "Admin",
     accessToken: "sealed-access-token",
-    refreshToken: "sealed-refresh-token",
     csrfHash: "hashed-csrf-token",
     createdAt: now.toISOString(),
-    rotatedAt: now.toISOString(),
     expiresAt: new Date(now.getTime() + 86_400_000).toISOString(),
   };
 }
 
 describe("Drizzle web stores", () => {
-  it("round-trips an opaque session and updates sealed tokens", async () => {
+  it("round-trips an opaque session without refresh credentials", async () => {
     const harness = await createMigratedPglite();
     try {
       const store = new DrizzleSessionStore(harness.db);
@@ -33,23 +31,11 @@ describe("Drizzle web stores", () => {
       expect(loaded).toMatchObject({
         userId: "444444444444444444",
         accessToken: "sealed-access-token",
-        refreshToken: "sealed-refresh-token",
         csrfHash: "hashed-csrf-token",
       });
       expect(loaded?.expiresAt).toBe(original.expiresAt);
-
-      const rotated = new Date(Date.now() + 172_800_000).toISOString();
-      await store.update("hashed-session-id", {
-        accessToken: "sealed-new-access",
-        refreshToken: null,
-        rotatedAt: rotated,
-        expiresAt: rotated,
-      });
-      expect(await store.get("hashed-session-id")).toMatchObject({
-        accessToken: "sealed-new-access",
-        refreshToken: null,
-        expiresAt: rotated,
-      });
+      expect(loaded).not.toHaveProperty("refreshToken");
+      expect(loaded).not.toHaveProperty("rotatedAt");
 
       await store.delete("hashed-session-id");
       expect(await store.get("hashed-session-id")).toBeUndefined();

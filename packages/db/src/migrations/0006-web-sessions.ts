@@ -1,10 +1,11 @@
 /**
  * 0006 — P6 dashboard sessions.
  *
- * Opaque session IDs are stored as SHA-256 hashes. Discord access and refresh
- * tokens are sealed with AES-256-GCM before they reach this table, so a database
- * read alone cannot replay a user's Discord authorization. No token or CSRF
- * value is stored in plaintext.
+ * Opaque session IDs are stored as SHA-256 hashes. The Discord access token is
+ * sealed with AES-256-GCM before it reaches this table, so a database read
+ * alone cannot replay a user's Discord authorization. No token or CSRF value is
+ * stored in plaintext. The unused refresh-token and rotation columns are
+ * removed by 0008.
  */
 export const version = "0006_web_sessions";
 
