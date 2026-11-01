@@ -292,6 +292,24 @@ export const inviteJoins = pgTable(
   ],
 );
 
+/** Append-only audit log. Delivery is best-effort; this table is the truth. */
+export const loggingEvents = pgTable(
+  "logging_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    guildId: text("guild_id").notNull(),
+    kind: text("kind").notNull(),
+    actorId: text("actor_id"),
+    targetId: text("target_id"),
+    channelId: text("channel_id"),
+    messageId: text("message_id"),
+    summary: text("summary").notNull(),
+    data: jsonValue("data"),
+    createdAt: createdAt(),
+  },
+  (table) => [index("logging_events_guild_created_idx").on(table.guildId, table.createdAt)],
+);
+
 /** Monotonic per-guild case numbers; the unique index on cases is the backstop. */
 export const caseCounters = pgTable("case_counters", {
   guildId: text("guild_id").primaryKey(),
@@ -357,6 +375,7 @@ export const schema = {
   aiDocuments,
   aiUsage,
   inviteJoins,
+  loggingEvents,
   caseCounters,
   jobReceipts,
   imports,

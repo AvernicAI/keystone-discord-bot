@@ -5,7 +5,7 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**12 roots · 77 subcommands · 89 total actions · 12/100 global roots used.**
+**13 roots · 84 subcommands · 97 total actions · 13/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
@@ -25,6 +25,7 @@ root, then choose a subcommand.
 | `/tools` | `community` | 24 |
 | `/ai` | `ai` | 11 |
 | `/invites` | `invites` | 3 |
+| `/logging` | `logging` | 7 |
 
 ## `/ping`
 
@@ -181,6 +182,20 @@ Invite leaderboard, your invite stats, and who invited a member.
 | `/invites leaderboard` | Show who has brought the most members in. | `limit` |
 | `/invites stats` | Show a member's join and retention totals. | `user` |
 | `/invites who` | Show who invited a member and any advisory flags. | `user` |
+
+## `/logging`
+
+Log message, member and moderation events in one audit channel.
+
+| Subcommand | Description | Options |
+| --- | --- | --- |
+| `/logging setup` | Set the log channel, enable logging and send a test message. | `channel` |
+| `/logging channel` | Change the log channel, or clear it by omitting the option. | `channel` |
+| `/logging events` | List event toggles, or turn one event type on or off. | `event`, `enabled` |
+| `/logging status` | Show the channel, event toggles, retention and stored count. | — |
+| `/logging retention` | Set how many days to keep events, then prune older rows. | `days` |
+| `/logging export` | Export the settings and the ten newest events as JSON. | — |
+| `/logging disable` | Stop capturing and delivering events; keep the configuration. | — |
 
 ## How to change this page
 

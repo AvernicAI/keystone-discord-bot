@@ -6,13 +6,13 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-01",
   "phase": "P7",
-  "lastPass": "journal/2026-11-01-pass-27.md",
+  "lastPass": "journal/2026-11-01-pass-28.md",
   "metrics": {
-    "commands": 12,
-    "subcommands": 77,
+    "commands": 13,
+    "subcommands": 84,
     "commandLimit": 100,
-    "modules": 6,
-    "tests": 255
+    "modules": 7,
+    "tests": 283
   },
   "modules": [
     {
@@ -143,6 +143,28 @@
       "premium": false,
       "optionalIntents": [
         "GuildMembers"
+      ]
+    },
+    {
+      "id": "logging",
+      "name": "Audit logging",
+      "status": "beta",
+      "phase": "P7",
+      "codePath": "modules/logging",
+      "specPath": "vault/04-Modules/logging/Spec.md",
+      "statusPath": "vault/04-Modules/logging/Status.md",
+      "teachingPath": "vault/04-Modules/logging/Teaching.md",
+      "commands": [
+        "logging"
+      ],
+      "intents": [
+        "Guilds",
+        "GuildMessages"
+      ],
+      "premium": false,
+      "optionalIntents": [
+        "GuildMembers",
+        "MessageContent"
       ]
     }
   ],

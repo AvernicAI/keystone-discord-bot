@@ -16,20 +16,21 @@ sessions, per-guild BigInt authorization, schema-validated module settings write
 from the dashboard and a `PATCH /api/v1` route. Fleet actions, templates, scoped
 API tokens and webhooks are the remaining P6 work. P7 now has invite tracking as
 a sixth module (attribution, a joins/retention leaderboard and advisory
-suspicious-join flags), link/profanity/zalgo content filters, and an
-auto-responder for exact, contains and regex triggers. The command ledger is
-**12/100 roots** with **77 real subcommands** and **89 actions**, there are **6
-modules**, and `pnpm check` covers **255 tests across 41 files** without a
-Discord token, database or network. Live on 2026-11-01: the bot logged in,
-registered 12 roots and 77 subcommands through Discord, answered a Qwen3:8b
-mention in `#ai-chat`, and ran real moderation, community, AI, invite and
+suspicious-join flags), audit logging as a seventh module (five event kinds, one
+operator channel and a retained ledger), link/profanity/zalgo content filters,
+and an auto-responder for exact, contains and regex triggers. The command ledger
+is **13/100 roots** with **84 real subcommands** and **97 actions**, there are
+**7 modules**, and `pnpm check` covers **283 tests across 44 files** without a
+Discord token, database or network. Live on 2026-11-01: the bot logged in and
+Discord reports **13 roots / 84 subcommands**, answered a Qwen3:8b mention in
+`#ai-chat`, and ran real moderation, community, AI, invite, logging and
 content-filter commands through a development message bridge, including
 `/help`’s generated catalog. The dashboard was booted in memory mode and
 exercised over real HTTP, including authenticated settings writes against a fake
 OAuth port; live Discord OAuth is not claimed. Slash `InteractionCreate` from a
 human client is still the next live check. The configured local Postgres/Redis
 endpoints are not reachable on this machine (no Docker or service), so the live
-window remains memory mode; see [pass 27](memory/journal/2026-11-01-pass-27.md).
+window remains memory mode; see [pass 28](memory/journal/2026-11-01-pass-28.md).
 
 This repo is both the product and the course: every module has a spec, tests, a
 teaching note and a status page. The docs are the source of truth, not a
@@ -244,8 +245,8 @@ refusals. See [the community spec](memory/vault/04-Modules/community/Spec.md).
 
 ## Commands
 
-Discord's global limit is 100 **roots**; Keystone uses **12** and exposes **77
-real subcommands** (89 total actions). A subcommand does not spend another global
+Discord's global limit is 100 **roots**; Keystone uses **13** and exposes **84
+real subcommands** (97 total actions). A subcommand does not spend another global
 slot, which is why the picker now expands instead of showing one flat `action`
 option. Slash commands are the product surface. In development, `DEV_GUILD_ID`
 also enables the `!` bridge for message-only harnesses.
@@ -268,6 +269,7 @@ the same live registry.
 | `/tools` | `embed`, `tag`, `reminder`, `schedule`, `giveaway`, `giveaway-end`, `giveaway-reroll`, `poll`, `feed`, `stat`, `welcome`, `roles`, `starboard`, `starboard-override`, `voice`, `birthdays`, `birthday`, `suggestions`, `suggestion`, `suggestion-decide`, `sticky`, `responder`, `responders`, `responder-remove` | Community utilities, panels and auto-responders |
 | `/ai` | `status`, `ask`, `chat`, `classify`, `docs-add`, `docs-list`, `docs-remove`, `deflect`, `explain`, `summary`, `budget` | Opt-in server-doc answers, advisory classification, explanations, summaries and hard caps |
 | `/invites` | `leaderboard`, `stats`, `who` | Invite attribution, joins/retention totals and who invited a member (`who` takes `user`) |
+| `/logging` | `setup`, `channel`, `events`, `status`, `retention`, `export`, `disable` | One audit channel for message, member and moderation events, with per-event toggles and retention pruning |
 
 `/ticket summary` and `/ai summary` require `ManageGuild`. `/ai docs-*` and
 `/ai budget` require `ManageGuild`; `/ai classify` and `/ai deflect` require
@@ -329,7 +331,7 @@ Everything below is free. No feature is moved behind a paywall.
 
 ### Platform and operations
 
-- Module registry with a CI-enforced 100-root budget (currently 12 roots, 77
+- Module registry with a CI-enforced 100-root budget (currently 13 roots, 84
   subcommands).
 - Real Discord subcommand tree: flat `action` options are gone from every
   existing hub, `/help` is generated from the registry, boot sync compares the
@@ -358,7 +360,11 @@ Everything below is free. No feature is moved behind a paywall.
   combined content-filter review queue.
 - Native AutoMod plan and `Keystone ·` rule ownership.
 - Anti-nuke, anti-raid, quarantine, join gate and `/verify`.
-- Action logging and an appeal button on case cards.
+- Audit logging: message delete/edit, member join/leave and moderation cases in
+  one operator channel, with five toggles, a 1–365 day retention window and a
+  JSON export. Events are stored before delivery, so a broken channel keeps the
+  ledger.
+- An appeal button on case cards.
 
 ### Community
 
@@ -396,9 +402,9 @@ Everything below is free. No feature is moved behind a paywall.
 - **P6 remaining:** schema-driven field widgets, the Next.js shell, fleet
   view/templates, token refresh/revocation, scoped public API tokens,
   per-token rate limits, idempotency, webhooks and OpenAPI.
-- **P7:** invite tracking, the link/profanity/zalgo filters and auto-responders
-  are done; the rest is parity completion (forms, events, role persistence,
-  modmail, analytics), Components V2 UI and i18n.
+- **P7:** invite tracking, audit logging, the link/profanity/zalgo filters and
+  auto-responders are done; the rest is parity completion (forms, events, role
+  persistence, modmail, analytics), Components V2 UI and i18n.
 - **P8:** bring-your-own Lavalink music, disabled by default; no bundled streamer.
 - **P9:** docs site, 14-lesson curriculum, release workflow, self-host kit.
 - **P10:** sharding, load tests, SLOs, Discord.js v15 migration.
@@ -418,16 +424,18 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
-| P7 Command tree | Done | 12 roots · 77 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
+| P7 Command tree | Done | 13 roots · 84 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
 | P7 Slash harness | Harness done | Synthetic nested `/mod ban` through the real adapter + dispatch; gateway `InteractionCreate` still human-only |
-| P7 Parity completion | **In progress** | Invite tracking, link/profanity/zalgo filters and auto-responders shipped; forms, events, expiry, modmail and UI/i18n open |
+| P7 Audit logging | Done | `/logging`; five event kinds, per-event toggles, append-only ledger, retention; message and moderation events live-proven |
+| P7 Parity completion | **In progress** | Invite tracking, audit logging, link/profanity/zalgo filters and auto-responders shipped; forms, events, expiry, modmail and UI/i18n open |
 
 Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 12
-global roots with 77 subcommands (including `/help` and `/invites`) with no
-drift, and Qwen3:8b answered a mention in `#ai-chat`. A development `!` bridge ran
-`!ping`, `!about`, `!help commands`, `!help browse`, `!help search query=ban`,
-`!ai status`, `!mod history`, `!rank leaderboard`, `!invites leaderboard` and
-`!invites who` through the real dispatch pipeline. `/ticket stats` reached
+global roots with 84 subcommands (including `/help`, `/invites` and `/logging`)
+with no drift, and Qwen3:8b answered a mention in `#ai-chat`. A development `!`
+bridge ran `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
+query=ban`, `!ai status`, `!mod history`, `!rank leaderboard`, `!invites
+leaderboard`, `!invites who` and `!logging status | events | retention | export`
+through the real dispatch pipeline. `/ticket stats` reached
 the `ManageGuild` guard (the MCP bot is not an admin); that check exposed a real
 ordering bug, now fixed and unit-tested.
 
@@ -455,9 +463,10 @@ trees double-posting replies; after stopping both and starting one, the MCP
 transcript showed exactly one reply for `!mod history` and one for
 `!help search query=ban`. See [pass 27](memory/journal/2026-11-01-pass-27.md).
 
-Command-tree live evidence (2026-11-01, pass 26): `pnpm commands:doctor` reported
-`AllinOne`, 2 guilds, **12 global roots and 77 live subcommands**, with no
-missing, extra or changed roots. The `!` bridge then returned the generated
+Command-tree live evidence (2026-11-01, pass 28): the Discord REST command set
+reports `AllinOne` with **13 global roots and 84 live subcommands**, including
+`/logging`; pass 26's `commands:doctor` run reported 12 roots / 77 subcommands at
+that point. The `!` bridge then returned the generated
 catalog for `!help commands`, the module map for `!help browse`, one search hit
 for `!help search query=ban`, a case list for `!mod history`, and the AI status
 embed for `!ai status`. See [pass 26](memory/journal/2026-11-01-pass-26.md). A
@@ -471,6 +480,18 @@ Auto-responder live evidence (2026-11-01, pass 25): the seeded guild trigger
 60-second cooldown produced no reply; a third after the window replied again.
 See [pass 25](memory/journal/2026-11-01-pass-25.md).
 
+Audit-logging live evidence (2026-11-01, pass 28): `/logging setup` sent a real
+test embed to the configured log channel. An MCP message was edited and then
+deleted; the log channel received a **Message edited** embed with before/after
+content and a **Message deleted** embed with the stored content. A marked
+profanity fixture opened case #1 and arrived as a **Moderation case** embed. The
+status bridge reported 3 stored events; the event toggle turned `message_edit`
+off and back on; retention was set to 7 days; and `!logging export` returned
+versioned JSON with the settings and those three events. Each reply appeared
+once. Member join/leave delivery is covered by the adapter test but was not
+exercised with a second account. See
+[pass 28](memory/journal/2026-11-01-pass-28.md).
+
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and
 `/login` `503` with the OAuth-unconfigured message. The authenticated read and
@@ -483,6 +504,8 @@ A live Discord login and a Postgres session are not claimed.
 Still open and not claimed as done:
 
 - Slash `InteractionCreate` from a human client (the MCP cannot invoke it).
+- A live member join/leave in the audit ledger, and a human author through the
+  log filters.
 - Live Postgres, live role grants, live selects/voice/scheduler and a human
   mention in production.
 - pgvector ANN at 1M×1536 with production embeddings; the exact index is the
@@ -594,6 +617,10 @@ message bridge that feeds the same registry, guards, cooldowns and reply adapter
 !mod filters
 !rank leaderboard
 !tools responders
+!logging status
+!logging events event=message_edit enabled=false
+!logging retention days=7
+!logging export
 ```
 
 The bridge is **never registered in production** and only answers in that one
@@ -625,7 +652,7 @@ packages/queue  BullMQ adapter + in-process driver for tests
 packages/telemetry  OpenTelemetry wrapper, off by default
 packages/config Zod-validated environment
 packages/testing token-free fixtures for module authors
-modules/        diagnostics, setup, moderation, community, ai, invites
+modules/        diagnostics, setup, moderation, community, ai, invites, logging
 memory/         Obsidian vault + machine state + journal
 ```
 

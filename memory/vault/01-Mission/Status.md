@@ -2,6 +2,22 @@
 
 ## Now
 
+**P7 audit logging is in repo and live-proven for message and moderation events**
+(pass 28, 2026-11-01): the seventh module adds `/logging setup | channel | events
+| status | retention | export | disable`. Five event kinds (message delete, message
+edit, member join, member leave, moderation case) are written to an append-only
+`logging_events` ledger **before** best-effort delivery to one operator channel.
+A disabled module or disabled event writes nothing; a missing or broken channel
+keeps the row. Moderation cases enter through `CaseService.onOpened`, not by
+re-reading the cases table. Retention prunes at startup, after `/logging
+retention`, and every six hours. Live: the configured channel received a
+test embed, a real edited/deleted MCP message produced before/after embeds, and a
+blocked profanity message arrived as case #1 through the case observer;
+`!logging status | events | retention | export` ran through the real dispatch
+pipeline and reported 3 stored events. Member join/leave remain adapter-tested
+only. See [[04-Modules/logging/Spec|Logging spec]] and
+[[04-Modules/logging/Status|Logging status]].
+
 **P7 invite tracking is in repo** (pass 19; cold-cache fix in pass 20;
 gateway boundary in pass 21, 2026-11-01): the sixth module adds `/invites leaderboard | stats | who`,
 durable `invite_joins` attribution with a unique
@@ -45,18 +61,19 @@ got no reply; a third after the window replied again. See
 [[04-Modules/community/Status|Community status]].
 
 **P7 command tree is in repo** (pass 26, 2026-11-01): the kernel now models
-real Discord subcommands and subcommand groups. Every existing hub exposes its
-working actions as subcommands — `/mod` 14, `/rank` 12, `/ticket` 8, `/tools` 24,
-`/ai` 11 and `/invites` 3 — for **12 roots · 77 subcommands · 89 actions**. The
-new `/help` root (`browse`, `commands`, `search`, `privacy`, `changelog`) reads
-the live registry, so its catalog cannot drift. `pnpm commands:catalog` generates
-`memory/machine/commands.json` and [[Command-Catalog]], and
-`pnpm commands:doctor` prints the live registration shape without writing. Two
-defects found during proof are fixed: the structural adapter now flattens nested
-subcommand options, and boot sync compares the whole option tree instead of names
-alone. Live: `pnpm commands:doctor` reported 12 roots / 77 subcommands with no
-drift; the `!` bridge returned `!help commands`, `!help browse`, `!help search
-query=ban`, `!mod history` and `!ai status` through the real gateway. See
+real Discord subcommands and subcommand groups. Every hub that existed at that
+point exposes its working actions as subcommands — `/mod` 14, `/rank` 12,
+`/ticket` 8, `/tools` 24, `/ai` 11 and `/invites` 3 — for 12 roots, 77
+subcommands and 89 actions. `/help` (`browse`, `commands`, `search`, `privacy`,
+`changelog`) reads the live registry, so its catalog cannot drift.
+`pnpm commands:catalog` generates `memory/machine/commands.json` and
+[[Command-Catalog]], and `pnpm commands:doctor` prints the live registration
+shape without writing. Two defects found during proof are fixed: the structural
+adapter now flattens nested subcommand options, and boot sync compares the whole
+option tree instead of names alone. Pass 28 added `/logging` with seven
+subcommands, bringing the current ledger to **13 roots · 84 subcommands · 97
+actions**; Discord's REST command set after pass 28 reports 13 roots / 84
+subcommands including `logging`. See
 [[03-Architecture/Command-Budget|Command budget]] and
 [[03-Architecture/ADR/ADR-0003-command-budget]].
 
@@ -114,10 +131,12 @@ guild and answered a qwen3:8b mention in `#ai-chat`. SaseQ's `discord-mcp` canno
 invoke slash commands, so a **dev-only `!` bridge** now feeds the real dispatch
 pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
 `!rank leaderboard` all returned live Discord messages/embeds. Pass 19 added
-`!invites leaderboard` and `!invites who`. Pass 26 re-registered **12 roots /
-77 subcommands** and added `!help commands`, `!help browse`, `!help search
-query=ban`, `!mod history` and `!ai status` to the live list; Discord's fetched
-shape matched the registry with no missing, extra or changed roots. Pass 23
+`!invites leaderboard` and `!invites who`. Pass 26 re-registered 12 roots /
+77 subcommands at the time; pass 28 added `/logging` and Discord's fetched shape
+now reports **13 roots / 84 subcommands** with no missing, extra or changed
+roots. The bridge added `!help commands`, `!help browse`, `!help search
+query=ban`, `!mod history`, `!ai status`, `!logging status`, `!logging events`,
+`!logging retention` and `!logging export` to the live list. Pass 23
 added `!mod links` and a live link-filter proof: three marked MCP messages
 produced a blocklisted
 subdomain case, an apex case and a punycode case; `!mod review case=2` marked one
@@ -149,10 +168,10 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 255 tests / 41 files · budget 12/100 roots (77 subcommands) · memory 1996/1996
+pnpm check        exit 0 · typecheck 0 · 283 tests / 44 files · budget 13/100 roots (84 subcommands) · memory 2027/2027
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 12 roots / 77 subcommands · one bot process · qwen3:8b reply in #ai-chat
-live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who
+live              2026-11-01 · AI Team#5758 · 2 guilds · 13 roots / 84 subcommands · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered
+live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
 live env blocker 2026-11-01 · DATABASE_URL localhost:5432 → ECONNREFUSED · REDIS_URL localhost:6379 → Connection is closed · Docker/service absent
 live content filters 2026-11-01 · link delete returned 10008 Unknown Message; profanity delete removed the pineapple message and kept its case; safe seed produced link/profanity/zalgo cases; one reviewed; example.com not flagged
@@ -165,6 +184,21 @@ A local `.env` exists in the working tree. Smoke commands pin
 `DOTENV_CONFIG_PATH=.env.absent` so the result is deterministic and does not
 read that file.
 
+## P7 audit-logging acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | The ledger is written before delivery | `modules/logging/src/logging.test.ts`: a missing channel stores one row; a failed send keeps the row and returns `delivery-failed` | In-memory service |
+| 2 | Disabled module and disabled event write nothing | Same suite: `disabled` and `event-off` return zero rows and zero sends | In-memory service |
+| 3 | Moderation cases share the stream through an observer | `logging.test.ts` maps a `ModerationCase`; live case #1 arrived as a **Moderation case** embed | Service + **live gateway** |
+| 4 | Event toggles are real settings, not decoration | `logging.test.ts`: `events` lists and toggles `message_delete`; live `message_edit` was turned off and back on | Command + **live bridge** |
+| 5 | Retention is bounded and actually prunes | `logging.test.ts`: only rows older than 7 days are removed; PGlite scoped prune test; live `retention days=7` pruned immediately | Service + **PGlite** + **live bridge** |
+| 6 | Storage is append-only and guild-scoped | `packages/db/src/logging-store.test.ts`: newest-first, guild isolation, prune, close/reopen | **PGlite** |
+| 7 | The bot marker cannot widen production | `apps/bot/src/logging-events.test.ts`: no marker and another guild are ignored; marker stripped in `DEV_GUILD_ID` | Adapter test; production passes no option |
+| 8 | Message edit and delete carry content when available | `logging-events.test.ts` asserts both halves; live log channel showed **Before/After** and stored **Content** | Adapter + **live gateway** |
+| 9 | The real surface runs without a new duplicate reply | Live 2026-11-01: `/logging setup` posted the test embed; 3 events stored; each bridge reply appeared once | **Live gateway + Discord API** |
+| 10 | A live member join/leave was **not** performed | `Status.md` limitation; no second account was available | Not claimed |
+
 ## P7 invite acceptance evidence
 
 | # | Criterion | Where it is asserted | Proven against |
@@ -176,7 +210,7 @@ read that file.
 | 5 | Flags are advisory | `invites.test.ts`: one log embed, footer "Advisory only"; the port has no ban/kick/timeout method | In-memory + recorder |
 | 6 | Settings are the module's own schema | `inviteSettingsSchema`; the dashboard uses the same catalog, no web-only schema | Shared catalog |
 | 7 | The command fits the budget and declares its intents | `commands.test.ts`: one root, budget 1, `GuildInvites` required, `GuildMembers` fallback named by `/setup` | Registry |
-| 8 | The real surface runs | Live 2026-11-01: 12 roots / 77 subcommands registered including `invites`; `!invites leaderboard` and `!invites who` dispatched and replied in `#ai-chat` | Live gateway |
+| 8 | The real surface runs | Live 2026-11-01: `/invites` was registered with the then-current 12 roots / 77 subcommands (now 13 / 84); `!invites leaderboard` and `!invites who` dispatched and replied in `#ai-chat` | Live gateway |
 | 9 | A live member join was **not** performed | `Status.md` limitation; no second account was available | Not claimed |
 
 ## P7 auto-responder acceptance evidence
@@ -189,7 +223,7 @@ read that file.
 | 4 | Configuration is admin-only and input is validated | `modules/community/src/commands.test.ts`: `ManageGuild` guard, enable/list/remove, duplicate and invalid regex rejected | Command + service |
 | 5 | Records are guild-scoped and survive a restart | `packages/db/src/community.test.ts`: one record after close/reopen, zero in another guild | **PGlite** |
 | 6 | The dev marker cannot widen production | `apps/bot/src/community-events.test.ts`: bot message without marker and marker in another guild do nothing; fixture message never awards XP | Adapter test |
-| 7 | The feature costs no new root | `/tools` subcommands `responder`, `responders`, `responder-remove`; budget remains 12 roots / 77 subcommands | Static registry |
+| 7 | The feature costs no new root | `/tools` subcommands `responder`, `responders`, `responder-remove`; budget remained 12 roots / 77 subcommands at that pass | Static registry |
 | 8 | The real surface runs | Live 2026-11-01: marked MCP message `hello keystone` produced `Hi from Keystone's auto-responder.` | **Live gateway** |
 
 ## P7 content-filter acceptance evidence
@@ -202,7 +236,7 @@ read that file.
 | 4 | A finding is reviewable through the existing case queue | `mod.test.ts`: `/mod links` reads an `automod.link` case; live `!mod review case=2` changed #2 to `reviewed` | Command + **live gateway** |
 | 5 | Bot authors stay ignored outside the dev marker | `moderation-events.test.ts`: no marker → ignored; marker in another guild → ignored; marker stripped in `DEV_GUILD_ID` | Adapter test; production passes no option |
 | 6 | Evidence is the host and match, not the message | `security.test.ts` asserts `{ host, match }`; the case stores no content | Unit |
-| 7 | The feature costs no new root | `/mod links` and `/mod filters` are existing `/mod` subcommands; `pnpm budget` remains 12 roots / 77 subcommands | Static registry |
+| 7 | The feature costs no new root | `/mod links` and `/mod filters` are existing `/mod` subcommands; `pnpm budget` remained 12 roots / 77 subcommands at that pass | Static registry |
 | 8 | A live `delete`-mode deletion | Temporary `dryRun: false` seed; blocked message ID returned `10008: Unknown Message`; case #1 stayed open | **Live gateway + Discord API** |
 | 9 | A configured word is caught on word edges | `security.test.ts`: `ass` not `class`; phrase whitespace; live `pineapple` case #2 | Pure engine + **live gateway** |
 | 10 | Excessive combining marks are caught at the threshold | `security.test.ts`: threshold hit and below-threshold; live 16-mark case #3 | Pure engine + **live gateway** |
@@ -375,9 +409,10 @@ here.
 
 ## Next
 
-P7 parity work continues alongside the P6 exit items. Auto-responders and the
-content filters are done; the next open rows are forms/events, analytics,
-modmail, expiry jobs, case export and panic mode. `automod.false-positive-report`
+P7 parity work continues alongside the P6 exit items. Auto-responders, audit
+logging and the content filters are done; the next open rows are forms/events,
+analytics (which can read `logging_events`), modmail, expiry jobs, case export
+and panic mode. `automod.false-positive-report`
 is still the smallest useful moderation follow-up. P6 remains the active phase
 for the dashboard. The auth gate and settings writes are built;
 next are schema-driven field widgets, the Next.js shell (or a decision to keep

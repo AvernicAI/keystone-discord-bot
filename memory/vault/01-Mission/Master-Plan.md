@@ -143,7 +143,7 @@ same interfaces. No module changes when a port changes.
 
 ### Command allocation
 
-The target is 18 roots. Twelve are live today with 77 real subcommands; the
+The target is 18 roots. Thirteen are live today with 84 real subcommands; the
 remaining roots land with their modules, not as empty placeholders. Subcommands
 are free inside a root, so most growth should not spend another slot.
 
@@ -156,6 +156,7 @@ are free inside a root, so most growth should not spend another slot.
 | `/rank` | view, leaderboard, rewards, admin | MEE6 leveling |
 | `/tools` | embed, tag, reminder, giveaway, poll, feed, stat | Carl/MEE6 utilities |
 | `/help` | browse, search, privacy | every bot's help |
+| `/logging` | setup, channel, events, status, retention, export, disable | Dyno/Carl audit logging |
 | `/appeal` | open, status | nobody (our edge) |
 | `/export` | guild, user, delete | nobody (our edge) |
 | `/verify` | start, status | Security Bot |

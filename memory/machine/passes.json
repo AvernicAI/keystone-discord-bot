@@ -352,6 +352,19 @@
         "budget": "12/100 roots · 77 subcommands",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-28",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Audit logging: the seventh module adds /logging setup|channel|events|status|retention|export|disable, five event kinds written to an append-only ledger before best-effort Discord delivery, a case observer, SQL + in-memory stores and retention pruning. Live-proven for message edit/delete and moderation cases; member joins/leaves remain adapter-only.",
+      "journal": "journal/2026-11-01-pass-28.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "283",
+        "budget": "13/100 roots · 84 subcommands",
+        "memory": "current"
+      }
     }
   ]
 }

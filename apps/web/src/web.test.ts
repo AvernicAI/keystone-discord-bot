@@ -233,6 +233,7 @@ describe("P6 web auth and authorization", () => {
         "community",
         "ai",
         "invites",
+        "logging",
       ]);
       expect(body.latestImport?.source).toBe("bundle");
 

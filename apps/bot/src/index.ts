@@ -22,8 +22,11 @@ import { createDiscordCommunityActions } from "./community-actions";
 import { registerCommunityEvents } from "./community-events";
 import { createDiscordInviteActions } from "./invites-actions";
 import { registerInviteEvents } from "./invite-events";
+import { createDiscordLoggingActions } from "./logging-actions";
+import { registerLoggingEvents } from "./logging-events";
 import { registerAiEvents } from "./ai-events";
 import { registerPrefixCommands } from "./prefix";
+import { LoggingService } from "@keystone/module-logging";
 import { buildNativeAutoModPlan, moderationSettingsSchema } from "@keystone/module-moderation";
 
 async function main(): Promise<void> {
@@ -64,6 +67,7 @@ async function main(): Promise<void> {
     createDiscordModerationActions(client),
     createDiscordCommunityActions(client),
     createDiscordInviteActions(client, logger.child("invites")),
+    createDiscordLoggingActions(client, logger.child("logging")),
   );
   logger.info("runtime ready", runtime.mode);
 
@@ -79,7 +83,14 @@ async function main(): Promise<void> {
     community: runtime.community,
     invites: runtime.invites,
     ai: runtime.ai,
+    logging: runtime.logging,
   };
+
+  const loggingService = new LoggingService(
+    runtime.logging.store,
+    runtime.logging.actions,
+    runtime.settings.forModule("logging"),
+  );
 
   client.once(Events.ClientReady, async (ready) => {
     logger.info("ready", {
@@ -131,6 +142,16 @@ async function main(): Promise<void> {
           }
         } catch (error) {
           logger.warn("native automod sync skipped", {
+            guild: guild.id,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+
+        try {
+          const pruned = await loggingService.prune(guild.id);
+          if (pruned > 0) logger.info("logging retention pruned", { guild: guild.id, pruned });
+        } catch (error) {
+          logger.warn("logging retention failed", {
             guild: guild.id,
             error: error instanceof Error ? error.message : String(error),
           });
@@ -237,6 +258,24 @@ async function main(): Promise<void> {
     runtime.settings.forModule("invites"),
     logger.child("invites"),
   );
+  const stopLogging = registerLoggingEvents(
+    client,
+    runtime.logging,
+    runtime.settings.forModule("logging"),
+    logger.child("logging"),
+    { botTestGuildId: devTestGuild },
+  );
+  const retentionTimer = setInterval(() => {
+    for (const guild of client.guilds.cache.values()) {
+      void loggingService.prune(guild.id).catch((error: unknown) => {
+        logger.warn("logging retention failed", {
+          guild: guild.id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      });
+    }
+  }, 6 * 60 * 60_000);
+  retentionTimer.unref();
   // One explicit development surface, never present in production: message
   // authors (including the MCP bot) can run the real pipeline with `!`, and
   // bot-authored mentions reach the AI event. Both are restricted to this
@@ -259,7 +298,9 @@ async function main(): Promise<void> {
     if (shuttingDown) return;
     shuttingDown = true;
     logger.info("shutting down", { signal });
+    clearInterval(retentionTimer);
     stopCommunity();
+    stopLogging();
     stopPrefix();
     stopAi();
     await client.destroy();

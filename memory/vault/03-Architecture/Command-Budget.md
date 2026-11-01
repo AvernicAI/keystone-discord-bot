@@ -10,8 +10,8 @@ refuses to boot when it fails.
 ## Current ledger
 
 ```text
-12/100 global roots used (88 left)
-77 subcommands · 89 total actions
+13/100 global roots used (87 left)
+84 subcommands · 97 total actions
 status: OK
 
   /command  module       subs  opts  chars
@@ -23,6 +23,7 @@ status: OK
   /help     diagnostics     5     1    816
   /ping     diagnostics     0     0    103
   /invites  invites         3     1    672
+  /logging  logging         7     2   1606
   /appeal   moderation      0     2    282
   /mod      moderation     14     4   3991
   /verify   moderation      0     0    120
@@ -74,9 +75,9 @@ would duplicate the hub and spend a command for no user benefit.
 | `/tools` | embeds, giveaways, reminders, feeds | `/tools embed edit` |
 | `/help` | discovery, generated from the registry | `/help moderation` |
 
-Twelve roots today for a bot with dozens of implemented actions. The remaining
-88 slots are held for context menus, Activities, and features that genuinely
-need their own name. `/help` and `/setup` are roots; `/config`, `/logging`,
+Thirteen roots today for a bot with dozens of implemented actions. The remaining
+87 slots are held for context menus, Activities, and features that genuinely
+need their own name. `/help`, `/setup` and `/logging` are roots; `/config`,
 `/analytics`, `/export` and `/music` arrive with their modules, not as empty
 advertisements.
 

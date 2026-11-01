@@ -2,6 +2,7 @@ export * from "./types";
 export * from "./community";
 export * from "./invites";
 export * from "./ai";
+export * from "./logging";
 export * from "./errors";
 export * from "./logger";
 export * from "./manifest";

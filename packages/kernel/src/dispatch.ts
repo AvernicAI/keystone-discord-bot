@@ -26,6 +26,7 @@ export interface DispatchDeps {
   community?: import("./community").CommunityPort;
   invites?: import("./invites").InvitePort;
   ai?: import("./ai").AiPort;
+  logging?: import("./logging").LoggingPort;
   /** Optional: when absent, tracing is a no-op and costs nothing. */
   telemetry?: Telemetry;
   /** Injectable clock; defaults to the real one. */
@@ -114,6 +115,7 @@ export async function dispatchCommand(
     community: deps.community,
     invites: deps.invites,
     ai: deps.ai,
+    logging: deps.logging,
   };
 
   try {

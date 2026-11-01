@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "updatedAt": "2026-11-01",
   "source": "packages/kernel ModuleRegistry catalog()",
-  "roots": 12,
-  "subcommands": 77,
-  "actions": 89,
+  "roots": 13,
+  "subcommands": 84,
+  "actions": 97,
   "limit": 100,
   "commands": [
     {
@@ -681,6 +681,58 @@
           "options": [
             "user"
           ]
+        }
+      ]
+    },
+    {
+      "name": "logging",
+      "moduleId": "logging",
+      "description": "Log message, member and moderation events in one audit channel.",
+      "options": [],
+      "subcommands": [
+        {
+          "name": "setup",
+          "description": "Set the log channel, enable logging and send a test message.",
+          "options": [
+            "channel"
+          ]
+        },
+        {
+          "name": "channel",
+          "description": "Change the log channel, or clear it by omitting the option.",
+          "options": [
+            "channel"
+          ]
+        },
+        {
+          "name": "events",
+          "description": "List event toggles, or turn one event type on or off.",
+          "options": [
+            "event",
+            "enabled"
+          ]
+        },
+        {
+          "name": "status",
+          "description": "Show the channel, event toggles, retention and stored count.",
+          "options": []
+        },
+        {
+          "name": "retention",
+          "description": "Set how many days to keep events, then prune older rows.",
+          "options": [
+            "days"
+          ]
+        },
+        {
+          "name": "export",
+          "description": "Export the settings and the ten newest events as JSON.",
+          "options": []
+        },
+        {
+          "name": "disable",
+          "description": "Stop capturing and delivering events; keep the configuration.",
+          "options": []
         }
       ]
     }

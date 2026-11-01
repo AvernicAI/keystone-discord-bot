@@ -19,6 +19,8 @@ import {
   type InviteActions,
   type InvitePort,
   type AiPort,
+  type LoggingActions,
+  type LoggingPort,
 } from "@keystone/kernel";
 import type { Env } from "@keystone/config";
 import {
@@ -27,6 +29,7 @@ import {
   createCommunityStore,
   createAiStore,
   createInviteStore,
+  createLoggingStore,
   createPostgresDatabase,
   createSettingsRepository,
   probeDatabase,
@@ -40,6 +43,7 @@ import {
 } from "@keystone/module-moderation";
 import { InMemoryCommunityStore } from "@keystone/module-community";
 import { InMemoryInviteStore } from "@keystone/module-invites";
+import { InMemoryLoggingStore, LoggingService } from "@keystone/module-logging";
 import { AiService, InMemoryAiStore, createAiProvider } from "@keystone/module-ai";
 import { createCooldownStore, type CooldownHandle } from "@keystone/cache";
 import { BullJobQueue, InProcessJobQueue } from "@keystone/queue";
@@ -59,6 +63,7 @@ export interface Runtime {
   community: CommunityPort;
   invites: InvitePort;
   ai: AiPort;
+  logging: LoggingPort;
   security: SecurityCoordinator;
   mode: { database: DatabaseMode; cache: CacheMode; queue: QueueMode };
   close(): Promise<void>;
@@ -101,6 +106,7 @@ export async function createRuntime(
   moderationActions: ModerationActions,
   communityActions: CommunityActions,
   inviteActions: InviteActions,
+  loggingActions: LoggingActions,
 ): Promise<Runtime> {
   const telemetry = env.OTEL_EXPORTER_OTLP_ENDPOINT
     ? await createOtlpTelemetry(env.OTEL_EXPORTER_OTLP_ENDPOINT, "keystone-bot")
@@ -141,8 +147,27 @@ export async function createRuntime(
       guildId: env.DEV_GUILD_ID,
     });
   }
+  const logging: LoggingPort = {
+    store: database ? createLoggingStore(database) : new InMemoryLoggingStore(),
+    actions: loggingActions,
+  };
+  const loggingService = new LoggingService(
+    logging.store,
+    logging.actions,
+    settings.forModule("logging"),
+  );
   const cases = new CaseService(
     database ? createCaseStore(database) : new InMemoryCaseStore(),
+    {
+      onOpened: (record) => {
+        void loggingService.recordCase(record).catch((error: unknown) => {
+          logger.warn("logging case event failed", {
+            guild: record.guildId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        });
+      },
+    },
   );
   const moderation: ModerationPort = { cases, actions: moderationActions };
   const community: CommunityPort = {
@@ -215,6 +240,7 @@ export async function createRuntime(
     community,
     invites,
     ai,
+    logging,
     security,
     mode: {
       database: database ? "postgres" : "memory",

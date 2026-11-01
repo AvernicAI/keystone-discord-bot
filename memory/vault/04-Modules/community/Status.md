@@ -22,7 +22,8 @@ P7 added the auto-responder in pass 25. Exact, contains and regex triggers are
 guild records; a message gets at most one reply, exact beats contains and
 contains beats regex, and each trigger carries its own cooldown. `/tools` gained
 `responder`, `responders` and `responder-remove` subcommands, so the command
-ledger stays at 12 roots / 77 subcommands. Live 2026-11-01: the seeded `hello keystone` trigger replied to
+ledger stayed at 12 roots / 77 subcommands at that pass (now 13 / 84 with audit
+logging). Live 2026-11-01: the seeded `hello keystone` trigger replied to
 a marked MCP message, a second identical message inside the 60-second cooldown
 got no reply, and a third after the window replied again. The admin actions were
 not run live because the MCP bot lacks `ManageGuild`; they are covered by the
@@ -31,7 +32,7 @@ command tests.
 ## Verified
 
 ```text
-pnpm check                            exit 0 · 255 tests / 41 files
+pnpm check                            exit 0 · 283 tests / 44 files
   responder.test.ts                   5 tests (auto-responder service)
   community.test.ts                  12 tests
   extras.test.ts                      7 tests
@@ -41,7 +42,7 @@ pnpm check                            exit 0 · 255 tests / 41 files
   apps/bot/src/prefix.test.ts         8 tests (dev bridge)
   packages/db/src/community.test.ts   5 tests (incl. responder reopen)
   packages/db/src/economy.test.ts     2 tests
-pnpm budget                           12/100 roots · 77 subcommands, status OK
+pnpm budget                           13/100 roots · 84 subcommands, status OK
 pnpm memory:check                     current (pass 25)
 ```
 

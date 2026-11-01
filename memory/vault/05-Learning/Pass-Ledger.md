@@ -7,6 +7,7 @@
 
 | Pass | Date | Phase | Summary | Journal |
 | --- | --- | --- | --- | --- |
+| pass-28 | 2026-11-01 | P7 | Audit logging: the seventh module adds /logging setup\|channel\|events\|status\|retention\|export\|disable, five event kinds written to an append-only ledger before best-effort Discord delivery, a case observer, SQL + in-memory stores and retention pruning. Live-proven for message edit/delete and moderation cases; member joins/leaves remain adapter-only. | [journal](../../journal/2026-11-01-pass-28.md) |
 | pass-27 | 2026-11-01 | P7 | Environment check plus synthetic slash harness: real nested /mod ban through asInteractionLike and dispatch, exact local Postgres/Redis blocker errors, Ollama warm retry, and a duplicate-process fix verified by one-reply MCP transcript. | [journal](../../journal/2026-11-01-pass-27.md) |
 | pass-26 | 2026-11-01 | P7 | Command tree: every existing hub now registers real Discord subcommands (12 roots, 77 subcommands), `/help` reads the live registry, the catalog is generated, and boot sync plus commands:doctor compare the full option shape instead of names alone. | [journal](../../journal/2026-11-01-pass-26.md) |
 | pass-25 | 2026-11-01 | P7 | Auto-responder: exact/contains/regex triggers in the community record seam, one reply with deterministic precedence, per-trigger cooldowns and /tools admin actions; live gateway proof plus a live profanity delete-mode proof. | [journal](../../journal/2026-11-01-pass-25.md) |
@@ -35,4 +36,4 @@
 | pass-02 | 2026-11-01 | P1 | Master plan, parity matrix and roadmap approved; the rejected plan shapes recorded. | [journal](../../journal/2026-11-01-pass-02.md) |
 | pass-01 | 2026-10-31 | P0 | Kernel, module contract, reference module, memory system, CI and ADR baseline. | [journal](../../journal/2026-10-31-pass-01.md) |
 
-Current phase: **P7**. 255 tests reported; 12/100 global roots (77 subcommands).
+Current phase: **P7**. 283 tests reported; 13/100 global roots (84 subcommands).

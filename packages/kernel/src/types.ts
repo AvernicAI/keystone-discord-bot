@@ -225,6 +225,8 @@ export interface CommandContext {
   readonly invites?: import("./invites").InvitePort;
   /** Present when the composition root wired the P4 AI provider. */
   readonly ai?: import("./ai").AiPort;
+  /** Present when the composition root wired the P7 audit-log adapters. */
+  readonly logging?: import("./logging").LoggingPort;
 }
 
 export type GuardResult = { ok: true } | { ok: false; message: string };

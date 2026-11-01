@@ -55,8 +55,17 @@ https://github.com/RNGBubba/keystone-discord-bot
   `/tools responder-remove` configure it under the existing root. Live:  the `hello keystone` trigger replied, a second message inside 60 seconds did not,
   and a third after the window did. See
   [[04-Modules/community/Spec|Community spec]].
+- **Audit logging** in repo (pass 28): `/logging setup | channel | events |
+  status | retention | export | disable` captures message delete/edit, member
+  join/leave and moderation cases in one operator channel and an append-only
+  `logging_events` ledger with a 1–365 day retention window. Events are stored
+  before delivery, so a broken channel keeps the history. Live: a real edit and
+  delete produced embeds with before/after content, a moderation case arrived
+  through the case observer, and `!logging status | events | retention | export`
+  ran through the real bridge. Member events are adapter-tested only. See
+  [[04-Modules/logging/Spec|Logging spec]].
 - **Command tree** in repo (pass 26): real Discord subcommands replaced the flat
-  `action` option across every existing hub — 12 roots, 77 subcommands, 89
+  `action` option across every existing hub — 13 roots, 84 subcommands, 97
   actions. `/help` is generated from the live registry; `pnpm commands:catalog`
   writes [[Command-Catalog]] and `pnpm commands:doctor` checks the live shape.
   A human slash invocation remains the one unobserved surface.
@@ -80,13 +89,15 @@ https://github.com/RNGBubba/keystone-discord-bot
   stopped, leaving one bot and one reply per command. The updated `.env` points
   at localhost Postgres/Redis, but neither service is installed here, so the live
   window remains memory mode.
-- **Live 2026-11-01:** AI Team#5758 logged in, cleared and re-registered 12
-  roots with 77 subcommands (then fetched Discord's shape to prove it), and
+- **Live 2026-11-01:** AI Team#5758 logged in, cleared and re-registered 13
+  roots with 84 subcommands (then fetched Discord's shape to prove it), and
   qwen3:8b via Ollama answered mentions in `#ai-chat`. A dev-only `!` bridge
   proved `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
   query=ban`, `!ai status`, `!mod history`, `!mod links`, `!mod filters`,
-  `!rank leaderboard`, `!invites leaderboard` and `!invites who` through the real
-  dispatch pipeline. The content filters produced live link, delete, profanity
+  `!rank leaderboard`, `!invites leaderboard`, `!invites who`, `!logging status`,
+  `!logging events`, `!logging retention` and `!logging export` through the real
+  dispatch pipeline. Audit logging also delivered live message-edit,
+  message-delete and moderation-case embeds to the configured channel. The content filters produced live link, delete, profanity
   and zalgo cases; `!mod filters` listed them, `!mod review` closed one, and
   `example.com` produced none. The auto-responder trigger replied, its cooldown
   suppressed a second reply, then released. Slash execution still needs a human
@@ -97,7 +108,7 @@ https://github.com/RNGBubba/keystone-discord-bot
 - Phase **P4** shipped the AI layer and the ledger-backed economy hardening.
 - Phase **P3** shipped the community suite: leveling, reaction roles, welcome,
   starboard, tickets, giveaways, temp voice, content and seasons.
-- 12 of Discord's 100 global roots used, with 77 subcommands; 6 modules registered.
+- 13 of Discord's 100 global roots used, with 84 subcommands; 7 modules registered.
 - The full suite covers the 5,000-row portability round trip and the failure,
   rollback and deletion paths; `pnpm check` also runs the intent, channel and
   memory audits.

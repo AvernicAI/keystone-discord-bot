@@ -1,0 +1,17 @@
+{
+  "name": "@keystone/module-logging",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "P7 audit logging: message, member and moderation events in one operator channel.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/kernel": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@keystone/testing": "workspace:*"
+  }
+}

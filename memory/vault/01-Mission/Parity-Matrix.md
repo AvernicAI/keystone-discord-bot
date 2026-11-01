@@ -147,7 +147,8 @@ checked. See [[Master-Plan]] for the research program.
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Web dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | P6 | Node/render first; field widgets and fleet open |
-| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 12 roots / 77 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human) |
+| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 13 roots / 84 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human) |
+| Audit logging | ❔ | 💰 | ✅ | ❌ | ✅ | P7 | Five event toggles, one operator channel and an append-only ledger with retention; `/logging`; message edit/delete and moderation cases proven live, member join/leave adapter-only |
 | Multi-server fleet | ❔ | ❔ | ❔ | ✅ | ❔ | P6 | One view, per-guild authz |
 | Config templates | ❔ | ❔ | ❔ | ❔ | ❔ | P6 | Apply to N guilds |
 | Drift detection | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | **Our edge** |
@@ -213,14 +214,15 @@ rule.
 | Music | 4 | 0 | 0 | 2 | BYO only |
 | AI | 6 | 0 | 6 | 6 | Advisory, capped, opt-in, zero-retention |
 | Invites | 3 | 0 | 0 | 3 | MEE6 is partly premium-gated; Dyno/Carl document none. Shipped in repo at pass 19; a live join is unperformed |
-| Operations | 11 | 0 | 0 | 11 | Export is the wedge; command tree is live-proven |
+| Operations | 12 | 0 | 0 | 12 | Export is the wedge; command tree and audit logging are live-proven |
 
 Two rows are non-goals (global economy, translation) and two are music features we
 refuse to ship. Everything else is promised, free.
 
 P3/P4 counts are implementation counts, not live-Discord verification. The
 adapter, buttons, gateway, scheduler, provider, mention event, live role grants
-and the Postgres guild lock are unrun here; see
+and the Postgres guild lock are unrun here; audit logging is proven live for
+message and moderation events, not for member joins. See
 [[04-Modules/ai/Status|AI status]] and
 [[04-Modules/community/Status|community status]] for the proven/unproven split.
 Economy concurrency is proven in-memory and on PGlite, not across shards. The

@@ -6,6 +6,7 @@ import { sql as migration0005, version as version0005 } from "./migrations/0005-
 import { sql as migration0006, version as version0006 } from "./migrations/0006-web-sessions";
 import { sql as migration0007, version as version0007 } from "./migrations/0007-invite-tracking";
 import { sql as migration0008, version as version0008 } from "./migrations/0008-web-session-cleanup";
+import { sql as migration0009, version as version0009 } from "./migrations/0009-logging-events";
 
 /**
  * The smallest database surface a migrator needs. Both the production driver
@@ -31,6 +32,7 @@ export const MIGRATIONS: readonly Migration[] = [
   { version: version0006, sql: migration0006 },
   { version: version0007, sql: migration0007 },
   { version: version0008, sql: migration0008 },
+  { version: version0009, sql: migration0009 },
 ];
 
 const LEDGER = "schema_migrations";

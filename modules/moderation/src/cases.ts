@@ -147,8 +147,16 @@ export function verifyButton(userId: string): ActionRow {
  * case number, a reason and an append-only `created` event. Appeals are new
  * events, never edits to history.
  */
+export interface CaseServiceOptions {
+  /** Best-effort observer. It must not be able to block case creation. */
+  readonly onOpened?: (record: ModerationCase) => void;
+}
+
 export class CaseService {
-  constructor(private readonly store: CaseStore) {}
+  constructor(
+    private readonly store: CaseStore,
+    private readonly options: CaseServiceOptions = {},
+  ) {}
 
   async open(input: Omit<NewModerationCase, "caseNumber">): Promise<ModerationCase> {
     const caseNumber = await this.store.nextCaseNumber(input.guildId);
@@ -159,6 +167,12 @@ export class CaseService {
       rule: record.rule,
       evidence: record.evidence,
     });
+    try {
+      this.options.onOpened?.(record);
+    } catch {
+      // An audit observer is not part of the case transaction. A broken log
+      // destination must not make moderation fail.
+    }
     return record;
   }
 

@@ -61,6 +61,10 @@ Examples that were actually run against AI Team:
 !ticket stats
 !invites leaderboard
 !invites who
+!logging status
+!logging events event=message_edit enabled=false
+!logging retention days=7
+!logging export
 ```
 
 A parse failure is answered in the channel with the generated usage line, so a
@@ -71,7 +75,8 @@ typo does not leave the tester guessing.
 Adapters correctly ignore bot authors. To exercise a message path without a
 second human account, a bot message in `DEV_GUILD_ID` that starts with
 `keystone-test:` is evaluated after the marker is stripped. The shared matcher
-lives in `apps/bot/src/dev-fixture.ts`; moderation and community consume it:
+lives in `apps/bot/src/dev-fixture.ts`; moderation, community and logging
+consume it:
 
 ```text
 keystone-test: https://login.phish.test/verify
@@ -82,6 +87,7 @@ keystone-test: z̸̸̸̸a̸̸̸̸l̸̸̸̸g̸̸̸̸o
 !mod filters
 
 keystone-test: hello keystone   # auto-responder fixture
+keystone-test: live audit check # message edit/delete fixture for /logging
 ```
 
 The event still travels the real gateway `MessageCreate` → `SecurityCoordinator`

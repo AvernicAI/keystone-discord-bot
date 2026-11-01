@@ -141,6 +141,7 @@ export interface TestContextOptions {
   community?: import("./community").CommunityPort;
   invites?: import("./invites").InvitePort;
   ai?: import("./ai").AiPort;
+  logging?: import("./logging").LoggingPort;
   catalog?: readonly CommandCatalogEntry[];
 }
 
@@ -168,5 +169,6 @@ export function createTestContext(options: TestContextOptions = {}): TestContext
     community: options.community,
     invites: options.invites,
     ai: options.ai,
+    logging: options.logging,
   };
 }
