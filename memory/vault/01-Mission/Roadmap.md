@@ -101,10 +101,10 @@ mention was performed.
 
 **Goal:** one dashboard with real per-guild authorization and an API at every tier.
 
-**Foundation shipped (pass 17, 2026-11-01):** see
+**Foundation shipped (passes 17–18, 2026-11-01):** see
 [[ADR-0016-dashboard-foundation]] and [[Dashboard]]. The first slice is a
 framework-free Node HTTP service so the authorization matrix could be proven
-before a UI framework was added.
+before a UI framework was added; settings writes followed through the same gate.
 
 - [x] OAuth2 code + PKCE, sealed `state`, `iss` and exact redirect validation.
 - [x] Opaque Postgres-backed sessions; Discord access/refresh tokens sealed
@@ -113,8 +113,10 @@ before a UI framework was added.
   check; CSP, CSRF and `no-store` on authenticated responses.
 - [x] Read-only dashboard and `/api/v1` reads through the kernel
   `SettingsService` + `DashboardStore` seams.
-- [ ] Next.js shell (or keep server-rendered HTML), schema-driven settings forms
-  from the module Zod schemas, writes and CSRF-protected mutations.
+- [x] Schema-validated module settings writes from the dashboard and API,
+  through `SettingsService`, with CSRF and no mutation on invalid input.
+- [ ] Next.js shell (or keep server-rendered HTML) and schema-driven field
+  widgets; the current editor is a validated JSON textarea.
 - [ ] Fleet view and templates with an explicit preview; audit log;
   import/export/drift surfaces; analytics aggregates.
 - [ ] Session refresh/rotation and Discord token revocation on logout; per-route

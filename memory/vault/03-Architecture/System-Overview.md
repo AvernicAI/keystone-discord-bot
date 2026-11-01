@@ -123,7 +123,7 @@ run only through `pnpm db:migrate` — never on boot.
 | `packages/testing` | Token-free fixtures | nothing |
 | `apps/bot` | Gateway process and composition root | discord.js |
 | `apps/worker` | BullMQ consumer, job handlers | BullMQ, Postgres |
-| `apps/web` | Optional dashboard/API, OAuth sessions, guild authorization | node:http, Postgres |
+| `apps/web` | Optional dashboard/API, OAuth sessions, guild authorization, settings writes | node:http, Postgres |
 | `packages/module-catalog` | One module list for bot and web | modules |
 | `modules/*` | Features | kernel only |
 

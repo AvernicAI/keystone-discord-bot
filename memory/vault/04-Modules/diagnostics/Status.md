@@ -4,7 +4,7 @@
 
 P0 complete.
 
-- Manifest registered by `apps/bot/src/modules.ts`.
+- Manifest registered in `packages/module-catalog/src/index.ts` and re-exported by `apps/bot/src/modules.ts`.
 - `/ping` replies with uptime; 3 s per-user cooldown.
 - `/about` replies with an ephemeral embed read from guild settings.
 - Six tests, no token required.

@@ -1548,9 +1548,9 @@
           "phase": "P6",
           "status": "open",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "Read-only auth foundation in repo; settings writes and the Next.js shell are pending",
+          "note": "Auth and settings-write foundation in repo; field widgets and the Next.js shell are pending",
           "liveVerified": false,
-          "openReason": "Login, sessions and one guild overview read are built; schema-driven settings forms, writes, fleet actions and a live OAuth round trip are not."
+          "openReason": "Login, sessions, guild reads and schema-validated settings writes are built; field widgets, fleet actions and a live OAuth round trip are not."
         },
         {
           "id": "operations.dashboard-auth-foundation",
@@ -1565,10 +1565,31 @@
           "phase": "P6",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "OAuth2/PKCE, opaque sessions, BigInt guild authz, read-only /api/v1 and HTML overview",
+          "note": "OAuth2/PKCE, opaque sessions, BigInt guild authz, /api/v1 and HTML overview",
           "evidence": [
             "apps/web/src/web.test.ts",
             "packages/db/src/web-store.test.ts",
+            "memory/vault/03-Architecture/Dashboard.md"
+          ],
+          "liveVerified": false
+        },
+        {
+          "id": "operations.dashboard-settings-writes",
+          "name": "Dashboard settings writes",
+          "competitors": {
+            "mee6": "✅",
+            "dyno": "✅",
+            "carl": "✅",
+            "ticket-tool": "✅",
+            "wick-security": "✅"
+          },
+          "phase": "P6",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Parity-Matrix.md",
+          "note": "Module settings update through the bot's Zod schema, CSRF and the existing per-guild auth gate",
+          "evidence": [
+            "apps/web/src/web.test.ts",
+            "apps/web/src/overview.ts",
             "memory/vault/03-Architecture/Dashboard.md"
           ],
           "liveVerified": false
@@ -1621,7 +1642,7 @@
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "Read-only /api/v1 exists; scoped tokens, webhooks and idempotency are pending",
           "liveVerified": false,
-          "openReason": "OAuth-session reads are built; public token issuance, scopes, per-token rate limits, Idempotency-Key, webhooks and OpenAPI are not."
+          "openReason": "OAuth-session reads and settings writes are built; public token issuance, scopes, per-token rate limits, Idempotency-Key, webhooks and OpenAPI are not."
         },
         {
           "id": "operations.i18n",

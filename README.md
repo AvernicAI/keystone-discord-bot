@@ -10,18 +10,19 @@ tickets, economy and AI all stand on.
 > Keystone ships the union — free, documented, and built so a stranger can add a
 > feature in an afternoon.
 
-**Status:** P0–P5 are complete in-repo. P6's **authorization foundation** is now
-in repo: Discord OAuth2/PKCE login, opaque Postgres-backed sessions, per-guild
-BigInt authorization, a read-only HTML dashboard and `/api/v1`. Settings writes,
-fleet actions, scoped API tokens and webhooks are the remaining P6 work. The
-command ledger is **10/100**, there are **5 modules**, and `pnpm check` covers
-**182 tests across 30 files** without a Discord token, database or network. Live
-on 2026-11-01: the bot logged in, registered 10 commands through Discord,
-answered a Qwen3:8b mention in `#ai-chat`, and ran real moderation, community and
-AI commands through a development message bridge. The dashboard was also booted
-in memory mode and exercised over real HTTP (`/healthz`, `/`, `/api/v1/...`);
-live Discord OAuth is not claimed. Slash `InteractionCreate` from a human client
-is still the next live check.
+**Status:** P0–P5 are complete in-repo. P6's **authorization and settings-write
+foundation** is now in repo: Discord OAuth2/PKCE login, opaque Postgres-backed
+sessions, per-guild BigInt authorization, schema-validated module settings writes
+from the dashboard and a `PATCH /api/v1` route. Fleet actions, templates, scoped
+API tokens and webhooks are the remaining P6 work. The command ledger is
+**10/100**, there are **5 modules**, and `pnpm check` covers **185 tests across
+30 files** without a Discord token, database or network. Live on 2026-11-01: the
+bot logged in, registered 10 commands through Discord, answered a Qwen3:8b
+mention in `#ai-chat`, and ran real moderation, community and AI commands through
+a development message bridge. The dashboard was booted in memory mode and
+exercised over real HTTP, including authenticated settings writes against a fake
+OAuth port; live Discord OAuth is not claimed. Slash `InteractionCreate` from a
+human client is still the next live check.
 
 This repo is both the product and the course: every module has a spec, tests, a
 teaching note and a status page. The docs are the source of truth, not a
@@ -259,18 +260,21 @@ happened.
 ## Dashboard and API
 
 The P6 foundation is a separate, optional Node process in `apps/web`. It is
-**security-first and read-only**: it proves login and one real read path before
-any write surface exists.
+**security-first**: login, per-guild authorization and a small, schema-validated
+settings write path.
 
 ```text
 GET /healthz                              public, no secrets
 GET /login                                OAuth2 code + PKCE; 503 without OAuth config
 GET /auth/callback                        state + iss validation, then a session
 GET /dashboard                            servers the user can manage
-GET /dashboard/guilds/:id                 read-only guild overview
+GET /dashboard/guilds/:id                 guild overview
+GET /dashboard/guilds/:id/settings/:module  settings editor for one module
+POST /dashboard/guilds/:id/settings/:module  save the form (CSRF + schema)
 GET /api/v1/me                            signed-in user, never a token
 GET /api/v1/guilds                        manageable servers only
 GET /api/v1/guilds/:id/overview           counts, module settings, latest import
+PATCH /api/v1/guilds/:id/settings/:module  update one module (CSRF + schema)
 POST /logout                              session + CSRF; deletes the server-side session
 ```
 
@@ -283,8 +287,18 @@ they reach Postgres and never appear in HTML or JSON. Responses carry a strict
 CSP, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` and
 `Cache-Control: no-store`.
 
-This is a foundation, not the P6 exit demo. Still open: schema-driven settings
-writes, the fleet view/templates, token refresh and revocation, public scoped
+Settings writes are deliberately narrow: only modules already registered in the
+bot can be edited, and the value is parsed by that module's own Zod schema through
+`SettingsService.update` before it is stored. Unknown keys are ignored, invalid
+values return `400` without a write, and both the HTML form and the API require
+the session's CSRF token. The API takes the session cookie plus
+`x-keystone-csrf` (the value of the `keystone_csrf` cookie); the HTML form carries
+the same token in a hidden field. A missing token is `403`. The editor is a JSON
+textarea because P6 has not built schema-driven fields yet; it edits real
+settings, not a second configuration store.
+
+This is a foundation, not the P6 exit demo. Still open: schema-driven field
+widgets, the fleet view/templates, token refresh and revocation, public scoped
 API tokens, per-token rate limits, `Idempotency-Key`, webhooks, OpenAPI, and a
 live OAuth round trip against Discord. See
 [Dashboard](memory/vault/03-Architecture/Dashboard.md) and
@@ -306,7 +320,8 @@ Everything below is free. No feature is moved behind a paywall.
 - Versioned export bundle, checksum verification, transactional restore,
   24-hour rollback, deletion receipts, importers and a read-only drift report.
 - P6 dashboard/API foundation: Discord OAuth2/PKCE, opaque Postgres sessions,
-  per-guild BigInt authorization, a read-only HTML overview and `/api/v1` reads.
+  per-guild BigInt authorization, a read-only overview, module settings writes
+  through the bot's own schemas, and `/api/v1` reads plus a settings `PATCH`.
 - Token-free tests on PGlite and structural fakes.
 
 ### Moderation and security
@@ -342,7 +357,7 @@ Everything below is free. No feature is moved behind a paywall.
 
 ### Planned (honest roadmap)
 
-- **P6 remaining:** schema-driven settings writes, the Next.js shell, fleet
+- **P6 remaining:** schema-driven field widgets, the Next.js shell, fleet
   view/templates, token refresh/revocation, scoped public API tokens,
   per-token rate limits, idempotency, webhooks and OpenAPI.
 - **P7:** parity completion (forms, events, role persistence, modmail,
@@ -365,7 +380,7 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P4 AI + economy | Done | Provider, caps, RAG, chat, explanations, summaries |
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
-| P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, read-only dashboard and `/api/v1` |
+| P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
 
 Live evidence (2026-11-01): `AI Team#5758` connected, cleared and re-registered
 10 global commands, and Qwen3:8b answered a mention in `#ai-chat`. A development
@@ -376,9 +391,12 @@ ordering bug, now fixed and unit-tested.
 
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and
-`/login` `503` with the OAuth-unconfigured message. The authenticated flow is
-proven against a real local HTTP server with a fake OAuth port; a live Discord
-login and a Postgres session are not claimed.
+`/login` `503` with the OAuth-unconfigured message. The authenticated read and
+write flows are proven against a real local HTTP server with a fake OAuth port:
+`PATCH /api/v1/guilds/:id/settings/:module` and the HTML form persist real module
+settings through `SettingsService`, invalid values are rejected without a write,
+and cross-guild, non-admin, bot-absent and missing-CSRF writes return `403`/`400`.
+A live Discord login and a Postgres session are not claimed.
 
 Still open and not claimed as done:
 
@@ -388,8 +406,8 @@ Still open and not claimed as done:
 - pgvector ANN at 1M×1536 with production embeddings; the exact index is the
   portable path today.
 - MEE6 import is file-based, not a live fetch.
-- Live Discord OAuth, a Postgres-backed session smoke, settings writes, fleet
-  actions and scoped API tokens are the remaining P6 work.
+- Live Discord OAuth, a Postgres-backed session smoke, fleet actions and scoped
+  API tokens are the remaining P6 work.
 
 ## How to add stuff
 
@@ -405,7 +423,8 @@ Read [Module-Contract](memory/vault/03-Architecture/Module-Contract.md) and copy
    `AiProvider`, `JobQueue`). Modules must not import discord.js, Drizzle,
    BullMQ or Redis.
 5. Add pure tests. Use `packages/testing` and PGlite; never require a token.
-6. Add the manifest to `apps/bot/src/modules.ts`, then run:
+6. Add the manifest to `packages/module-catalog/src/index.ts` (the one list
+   shared by the bot and the dashboard), then run:
 
 ```bash
 pnpm typecheck
@@ -418,6 +437,11 @@ pnpm check
 7. Add a spec, status and teaching note under `memory/vault/04-Modules/<id>/`,
    plus the matching machine entry. Run `pnpm memory:render`; never hand-edit a
    generated page.
+
+A new module's settings editor appears in the dashboard automatically because the
+web app reads the same `settingsSchema` from the shared catalog. Do not add a
+web-only schema or a second write path: use `SettingsService.update` and the
+module's existing defaults.
 
 If the feature needs a database table, add a migration in
 `packages/db/src/migrations` and a repository; if it needs a Discord permission,
@@ -498,7 +522,7 @@ commands.
 ```text
 apps/bot        gateway adapter, composition root, dispatch, dev prefix bridge
 apps/worker     BullMQ consumer with idempotent handlers
-apps/web        optional dashboard/API: OAuth sessions, guild authz, read-only views
+apps/web        optional dashboard/API: OAuth sessions, guild authz, settings writes
 packages/kernel registry · guards · settings · dispatch · budget · ports
 packages/module-catalog  the one module list shared by bot and web
 packages/db     Drizzle schema, migrations, Postgres repositories

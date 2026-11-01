@@ -35,8 +35,9 @@ https://github.com/RNGBubba/keystone-discord-bot
 
 - Phase **P6** foundation in repo: Discord OAuth2/PKCE, opaque Postgres-backed
   sessions, BigInt per-guild authorization with a bot-membership check, a
-  read-only HTML dashboard and `/api/v1` reads. Settings writes, fleet actions
-  and scoped API tokens are next. See [[Dashboard]] and
+  server-rendered dashboard, `/api/v1` reads and schema-validated module settings
+  writes from the HTML form and a CSRF-protected `PATCH`. Field widgets, fleet
+  actions and scoped API tokens are next. See [[Dashboard]] and
   [[ADR-0016-dashboard-foundation]].
 - Phase **P5** complete in-repo: versioned export/restore with checksum
   verification, 24-hour rollback, deletion receipts, file level importers,

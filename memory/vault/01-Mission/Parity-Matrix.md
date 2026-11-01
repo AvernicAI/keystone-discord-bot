@@ -146,16 +146,16 @@ checked. See [[Master-Plan]] for the research program.
 
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Web dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | P5 | Next.js |
-| Multi-server fleet | ❔ | ❔ | ❔ | ✅ | ❔ | P5 | One view, per-guild authz |
-| Config templates | ❔ | ❔ | ❔ | ❔ | ❔ | P5 | Apply to N guilds |
+| Web dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | P6 | Node/render first; field widgets and fleet open |
+| Multi-server fleet | ❔ | ❔ | ❔ | ✅ | ❔ | P6 | One view, per-guild authz |
+| Config templates | ❔ | ❔ | ❔ | ❔ | ❔ | P6 | Apply to N guilds |
 | Drift detection | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | **Our edge** |
 | Importer (MEE6/Dyno/Carl) | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | **Our edge** |
 | Full export | ❌ | ❔ | ❌ | ❔ | ❌ | P5 | JSON, documented schema |
 | Real deletion | ❔ | ❔ | ❔ | ❔ | ❔ | P5 | Receipt included |
-| Public API / webhooks | ❌ | ❔ | ❌ | 💰 | ❔ | P5 | Scoped tokens |
-| i18n | ❔ | ✅ | ❔ | ✅ | ❔ | P5 | i18next, per-guild locale |
-| Status page | ❌ | ❔ | ❔ | ❔ | ❔ | P7 | Public incidents |
+| Public API / webhooks | ❌ | ❔ | ❌ | 💰 | ❔ | P6 | OAuth reads + settings PATCH; scoped tokens open |
+| i18n | ❔ | ✅ | ❔ | ✅ | ❔ | P7 | i18next, per-guild locale |
+| Status page | ❌ | ❔ | ❔ | ❔ | ❔ | P9 | Public incidents |
 
 ## 12. Portability (new in Roadmap v2)
 

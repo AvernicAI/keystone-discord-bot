@@ -11,7 +11,7 @@ import {
   serializeCookie,
 } from "./cookies";
 import { HttpError } from "./http-error";
-import type { DashboardService, DashboardView } from "./overview";
+import type { DashboardModule, DashboardService, DashboardView } from "./overview";
 import type { DiscordGuild } from "./oauth";
 
 export interface WebServerDeps {
@@ -25,6 +25,7 @@ export interface WebServerDeps {
 
 const STATE_MAX_AGE_MS = 10 * 60_000;
 const MAX_BODY_BYTES = 2_048;
+const MAX_SETTINGS_BYTES = 32 * 1024;
 
 function escapeHtml(value: string): string {
   return value
@@ -71,14 +72,14 @@ function redirect(res: ServerResponse, location: string, cookies: string[] = [])
   send(res, 302, "", "text/plain; charset=utf-8", headers);
 }
 
-function parseBody(req: IncomingMessage): Promise<string> {
+function parseBody(req: IncomingMessage, maxBytes = MAX_BODY_BYTES): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     let size = 0;
     req.on("data", (chunk: Buffer) => {
       size += chunk.length;
-      if (size > MAX_BODY_BYTES) {
-        reject(new HttpError(413, "The form body is too large.", "body_too_large"));
+      if (size > maxBytes) {
+        reject(new HttpError(413, "The request body is too large.", "body_too_large"));
         req.destroy();
         return;
       }
@@ -87,6 +88,41 @@ function parseBody(req: IncomingMessage): Promise<string> {
     req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
     req.on("error", reject);
   });
+}
+
+function parseSettings(raw: string): Record<string, unknown> {
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    throw new HttpError(400, "Settings must be a JSON object.", "settings_json_invalid");
+  }
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new HttpError(400, "Settings must be a JSON object.", "settings_json_invalid");
+  }
+  return value as Record<string, unknown>;
+}
+
+async function parseApiSettings(req: IncomingMessage): Promise<Record<string, unknown>> {
+  const contentType = req.headers["content-type"] ?? "";
+  if (!contentType.toLowerCase().startsWith("application/json")) {
+    throw new HttpError(415, "Send settings as application/json.", "content_type_required");
+  }
+  return parseSettings(await parseBody(req, MAX_SETTINGS_BYTES));
+}
+
+async function parseFormSettings(
+  req: IncomingMessage,
+): Promise<{ csrf: string | undefined; patch: Record<string, unknown> }> {
+  const form = new URLSearchParams(await parseBody(req, MAX_SETTINGS_BYTES));
+  const raw = form.get("settings");
+  if (!raw) throw new HttpError(400, "The settings field is missing.", "settings_missing");
+  return { csrf: form.get("csrf") ?? undefined, patch: parseSettings(raw) };
+}
+
+function csrfHeader(req: IncomingMessage): string | undefined {
+  const header = req.headers["x-keystone-csrf"];
+  return typeof header === "string" ? header : undefined;
 }
 
 function layout(title: string, body: string, username?: string): string {
@@ -106,8 +142,10 @@ main{max-width:960px;margin:0 auto;padding:32px 24px 64px}a{color:#8ea1ff;text-d
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
 .stat b{display:block;font-size:24px}.stat span{color:var(--muted);font-size:13px}
 button{background:var(--accent);color:#fff;border:0;border-radius:7px;padding:8px 14px;font:inherit;cursor:pointer}
-pre{white-space:pre-wrap;word-break:break-word;background:#0b0f14;border:1px solid var(--line);border-radius:8px;padding:14px;overflow:auto;font-size:13px}
+pre,textarea{white-space:pre-wrap;word-break:break-word;background:#0b0f14;border:1px solid var(--line);border-radius:8px;padding:14px;overflow:auto;font-size:13px;color:var(--text);width:100%}
+textarea{font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}
 table{border-collapse:collapse;width:100%}td,th{text-align:left;padding:8px;border-bottom:1px solid var(--line)}
+p.error{color:#ffb4b4}
 </style>
 </head>
 <body>
@@ -178,7 +216,8 @@ function renderOverview(username: string, view: DashboardView, csrfToken: string
       (module) =>
         `<div class="panel"><h3>${escapeHtml(module.name)} <span class="muted">· ${escapeHtml(module.version)} · ${module.enabled ? "enabled" : "disabled"}</span></h3>
          <p class="muted">${escapeHtml(module.description)}</p>
-         <pre>${escapeHtml(JSON.stringify(module.settings, null, 2))}</pre></div>`,
+         <pre>${escapeHtml(JSON.stringify(module.settings, null, 2))}</pre>
+         <p><a href="/dashboard/guilds/${percent(view.guild.id)}/settings/${percent(module.id)}">Edit settings</a></p></div>`,
     )
     .join("");
   const latest = view.latestImport
@@ -188,11 +227,36 @@ function renderOverview(username: string, view: DashboardView, csrfToken: string
     view.guild.name,
     `<p><a href="/dashboard">← All servers</a></p>
      <h1>${escapeHtml(view.guild.name)}</h1>
-     <p class="muted">Guild ${escapeHtml(view.guild.id)} · read-only P6 foundation</p>
+     <p class="muted">Guild ${escapeHtml(view.guild.id)} · P6 foundation · settings writes enabled</p>
      <div class="grid">${stats}</div>
      <div class="panel"><h2>Portability</h2>${latest}</div>
      ${modules}
-     <p class="muted">Settings writes, templates and fleet controls are not part of this foundation pass.</p>
+     <p class="muted">Settings are validated by each module's own schema. Templates and fleet controls remain open.</p>
+     ${logoutForm(csrfToken)}`,
+    username,
+  );
+}
+
+function renderSettingsEditor(
+  username: string,
+  guild: DiscordGuild,
+  module: DashboardModule,
+  csrfToken: string,
+): string {
+  const action = `/dashboard/guilds/${percent(guild.id)}/settings/${percent(module.id)}`;
+  return layout(
+    `${module.name} settings`,
+    `<p><a href="/dashboard/guilds/${percent(guild.id)}">← Back to ${escapeHtml(guild.name)}</a></p>
+     <h1>${escapeHtml(module.name)} settings</h1>
+     <p class="muted">${escapeHtml(module.description)} · version ${escapeHtml(module.version)}</p>
+     <div class="panel">
+       <p class="muted">The value is validated by this module's schema before it is stored. Send the complete settings object; unknown keys are ignored.</p>
+       <form method="post" action="${action}">
+         <input type="hidden" name="csrf" value="${escapeHtml(csrfToken)}">
+         <textarea name="settings" rows="22" spellcheck="false" aria-label="Settings JSON">${escapeHtml(JSON.stringify(module.settings, null, 2))}</textarea>
+         <p><button type="submit">Save settings</button></p>
+       </form>
+     </div>
      ${logoutForm(csrfToken)}`,
     username,
   );
@@ -342,6 +406,32 @@ async function handle(req: IncomingMessage, res: ServerResponse, deps: WebServer
     return;
   }
 
+  const dashboardSettings = /^\/dashboard\/guilds\/(\d{15,20})\/settings\/([a-z][a-z0-9-]{1,31})$/.exec(path);
+  if (dashboardSettings) {
+    const guildId = dashboardSettings[1] as string;
+    const moduleId = dashboardSettings[2] as string;
+    const active = requireSession();
+    const guild = await deps.access.authorize(deps.auth.accessToken(active), guildId);
+
+    if (method === "GET") {
+      const module = await deps.dashboard.module(guild, moduleId);
+      send(res, 200, renderSettingsEditor(active.username, guild, module, csrfToken), "text/html; charset=utf-8", {
+        "Cache-Control": "no-store",
+      });
+      return;
+    }
+
+    if (method === "POST") {
+      const form = await parseFormSettings(req);
+      if (!deps.auth.csrfValid(active, form.csrf)) {
+        throw new HttpError(403, "The CSRF token is missing or invalid.", "csrf_invalid");
+      }
+      await deps.dashboard.update(guild, moduleId, form.patch);
+      redirect(res, `/dashboard/guilds/${percent(guildId)}`);
+      return;
+    }
+  }
+
   if (path === "/api/v1/me" && method === "GET") {
     const active = requireSession();
     sendJson(res, 200, { user: { id: active.userId, username: active.username } });
@@ -369,6 +459,21 @@ async function handle(req: IncomingMessage, res: ServerResponse, deps: WebServer
     const guild = await deps.access.authorize(deps.auth.accessToken(active), guildId);
     const view = await deps.dashboard.view(guild);
     sendJson(res, 200, view);
+    return;
+  }
+
+  const apiSettings = /^\/api\/v1\/guilds\/(\d{15,20})\/settings\/([a-z][a-z0-9-]{1,31})$/.exec(path);
+  if (apiSettings && method === "PATCH") {
+    const active = requireSession();
+    const guildId = apiSettings[1] as string;
+    const moduleId = apiSettings[2] as string;
+    const guild = await deps.access.authorize(deps.auth.accessToken(active), guildId);
+    if (!deps.auth.csrfValid(active, csrfHeader(req))) {
+      throw new HttpError(403, "The CSRF token is missing or invalid.", "csrf_invalid");
+    }
+    const patch = await parseApiSettings(req);
+    const module = await deps.dashboard.update(guild, moduleId, patch);
+    sendJson(res, 200, { guildId, module });
     return;
   }
 

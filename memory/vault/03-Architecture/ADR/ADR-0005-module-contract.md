@@ -26,7 +26,9 @@ defineModule({ id, settingsSchema, defaultSettings, commands, intents, permissio
 
 Every command is `defineCommand({ name, description, options, guards, execute })`.
 The kernel provides dispatch, guards, schema-validated settings, error redaction
-and the budget ledger. Registration is one line in `apps/bot/src/modules.ts`.
+and the budget ledger. Registration is one line in the shared
+`packages/module-catalog/src/index.ts` list, which `apps/bot/src/modules.ts`
+re-exports and the web app also imports.
 
 Manifests are validated at registration: ids, duplicate command names, option
 ordering, description length, and self-consistency of defaults with the schema.

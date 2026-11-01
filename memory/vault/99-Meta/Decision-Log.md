@@ -95,6 +95,8 @@ including the small calls that did not deserve an ADR.
 | 56 | Web reads go through `SettingsService` and the `DashboardStore` port, not ad-hoc SQL in a handler | [[Dashboard]] |
 | 57 | Read-only first: settings writes, fleet actions and scoped tokens are deferred until the authz matrix is proven | [[Roadmap]] |
 | 58 | No paid services, including paid GitHub plans/features; free/local only | [[01-Mission/Non-Negotiables\|Non-Negotiables]] |
+| 59 | Settings writes reuse the viewer's `GuildAccessService` gate, session CSRF and `SettingsService` schema; no second write path | [[Dashboard]] |
+| 60 | The first settings editor is a validated JSON textarea; richer field widgets remain P6 work | [[Dashboard]] |
 
 ## How to add a decision
 

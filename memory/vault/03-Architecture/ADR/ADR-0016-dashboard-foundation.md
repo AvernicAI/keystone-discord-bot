@@ -92,3 +92,11 @@ fleet view. It will consume this authorization layer, not replace it.
 
 The live OAuth round trip and a Postgres-backed session are the next proof, not a
 claim of this pass.
+
+## Follow-up (pass 18)
+
+The write path now reuses this gate. `PATCH /api/v1/guilds/:id/settings/:module`
+and the HTML settings form call `SettingsService.update` with the module's own
+Zod schema, after `GuildAccessService.authorize()` and the session CSRF check.
+There is still no second schema, no browser-held permission cache and no direct
+repository write from a handler. See [[Dashboard]].

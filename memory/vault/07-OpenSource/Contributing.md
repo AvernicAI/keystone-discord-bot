@@ -22,7 +22,7 @@ token, the change is wrong.
 3. Get a maintainer's yes. This is the scope gate — it is why the project stays
    coherent instead of becoming 300 unreviewed commands.
 4. Copy `modules/diagnostics`, rename, implement, test.
-5. Register it in `apps/bot/src/modules.ts`.
+5. Register it in `packages/module-catalog/src/index.ts`; the bot and web app both import that list.
 6. Add it to `memory/machine/project.json` and write Spec/Status/Teaching docs.
 7. `pnpm check`.
 

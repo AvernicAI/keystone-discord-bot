@@ -222,6 +222,19 @@
         "budget": "10/100",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-18",
+      "date": "2026-11-01",
+      "phase": "P6",
+      "summary": "P6 settings writes: CSRF-protected dashboard form and PATCH API through SettingsService, module Zod validation, cross-guild/non-admin/bot-absent tests.",
+      "journal": "journal/2026-11-01-pass-18.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "185",
+        "budget": "10/100",
+        "memory": "current"
+      }
     }
   ]
 }

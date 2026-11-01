@@ -47,7 +47,7 @@ schema.
    settings, the commands, the limits it respects.
 3. Implement `service.ts` with pure functions first. It is the part you test.
 4. Add commands. Each gets `defineCommand`, a description, guards, `execute`.
-5. Add the manifest to `apps/bot/src/modules.ts`.
+5. Add the manifest to `packages/module-catalog/src/index.ts`; `apps/bot/src/modules.ts` re-exports that shared list for the gateway.
 6. Add the module to `memory/machine/project.json` with its spec/status paths.
 7. `pnpm check` — typecheck, tests, budget, memory links.
 

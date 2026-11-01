@@ -4,7 +4,7 @@
 
 P1 complete.
 
-- `/setup` registered through `apps/bot/src/modules.ts`, behind `ManageGuild`.
+- `/setup` registered through the shared module catalog (`packages/module-catalog`), behind `ManageGuild`.
 - Reports database reachability, migration state, cache mode, module state and
   the intents each manifest requests (P4.5, ADR-0012).
 - Three readiness branches are covered by tests; the command never writes.
@@ -18,7 +18,7 @@ pnpm test                          # includes modules/setup with the intents fie
 
 P1 exit evidence for this module:
 
-- `/setup` registers through `apps/bot/src/modules.ts` and the normal registry.
+- `/setup` registers through the shared module catalog and the normal registry.
 - Dispatch blocks a member without `ManageGuild` and allows one with it.
 - Ready, missing-database, pending-migration and disabled-module states are
   asserted; the module enabled state comes from its own settings.

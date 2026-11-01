@@ -75,7 +75,7 @@ scripts/              budget, audits, portability, command sync
 ```
 
 Adding a module: create `modules/<id>` like `modules/diagnostics`, export a
-`defineModule` manifest, add it to `apps/bot/src/modules.ts`, then run the checks
+`defineModule` manifest, add it to `packages/module-catalog/src/index.ts`, then run the checks
 below. There is no central command switch to edit.
 
 ## Commands you will use
@@ -118,15 +118,17 @@ by a rate-limited register leaves the app with no commands.
 
 ## Current state (2026-11-01)
 
-- P0–P5 complete in-repo. P6 authorization foundation is in repo: OAuth2/PKCE,
-  opaque Postgres sessions, per-guild BigInt authz, read-only HTML/API reads.
-- 5 modules, 10 global command roots, 182 tests in 30 files.
+- P0–P5 complete in-repo. P6 auth and settings-write foundation is in repo:
+  OAuth2/PKCE, opaque Postgres sessions, per-guild BigInt authz, dashboard/API
+  reads and schema-validated module settings writes with CSRF.
+- 5 modules, 10 global command roots, 185 tests in 30 files.
 - Live: AI Team#5758 connected; 10 commands registered; Qwen3:8b replied in
   `#ai-chat`; `!ping`, `!about`, `!ai status`, `!mod history` and
   `!rank leaderboard` ran through the real pipeline. The web process booted in
-  memory mode and answered real HTTP requests; live Discord OAuth is open.
+  memory mode and answered real HTTP requests; the write path was exercised over
+  real local HTTP with a fake OAuth port. Live Discord OAuth is open.
 - Open: human slash run, live Postgres/role/select/voice/scheduler paths,
-  pgvector ANN benchmark, MEE6 live fetch, P6 settings writes/fleet/tokens.
+  pgvector ANN benchmark, MEE6 live fetch, P6 field widgets/fleet/tokens.
 
 When you finish a pass, update `memory/machine/project.json` (`lastPass`,
 `tests`), append to `memory/machine/passes.json`, write the journal, update the

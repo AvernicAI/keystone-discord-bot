@@ -2,13 +2,14 @@
 
 ## Now
 
-**P6 authorization foundation is in repo** (pass 17, 2026-11-01): Discord
-OAuth2 code + PKCE, sealed state, opaque Postgres-backed sessions, BigInt
-guild authorization with a bot-token membership check, a read-only HTML
-dashboard and `/api/v1` reads. The browser never receives a Discord token. This
-is the read-only first step from the roadmap's kill signal, not the full P6
-exit demo: settings writes, fleet actions and scoped API tokens are still open.
-See [[Dashboard]] and [[ADR-0016-dashboard-foundation]].
+**P6 authorization and settings-write foundation is in repo** (passes 17–18,
+2026-11-01): Discord OAuth2 code + PKCE, sealed state, opaque Postgres-backed
+sessions, BigInt guild authorization with a bot-token membership check, a
+server-rendered dashboard, `/api/v1` reads and schema-validated module settings
+writes from both the HTML form and `PATCH /api/v1`. The browser never receives a
+Discord token. This is the read-only auth step plus a narrow write path, not the
+full P6 exit demo: field widgets, fleet actions and scoped API tokens are still
+open. See [[Dashboard]] and [[ADR-0016-dashboard-foundation]].
 
 **P5 is complete in-repo** (pass 13, 2026-10-31): a versioned export bundle with
 checksum and counts, transactional restore with post-import verification, a
@@ -16,11 +17,13 @@ checksum and counts, transactional restore with post-import verification, a
 a read-only drift report and migration guides. P4.5 platform hardening and the
 P4 AI/economy layers remain as shipped.
 
-**Web verification (pass 17):** `pnpm web:start` booted in memory mode; real
-HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and
+**Web verification (passes 17–18):** `pnpm web:start` booted in memory mode;
+real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and
 `/login` `503`. A real local HTTP server with a fake OAuth port proved login,
-logout/CSRF, cross-guild `403`s, escaped HTML and no token in the response. Live
-Discord OAuth is not claimed.
+logout/CSRF, cross-guild `403`s, escaped HTML and no token in the response. The
+same harness proved a `PATCH` and the HTML form persist real module settings via
+`SettingsService`, invalid values are rejected without mutation, and a missing
+CSRF token or unauthorized guild is refused. Live Discord OAuth is not claimed.
 
 **Live verification (pass 15, 2026-11-01):** AI Team#5758 logged into the test
 guild and answered a qwen3:8b mention in `#ai-chat`. SaseQ's `discord-mcp` cannot
@@ -39,7 +42,7 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 182 tests / 30 files · budget 10/100 · memory 1785/1785
+pnpm check        exit 0 · typecheck 0 · 185 tests / 30 files · budget 10/100 · memory 1807/1807
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 10 commands · qwen3:8b reply in #ai-chat
 live commands     2026-11-01 · !ping · !about · !ai status · !mod history · !rank leaderboard
@@ -63,9 +66,13 @@ read that file.
 | 6 | One real read path through repository seams | `web.test.ts`: `/api/v1/guilds/:id/overview` and the HTML page show guild-scoped counts; `packages/db/src/web-store.test.ts` proves a second guild does not leak | Real HTTP + **PGlite** |
 | 7 | CSRF and revocation | `web.test.ts`: logout without CSRF `403`; valid logout `302` then `/api/v1/me` `401` | Real local HTTP |
 | 8 | No token or secret in a route | `web.test.ts`: `/healthz` has only ok/database/oauth; CSP and `no-store` asserted | Real HTTP |
+| 9 | A write is schema-validated by the bot's own contract | `web.test.ts`: `PATCH` and the form update AI settings through `SettingsService`; `monthlyBudgetUsd: 5000` is `400` and leaves the stored value unchanged | Real HTTP + in-memory repository |
+| 10 | Every write is CSRF-protected | `web.test.ts`: missing header/form token is `403`; a valid token writes | Real HTTP |
+| 11 | A write is guild-scoped and two-checked | `web.test.ts`: cross-guild, non-admin and bot-absent writes are `403`; no session is `401` | Real HTTP + fake OAuth |
 
-This table proves the foundation, not the exit demo. Live OAuth, a live
-Postgres-backed session and every P6 write surface remain open.
+This table proves the foundation and the narrow write path, not the exit demo.
+Live OAuth, a live Postgres-backed session, field widgets, fleet actions and
+scoped API tokens remain open.
 
 ## P5 acceptance evidence
 
@@ -201,6 +208,7 @@ remain open.
 | Slash-command execution | No | A human client, or a harness with interaction support |
 | Dashboard HTTP surface | Yes, real process in memory mode | Re-run with Postgres and a real OAuth client |
 | Dashboard login/session/CSRF/authz | Yes, real HTTP + fake OAuth | A live Discord OAuth round trip |
+| Dashboard settings writes | Yes, real HTTP + in-memory repository | A Postgres server and a browser form run |
 | Dashboard Postgres session | Yes, PGlite | A Postgres server |
 
 No document claims a live-server or live-gateway run for a row marked "not
@@ -210,9 +218,9 @@ here.
 
 ## Next
 
-P6 remains the active phase. The auth foundation is built; next are schema-driven
-settings writes, the Next.js shell (or a decision to keep server-rendered HTML),
-fleet actions/templates, token refresh and revocation, scoped API tokens,
-per-token rate limits, `Idempotency-Key`, webhooks and OpenAPI. Before launch,
-close the pgvector ANN gate and run the live provider/Discord/Postgres/OAuth
-smoke in staging.
+P6 remains the active phase. The auth gate and settings writes are built; next
+are schema-driven field widgets, the Next.js shell (or a decision to keep
+server-rendered HTML), fleet actions/templates, token refresh and revocation,
+scoped API tokens, per-token rate limits, `Idempotency-Key`, webhooks and
+OpenAPI. Before launch, close the pgvector ANN gate and run the live
+provider/Discord/Postgres/OAuth smoke in staging.
