@@ -191,11 +191,20 @@ disabled `add` was refused. Pass 33 added the four context menus the plan named:
 The kernel now models application-command type and audits the separate 15 + 15
 menu budget; the menus reuse the existing case, level and AI services and add no
 store. One memory-mode boot found all four missing, cleared once and registered
-21 commands; Discord reports **17 roots / 108 subcommands / 2 user menus / 2
+21 commands; Discord reported **17 roots / 108 subcommands / 2 user menus / 2
 message menus** with no drift. The MCP cannot right-click, so invocation is
-covered by adapter and command tests and is not claimed live. The ledger is now
-**17 roots / 108 subcommands / 125 actions / 4 context menus**. The rest of this
-phase is open.
+covered by adapter and command tests and is not claimed live. Pass 34 audited the
+subcommand gap: the only saved plan table names 12 roots / 59 subcommands, not
+18 / 160, so the larger figure stays unverified rather than invented. The
+largest named gap was `/setup` (5 names, 0 registered), now a real hub:
+`status | module | verify | import | reset`. `module` and `reset` use the existing
+settings service and schema; `verify` reads health, parsed settings and the live
+catalog; `import` is a preview only over the existing export port. Live: 9
+modules / 2 disabled, music enabled then reset to its default, read-back
+confirmed disabled, and verify reported 17 roots / 113 subcommands. The ledger is
+now **17 roots / 113 subcommands / 130 actions / 4 context menus**. The only
+named plan gaps left are `/appeal open | status` and `/verify start | status`.
+The rest of this phase is open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.
@@ -203,7 +212,7 @@ phase is open.
   goodbye messages, YouTube/Twitch/RSS feeds, temp ban/role expiry, join-gate
   expiry, panic mode, case export and `command_usage` retention. Invites, the
   link, profanity and zalgo filters, auto-responders, analytics and the four
-  context menus are done (above).
+  context menus and the `/setup` hub are done (above).
 - `/export`, `/config`, `/help` and the `/music` saved queue shipped; BYO
   Lavalink playback is the open half of `/music`; command-budget audit remains a
   gate, now covering the separate context-menu budgets.

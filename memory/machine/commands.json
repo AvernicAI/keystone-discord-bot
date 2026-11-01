@@ -3,8 +3,8 @@
   "updatedAt": "2026-11-01",
   "source": "packages/kernel ModuleRegistry catalog()",
   "roots": 17,
-  "subcommands": 108,
-  "actions": 125,
+  "subcommands": 113,
+  "actions": 130,
   "contextMenus": 4,
   "userContextMenus": 2,
   "messageContextMenus": 2,
@@ -67,9 +67,43 @@
     {
       "name": "setup",
       "moduleId": "setup",
-      "description": "Check database, migrations, cache and module readiness.",
+      "description": "Check readiness, manage modules, preview an import or reset settings.",
       "options": [],
-      "subcommands": []
+      "subcommands": [
+        {
+          "name": "status",
+          "description": "Check database, migrations, cache and module readiness.",
+          "options": []
+        },
+        {
+          "name": "module",
+          "description": "List modules, inspect one, or enable/disable it.",
+          "options": [
+            "module",
+            "enabled"
+          ]
+        },
+        {
+          "name": "verify",
+          "description": "Verify settings, schema parsing and the command catalog.",
+          "options": []
+        },
+        {
+          "name": "import",
+          "description": "Preview a keystone.export bundle before /export import applies it.",
+          "options": [
+            "bundle",
+            "mode"
+          ]
+        },
+        {
+          "name": "reset",
+          "description": "Reset one module's stored settings to its schema defaults.",
+          "options": [
+            "module"
+          ]
+        }
+      ]
     },
     {
       "name": "config",

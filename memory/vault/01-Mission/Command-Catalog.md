@@ -5,7 +5,7 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**17 roots · 108 subcommands · 125 total actions · 4 context menus · 17/100 global roots used.**
+**17 roots · 113 subcommands · 130 total actions · 4 context menus · 17/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
@@ -17,7 +17,7 @@ and appear under right-click → Apps.
 | `/ping` | `diagnostics` | 0 |
 | `/about` | `diagnostics` | 0 |
 | `/help` | `diagnostics` | 5 |
-| `/setup` | `setup` | 0 |
+| `/setup` | `setup` | 5 |
 | `/config` | `setup` | 4 |
 | `/export` | `setup` | 6 |
 | `/mod` | `moderation` | 14 |
@@ -58,9 +58,15 @@ Browse every Keystone command, search the catalog and check data retention.
 
 ## `/setup`
 
-Check database, migrations, cache and module readiness.
+Check readiness, manage modules, preview an import or reset settings.
 
-No subcommands; the root has its own options.
+| Subcommand | Description | Options |
+| --- | --- | --- |
+| `/setup status` | Check database, migrations, cache and module readiness. | — |
+| `/setup module` | List modules, inspect one, or enable/disable it. | `module`, `enabled` |
+| `/setup verify` | Verify settings, schema parsing and the command catalog. | — |
+| `/setup import` | Preview a keystone.export bundle before /export import applies it. | `bundle`, `mode` |
+| `/setup reset` | Reset one module's stored settings to its schema defaults. | `module` |
 
 ## `/config`
 

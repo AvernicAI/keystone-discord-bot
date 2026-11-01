@@ -125,6 +125,19 @@ describe("settings persistence", () => {
     await harness.close();
   });
 
+  it("reset removes the stored record and the schema defaults return", async () => {
+    const harness = await open(await tempDir());
+    const service = serviceFor(harness);
+
+    await service.update("guild-1", "levels", { payload: { custom: "stored" } });
+    expect((await service.get("guild-1", "levels")).payload).toEqual({ custom: "stored" });
+
+    await service.reset("guild-1", "levels");
+
+    expect((await service.get("guild-1", "levels")).payload).toBeNull();
+    await harness.close();
+  });
+
   it("is safe to migrate twice", async () => {
     const harness = await open(await tempDir());
     const second = await migrate(harness.runner);

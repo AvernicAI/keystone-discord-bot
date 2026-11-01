@@ -147,9 +147,10 @@ checked. See [[Master-Plan]] for the research program.
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Web dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | P6 | Node/render first; field widgets and fleet open |
-| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 17 roots / 108 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human); `/music` pass 32 |
+| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 17 roots / 113 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human); `/music` pass 32; `/setup` hub pass 34. The saved plan table is 12 roots / 59 names; the handoff's 18 / 160 has no per-root list and is unverified |
 | Context menus | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | 4 menus (Report message, Case history, Rank card, Explain with AI) registered live on the separate 15 + 15 budget; invocation is human-only because the MCP cannot right-click. Competitor presence not verified for every row |
 | In-bot configuration | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/config` (list, get, set, export) over every module's own schema; shipped pass 30; live-proven. Competitor in-Discord config not verified (all surveyed bots also ship a web dashboard) |
+| First-run setup hub | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/setup status | module | verify | import | reset`; real settings/health/export seams, settings-only reset; live pass 34 |
 | Audit logging | ❔ | 💰 | ✅ | ❌ | ✅ | P7 | Five event toggles, one operator channel and an append-only ledger with retention; `/logging`; message edit/delete and moderation cases proven live, member join/leave adapter-only |
 | Multi-server fleet | ❔ | ❔ | ❔ | ✅ | ❔ | P6 | One view, per-guild authz |
 | Config templates | ❔ | ❔ | ❔ | ❔ | ❔ | P6 | Apply to N guilds |

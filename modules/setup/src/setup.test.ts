@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   InMemoryCooldownStore,
+  InMemorySettingsRepository,
   ModuleRegistry,
   SettingsService,
   auditBudget,
   createSilentLogger,
   dispatchCommand,
+  type ExportImportOptions,
+  type ExportPort,
   type HealthProbe,
   type SettingsRepository,
 } from "@keystone/kernel";
@@ -73,6 +76,36 @@ async function runThroughDispatch(options: RunOptions = {}) {
   );
 
   return { outcome, interaction, writes };
+}
+
+async function runWithRepository(
+  repository: SettingsRepository,
+  subcommand: string,
+  options: Record<string, string | number | boolean | null> = {},
+) {
+  const registry = new ModuleRegistry().register(setupModule);
+  const settings = new SettingsService(repository, registry);
+  const interaction = new FakeInteraction({
+    commandName: "setup",
+    subcommand,
+    options,
+    guildId: "guild-1",
+    permissions: ["ManageGuild"],
+  });
+
+  const outcome = await dispatchCommand(
+    {
+      registry,
+      settings,
+      config: settings,
+      logger: createSilentLogger(),
+      cooldowns: new InMemoryCooldownStore(),
+      queue: noopQueue,
+      health: readyHealth(),
+    },
+    interaction,
+  );
+  return { outcome, interaction, settings };
 }
 
 describe("setup module", () => {
@@ -162,6 +195,84 @@ describe("setup module", () => {
     expect(fields["Gateway intents"]).toContain("profile: minimal");
     expect(fields["Gateway intents"]).toContain("welcome and autorole are disabled");
     expect(fields["Next step"]).toContain("INTENT_PROFILE=full");
+  });
+
+  it("lists modules and changes one through the shared settings service", async () => {
+    const repository = new InMemorySettingsRepository();
+
+    const listed = await runWithRepository(repository, "module");
+    expect(listed.outcome.status).toBe("ok");
+    expect(listed.interaction.lastReply?.content).toContain("1 modules");
+
+    const changed = await runWithRepository(repository, "module", {
+      module: "setup",
+      enabled: false,
+    });
+    expect(changed.outcome.status).toBe("ok");
+    expect(changed.interaction.lastReply?.content).toContain("now disabled");
+    expect(await changed.settings.get("guild-1", "setup")).toMatchObject({ enabled: false });
+
+    const inspected = await runWithRepository(repository, "module", { module: "setup" });
+    expect(inspected.interaction.lastReply?.content).toContain("is disabled here");
+  });
+
+  it("resets only the selected module's stored settings", async () => {
+    const repository = new InMemorySettingsRepository();
+    await repository.set("guild-1", "setup", { enabled: false });
+
+    const { outcome, interaction, settings } = await runWithRepository(repository, "reset", {
+      module: "setup",
+    });
+    expect(outcome.status).toBe("ok");
+    expect(interaction.lastReply?.content).toContain("Reset `setup`");
+    expect(await settings.get("guild-1", "setup")).toMatchObject({ enabled: true });
+  });
+
+  it("verifies settings parsing and the command catalog without writing", async () => {
+    const { outcome, interaction, settings } = await runWithRepository(
+      new InMemorySettingsRepository(),
+      "verify",
+    );
+    expect(outcome.status).toBe("ok");
+    const fields = fieldsFrom(interaction);
+    expect(fields.Settings).toContain("modules parsed");
+    expect(fields.Commands).toContain("roots");
+    expect(interaction.lastReply?.embeds?.[0]?.description).toContain("Every check passed");
+    expect(await settings.get("guild-1", "setup")).toMatchObject({ enabled: true });
+  });
+
+  it("previews an attached bundle and never asks the port to apply it", async () => {
+    let received: ExportImportOptions | undefined;
+    const exportPort = {
+      async importBundle(_guildId: string, _text: string, options: ExportImportOptions) {
+        received = options;
+        return {
+          state: "dry-run" as const,
+          counts: { settings: 2, cases: 1 },
+          warnings: [],
+        };
+      },
+    } as unknown as ExportPort;
+    const interaction = new FakeInteraction({
+      commandName: "setup",
+      subcommand: "import",
+      guildId: "guild-1",
+      permissions: ["ManageGuild"],
+      options: { bundle: "https://cdn.discordapp.com/bundle.json", mode: "merge" },
+    });
+    const ctx = createTestContext({
+      interaction,
+      moduleId: "setup",
+      export: exportPort,
+      attachments: { read: async () => "{\"version\":1}" },
+    });
+
+    await setup.execute(ctx);
+
+    expect(received).toMatchObject({ mode: "merge", dryRun: true });
+    expect(interaction.lastReply?.content).toContain("Import preview");
+    expect(interaction.lastReply?.content).toContain("2 settings");
+    expect(interaction.lastReply?.embeds?.[0]?.description).toContain("no rows were written");
   });
 
   it("does not claim readiness when migrations are pending", async () => {

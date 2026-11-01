@@ -143,16 +143,19 @@ same interfaces. No module changes when a port changes.
 
 ### Command allocation
 
-The approved v1.0 plan targets 18 roots. Sixteen are live today with 100 real
-subcommands, and `/music` is the next named root; the
-remaining roots land with their modules, not as empty placeholders. Subcommands
-are free inside a root, so most growth should not spend another slot. The table
-below is the approved **allocation plan**, not a live registration claim;
-[[01-Mission/Command-Catalog|Command-Catalog]] is the generated current list.
+**Gap audit (pass 34, 2026-11-01):** the "18 roots / 160 subcommands" figure in
+the plan handoff has no per-root list in this repository. This table is the only
+saved allocation list; it names **12 roots / 59 subcommands**, not 160, and does
+not name an 18th root. The live registry now has **17 roots / 113 subcommands**
+(see [[01-Mission/Command-Catalog|Command-Catalog]]); 47 names in the 160 figure
+remain unaccounted for. `/setup` is complete; the only named plan gaps are
+`/appeal open | status` and `/verify start | status` (four names). Do not invent
+the missing names or an 18th root: the generated catalog and this table are the
+evidence.
 
 | Root | Subcommands | Replaces |
 | --- | --- | --- |
-| `/setup` | status, module, import, verify, reset | onboarding wizards |
+| `/setup` | status, module, import, verify, reset | onboarding wizards — **shipped pass 34** |
 | `/config` | get, set, list, export | per-feature config commands |
 | `/mod` | ban, kick, timeout, warn, purge, lock, slowmode, case, note, history | Dyno/Carl moderation |
 | `/ticket` | panel, claim, close, add, transcript, stats | Ticket Tool |

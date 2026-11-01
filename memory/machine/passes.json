@@ -430,6 +430,19 @@
         "budget": "17/100 roots · 108 subcommands · 4 context menus",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-34",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Subcommand gap audit and the `/setup` hub. The repository's only saved per-root plan names 12 roots / 59 subcommands, not 18 / 160; the 18th root is unnamed and 47 subcommands remain unaccounted for, so the 160 target is recorded as unverified rather than invented. The largest honest gap was `/setup` (5 planned, 0 registered): it now ships status, module, verify, import-preview and reset. Status is the previous readiness report; module lists/inspects/toggles a module through ConfigPort and its Zod schema; verify checks database, settings parsing and the catalog read-only; import previews an attachment through the existing ExportPort with dryRun true and points at `/export import`; reset exposes the existing repository clear through ConfigPort.reset and leaves cases/XP/ledger untouched. No new root, store or migration. Live bridge: 9 modules / 2 disabled, music enabled then reset, read-back showed the schema default disabled; doctor reports 17 roots / 113 subcommands, 0 errors. MCP cannot attach a file, so import is test-covered. 365 tests / 56 files.",
+      "journal": "journal/2026-11-01-pass-34.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "365",
+        "budget": "17/100 roots · 113 subcommands · 4 context menus",
+        "memory": "current"
+      }
     }
   ]
 }

@@ -2,6 +2,25 @@
 
 ## Now
 
+**P7 `/setup` is a real onboarding hub; the 160-subcommand target is corrected**
+(pass 34, 2026-11-01): `/setup status | module | verify | import | reset` replaces
+the previous root-only command. Status is the same readiness report; `module`
+lists, inspects and toggles one module through `ConfigPort` and its Zod schema;
+`verify` is a read-only check of database, settings parsing and the command
+catalog; `import` previews an attached bundle through the existing `ExportPort`
+with `dryRun: true` and never applies it; `reset` exposes the existing repository
+`clear` through `ConfigPort.reset` and leaves cases, XP and ledger rows alone.
+No new root, store, migration or paid service. Live in `#ai-chat`: `!setup
+module` reported **9 modules · 2 disabled here**, `music` was enabled, then
+`!setup reset module=music` returned it to its schema default and a fresh read
+confirmed **disabled**; `/setup verify` read back from Discord reported **17
+roots · 113 subcommands** and **9 modules parsed**. `commands:doctor` agrees with
+no drift. The MCP cannot attach a file or invoke slash, so `import` is
+preview-tested only. The saved plan table names **12 roots / 59 subcommands**, not
+18 / 160; the 160 figure has no per-root list in the repository and remains
+unverified. See [[04-Modules/setup/Spec|Setup spec]] and
+[[04-Modules/setup/Status|Setup status]].
+
 **P7 context menus are registered in Discord and unit-proven; invocation is
 human-only** (pass 33, 2026-11-01): the four right-click commands from the
 approved v1.0 plan now exist — **Report message** (message), **Case history**
@@ -16,8 +35,9 @@ same rows as `/mod history`; Rank card reads the same `LevelingService.rank`
 projection as `/rank view`; Explain with AI calls the same capped
 `AiService.explain` path and honours the `explanations` switch. One memory-mode
 boot found all four missing, cleared once and registered **21 application
-commands**. Discord's own registry now reports **17 chat-input commands · 108
-subcommands · 2 user menus · 2 message menus** with no drift. The MCP cannot
+commands**. At pass 33 Discord's own registry reported **17 chat-input commands ·
+108 subcommands · 2 user menus · 2 message menus** with no drift; pass 34's
+`/setup` hub brought the live ledger to 113. The MCP cannot
 right-click, so the handlers were not invoked live; adapter and command tests
 cover each path. See [[04-Modules/moderation/Status|Moderation status]],
 [[04-Modules/community/Status|Community status]] and
@@ -68,8 +88,8 @@ subcommands, no module, no table and no second settings store. Live in
 `#ai-chat`: `moderation.automod.links` went `alert → delete → alert`, with a
 read-back after each write; `bogus` returned `automod.links: Invalid enum value`
 and the next read still returned `"alert"`. Pass 31 added `/export` and pass 32 added
-`/music`, so Discord now reports **17 roots / 108 subcommands / 125 actions**
-including `config`, `export` and `music`. The MCP cannot invoke slash
+`/music`, so Discord now reports **17 roots / 113 subcommands / 130 actions**
+including `config`, `export`, `music` and the five `/setup` actions. The MCP cannot invoke slash
 commands or render embeds, so the live proof is the message bridge with
 plain-text replies; list/export embeds are covered by a command test. See
 [[04-Modules/setup/Spec|Setup spec]] and [[04-Modules/setup/Status|Setup status]].
@@ -87,7 +107,7 @@ one MCP edit plus one delete appeared as **1 edited / 1 deleted**. Command runs
 rose 0 → 3 → 4 as bridge commands completed; the current invocation is recorded
 after its reply. At pass 29 Discord reported **14 roots / 90 subcommands / 104
 actions**; pass 30 added `/config`, pass 31 added `/export` and pass 32 added
-`/music`, so the current ledger is **17 / 108 / 125**.
+`/music`, so the current ledger is **17 / 113 / 130**.
 The MCP text reader does not render embeds, so the live transcript proves the
 summary text while the embed fields and JSON export are covered by a command
 test. See [[04-Modules/analytics/Spec|Analytics spec]] and
@@ -165,13 +185,15 @@ option tree instead of names alone. Pass 28 added `/logging` with seven
 subcommands, bringing the ledger to **13 roots · 84 subcommands · 97 actions** at
 that point. Pass 29 added `/analytics` with six subcommands, pass 30 added
 `/config` with four, pass 31 added `/export` with six and pass 32 added `/music`
-with eight, so the current ledger is **17 roots · 108 subcommands · 125 actions**. After pass 30 the boot found
+with eight, and pass 34 split `/setup` into five subcommands, so the current
+ledger is **17 roots · 113 subcommands · 130 actions**. After pass 30 the boot found
 `config` missing, cleared the global set once and re-registered it; pass 31's
 boot found only `export` missing and did the same. Pass 33 now models context
 menus as application commands with their own type and budget, and its boot found
 all four menus missing and re-registered 21 commands. `commands:doctor` now
-reports 17 roots / 108 subcommands plus 2 user and 2 message menus, including
-`analytics`, `logging`, `config`, `export` and `music`. See
+reports 17 roots / 113 subcommands plus 2 user and 2 message menus, including
+`analytics`, `logging`, `config`, `export`, `music` and the five `/setup`
+actions. See
 [[03-Architecture/Command-Budget|Command budget]] and
 [[03-Architecture/ADR/ADR-0003-command-budget]].
 
@@ -187,10 +209,10 @@ connection — a human `InteractionCreate` remains unobserved. The pass also fou
 and stopped two live bot process trees that were double-posting replies; one
 instance now answers each command once.
 
-**Live environment check (re-probed pass 33):** `.env` still sets
+**Live environment check (re-probed pass 34):** `.env` still sets
 `DATABASE_URL` and `REDIS_URL` to localhost:5432/6379, but this machine has no
 Docker, no Postgres/Redis service and no listener on either port. TCP probes on
-2026-11-01 and again in pass 33 returned `ECONNREFUSED` for both
+2026-11-01 and again in pass 34 returned `ECONNREFUSED` for both
 `DATABASE_URL: localhost:5432` and `REDIS_URL: localhost:6379`. Booting without overrides
 reaches `settings: postgres` and then fails loudly with `REDIS_URL is set but
 Redis is unreachable: Reached the max retries per request limit (which is 2).`
@@ -235,8 +257,8 @@ pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
 `!invites leaderboard` and `!invites who`. Pass 26 re-registered 12 roots /
 77 subcommands at the time; pass 28 added `/logging`, pass 29 added
 `/analytics`, pass 30 added `/config`, pass 31 added `/export` and pass 32 added
-`/music`, so Discord's fetched shape now reports **17 roots / 108 subcommands**
-with no missing, extra or changed roots. The bridge
+`/music`, and pass 34's `/setup` hub, so Discord's fetched shape now reports
+**17 roots / 113 subcommands** with no missing, extra or changed roots. The bridge
 added `!help commands`, `!help browse`, `!help search query=ban`, `!mod history`,
 `!ai status`, `!logging status`, `!logging events`, `!logging retention`,
 `!logging export`, `!analytics overview`, `!analytics commands`, `!analytics
@@ -274,9 +296,9 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 360 tests / 56 files · budget 17/100 roots (108 subcommands · 4 context menus) · memory current
+pnpm check        exit 0 · typecheck 0 · 365 tests / 56 files · budget 17/100 roots (113 subcommands · 4 context menus) · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 17 roots / 108 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused
+live              2026-11-01 · AI Team#5758 · 2 guilds · 17 roots / 113 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back, verify 17/113
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)
 live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set · !export guild · !export user · !export drift · !music status · !music add · !music queue · !music play · !music remove · !music skip
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
@@ -311,6 +333,21 @@ read that file.
 | 11 | The menus were invoked live | **Not performed and not claimed** — the MCP account cannot right-click; adapter and command tests cover the handlers | Not claimed |
 | 12 | The SQL side was exercised for menus | **Not performed** — the menus add no store; they read the existing case and XP services, whose SQL adapters are covered by their own PGlite tests | Not claimed |
 
+## P7 setup acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | The five saved `/setup` names exist | `commands.json` and `commands:doctor`: `/setup status`, `module`, `verify`, `import`, `reset` | **Live Discord API** |
+| 2 | Module changes go through the owning schema | `setup.test.ts` toggles `setup.enabled` through `SettingsService`; an unknown module is refused with the valid ids | In-memory repository + dispatch |
+| 3 | Reset removes only the module's stored record | `setup.test.ts` resets `setup.enabled`; `settings.test.ts` proves the same `SettingsService.reset` clears a PGlite row and the schema default returns | In-memory + **PGlite** |
+| 4 | Reset does not touch cases, XP or ledger rows | `resetAction` calls only `ConfigPort.reset`; the repository port has no case/XP method and the footer says so | Code inspection |
+| 5 | Import is a preview and cannot apply | `setup.test.ts` records `dryRun: true` and `mode: "merge"`, and the reply says no rows were written | Unit with a recording port |
+| 6 | Verify reports a real catalog and real settings | `setup.test.ts` checks parsed modules and catalog roots; live `/setup verify` read `9 modules` and `17 roots · 113 subcommands` | Unit + **live REST read** |
+| 7 | Verify does not claim readiness in memory mode | Live `/setup verify` printed `Not ready: database` and named `DATABASE_URL` | **Live REST read** |
+| 8 | The live toggle is a real settings change | `!setup module module=music enabled=true` then `!setup module module=music` returned enabled; after `!setup reset` it returned disabled | **Live bridge** |
+| 9 | The saved plan's 160 claim is not invented | The gap table in `memory/journal/2026-11-01-pass-34.md` shows the saved table is 12 roots / 59 names; 4 names remain missing and 47 are unnamed | Repository audit |
+| 10 | Import was exercised live | **Not performed** — the MCP cannot attach a file; the unit test covers the preview path | Not claimed |
+
 ## P8 music acceptance evidence
 
 | # | Criterion | Where it is asserted | Proven against |
@@ -321,7 +358,7 @@ read that file.
 | 4 | Status is available while disabled | `music.test.ts`: disabled `status` names the enabling command; live 0/25 `playback UNAVAILABLE` reply before enabling | Unit + **live bridge** |
 | 5 | A disabled module refuses mutations without writing | `music.test.ts`: disabled `add` throws; live `add` after disabling returned the refusal | Unit + **live bridge** |
 | 6 | Queue mutations are permission-gated | `music.test.ts`: `remove`/`clear` without `ManageGuild` are blocked; live `remove` ran under the MCP member who holds `ManageGuild` | Dispatch + **live bridge** |
-| 7 | One root, eight subcommands, budget intact | `music.test.ts` registry shape; `pnpm budget`: 17/100 roots, 108 subcommands | Registry + budget |
+| 7 | One root, eight subcommands, budget intact | `music.test.ts` registry shape; `pnpm budget`: 17/100 roots, 113 subcommands | Registry + budget |
 | 8 | The live counts match the queue | Live two adds → **2/25**, one remove → **1/25**, and the disabled add wrote nothing | **Live gateway** |
 | 9 | Audio was played | **Not performed and not claimed** — the playback adapter is unavailable by design; `play`, `skip` and `stop` refused | Not claimed |
 | 10 | The SQL queue was exercised live | **Not performed** — local Postgres still returns `ECONNREFUSED`; PGlite covers the SQL adapter | Not claimed |

@@ -19,4 +19,6 @@ export interface ConfigPort {
     moduleId: string,
     patch: Record<string, unknown>,
   ): Promise<Record<string, unknown>>;
+  /** Remove this guild's stored record; the module's schema defaults apply again. */
+  reset(guildId: string, moduleId: string): Promise<void>;
 }

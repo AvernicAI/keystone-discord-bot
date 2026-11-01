@@ -11,7 +11,7 @@ refuses to boot when it fails.
 
 ```text
 17/100 global roots used (83 left)
-108 subcommands · 125 total actions
+113 subcommands · 130 total actions
 4 context menus (2 user · 2 message; 15 each)
 status: OK
 
@@ -32,7 +32,7 @@ status: OK
   /music      music           8     2   1322
   /config     setup           4     3   1106
   /export     setup           6     3   1445
-  /setup      setup           0     0    130
+  /setup      setup           5     2   1151
 
   Context menus (separate 15 + 15 budget)
   Explain with AI  ai           message
@@ -102,6 +102,10 @@ subcommands and reuses the P5 portability service; `/music` landed in pass 32
 with eight subcommands over the existing `community_records` table, and its
 playback seam refuses because no voice/Lavalink client is installed. Pass 33
 added four context menus over existing services; none needed a root or a table.
+Pass 34 split `/setup` into five subcommands (`status`, `module`, `verify`,
+`import`, `reset`), so the root now spends five more free slots and no new root.
+The saved plan table names 12 roots / 59 subcommands, not the handoff's 18 / 160;
+the generated catalog is the current truth.
 
 ## Component budget (the other 100-limit)
 

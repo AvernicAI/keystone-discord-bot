@@ -199,6 +199,9 @@ function memoryConfig(settings: Record<string, unknown>): ConfigPort {
     async update() {
       throw new Error("export must never write settings");
     },
+    async reset() {
+      throw new Error("export must never reset settings");
+    },
   };
 }
 
