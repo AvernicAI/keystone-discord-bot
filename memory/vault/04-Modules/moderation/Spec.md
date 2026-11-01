@@ -172,4 +172,4 @@ permission **before** the Discord call.
   stripped; ordinary member messages still reach the coordinator.
 - `packages/db/src/cases.test.ts` — PGlite case numbering, events, state and
   concurrent allocation.
-- `pnpm budget` — 15/100 roots with all shipped commands (94 subcommands).
+- `pnpm budget` — 16/100 roots with all shipped commands (100 subcommands).

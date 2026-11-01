@@ -26,6 +26,7 @@ import { createDiscordLoggingActions } from "./logging-actions";
 import { registerLoggingEvents } from "./logging-events";
 import { registerAiEvents } from "./ai-events";
 import { registerPrefixCommands } from "./prefix";
+import { createDiscordAttachmentReader, createDiscordExportFacts } from "./export-discord";
 import { LoggingService } from "@keystone/module-logging";
 import { buildNativeAutoModPlan, moderationSettingsSchema } from "@keystone/module-moderation";
 
@@ -86,6 +87,9 @@ async function main(): Promise<void> {
     ai: runtime.ai,
     logging: runtime.logging,
     analytics: runtime.analytics,
+    export: runtime.export,
+    exportFacts: createDiscordExportFacts(client),
+    attachments: createDiscordAttachmentReader(),
     usage: runtime.usage,
   };
 

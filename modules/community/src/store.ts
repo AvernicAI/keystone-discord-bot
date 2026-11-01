@@ -21,6 +21,18 @@ import type {
 
 const nowIso = (): string => new Date().toISOString();
 
+/** The event that produced an XP projection. The in-memory store keeps it so
+ * `/export` can be truthful in memory mode; Postgres already stores the row. */
+export interface XpEventRecord {
+  readonly id: string;
+  readonly guildId: string;
+  readonly userId: string;
+  readonly amount: number;
+  readonly source: string;
+  readonly idempotencyKey: string;
+  readonly createdAt: string;
+}
+
 /**
  * In-memory implementation of the community port. It is a real store, not a
  * mock: idempotency keys, balances, ticket events and record scoping behave the
@@ -30,6 +42,7 @@ const nowIso = (): string => new Date().toISOString();
 export class InMemoryCommunityStore implements CommunityStore {
   readonly #levels = new Map<string, LevelProfile>();
   readonly #xpKeys = new Set<string>();
+  readonly #xpEvents: XpEventRecord[] = [];
   readonly #ledger: LedgerEntry[] = [];
   readonly #ledgerKeys = new Map<string, string>();
   readonly #tickets = new Map<string, TicketRecord>();
@@ -63,6 +76,15 @@ export class InMemoryCommunityStore implements CommunityStore {
       return { inserted: false, profile: existing };
     }
     this.#xpKeys.add(input.idempotencyKey);
+    this.#xpEvents.push({
+      id: randomUUID(),
+      guildId: input.guildId,
+      userId: input.userId,
+      amount: input.amount,
+      source: input.source,
+      idempotencyKey: input.idempotencyKey,
+      createdAt: nowIso(),
+    });
     const profile: LevelProfile = {
       ...existing,
       xp: existing.xp + input.amount,
@@ -260,6 +282,23 @@ export class InMemoryCommunityStore implements CommunityStore {
   /** Read-only helper for the in-memory analytics adapter; not part of the port. */
   tickets(guildId: string): readonly TicketRecord[] {
     return [...this.#tickets.values()].filter((ticket) => ticket.guildId === guildId);
+  }
+
+  /** Read-only helpers for the in-memory export adapter; not part of the port. */
+  allLevels(guildId: string): readonly LevelProfile[] {
+    return [...this.#levels.values()].filter((profile) => profile.guildId === guildId);
+  }
+
+  allXpEvents(guildId: string): readonly XpEventRecord[] {
+    return this.#xpEvents.filter((event) => event.guildId === guildId);
+  }
+
+  allLedger(guildId: string): readonly LedgerEntry[] {
+    return this.#ledger.filter((entry) => entry.guildId === guildId);
+  }
+
+  allRecords(guildId: string): readonly CommunityRecord<unknown>[] {
+    return [...this.#records.values()].filter((record) => record.guildId === guildId);
   }
 
   async updateTicket(

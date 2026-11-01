@@ -1,6 +1,7 @@
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
+  AttachmentBuilder,
   ButtonBuilder,
   ButtonStyle,
   StringSelectMenuBuilder,
@@ -41,6 +42,10 @@ function flattenOptions(
       option.type === ApplicationCommandOptionType.SubcommandGroup
     ) {
       Object.assign(flat, flattenOptions(option.options ?? []));
+    } else if (option.type === ApplicationCommandOptionType.Attachment) {
+      // An attachment option carries an object, not a scalar. The command only
+      // needs the CDN URL; `ctx.attachments` downloads and size-checks it.
+      flat[option.name] = option.attachment?.url ?? null;
     } else {
       flat[option.name] = (option.value ?? null) as string | number | boolean | null;
     }
@@ -77,10 +82,22 @@ export function asInteractionLike(interaction: ChatInputCommandInteraction): Int
  * importing discord.js into 40 modules.
  */
 function toReplyOptions(input: ReplyInput): InteractionReplyOptions {
-  const { components, ...rest } = input;
+  const { components, files, ...rest } = input;
   const options = rest as unknown as InteractionReplyOptions;
   if (components) options.components = toComponents(components);
+  if (files?.length) options.files = toFiles(files);
   return options;
+}
+
+/** Exports are UTF-8 JSON; the adapter owns the Buffer and file name mapping. */
+function toFiles(files: NonNullable<ReplyInput["files"]>): AttachmentBuilder[] {
+  return files.map(
+    (file) =>
+      new AttachmentBuilder(Buffer.from(file.content, "utf8"), {
+        name: file.name,
+        description: file.description,
+      }),
+  );
 }
 
 /**
@@ -88,9 +105,10 @@ function toReplyOptions(input: ReplyInput): InteractionReplyOptions {
  * instead of reusing the reply one.
  */
 function toEditOptions(input: ReplyInput): InteractionEditReplyOptions {
-  const { components, ...rest } = input;
+  const { components, files, ...rest } = input;
   const options = rest as unknown as InteractionEditReplyOptions;
   if (components) options.components = toComponents(components);
+  if (files?.length) options.files = toFiles(files);
   return options;
 }
 

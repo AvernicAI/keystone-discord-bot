@@ -2,6 +2,7 @@ import { z } from "zod";
 import { defineModule } from "@keystone/kernel";
 import { setup } from "./commands/setup";
 import { config } from "./commands/config";
+import { exportCommand } from "./commands/export";
 
 /**
  * Setup owns the operator's first questions: is this deployment ready, and what
@@ -17,13 +18,13 @@ export const setupModule = defineModule({
   id: "setup",
   name: "Setup",
   description: "First-run readiness checks and per-guild module settings.",
-  version: "0.2.0",
+  version: "0.3.0",
   settingsSchema: z.object({
     enabled: z.boolean().default(true),
   }),
   defaultSettings: { enabled: true },
   intents: ["Guilds"],
   permissions: [],
-  commands: [setup, config],
+  commands: [setup, config, exportCommand],
   docsPath: "04-Modules/setup/Spec.md",
 });

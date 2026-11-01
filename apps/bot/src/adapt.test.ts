@@ -69,6 +69,27 @@ describe("buildCommandJson", () => {
     expect(optionsOf(json)[0]?.options?.map((option) => option.name)).toEqual(["one", "list"]);
   });
 
+  it("emits an attachment option with Discord's attachment type", () => {
+    const json = buildCommandJson(
+      defineCommand({
+        name: "export",
+        description: "Export",
+        subcommands: [
+          {
+            name: "import",
+            description: "Import a bundle",
+            options: [{ type: "attachment", name: "bundle", description: "Bundle", required: true }],
+          },
+        ],
+        execute: noop,
+      }),
+    );
+
+    expect(optionsOf(json)[0]?.options?.map((option) => [option.name, option.type])).toEqual([
+      ["bundle", 11],
+    ]);
+  });
+
   it("keeps flat options for a root-only command", () => {
     const json = buildCommandJson(
       defineCommand({
@@ -128,5 +149,46 @@ describe("asInteractionLike", () => {
     expect(like.options).toEqual({ user: "target-1", reason: "spam" });
     expect(like.subcommand).toBe("ban");
     expect(like.permissions).toEqual(["BanMembers"]);
+  });
+
+  it("keeps an attachment's CDN URL and uploads a reply file", async () => {
+    const captured: Array<{ files?: Array<{ name: string }> }> = [];
+    const url = "https://cdn.discordapp.com/attachments/1/2/bundle.json";
+    const interaction = {
+      id: "interaction-2",
+      commandName: "export",
+      guildId: "guild-1",
+      channelId: "channel-1",
+      user: { id: "user-1" },
+      memberPermissions: { toArray: () => ["ManageGuild"] },
+      options: {
+        data: [
+          {
+            name: "import",
+            type: 1,
+            options: [{ name: "bundle", type: 11, attachment: { url } }],
+          },
+        ],
+        getSubcommand: () => "import",
+        getSubcommandGroup: () => null,
+      },
+      replied: false,
+      deferred: false,
+      reply: async (options: { files?: Array<{ name: string }> }) => {
+        captured.push(options);
+      },
+      deferReply: noop,
+      editReply: noop,
+      followUp: noop,
+    } as unknown as ChatInputCommandInteraction;
+
+    const like = asInteractionLike(interaction);
+    expect(like.options.bundle).toBe(url);
+
+    await like.reply({
+      content: "bundle",
+      files: [{ name: "keystone.json", content: "{}" }],
+    });
+    expect(captured[0]?.files?.[0]?.name).toBe("keystone.json");
   });
 });

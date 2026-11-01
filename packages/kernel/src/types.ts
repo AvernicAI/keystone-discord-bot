@@ -32,11 +32,21 @@ export interface EmbedPayload {
   timestamp?: string;
 }
 
+export interface ReplyFile {
+  /** File name shown in Discord; keep it boring and stable. */
+  readonly name: string;
+  /** UTF-8 content. Exports are JSON text, not binaries. */
+  readonly content: string;
+  readonly description?: string;
+}
+
 export interface ReplyInput {
   content?: string;
   embeds?: EmbedPayload[];
   ephemeral?: boolean;
   components?: ActionRow[];
+  /** Optional attachments; the adapter turns each one into a file upload. */
+  files?: ReplyFile[];
 }
 
 export type ButtonStyle = "primary" | "secondary" | "success" | "danger" | "link";
@@ -231,6 +241,12 @@ export interface CommandContext {
   readonly logging?: import("./logging").LoggingPort;
   /** Present when the composition root wired the read-only analytics store. */
   readonly analytics?: import("./analytics").AnalyticsStore;
+  /** Present when the composition root wired the portability adapters. */
+  readonly export?: import("./export").ExportPort;
+  /** Reads the live guild facts drift compares against. */
+  readonly exportFacts?: import("./export").ExportFacts;
+  /** Downloads a bundle the operator attached to an import command. */
+  readonly attachments?: import("./export").AttachmentReader;
 }
 
 export type GuardResult = { ok: true } | { ok: false; message: string };

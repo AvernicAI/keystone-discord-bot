@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**118 features** across 16 domains: **86 in repo**, **10 open**, **18 planned**. Live behaviour is marked separately; a green
+**119 features** across 16 domains: **87 in repo**, **10 open**, **18 planned**. Live behaviour is marked separately; a green
 box means the code and its tests exist, not that a live guild has run it.
 
 ## Domains
@@ -23,7 +23,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Music | 4 | 0 | 0 | 2 |
 | AI | 6 | 5 | 1 | 0 |
 | Operations | 11 | 5 | 3 | 3 |
-| Portability | 11 | 11 | 0 | 0 |
+| Portability | 12 | 12 | 0 | 0 |
 | Invites | 3 | 3 | 0 | 0 |
 | Forms and applications | 3 | 0 | 0 | 3 |
 | Events and RSVP | 4 | 0 | 0 | 4 |
@@ -177,7 +177,8 @@ box means the code and its tests exist, not that a live guild has run it.
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Full export bundle | P5 | ✅ in repo | `packages/importer/src/importer.test.ts`, `packages/db/src/portability.test.ts` · live unverified |
+| Full export bundle | P5 | ✅ in repo | `packages/importer/src/importer.test.ts`, `packages/db/src/portability.test.ts`, `modules/setup/src/export.test.ts`, `apps/bot/src/export-port.test.ts` · live verified |
+| In-Discord export surface | P7 | ✅ in repo | `modules/setup/src/export.test.ts`, `apps/bot/src/export-port.test.ts`, `apps/bot/src/export-discord.test.ts`, `packages/kernel/src/export.ts` · live verified |
 | Restore and config hash | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live unverified |
 | Dry-run import diff | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
 | Rollback window | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live unverified |
@@ -186,7 +187,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Generic JSON/CSV import | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
 | ProBot JSON transcript import | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
 | Ticket Tool HTML archive | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
-| Drift detection | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live unverified |
+| Drift detection | P5 | ✅ in repo | `packages/db/src/portability.test.ts`, `apps/bot/src/export-discord.test.ts`, `modules/setup/src/export.test.ts` · live verified |
 | Guided migration guides | P5 | ✅ in repo | `memory/vault/06-Operations/Migration-Guides.md` · live unverified |
 
 ## Invites

@@ -10,6 +10,16 @@ you a file. Guide the rest.** We do not claim one-click migration from Dyno,
 Carl-bot or Wick because those vendors expose no usable egress. A broken
 one-click promise is worse than an honest checklist.
 
+## Two surfaces, one service
+
+The CLI (`pnpm portability ...`) and `/export guild | user | import | delete |
+drift | rollback` call the same `PortabilityService` in SQL mode. The command
+formats results; it does not own bundle or restore policy. The SQL adapter
+constructs the service over `createPortabilityStore`, and the memory adapter
+exports the live in-memory stores while refusing import, delete and rollback
+with the exact missing prerequisite (`DATABASE_URL`). See [[03-Architecture/ADR/ADR-0015-portability-bundles-and-receipts|ADR-0015]]
+for why the service, not a second implementation, sits behind both doors.
+
 ## The bundle
 
 One JSON file, format `keystone.export`, version `1`, capped at **25 MB**.
@@ -102,17 +112,20 @@ messages.
 ## Drift
 
 `drift` walks settings for keys ending in `channelId`, `roleId` or `categoryId`
-(case-insensitive), compares them with a supplied live fact file, and reports
-missing resources, refused channel permissions and expected AutoMod rules that
-are absent. It is **read-only**; the report has `readOnly: true`. Obfuscation
-means "missing" may mean "hidden from the bot", so the report names the
-ambiguity instead of guessing.
+(case-insensitive) and reports missing resources, refused channel permissions
+and expected AutoMod rules that are absent. The Discord surface reads live
+channels, categories, roles and AutoMod names from the gateway cache through
+`apps/bot/src/export-discord.ts`; channel enumeration goes through the one
+`cachedChannels()` seam in `apps/bot/src/channels.ts`. The CLI still accepts a
+saved fact file. Drift is **read-only**; the report has `readOnly: true`.
+Obfuscation means "missing" may mean "hidden from the bot", so the report names
+the ambiguity instead of guessing.
 
 ## Threat model
 
 | Risk | Control |
 | --- | --- |
-| Another guild's data imported without authorisation | The destination guild id is an explicit argument; every row is rewritten to it; the command requires `--yes` and a database credential |
+| Another guild's data imported without authorisation | The destination guild id is an explicit argument; every row is rewritten to it; the CLI requires `--yes` and a database credential; `/export` requires `ManageGuild` and a guild-scoped context |
 | Corrupt or edited bundle | Version, schema, checksum and counts verified before a write |
 | Partial restore | One transaction, backup first, post-import checksum |
 | Deletion claimed but not done | Deletion and receipt in the same operation; backup payloads removed |
@@ -126,6 +139,13 @@ ambiguity instead of guessing.
 - Ticket transcripts are references/archives, not message rows.
 - MEE6's live leaderboard endpoint is **not** called. Admins save the JSON the
   source gives them and upload it; this stays within the no-scraping rule.
+- `/export import`, `delete` and `rollback` require `DATABASE_URL`; memory mode
+  names the prerequisite instead of simulating a transaction.
+- A memory-mode guild export omits member profiles and audit events because the
+  in-memory stores never retained them. Settings are effective values, not raw
+  override rows.
+- The prefix bridge cannot carry an attachment option, so `!export import` is
+  covered by the command test, not a live bridge run.
 - The dashboard, scoped API tokens and webhook notifications are P6.
-- Drift currently takes live facts from a JSON file. P6 wires them to the
-  dashboard's bot-token membership check.
+- Drift reads the gateway cache in Discord and a JSON fact file in the CLI. Both
+  are snapshots at call time, not a live permission audit.

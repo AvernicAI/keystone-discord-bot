@@ -2,7 +2,7 @@
 
 ## Now
 
-P1 complete; `/config` added in pass 30 (2026-11-01).
+P1 complete; `/config` added in pass 30 and `/export` in pass 31 (2026-11-01).
 
 - `/setup` registered through the shared module catalog (`packages/module-catalog`), behind `ManageGuild`.
 - Reports database reachability, migration state, cache mode, module state and
@@ -11,15 +11,22 @@ P1 complete; `/config` added in pass 30 (2026-11-01).
 - `/config list | get | set | export` reads and writes any registered module's
   per-guild settings through `SettingsService` and the owning Zod schema. It has
   its own 8-test suite and no second settings store.
+- `/export guild | user | import | delete | drift | rollback` puts the P5
+  portability service above Discord. `guild` and `user` post the same verified
+  `keystone.export` files the CLI writes; `import` previews by default;
+  `delete` requires the exact guild id; `drift` reads live gateway facts and
+  never writes; `rollback` restores a 24-hour pre-import backup. The memory
+  adapter exports the live in-memory rows and refuses import/delete/rollback
+  with the missing `DATABASE_URL` rather than faking a transaction.
 
 ## Verified
 
 ```text
 pnpm typecheck
-pnpm vitest run modules/setup/src   # 15 tests / 2 files
-pnpm test                           # 298 tests / 47 files
-pnpm budget                         # 15/100 roots · 94 subcommands
-pnpm commands:doctor                # Registry 15 roots · 94 subcommands
+pnpm vitest run modules/setup/src   # 23 tests / 3 files
+pnpm test                           # 322 tests / 50 files
+pnpm budget                         # 16/100 roots · 100 subcommands
+pnpm commands:doctor                # Registry 16 roots · 100 subcommands
 ```
 
 P1 exit evidence for `/setup`:
@@ -46,6 +53,25 @@ Pass 30 evidence for `/config`:
 - One bot process performed one drift-triggered clear + re-register, and
   `commands:doctor` reports 15 roots / 94 subcommands including `config`.
 
+Pass 31 evidence for `/export`:
+
+- The command suite covers all six subcommands: one root, permission refusal
+  before the port is called, file attachment and checksum in the guild reply,
+  member filtering in the user reply, import preview by default and write only
+  on `dry_run:false`, exact-id delete confirmation, read-only drift, and
+  rollback by import id.
+- The PGlite suite exports real rows, proves USER_B never appears in USER_A's
+  file, previews without writing, applies with `verified:true`, rolls back to
+  the pre-import value, and returns a deletion receipt while refusing a
+  post-deletion rollback.
+- Live in `#ai-chat`: `!export guild` posted a 12.8 KB bundle whose parsed
+  counts and checksum matched the reply (49 settings, 1 case, 1 case event,
+  1 ledger row, 1 community record); `!export user` posted the 2.0 KB member
+  file; drift went `1 missing` -> `0 missing` after restoring the channel; a
+  wrong-id delete and a memory-mode rollback were refused with named reasons.
+- One bot process booted, saw only `export` missing, cleared once and
+  re-registered 16 roots with no duplicate replies.
+
 ## What it proves
 
 `/setup`'s health port is wired to the real adapters in
@@ -56,6 +82,13 @@ Pass 30 evidence for `/config`:
 value that the dashboard accepts and a value that `/config` accepts are parsed
 by the same schema and persisted through the same service. That is the property
 that stops a guild's settings from depending on which surface edited it last.
+
+`/export` demonstrates that a Discord surface can reuse a service without
+copying its policy. The SQL adapter constructs the same `PortabilityService` the
+CLI uses, so bundle format, checksum verification, restore transaction and
+rollback window have one implementation and two doors. The memory adapter is
+the honest exception: it exports the rows that exist and names the prerequisite
+it lacks for the rest.
 
 ## Known limitations
 
@@ -75,6 +108,14 @@ that stops a guild's settings from depending on which surface edited it last.
 - The MCP cannot invoke slash commands or render embeds, so the live proof is
   the message bridge with plain-text replies; the list and export embeds are
   covered by the command test.
+- `/export import` cannot run through the `!` bridge because the bridge cannot
+  carry an attachment option. The command path is tested; no live import is
+  claimed.
+- `/export import`, `delete` and `rollback` need `DATABASE_URL`. Memory mode
+  refuses them by name instead of pretending a transaction exists.
+- A memory-mode guild export omits member profiles and audit events because the
+  in-memory stores never retained them. Settings are effective values, not raw
+  override rows.
 
 ## Next
 
@@ -82,3 +123,6 @@ that stops a guild's settings from depending on which surface edited it last.
   before `/config` is used in production.
 - P6: link the dashboard's setup page to the same health probe.
 - P7: `/help` can render the same manifest data as documentation.
+- Portability: store the current bundle as an import candidate so a large file
+  can be restored without a fresh upload; add a live Postgres import/delete run
+  once those services exist.

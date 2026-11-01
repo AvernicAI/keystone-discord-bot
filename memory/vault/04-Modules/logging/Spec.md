@@ -140,8 +140,8 @@ arrive; message and moderation events continue.
 
 ## Limits respected
 
-- One new global root (`15/100` now that analytics and `/config` have landed). Seven
-  subcommands cost no extra slot.
+- One new global root (`16/100` now that analytics, `/config` and `/export` have
+  landed). Seven subcommands cost no extra slot.
 - One indexed table and an append-only write per enabled event.
 - Export is capped at ten events and trimmed to fit one embed.
 - No paid service and no network call beyond Discord.

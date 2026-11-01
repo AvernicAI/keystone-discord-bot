@@ -23,6 +23,7 @@ import {
   type LoggingPort,
   type AnalyticsStore,
   type CommandUsageStore,
+  type ExportPort,
   type CaseStore,
   type CommunityStore,
   type InviteStore,
@@ -38,6 +39,7 @@ import {
   createAnalyticsStore,
   createCommandUsageStore,
   createPostgresDatabase,
+  createPortabilityStore,
   createSettingsRepository,
   probeDatabase,
   type PostgresHandle,
@@ -56,6 +58,7 @@ import {
   MemoryAnalyticsStore,
 } from "@keystone/module-analytics";
 import { AiService, InMemoryAiStore, createAiProvider } from "@keystone/module-ai";
+import { createMemoryExportPort, createSqlExportPort } from "./export-port";
 import { createCooldownStore, type CooldownHandle } from "@keystone/cache";
 import { BullJobQueue, InProcessJobQueue } from "@keystone/queue";
 import { createOtlpTelemetry, createTelemetry } from "@keystone/telemetry";
@@ -76,6 +79,7 @@ export interface Runtime {
   ai: AiPort;
   logging: LoggingPort;
   analytics: AnalyticsStore;
+  export: ExportPort;
   usage: CommandUsageStore;
   security: SecurityCoordinator;
   mode: { database: DatabaseMode; cache: CacheMode; queue: QueueMode };
@@ -221,8 +225,9 @@ export async function createRuntime(
         commands: async (guildId) =>
           usage instanceof InMemoryCommandUsageStore ? usage.records(guildId) : [],
       });
+  const aiStore = database ? createAiStore(database) : new InMemoryAiStore();
   const ai = new AiService(
-    database ? createAiStore(database) : new InMemoryAiStore(),
+    aiStore,
     createAiProvider({
       apiKey: env.AI_API_KEY,
       baseUrl: env.AI_BASE_URL,
@@ -241,6 +246,25 @@ export async function createRuntime(
     settings: settings.forModule("moderation"),
     logger: logger.child("security"),
   });
+
+  let exportPort: ExportPort;
+  if (database) {
+    exportPort = createSqlExportPort(createPortabilityStore(database));
+  } else {
+    if (
+      !(caseStore instanceof InMemoryCaseStore) ||
+      !(communityStore instanceof InMemoryCommunityStore) ||
+      !(aiStore instanceof InMemoryAiStore)
+    ) {
+      throw new Error("Memory export requires the in-memory stores; the composition root is inconsistent.");
+    }
+    exportPort = createMemoryExportPort({
+      config: settings,
+      cases: caseStore,
+      community: communityStore,
+      ai: aiStore,
+    });
+  }
 
   let queue: JobQueue;
   if (env.REDIS_URL) {
@@ -269,6 +293,7 @@ export async function createRuntime(
     ai,
     logging,
     analytics,
+    export: exportPort,
     usage,
     security,
     mode: {

@@ -8,7 +8,8 @@ events. It is the seventh module and one event source `/analytics` now reads
 
 - `/logging` is registered through the shared catalog with `setup`, `channel`,
   `events`, `status`, `retention`, `export` and `disable`. The command ledger is
-  **15 roots / 94 subcommands / 109 actions** after analytics and `/config` landed.
+  **16 roots / 100 subcommands / 116 actions** after analytics, `/config` and
+  `/export` landed.
 - An event is appended before delivery. A disabled module or a disabled event
   writes nothing; a configured channel that fails still leaves the row behind.
 - The five event kinds are message delete, message edit, member join, member

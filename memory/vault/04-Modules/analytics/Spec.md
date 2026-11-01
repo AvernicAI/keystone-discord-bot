@@ -100,7 +100,7 @@ configured, `DrizzleAnalyticsStore` is used instead.
 
 ## Limits respected
 
-- One new global root; after `/config` the ledger is `15/100`, and six subcommands cost no extra slot.
+- One new global root; after `/export` the ledger is `16/100`, and six subcommands cost no extra slot.
 - No new intents, permissions or paid service.
 - Queries are guild-scoped and bounded to 90 days.
 - `command_usage` adds one insert per dispatched guild command.

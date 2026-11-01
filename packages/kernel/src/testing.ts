@@ -143,6 +143,9 @@ export interface TestContextOptions {
   ai?: import("./ai").AiPort;
   logging?: import("./logging").LoggingPort;
   config?: import("./config").ConfigPort;
+  export?: import("./export").ExportPort;
+  exportFacts?: import("./export").ExportFacts;
+  attachments?: import("./export").AttachmentReader;
   catalog?: readonly CommandCatalogEntry[];
 }
 
@@ -172,5 +175,8 @@ export function createTestContext(options: TestContextOptions = {}): TestContext
     ai: options.ai,
     logging: options.logging,
     config: options.config,
+    export: options.export,
+    exportFacts: options.exportFacts,
+    attachments: options.attachments,
   };
 }

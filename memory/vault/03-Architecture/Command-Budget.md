@@ -10,8 +10,8 @@ refuses to boot when it fails.
 ## Current ledger
 
 ```text
-15/100 global roots used (85 left)
-94 subcommands · 109 total actions
+16/100 global roots used (84 left)
+100 subcommands · 116 total actions
 status: OK
 
   /command    module       subs  opts  chars
@@ -29,6 +29,7 @@ status: OK
   /mod        moderation     14     4   3991
   /verify     moderation      0     0    120
   /config     setup           4     3   1106
+  /export     setup           6     3   1445
   /setup      setup           0     0    130
 ```
 
@@ -77,12 +78,13 @@ would duplicate the hub and spend a command for no user benefit.
 | `/tools` | embeds, giveaways, reminders, feeds | `/tools embed edit` |
 | `/help` | discovery, generated from the registry | `/help moderation` |
 
-Fifteen roots today for a bot with dozens of implemented actions. The remaining
-85 slots are held for context menus, Activities, and features that genuinely
-need their own name. `/help`, `/setup`, `/logging`, `/analytics` and `/config`
-are roots; `/export` and `/music` arrive with their modules, not as empty
-advertisements. `/config` landed in pass 30 with four subcommands and no new
-settings store.
+Sixteen roots today for a bot with dozens of implemented actions. The remaining
+84 slots are held for context menus, Activities, and features that genuinely
+need their own name. `/help`, `/setup`, `/logging`, `/analytics`, `/config` and
+`/export` are roots; `/music` arrives with its module, not as an empty
+advertisement. `/config` landed in pass 30 with four subcommands and no new
+settings store; `/export` landed in pass 31 with six subcommands and reuses the
+P5 portability service.
 
 ## Component budget (the other 100-limit)
 

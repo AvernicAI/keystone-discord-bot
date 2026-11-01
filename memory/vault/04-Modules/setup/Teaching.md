@@ -7,11 +7,19 @@
    settings port.
 3. `packages/kernel/src/config.ts` — the narrow `ConfigPort`.
 4. `packages/kernel/src/settings.ts` — the service that validates and persists.
-5. `packages/kernel/src/types.ts` — `HealthProbe` and `HealthReport`, the two
+5. `modules/setup/src/commands/export.ts` — one root, six subcommands, one
+   portability port; note that the command formats and the adapter decides.
+6. `packages/kernel/src/export.ts` — `ExportPort`, `AttachmentReader`,
+   `ExportFacts`; no Drizzle and no discord.js.
+7. `apps/bot/src/export-port.ts` — the SQL adapter over `PortabilityService`
+   and the honest memory adapter that refuses what it cannot do.
+8. `apps/bot/src/export-discord.ts` — live gateway facts and a CDN-only,
+   size-capped attachment reader.
+9. `packages/kernel/src/types.ts` — `HealthProbe` and `HealthReport`, the two
    types `/setup` depends on.
-6. `apps/bot/src/runtime.ts` — where the real probe and settings service are
-   built.
-7. `packages/db/src/health.ts` — `SELECT 1`, then the migration ledger.
+10. `apps/bot/src/runtime.ts` — where the real probe, settings and export ports
+    are built.
+11. `packages/db/src/health.ts` — `SELECT 1`, then the migration ledger.
 
 ## The idea to take away
 
@@ -29,6 +37,19 @@ cannot enter through one surface while being rejected by the other.
 The second idea is restraint: a first-run command that writes configuration can
 leave a server half-configured when the third step fails. `/setup` cannot write.
 `/config` is a separate, explicit act with a guard and a cooldown.
+
+**A second surface must not mean a second policy.** `/export` does not build its
+own bundle writer. `apps/bot/src/export-port.ts` constructs the same
+`PortabilityService` that `scripts/portability.ts` uses, so checksum rules,
+bundle versions, restore transactions and the 24-hour rollback window cannot
+drift between the CLI and Discord. The command only turns results into embeds
+and files. When you add another surface, look for the service it should call
+before looking for the code it should copy.
+
+The memory adapter is the counter-example that keeps the rule honest. It has no
+transaction and no backup table, so `import`, `delete` and `rollback` return the
+missing `DATABASE_URL` instead of simulating success. An adapter is allowed to
+refuse; it is not allowed to lie.
 
 ## Why a dotted key instead of a JSON blob
 

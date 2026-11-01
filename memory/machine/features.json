@@ -1757,11 +1757,29 @@
           "phase": "P5",
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
-          "note": "Versioned JSON bundle with canonical SHA-256 checksum, counts and include/omit manifest.",
-          "liveVerified": false,
+          "note": "Versioned JSON bundle with canonical SHA-256 checksum, counts and include/omit manifest. Live 2026-11-01: `/export guild` posted a 12.8 KB bundle that downloaded and parsed with 49 settings, 1 case, 1 case event, 1 ledger row and 1 community record.",
+          "liveVerified": true,
           "evidence": [
             "packages/importer/src/importer.test.ts",
-            "packages/db/src/portability.test.ts"
+            "packages/db/src/portability.test.ts",
+            "modules/setup/src/export.test.ts",
+            "apps/bot/src/export-port.test.ts"
+          ]
+        },
+        {
+          "id": "portability.in-discord-export",
+          "name": "In-Discord export surface",
+          "competitors": {},
+          "phase": "P7",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/02-Research/Import-Formats.md",
+          "note": "`/export guild | user | import | delete | drift | rollback` in the setup module. Guild and user exports are JSON file attachments; import reads a Discord attachment and defaults to a dry run; delete needs the exact guild id; drift reads live channels, categories, roles and AutoMod names from the gateway cache. One `ExportPort`; SQL uses the existing `PortabilityService`, memory mode reads the live stores and refuses destructive actions by name.",
+          "liveVerified": true,
+          "evidence": [
+            "modules/setup/src/export.test.ts",
+            "apps/bot/src/export-port.test.ts",
+            "apps/bot/src/export-discord.test.ts",
+            "packages/kernel/src/export.ts"
           ]
         },
         {
@@ -1797,7 +1815,7 @@
           "phase": "P5",
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
-          "note": "Applied imports restore their pre-import backup inside 24 hours.",
+          "note": "Applied imports restore their pre-import backup inside 24 hours. `/export rollback import_id:` exposes it in Discord; the SQL adapter is tested on PGlite, while memory mode refuses it by name.",
           "liveVerified": false,
           "evidence": [
             "packages/db/src/portability.test.ts"
@@ -1810,7 +1828,7 @@
           "phase": "P5",
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
-          "note": "Guild deletion removes backups and retains counts plus a content hash only.",
+          "note": "Guild deletion removes backups and retains counts plus a content hash only. `/export delete confirm:<guild-id>` exposes it to an admin; memory mode refuses it because it has no transaction or backup policy.",
           "liveVerified": false,
           "evidence": [
             "packages/db/src/portability.test.ts"
@@ -1875,10 +1893,12 @@
           "phase": "P5",
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
-          "note": "Read-only report over settings ids; live facts currently come from a JSON file.",
-          "liveVerified": false,
+          "note": "Read-only report over settings ids. `/export drift` reads live channels, categories, roles and AutoMod names from the gateway cache; the CLI still accepts a saved JSON fact file. Live 2026-11-01: a stale `logging.channelId` produced 1 missing, and restoring the real channel produced 0 missing.",
+          "liveVerified": true,
           "evidence": [
-            "packages/db/src/portability.test.ts"
+            "packages/db/src/portability.test.ts",
+            "apps/bot/src/export-discord.test.ts",
+            "modules/setup/src/export.test.ts"
           ]
         },
         {

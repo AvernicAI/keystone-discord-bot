@@ -1,4 +1,10 @@
-import { Events, type Client, type Message, type TextBasedChannel } from "discord.js";
+import {
+  AttachmentBuilder,
+  Events,
+  type Client,
+  type Message,
+  type TextBasedChannel,
+} from "discord.js";
 import {
   UserError,
   dispatchCommand,
@@ -299,11 +305,21 @@ function sendable(channel: Message["channel"]): TextBasedChannel & {
 }
 
 function toMessageBody(input: ReplyInput): Record<string, unknown> {
-  const { components, ephemeral: _ephemeral, ...rest } = input;
+  const { components, files, ephemeral: _ephemeral, ...rest } = input;
   return {
     ...rest,
     content: input.content?.slice(0, MAX_CONTENT),
     components: components ? toComponents(components) : undefined,
+    // The development bridge cannot receive ephemeral replies. A file is still
+    // useful there: the MCP can read its message text and a human can download
+    // the attachment.
+    files: files?.map(
+      (file) =>
+        new AttachmentBuilder(Buffer.from(file.content, "utf8"), {
+          name: file.name,
+          description: file.description,
+        }),
+    ),
     allowedMentions: { parse: [] },
   };
 }

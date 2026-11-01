@@ -49,6 +49,15 @@ export class InMemoryAiStore implements AiStore {
     return this.#usage.get(`${guildId}:${period}`);
   }
 
+  /** Read-only helpers for the in-memory export adapter; not part of the port. */
+  allDocuments(guildId: string): readonly AiDocument[] {
+    return [...this.#documents.values()].filter((document) => document.guildId === guildId);
+  }
+
+  allUsage(guildId: string): readonly AiUsage[] {
+    return [...this.#usage.values()].filter((usage) => usage.guildId === guildId);
+  }
+
   async addUsage(input: AiUsageIncrement): Promise<AiUsage> {
     const key = `${input.guildId}:${input.period}`;
     const existing = this.#usage.get(key) ?? {

@@ -91,10 +91,13 @@ https://github.com/RNGBubba/keystone-discord-bot under AGPL-3.0-or-later. The
 README covers setup, commands, features, agent onboarding and the Obsidian vault;
 `AGENTS.md` is the short read order for contributors and agents.
 
-**Honest limits:** MEE6 live fetch is not wired (file only); drift's live facts
-come from a JSON file until P6; messages and attachments cannot be exported;
-merge does not combine history. No live Postgres, slash-command run or human
-mention was performed.
+**Honest limits:** MEE6 live fetch is not wired (file only); the CLI's drift
+facts still come from a JSON file, while `/export drift` reads the gateway cache;
+messages and attachments cannot be exported; merge does not combine history.
+No live Postgres, slash-command run or human mention was performed. Pass 31
+added `/export guild | user | import | delete | drift | rollback`; guild and
+member exports and drift were proven live in memory mode, while import, delete
+and rollback are SQL-only and tested on PGlite.
 
 ## Next
 
@@ -171,9 +174,16 @@ edit/delete to 1 edited / 1 deleted. Pass 30 added in-bot configuration:
 `/config list | get | set | export` reads and writes any registered module's
 settings through `SettingsService` and the owning Zod schema, with no second
 store. The live bridge set `moderation.automod.links` alert → delete → alert,
-read each value back, and rejected `bogus` with the schema's own message. The
-ledger is now **15 roots / 94 subcommands / 109 actions**. The rest of this
-phase is open.
+read each value back, and rejected `bogus` with the schema's own message. Pass 31
+added in-Discord portability: `/export guild | user | import | delete | drift |
+rollback` in the setup module, with real JSON file attachments, a dry-run-first
+attachment import, exact-id delete and live drift facts from the gateway cache.
+The SQL adapter is the existing `PortabilityService`; the memory adapter reads
+the live stores and refuses destructive actions by name. Live: a 12.8 KB guild
+bundle was downloaded and parsed back to the printed counts and checksum; a 2 KB
+member bundle; drift went 1 missing → 0 missing; wrong-id delete and memory
+rollback were refused. The ledger is now **16 roots / 100 subcommands / 116
+actions**. The rest of this phase is open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.
@@ -182,8 +192,8 @@ phase is open.
   expiry, panic mode, case export and `command_usage` retention. Invites, the
   link, profanity and zalgo filters, auto-responders and analytics are done
   (above).
-- `/export` (surface the existing bundle above the CLI) and `/music` (BYO
-  Lavalink only); `/config` and `/help` shipped; command-budget audit remains a gate.
+- `/music` (BYO Lavalink only); `/export`, `/config` and `/help` shipped;
+  command-budget audit remains a gate.
 - Split `modules/community` into domain folders, then extract a module only if the
   "add a feature in an afternoon" test still fails.
 - `packages/i18n`: typed keys, per-guild locale, command localizations; no machine

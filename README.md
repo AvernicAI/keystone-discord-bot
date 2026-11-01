@@ -22,11 +22,14 @@ an auto-responder for exact, contains and regex triggers, and guild analytics as
 an eighth module. P7 also ships `/config list | get | set | export`, the in-bot
 settings surface: it reads and writes any registered module's per-guild settings
 through the same `SettingsService` and Zod schema as the dashboard, with no
-second store. The command ledger is **15/100 roots** with **94 real
-subcommands** and **109 actions**, there are **8 modules**, and `pnpm check`
-covers **298 tests across 47 files** without a Discord token, database or
-network. Live on 2026-11-01: the bot logged in and Discord reports **15 roots /
-94 subcommands**, answered a Qwen3:8b mention in `#ai-chat`, and ran real
+second store. `/export guild | user | import | delete | drift | rollback` puts
+the P5 portability service inside Discord: real JSON file attachments, a
+dry-run-first import, a confirmation-gated delete and live drift facts from the
+gateway cache. The command ledger is **16/100 roots** with **100 real
+subcommands** and **116 actions**, there are **8 modules**, and `pnpm check`
+covers **322 tests across 50 files** without a Discord token, database or
+network. Live on 2026-11-01: the bot logged in and Discord reports **16 roots /
+100 subcommands**, answered a Qwen3:8b mention in `#ai-chat`, and ran real
 moderation, community, AI, invite, logging, analytics, configuration and
 content-filter commands through a development message bridge, including
 `/help`’s generated catalog. The dashboard was booted in memory mode and
@@ -249,8 +252,8 @@ refusals. See [the community spec](memory/vault/04-Modules/community/Spec.md).
 
 ## Commands
 
-Discord's global limit is 100 **roots**; Keystone uses **15** and exposes **94
-real subcommands** (109 total actions). A subcommand does not spend another global
+Discord's global limit is 100 **roots**; Keystone uses **16** and exposes **100
+real subcommands** (116 total actions). A subcommand does not spend another global
 slot, which is why the picker now expands instead of showing one flat `action`
 option. Slash commands are the product surface. In development, `DEV_GUILD_ID`
 also enables the `!` bridge for message-only harnesses.
@@ -266,6 +269,7 @@ the same live registry.
 | `/help` | `browse`, `commands`, `search`, `privacy`, `changelog` | Browse the generated catalog, search it, inspect retention and the latest pass |
 | `/setup` | — | Database, migrations, cache, intents and next-step report |
 | `/config` | `list`, `get`, `set`, `export` | Read or change any module's per-guild settings through that module's own Zod schema; admin-only and guild-scoped |
+| `/export` | `guild`, `user`, `import`, `delete`, `drift`, `rollback` | Download a verified JSON bundle, export one member, preview/restore a bundle, delete with an exact-id confirmation, or compare stored ids with the live server |
 | `/mod` | `ban`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `links`, `filters`, `review` | Moderation with cases, reasons, evidence, a content-filter review queue and a case queue |
 | `/appeal` | — | Open an appeal for your own case (takes `case` or `message`) |
 | `/verify` | — | Complete the join gate and leave quarantine |
@@ -277,7 +281,7 @@ the same live registry.
 | `/logging` | `setup`, `channel`, `events`, `status`, `retention`, `export`, `disable` | One audit channel for message, member and moderation events, with per-event toggles and retention pruning |
 | `/analytics` | `overview`, `members`, `messages`, `commands`, `tickets`, `export` | Read-only aggregates over the audit ledger, cases, invite joins, tickets and command usage; every view names its source rows |
 
-`/analytics` and its six views require `ManageGuild`. `/ticket summary` and
+`/analytics`, `/config` and `/export` require `ManageGuild`. `/ticket summary` and
 `/ai summary` require `ManageGuild`. `/ai docs-*` and
 `/ai budget` require `ManageGuild`; `/ai classify` and `/ai deflect` require
 `ManageMessages`. AI is advisory: it never punishes, deletes or claims an action
@@ -338,11 +342,16 @@ Everything below is free. No feature is moved behind a paywall.
 
 ### Platform and operations
 
-- Module registry with a CI-enforced 100-root budget (currently 15 roots, 94
+- Module registry with a CI-enforced 100-root budget (currently 16 roots, 100
   subcommands).
 - In-bot configuration: `/config list | get | set | export` reads and writes every
   registered module's settings through `SettingsService` and the owning Zod
   schema. No second store; a rejected value never persists.
+- In-Discord portability: `/export guild` posts the verified bundle as a file,
+  `/export user` exports one member, `/export import` previews before writing,
+  `/export delete` needs the exact guild id, `/export drift` compares stored
+  channel/role ids with the live server, and `/export rollback` restores an
+  applied import. The SQL adapter is the same `PortabilityService` as the CLI.
 - Real Discord subcommand tree: flat `action` options are gone from every
   existing hub, `/help` is generated from the registry, boot sync compares the
   full option tree, and `pnpm commands:doctor` prints the live shape.
@@ -417,8 +426,9 @@ Everything below is free. No feature is moved behind a paywall.
   view/templates, token refresh/revocation, scoped public API tokens,
   per-token rate limits, idempotency, webhooks and OpenAPI.
 - **P7:** invite tracking, audit logging, the link/profanity/zalgo filters,
-  auto-responders, guild analytics and `/config` are done; the rest is parity completion
-  (forms, events, role persistence, modmail), Components V2 UI and i18n.
+  auto-responders, guild analytics, `/config` and `/export` are done; the rest is
+  parity completion (forms, events, role persistence, modmail), Components V2 UI
+  and i18n. `/music` is the remaining planned root.
 - **P8:** bring-your-own Lavalink music, disabled by default; no bundled streamer.
 - **P9:** docs site, 14-lesson curriculum, release workflow, self-host kit.
 - **P10:** sharding, load tests, SLOs, Discord.js v15 migration.
@@ -438,16 +448,17 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
-| P7 Command tree | Done | 15 roots · 94 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
+| P7 Command tree | Done | 16 roots · 100 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
 | P7 Slash harness | Harness done | Synthetic nested `/mod ban` through the real adapter + dispatch; gateway `InteractionCreate` still human-only |
 | P7 Audit logging | Done | `/logging`; five event kinds, per-event toggles, append-only ledger, retention; message and moderation events live-proven |
 | P7 Analytics | Done | `/analytics`; six read-only views over audit, cases, invites, tickets and command usage; live counts cross-checked against the ledger |
 | P7 In-bot config | Done | `/config`; four subcommands over every module's own schema; live `alert → delete → alert` read-back and a rejected invalid value |
-| P7 Parity completion | **In progress** | Invite tracking, audit logging, link/profanity/zalgo filters, auto-responders, analytics and in-bot config shipped; forms, events, expiry, modmail and UI/i18n open |
+| P7 Export surface | Done | `/export`; six subcommands, file attachments, dry-run import, exact-id delete, live drift; 12.8 KB live bundle parsed and checksum-verified |
+| P7 Parity completion | **In progress** | Invite tracking, audit logging, link/profanity/zalgo filters, auto-responders, analytics, in-bot config and `/export` shipped; forms, events, expiry, modmail, `/music` and UI/i18n open |
 
-Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 15
-global roots with 94 subcommands (including `/analytics`, `/config`, `/help`,
-`/invites` and `/logging`) with no drift, and Qwen3:8b answered a mention in
+Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 16
+global roots with 100 subcommands (including `/analytics`, `/config`, `/export`,
+`/help`, `/invites` and `/logging`) with no drift, and Qwen3:8b answered a mention in
 `#ai-chat`. A development `!`
 bridge ran `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
 query=ban`, `!ai status`, `!mod history`, `!rank leaderboard`, `!invites
@@ -517,7 +528,8 @@ then deleted; `!logging status` reported **2 stored** events, and
 the two MCP actions. `!analytics commands days=7` rose from 0 to 3 to 4 as bridge
 commands completed, because the current `/analytics` run is recorded after its
 reply. At pass 29 `pnpm commands:doctor` reported `Registry 14 roots · 90
-subcommands`; after pass 30's `/config` it reports 15 roots / 94 subcommands. The MCP text reader
+subcommands`; after pass 30's `/config` it reported 15 roots / 94 subcommands,
+and after pass 31's `/export` it is 16 roots / 100 subcommands. The MCP text reader
 does not render embeds, so the embed fields, top-command list and JSON export
 were covered by [the command test](modules/analytics/src/analytics.test.ts), not
 read back live. See [pass 29](memory/journal/2026-11-01-pass-29.md).
@@ -531,10 +543,24 @@ next read still returned `"delete"`; the pass then reset the value to `"alert"`.
 Each bridge command produced exactly one reply. Boot found `config` missing,
 performed one clear + re-register cycle, and `pnpm commands:doctor` then reported
 `Registry 15 roots · 94 subcommands` and `Discord 15 global chat-input commands ·
-94 subcommands`. The MCP cannot invoke slash commands or render embeds, so the
+94 subcommands`; pass 31's `/export` brought that to 16 / 100. The MCP cannot
+invoke slash commands or render embeds, so the
 list/export embeds are covered by
 [the config test](modules/setup/src/config.test.ts), not read back live. See
 [pass 30](memory/journal/2026-11-01-pass-30.md).
+
+Export live evidence (2026-11-01, pass 31): one memory-mode process served the
+real bridge. A marked link message created case #1; `!rank daily` created one
+100-coin ledger row; `!export guild` uploaded a **12.8 KB** bundle whose reply
+reported **49 settings · 1 case · 1 case event · 1 ledger row · 1 record**; the
+file was downloaded from Discord and parsed with the same verifier, which
+confirmed checksum `5cde59ae…` and those counts. `!export user user=1493685079468146808`
+uploaded a 2 KB member file. A stale
+`logging.channelId` made `!export drift` report **1 missing**; restoring the real
+channel made it **0 missing**. A wrong-id `!export delete` and a memory-mode
+`!export rollback` were refused with named reasons. `!export import` was not run
+live because the bridge cannot carry an attachment; it is covered by the PGlite
+round-trip test. See [pass 31](memory/journal/2026-11-01-pass-31.md).
 
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and

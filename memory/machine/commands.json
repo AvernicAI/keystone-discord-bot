@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "updatedAt": "2026-11-01",
   "source": "packages/kernel ModuleRegistry catalog()",
-  "roots": 15,
-  "subcommands": 94,
-  "actions": 109,
+  "roots": 16,
+  "subcommands": 100,
+  "actions": 116,
   "limit": 100,
   "commands": [
     {
@@ -99,6 +99,54 @@
           "name": "export",
           "description": "Export every module's effective settings as JSON.",
           "options": []
+        }
+      ]
+    },
+    {
+      "name": "export",
+      "moduleId": "setup",
+      "description": "Export, inspect or restore this server's data without leaving Discord.",
+      "options": [],
+      "subcommands": [
+        {
+          "name": "guild",
+          "description": "Download the full server bundle with settings, cases and history.",
+          "options": []
+        },
+        {
+          "name": "user",
+          "description": "Download one member's cases, tickets, XP and ledger rows.",
+          "options": [
+            "user"
+          ]
+        },
+        {
+          "name": "import",
+          "description": "Preview or restore a keystone.export bundle attachment.",
+          "options": [
+            "bundle",
+            "mode",
+            "dry_run"
+          ]
+        },
+        {
+          "name": "delete",
+          "description": "Delete this server's stored data and leave a count-only receipt.",
+          "options": [
+            "confirm"
+          ]
+        },
+        {
+          "name": "drift",
+          "description": "Compare stored channel and role ids with the live server.",
+          "options": []
+        },
+        {
+          "name": "rollback",
+          "description": "Restore the pre-import backup of an applied import.",
+          "options": [
+            "import_id"
+          ]
         }
       ]
     },

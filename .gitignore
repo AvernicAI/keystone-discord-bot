@@ -10,6 +10,7 @@ coverage/
 !.env.example
 
 # Obsidian workspace state is per-user, never shared.
+memory/.obsidian/
 memory/vault/.obsidian/workspace*.json
 memory/vault/.trash/
 

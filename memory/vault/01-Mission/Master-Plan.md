@@ -143,9 +143,12 @@ same interfaces. No module changes when a port changes.
 
 ### Command allocation
 
-The target is 18 roots. Fifteen are live today with 94 real subcommands; the
+The approved v1.0 plan targets 18 roots. Sixteen are live today with 100 real
+subcommands, and `/music` is the next named root; the
 remaining roots land with their modules, not as empty placeholders. Subcommands
-are free inside a root, so most growth should not spend another slot.
+are free inside a root, so most growth should not spend another slot. The table
+below is the approved **allocation plan**, not a live registration claim;
+[[01-Mission/Command-Catalog|Command-Catalog]] is the generated current list.
 
 | Root | Subcommands | Replaces |
 | --- | --- | --- |
@@ -158,7 +161,7 @@ are free inside a root, so most growth should not spend another slot.
 | `/help` | browse, search, privacy | every bot's help |
 | `/logging` | setup, channel, events, status, retention, export, disable | Dyno/Carl audit logging |
 | `/appeal` | open, status | nobody (our edge) |
-| `/export` | guild, user, delete | nobody (our edge) |
+| `/export` | guild, user, import, delete, drift, rollback | nobody (our edge) |
 | `/verify` | start, status | Security Bot |
 | `/music` | play, queue, stop | BYO Lavalink |
 

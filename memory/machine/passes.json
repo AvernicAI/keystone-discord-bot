@@ -391,6 +391,19 @@
         "budget": "15/100 roots · 94 subcommands",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-31",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "In-Discord portability: `/export guild | user | import | delete | drift | rollback` in the setup module. Guild and user exports are real JSON file attachments; import defaults to a dry run and reads a Discord attachment through a size-capped reader; drift compares stored ids with the live gateway cache. One kernel ExportPort has a SQL adapter over the existing PortabilityService and a memory adapter that reads the live stores. Live bridge proof: a 12.8 KB guild bundle parsed with 49 settings / 1 case / 1 case event / 1 ledger row / 1 record and the printed checksum; a 2 KB member bundle; drift 1 missing -> 0 missing after restoring the channel; wrong-id delete and memory rollback refused. Discord reports 16 roots / 100 subcommands.",
+      "journal": "journal/2026-11-01-pass-31.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "322",
+        "budget": "16/100 roots · 100 subcommands",
+        "memory": "current"
+      }
     }
   ]
 }

@@ -100,7 +100,8 @@ describe("/config command", () => {
       "set",
       "export",
     ]);
-    expect(auditBudget(registry).commands).toBe(2);
+    // The setup module now owns /setup, /config and /export.
+    expect(auditBudget(registry).commands).toBe(3);
     expect(auditBudget(registry).status).toBe("ok");
   });
 

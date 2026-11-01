@@ -2,6 +2,25 @@
 
 ## Now
 
+**P7 in-Discord portability is in repo and live-proven for export and drift**
+(pass 31, 2026-11-01): `/export guild | user | import | delete | drift |
+rollback` puts the P5 service inside Discord. Guild and member exports are real
+JSON file attachments; import reads a Discord CDN attachment, verifies checksum
+and counts, and defaults to a dry run; delete requires the exact guild id;
+drift reads live channels, categories, roles and AutoMod names from the gateway
+cache. One `ExportPort`; the SQL adapter is the existing `PortabilityService`
+and the memory adapter reads the live stores and refuses destructive actions by
+name. Live in `#ai-chat`: `!export guild` uploaded a **12.8 KB** bundle that was
+downloaded and parsed with the same verifier (**49 settings · 1 case · 1 case
+event · 1 ledger row · 1 record**, checksum `5cde59ae…`); `!export user`
+uploaed a **2 KB** member file; a stale `logging.channelId` made drift report
+**1 missing**, restoring the real channel made it **0 missing**; a wrong-id
+delete and a memory-mode rollback were refused with named reasons. `!export
+import` was not run live because the message bridge cannot carry an attachment;
+the PGlite round-trip test covers preview → apply → verify → rollback. The root
+adds one global slot and six subcommands; no module, table or migration. See
+[[04-Modules/setup/Spec|Setup spec]] and [[04-Modules/setup/Status|Setup status]].
+
 **P7 in-bot configuration is in repo and live-proven** (pass 30, 2026-11-01):
 `/config list | get | set | export` is the settings surface for guild admins
 inside Discord. It calls the same `SettingsService` the dashboard uses, so every
@@ -11,8 +30,9 @@ Zod schema before it is stored. The command is guild-only, requires
 subcommands, no module, no table and no second settings store. Live in
 `#ai-chat`: `moderation.automod.links` went `alert → delete → alert`, with a
 read-back after each write; `bogus` returned `automod.links: Invalid enum value`
-and the next read still returned `"alert"`. Discord now reports **15 roots / 94
-subcommands / 109 actions** including `config`. The MCP cannot invoke slash
+and the next read still returned `"alert"`. Pass 31 added `/export`, so Discord
+now reports **16 roots / 100 subcommands / 116 actions** including `config` and
+`export`. The MCP cannot invoke slash
 commands or render embeds, so the live proof is the message bridge with
 plain-text replies; list/export embeds are covered by a command test. See
 [[04-Modules/setup/Spec|Setup spec]] and [[04-Modules/setup/Status|Setup status]].
@@ -29,7 +49,8 @@ stored** rows, `/analytics overview` reported the same **2 logged events**, and
 one MCP edit plus one delete appeared as **1 edited / 1 deleted**. Command runs
 rose 0 → 3 → 4 as bridge commands completed; the current invocation is recorded
 after its reply. At pass 29 Discord reported **14 roots / 90 subcommands / 104
-actions**; pass 30 added `/config`, so the current ledger is **15 / 94 / 109**.
+actions**; pass 30 added `/config` and pass 31 added `/export`, so the current
+ledger is **16 / 100 / 116**.
 The MCP text reader does not render embeds, so the live transcript proves the
 summary text while the embed fields and JSON export are covered by a command
 test. See [[04-Modules/analytics/Spec|Analytics spec]] and
@@ -105,11 +126,13 @@ shape without writing. Two defects found during proof are fixed: the structural
 adapter now flattens nested subcommand options, and boot sync compares the whole
 option tree instead of names alone. Pass 28 added `/logging` with seven
 subcommands, bringing the ledger to **13 roots · 84 subcommands · 97 actions** at
-that point. Pass 29 added `/analytics` with six subcommands, and pass 30 added
-`/config` with four, so the current ledger is **15 roots · 94 subcommands · 109
-actions**. After pass 30 the boot found `config` missing, cleared the global
-set once, re-registered it and `commands:doctor` reports 15 roots / 94
-subcommands including `analytics`, `logging` and `config`. See
+that point. Pass 29 added `/analytics` with six subcommands, pass 30 added
+`/config` with four and pass 31 added `/export` with six, so the current ledger
+is **16 roots · 100 subcommands · 116 actions**. After pass 30 the boot found
+`config` missing, cleared the global set once and re-registered it; pass 31's
+boot found only `export` missing and did the same. `commands:doctor` now
+reports 16 roots / 100 subcommands including `analytics`, `logging`, `config`
+and `export`. See
 [[03-Architecture/Command-Budget|Command budget]] and
 [[03-Architecture/ADR/ADR-0003-command-budget]].
 
@@ -172,8 +195,9 @@ pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
 `!rank leaderboard` all returned live Discord messages/embeds. Pass 19 added
 `!invites leaderboard` and `!invites who`. Pass 26 re-registered 12 roots /
 77 subcommands at the time; pass 28 added `/logging`, pass 29 added
-`/analytics`, and pass 30 added `/config`, so Discord's fetched shape now reports
-**15 roots / 94 subcommands** with no missing, extra or changed roots. The bridge
+`/analytics`, pass 30 added `/config` and pass 31 added `/export`, so Discord's
+fetched shape now reports **16 roots / 100 subcommands** with no missing, extra or
+changed roots. The bridge
 added `!help commands`, `!help browse`, `!help search query=ban`, `!mod history`,
 `!ai status`, `!logging status`, `!logging events`, `!logging retention`,
 `!logging export`, `!analytics overview`, `!analytics commands`, `!analytics
@@ -209,14 +233,15 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 298 tests / 47 files · budget 15/100 roots (94 subcommands) · memory 2077/2077
+pnpm check        exit 0 · typecheck 0 · 322 tests / 50 files · budget 16/100 roots (100 subcommands) · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 15 roots / 94 subcommands · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back
-live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set
+live              2026-11-01 · AI Team#5758 · 2 guilds · 16 roots / 100 subcommands · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed
+live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set · !export guild · !export user · !export drift
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
-live env blocker 2026-11-01 · DATABASE_URL localhost:5432 → ECONNREFUSED (19ms) · REDIS_URL localhost:6379 → ECONNREFUSED (1ms) · Docker/service absent
-live analytics    2026-11-01 · 2 stored audit rows = 2 logged events · 1 MCP edit + 1 delete = 1 edited / 1 deleted · command runs 0 → 3 → 4 · doctor now 15 roots / 94 subcommands
+live env blocker 2026-11-01 · DATABASE_URL localhost:5432 → ECONNREFUSED (4ms) · REDIS_URL localhost:6379 → ECONNREFUSED (1ms) · Docker/service absent
+live analytics    2026-11-01 · 2 stored audit rows = 2 logged events · 1 MCP edit + 1 delete = 1 edited / 1 deleted · command runs 0 → 3 → 4
 live config       2026-11-01 · moderation.automod.links alert → delete → alert read back · bogus rejected by the enum schema with no write · one reply per bridge command
+live export       2026-11-01 · 12.8 KB guild bundle downloaded and parsed = 49 settings / 1 case / 1 case event / 1 ledger row / 1 record; checksum matched; 2 KB member file; drift 1 missing → 0 missing; wrong-id delete and memory rollback refused
 live content filters 2026-11-01 · link delete returned 10008 Unknown Message; profanity delete removed the pineapple message and kept its case; safe seed produced link/profanity/zalgo cases; one reviewed; example.com not flagged
 live auto-responder 2026-11-01 · hello keystone replied, 60s cooldown suppressed the next reply, then released
 live failure      !ticket stats → ManageGuild guard (MCP bot is not admin); branch fixed and unit-tested
@@ -226,6 +251,23 @@ public            2026-11-01 · https://github.com/RNGBubba/keystone-discord-bot
 A local `.env` exists in the working tree. Smoke commands pin
 `DOTENV_CONFIG_PATH=.env.absent` so the result is deterministic and does not
 read that file.
+
+## P7 export acceptance evidence
+
+| # | Criterion | Where it is asserted | Proven against |
+| --- | --- | --- | --- |
+| 1 | The bundle is the same verified format the CLI writes | `createSqlExportPort` calls `PortabilityService.exportGuild` and `serializeBundle`; `export-port.test.ts` parses it with `parseBundle` and compares checksum/counts | **PGlite + live downloaded file** |
+| 2 | Printed counts equal the file | Live 2026-11-01: summary `49 settings · 1 cases · 1 case events · 1 ledger rows · 1 records`; downloaded bundle parsed to exactly those counts and checksum `5cde59ae…` | **Live gateway + Discord CDN** |
+| 3 | A user export contains only that member's rows | `export-port.test.ts` seeds USER_A and USER_B; USER_A's file has 1 case/1 level and does not contain USER_B | **PGlite** |
+| 4 | Import previews by default and verifies after writing | `export.test.ts` proves `dry_run` defaults true; `export-port.test.ts` applies the same bundle, gets `verified:true`, and the re-exported checksum matches | Command + **PGlite** |
+| 5 | Rollback restores the pre-import snapshot | `export-port.test.ts`: change setting → import → change again → rollback; value returns to the pre-import `999` | **PGlite** |
+| 6 | Deletion is exact-id-gated and keeps a count-only receipt | `export.test.ts` wrong id throws before the port; `export-port.test.ts` deletes, checks counts/hash and a refused post-deletion rollback | Command + **PGlite** |
+| 7 | Drift is read-only and uses live facts | `export.test.ts` passes gateway facts; `export-port.test.ts` finds stored `404` without changing it; live 1 missing → 0 missing | Unit + **live gateway** |
+| 8 | Attachment input cannot SSRF | `export-discord.test.ts`: a non-Discord URL throws before `fetch`; only HTTPS Discord CDN hosts pass; content-length over 25 MB throws | Unit |
+| 9 | Memory mode does not pretend | Memory adapter exports live rows but throws `needs DATABASE_URL` for import/delete/rollback; live memory rollback returned that exact message | Unit + **live bridge** |
+| 10 | One root, six subcommands, budget intact | `export.test.ts` registry shape; `pnpm budget`: 16/100 roots, 100 subcommands | Registry + budget |
+| 11 | The real surface runs once | Live 2026-11-01: `!export guild`, `!export user`, three `!export drift`, a refused delete and a refused rollback each produced one message; boot re-registered 16 roots | **Live gateway + Discord API** |
+| 12 | Slash `InteractionCreate` and a live SQL import/delete | **Not performed** — the bridge is message-based and Postgres is unreachable; command/PGlite tests cover them | Not claimed |
 
 ## P7 in-bot configuration acceptance evidence
 
@@ -484,9 +526,9 @@ here.
 ## Next
 
 P7 parity work continues alongside the P6 exit items. Auto-responders, audit
-logging, the content filters and guild analytics are done; the next open rows are
-forms/events, modmail, expiry jobs, case export, command-usage retention and
-panic mode. `automod.false-positive-report` is still the smallest useful
+logging, the content filters, guild analytics, in-bot configuration and
+`/export` are done; the next open rows are forms/events, modmail, expiry jobs,
+case export, command-usage retention, panic mode and `/music`. `automod.false-positive-report` is still the smallest useful
 moderation follow-up. P6 remains the active phase
 for the dashboard. The auth gate and settings writes are built;
 next are schema-driven field widgets, the Next.js shell (or a decision to keep

@@ -30,6 +30,9 @@ export interface DispatchDeps {
   ai?: import("./ai").AiPort;
   logging?: import("./logging").LoggingPort;
   analytics?: import("./analytics").AnalyticsStore;
+  export?: import("./export").ExportPort;
+  exportFacts?: import("./export").ExportFacts;
+  attachments?: import("./export").AttachmentReader;
   /** Optional: records one real row per dispatched guild command. */
   usage?: import("./analytics").CommandUsageStore;
   /** Optional: when absent, tracing is a no-op and costs nothing. */
@@ -123,6 +126,9 @@ export async function dispatchCommand(
     ai: deps.ai,
     logging: deps.logging,
     analytics: deps.analytics,
+    export: deps.export,
+    exportFacts: deps.exportFacts,
+    attachments: deps.attachments,
   };
 
   const startedAt = deps.now?.() ?? Date.now();

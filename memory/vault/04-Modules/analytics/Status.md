@@ -8,7 +8,7 @@ modules own.
 
 - `/analytics` is registered through the shared catalog with `overview`,
   `members`, `messages`, `commands`, `tickets` and `export`. The command ledger is
-  **15 roots / 94 subcommands / 109 actions** after `/config` landed in pass 30.
+  **16 roots / 100 subcommands / 116 actions** after `/export` landed in pass 31.
 - Every view is admin-only (`ManageGuild`), guild-scoped, read-only and cooled
   down for three seconds. There is no mutation path.
 - `AnalyticsStore` is one port. Postgres uses `DrizzleAnalyticsStore`; local mode

@@ -22,6 +22,25 @@ export interface ChannelLike {
   readonly flags?: { readonly bitfield: number } | null;
 }
 
+/** The channel fields drift needs; discord.js channels satisfy it. */
+export interface CachedChannel extends ChannelLike {
+  readonly type: number;
+}
+
+/**
+ * Enumerate the channels the bot can currently see, for drift comparison.
+ *
+ * A channel missing from this list is exactly what the operator needs to know:
+ * it was deleted, or Discord hid it after the obfuscation rollout. Keeping the
+ * cache read here is deliberate — it is the one seam allowed to treat the
+ * guild cache as a collection, so no other adapter does it by accident.
+ */
+export function cachedChannels(guild: {
+  readonly channels: { readonly cache: ReadonlyMap<string, CachedChannel> };
+}): CachedChannel[] {
+  return [...guild.channels.cache.values()];
+}
+
 export type ChannelResolution<T extends ChannelLike> =
   | { status: "ok"; channel: T }
   | { status: "hidden"; reason: string }

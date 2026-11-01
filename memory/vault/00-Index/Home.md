@@ -39,6 +39,16 @@ https://github.com/RNGBubba/keystone-discord-bot
   subcommands, no second store. Live: `moderation.automod.links` alert → delete
   → alert, read back after each write; `bogus` was rejected by the schema and
   nothing was stored. See [[04-Modules/setup/Spec|Setup spec]].
+- **In-Discord portability** in repo and live-proven for export and drift (pass
+  31): `/export guild | user | import | delete | drift | rollback`. Guild and
+  member exports are real JSON file attachments; import defaults to a dry run
+  and reads a CDN-only attachment; delete requires the exact guild id; drift
+  reads the live gateway cache. The SQL adapter reuses `PortabilityService`;
+  memory mode exports the live stores and refuses destructive actions by name.
+  Live: a 12.8 KB guild bundle downloaded and parsed back to 49 settings / 1
+  case / 1 case event / 1 ledger row / 1 record with the printed checksum; a 2
+  KB member file; drift 1 missing → 0 missing; wrong-id delete and memory
+  rollback refused. See [[04-Modules/setup/Status|Setup status]].
 - **Guild analytics** in repo (pass 29): `/analytics overview | members |
   messages | commands | tickets | export` is a read-only aggregate over the
   audit ledger, cases, invite joins, tickets and an append-only `command_usage`
@@ -78,9 +88,9 @@ https://github.com/RNGBubba/keystone-discord-bot
   through the case observer, and `!logging status | events | retention | export`
   ran through the real bridge. Member events are adapter-tested only. See
   [[04-Modules/logging/Spec|Logging spec]].
-- **Command tree** in repo (passes 26 and 30): real Discord subcommands replaced
-  the flat `action` option across every existing hub — 15 roots, 94 subcommands,
-  109 actions. `/help` is generated from the live registry;
+- **Command tree** in repo (passes 26, 30 and 31): real Discord subcommands
+  replaced the flat `action` option across every existing hub — 16 roots, 100
+  subcommands, 116 actions. `/help` is generated from the live registry;
   `pnpm commands:catalog` writes [[Command-Catalog]] and
   `pnpm commands:doctor` checks the live shape. A human slash invocation remains
   the one unobserved surface.
@@ -104,7 +114,7 @@ https://github.com/RNGBubba/keystone-discord-bot
   stopped, leaving one bot and one reply per command. The updated `.env` points
   at localhost Postgres/Redis, but neither service is installed here, so the live
   window remains memory mode.
-- **Live 2026-11-01:** AI Team#5758 logged in, re-registered 15 roots with 94
+- **Live 2026-11-01:** AI Team#5758 logged in, re-registered 16 roots with 100
   subcommands (then fetched Discord's shape to prove it), and
   qwen3:8b via Ollama answered mentions in `#ai-chat`. A dev-only `!` bridge
   proved `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
@@ -112,8 +122,9 @@ https://github.com/RNGBubba/keystone-discord-bot
   `!rank leaderboard`, `!invites leaderboard`, `!invites who`, `!logging status`,
   `!logging events`, `!logging retention`, `!logging export`, `!analytics
   overview`, `!analytics commands`, `!analytics messages`, `!config list`,
-  `!config get` and `!config set` through the real dispatch pipeline; `/config
-  export` is covered by the command test, not the live bridge. Audit logging also delivered live message-edit,
+  `!config get`, `!config set`, `!export guild`, `!export user` and `!export
+  drift` through the real dispatch pipeline; `/config export` and `!export
+  import` are covered by tests, not the live bridge. Audit logging also delivered live message-edit,
   message-delete and moderation-case embeds to the configured channel. The content filters produced live link, delete, profanity
   and zalgo cases; `!mod filters` listed them, `!mod review` closed one, and
   `example.com` produced none. The auto-responder trigger replied, its cooldown
@@ -125,7 +136,7 @@ https://github.com/RNGBubba/keystone-discord-bot
 - Phase **P4** shipped the AI layer and the ledger-backed economy hardening.
 - Phase **P3** shipped the community suite: leveling, reaction roles, welcome,
   starboard, tickets, giveaways, temp voice, content and seasons.
-- 15 of Discord's 100 global roots used, with 94 subcommands; 8 modules registered.
+- 16 of Discord's 100 global roots used, with 100 subcommands; 8 modules registered.
 - The full suite covers the 5,000-row portability round trip and the failure,
   rollback and deletion paths; `pnpm check` also runs the intent, channel and
   memory audits.

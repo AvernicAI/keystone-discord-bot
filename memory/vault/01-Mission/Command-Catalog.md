@@ -5,7 +5,7 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**15 roots · 94 subcommands · 109 total actions · 15/100 global roots used.**
+**16 roots · 100 subcommands · 116 total actions · 16/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
@@ -18,6 +18,7 @@ root, then choose a subcommand.
 | `/help` | `diagnostics` | 5 |
 | `/setup` | `setup` | 0 |
 | `/config` | `setup` | 4 |
+| `/export` | `setup` | 6 |
 | `/mod` | `moderation` | 14 |
 | `/appeal` | `moderation` | 0 |
 | `/verify` | `moderation` | 0 |
@@ -69,6 +70,19 @@ Inspect and change any module's per-guild settings through the bot's own schema.
 | `/config get` | Show one module's effective settings, or one dotted key. | `module`, `key` |
 | `/config set` | Validate and write one dotted key; the module's Zod schema is the gate. | `module`, `key`, `value` |
 | `/config export` | Export every module's effective settings as JSON. | — |
+
+## `/export`
+
+Export, inspect or restore this server's data without leaving Discord.
+
+| Subcommand | Description | Options |
+| --- | --- | --- |
+| `/export guild` | Download the full server bundle with settings, cases and history. | — |
+| `/export user` | Download one member's cases, tickets, XP and ledger rows. | `user` |
+| `/export import` | Preview or restore a keystone.export bundle attachment. | `bundle`, `mode`, `dry_run` |
+| `/export delete` | Delete this server's stored data and leave a count-only receipt. | `confirm` |
+| `/export drift` | Compare stored channel and role ids with the live server. | — |
+| `/export rollback` | Restore the pre-import backup of an applied import. | `import_id` |
 
 ## `/mod`
 
