@@ -159,15 +159,16 @@ rate-limited register leaves the app with no commands.
   moderator changes the case state. `status` is member-scoped and refuses another
   member's case by name. Live: `#1 · warn · appealed · 1 appeal` became
   `#1 · warn · reviewed · 1 appeal` after `!mod review`.
-- P7 `/verify` is a real hub in repo and live-proven for its checks: `start`
-  enables the join gate, refuses when the member's DMs are closed, and sends the
-  existing verification button; `status` reads the persisted `members` row, not
-  gateway roles. The button writes `verified_at` only after the quarantine
-  action succeeds. Live: `!verify status` read no record, `!verify start`
-  refused with the exact DM error, and a second status still read no record.
-  The MCP account is a bot and cannot receive the DM or click the button, so
-  completion is covered by command and PGlite tests, not claimed live. The
-  saved plan table is now complete at 59 of 59 names.
+- P7 `/verify` is a real hub in repo and live-proven for its checks. An
+  enforced join-gate hold now writes a quarantined `members` row through the
+  security coordinator; `start` requires that row, checks DM-ability and sends
+  the existing verification button; `status` reads the row, not gateway roles.
+  The button writes `verified_at` only after the quarantine action succeeds and
+  only from a quarantined row. Live: no record, `!verify start` refused with
+  `No quarantine is recorded`, and no row was written. The MCP account is a bot
+  and cannot make a member join, receive a DM or click the button, so the join
+  and completion paths are covered by command, security and PGlite tests, not
+  claimed live. The saved plan table is complete at 59 of 59 names.
 - P7 context menus are in repo and registered: `Report message` (message),
   `Case history` (user), `Rank card` (user) and `Explain with AI` (message).
   They reuse the case, level and AI services, consume Discord's separate 15 + 15
@@ -202,8 +203,8 @@ rate-limited register leaves the app with no commands.
   view prints its source row counts; there is no analytics table. Live: two
   stored audit rows matched two logged events, and one MCP edit plus one delete
   produced exactly one edited / one deleted.
-- 9 modules, 17 global command roots, 117 subcommands, 4 context menus, 371
-  tests in 57 files.
+- 9 modules, 17 global command roots, 117 subcommands, 4 context menus, 385
+  tests in 58 files.
 - Live: AI Team#5758 connected; 17 roots / 117 subcommands and 2 user / 2 message
   menus registered; one bot
   process (two trees were double-posting and were stopped); Qwen3:8b replied in

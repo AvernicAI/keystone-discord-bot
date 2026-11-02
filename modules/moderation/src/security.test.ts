@@ -7,6 +7,7 @@ import {
 } from "@keystone/kernel";
 import { createTestSettings } from "@keystone/testing";
 import { CaseService, InMemoryCaseStore } from "./cases";
+import { InMemoryMemberStore } from "./members";
 import { SecurityCoordinator, SecurityEngine } from "./security";
 import { moderationSettingsSchema } from "./settings";
 import { buildNativeAutoModPlan } from "./native-automod";
@@ -82,20 +83,27 @@ class RecordingActions implements ModerationActions {
   }
 }
 
-function coordinator(
-  settings: Record<string, unknown>,
-): { coordinator: SecurityCoordinator; actions: RecordingActions; cases: CaseService; store: InMemoryCaseStore } {
+function coordinator(settings: Record<string, unknown>): {
+  coordinator: SecurityCoordinator;
+  actions: RecordingActions;
+  cases: CaseService;
+  store: InMemoryCaseStore;
+  members: InMemoryMemberStore;
+} {
   const store = new InMemoryCaseStore();
   const cases = new CaseService(store);
   const actions = new RecordingActions();
+  const members = new InMemoryMemberStore();
   return {
     store,
     cases,
     actions,
+    members,
     coordinator: new SecurityCoordinator({
       engine: new SecurityEngine(),
       cases,
       actions,
+      members,
       settings: createTestSettings(settings),
       logger: createSilentLogger(),
       now: () => 1_000,
@@ -112,7 +120,7 @@ const ENFORCING = {
 
 describe("scripted raid", () => {
   it("contains 10 joins, 5 invite posts and one webhook, with a case for every action", async () => {
-    const { coordinator: security, actions, cases } = coordinator(ENFORCING);
+    const { coordinator: security, actions, cases, members } = coordinator(ENFORCING);
 
     for (let index = 0; index < 10; index += 1) {
       await security.handle({
@@ -144,8 +152,18 @@ describe("scripted raid", () => {
       at: 3_000,
     });
 
-    // The raid is contained: every joining account was quarantined.
+    // The raid is contained, but anti-raid holds are moderator actions, not
+    // join-gate verification rows.
     expect(actions.calls.filter((call) => call === "quarantine")).toHaveLength(11);
+    expect(await members.get("guild-raid", "joiner-0")).toBeUndefined();
+    expect(await members.get("guild-raid", "attacker")).toBeUndefined();
+    expect(
+      actions.notifications.some((notification) =>
+        notification.notice.components?.some((row) =>
+          row.components.some((component) => component.customId.startsWith("keystone:verify:")),
+        ),
+      ),
+    ).toBe(false);
     expect(actions.calls.filter((call) => call === "delete-message")).toHaveLength(5);
     expect(actions.calls.filter((call) => call === "delete-webhook")).toHaveLength(1);
     expect(actions.calls.filter((call) => call === "timeout")).toHaveLength(1);
@@ -167,7 +185,7 @@ describe("scripted raid", () => {
   });
 
   it("takes no punitive action in the default dry-run, but records alerts", async () => {
-    const { coordinator: security, actions, cases } = coordinator({});
+    const { coordinator: security, actions, cases, members } = coordinator({});
 
     for (let index = 0; index < 10; index += 1) {
       await security.handle({
@@ -185,6 +203,44 @@ describe("scripted raid", () => {
     const records = await cases.list("guild-dry", { limit: 100 });
     expect(records.length).toBeGreaterThan(0);
     expect(records.every((record) => record.state === "alerted")).toBe(true);
+    expect(await members.get("guild-dry", "joiner-0")).toBeUndefined();
+  });
+
+  it("persists a quarantined row only for an enforced join-gate hold", async () => {
+    const { coordinator: security, members, actions } = coordinator({
+      dryRun: false,
+      joinGate: { enabled: true, minAccountAgeDays: 7 },
+    });
+
+    await security.handle({
+      type: "member.join",
+      guildId: "guild-gate",
+      userId: "young",
+      accountAgeDays: 1,
+      hasAvatar: true,
+      at: 1_000,
+    });
+    await security.handle({
+      type: "member.join",
+      guildId: "guild-gate",
+      userId: "old-enough",
+      accountAgeDays: 30,
+      hasAvatar: true,
+      at: 1_001,
+    });
+
+    expect(await members.get("guild-gate", "young")).toMatchObject({
+      quarantined: true,
+      verifiedAt: undefined,
+    });
+    expect(await members.get("guild-gate", "old-enough")).toBeUndefined();
+    expect(
+      actions.notifications.some((notification) =>
+        notification.notice.components?.some((row) =>
+          row.components.some((component) => component.customId.startsWith("keystone:verify:")),
+        ),
+      ),
+    ).toBe(true);
   });
 
   it("does not mistake a single join for a raid", () => {

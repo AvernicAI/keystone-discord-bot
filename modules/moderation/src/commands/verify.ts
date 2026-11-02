@@ -19,13 +19,49 @@ function memberStore(ctx: CommandContext): MemberStore {
   return ctx.moderation.members;
 }
 
-function recordValue(record: MemberVerification | undefined, gateEnabled: boolean): string {
-  if (!record) {
-    return `No verification record.${gateEnabled ? "" : " The join gate is disabled here."}`;
+interface VerificationView {
+  readonly state: string;
+  readonly next: string;
+  readonly color: number;
+}
+
+function verificationView(
+  record: MemberVerification | undefined,
+  gateEnabled: boolean,
+): VerificationView {
+  if (record?.verifiedAt) {
+    return {
+      state: `Verified at ${record.verifiedAt}.`,
+      next: "Nothing to do; your verification is on record.",
+      color: 0x57f287,
+    };
   }
-  if (record.verifiedAt) return `Verified at ${record.verifiedAt}.`;
-  if (record.quarantined) return "Quarantined; verification is not complete.";
-  return "Not verified; no quarantine is recorded.";
+
+  const state = record?.quarantined
+    ? "Quarantined; verification is not complete."
+    : record
+      ? "Not verified; no quarantine is recorded."
+      : "No verification record.";
+
+  if (!gateEnabled) {
+    return {
+      state: `${state} The join gate is disabled here.`,
+      next: "Ask a moderator to enable the join gate.",
+      color: 0xfee75c,
+    };
+  }
+  if (record?.quarantined) {
+    return {
+      state,
+      next: "Run `/verify start` to receive the verification button in a DM.",
+      color: 0xfee75c,
+    };
+  }
+  return {
+    state,
+    next: "No quarantine is recorded. Ask a moderator if you are still restricted.",
+    color: 0xfee75c,
+  };
 }
 
 async function startVerification(ctx: CommandContext): Promise<void> {
@@ -37,10 +73,15 @@ async function startVerification(ctx: CommandContext): Promise<void> {
 
   const members = memberStore(ctx);
   const existing = await members.get(guildId, ctx.userId);
-  if (existing?.verifiedAt) {
+  if (!existing) {
+    throw new UserError(
+      "No quarantine is recorded for you in this server. If you are restricted, ask a moderator.",
+    );
+  }
+  if (existing.verifiedAt) {
     throw new UserError(`You are already verified (${existing.verifiedAt}).`);
   }
-  if (existing && !existing.quarantined) {
+  if (!existing.quarantined) {
     throw new UserError(
       "Your record does not show a quarantine. If you are still restricted, ask a moderator.",
     );
@@ -75,28 +116,25 @@ async function verificationStatus(ctx: CommandContext): Promise<void> {
   const settings = moderationSettingsSchema.parse(await ctx.settings.get(guildId));
   const record = await memberStore(ctx).get(guildId, ctx.userId);
   const gateEnabled = settings.joinGate.enabled;
-  const state = recordValue(record, gateEnabled);
-  const next = record?.verifiedAt
-    ? "Nothing to do; your verification is on record."
-    : !gateEnabled
-      ? "Ask a moderator to enable the join gate."
-      : record && !record.quarantined
-        ? "No quarantine is recorded. Ask a moderator if you are still restricted."
-        : "Run `/verify start` to receive the verification button in a DM.";
+  const view = verificationView(record, gateEnabled);
 
   await ctx.interaction.reply({
     ephemeral: true,
-    content: `Verification status · ${state}`,
+    content: `Verification status · ${view.state}`,
     embeds: [
       {
         title: "Verification status",
-        description: state,
-        color: record?.verifiedAt ? 0x57f287 : 0xfee75c,
+        description: view.state,
+        color: view.color,
         fields: [
           { name: "Join gate", value: gateEnabled ? "enabled here" : "disabled here", inline: true },
-          { name: "Quarantine record", value: record?.quarantined ? "quarantined" : "not quarantined", inline: true },
+          {
+            name: "Quarantine record",
+            value: record ? (record.quarantined ? "quarantined" : "not quarantined") : "no record",
+            inline: true,
+          },
           { name: "Joined", value: record?.joinedAt ?? "no persisted join record", inline: true },
-          { name: "Next step", value: next },
+          { name: "Next step", value: view.next },
         ],
         footer: { text: "Read from the members table; gateway roles are not consulted." },
       },
@@ -139,5 +177,5 @@ export const verify = defineCommand({
     throw new UserError("Choose `/verify start` or `/verify status`.");
   },
   notes:
-    "The DM button is the only completion path. `start` never marks a member verified; `status` reads the `members` row written after the quarantine action succeeds.",
+    "The DM button is the only completion path. `start` requires a persisted quarantined row and never marks a member verified; `status` reads that row; the button transitions only a quarantined row.",
 });

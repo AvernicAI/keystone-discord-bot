@@ -153,7 +153,9 @@ https://github.com/RNGBubba/keystone-discord-bot
   (then fetched Discord's shape to prove it); pass 34 split `/setup` into five
   subcommands, pass 35 split `/appeal` into two, and pass 36 split `/verify`
   into `start | status`, bringing the live ledger to 117; all three hubs were
-  driven through the bridge. Also
+  driven through the bridge. Pass 37 made the join gate persist an enforced
+  quarantine hold, so `/verify start` can no longer bypass the state it was
+  meant to check. Also
   qwen3:8b via Ollama answered mentions in `#ai-chat`. A dev-only `!` bridge
   proved `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
   query=ban`, `!ai status`, `!mod history`, `!mod links`, `!mod filters`,

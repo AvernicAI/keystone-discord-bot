@@ -25,19 +25,22 @@ P2 core shipped in pass 05 (2026-11-01).
   `case_events` rows through `CaseStore.listEvents`, so a review that changes the
   case state cannot erase the appeal. The case-button path still calls
   `appealById`.
-- `/verify start | status` is a hub (pass 36). `start` checks the join gate,
-  persisted state and DM-ability, then sends the existing verification button
-  by DM; `status` reads the persisted `members` row through `MemberStore`, not
-  gateway roles. The in-guild and DM buttons share `completeVerification`, which
-  performs the quarantine action before writing `verified_at`.
+- `/verify start | status` is a hub with a persisted join gate (passes 36–37).
+  An enforced `join-gate.*` hold writes a quarantined `members` row through
+  `MemberStore`; a dry run and anti-raid holds do not. `start` requires that
+  row, checks the gate and DM-ability, and sends the existing button by DM;
+  `status` reads the row and reports no record, quarantined, verified or a
+  disabled gate. The in-guild and DM buttons share `completeVerification`, which
+  refuses any non-quarantined row and performs the quarantine action before
+  writing `verified_at`.
 - Native AutoMod rules are built and synced only when explicitly enabled.
 - Dry-run is the default and produces alerts/cases without punitive calls.
 
 ## Verified
 
 ```
-pnpm test                                  # 371 tests / 57 files
-pnpm vitest run modules/moderation        # 33 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal/status, verify start/status, native plan, context menus
+pnpm test                                  # 385 tests / 58 files
+pnpm vitest run modules/moderation         # 46 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal/status, verify start/status, join-gate state, native plan, context menus
 pnpm test -- packages/db/src/cases.test.ts # 2 PGlite case-store tests, including listEvents
 pnpm test -- packages/db/src/member-store.test.ts # PGlite member row + verification upsert
 pnpm budget                                # 17/100 roots · 117 subcommands · 4 context menus, status OK
@@ -128,22 +131,29 @@ P7 profanity/zalgo evidence (pass 24):
   subcommand is rejected before any side effect. This is not a gateway run and
   does not replace a live ban.
 
-P7 verify-hub evidence (pass 36):
+P7 verify-hub evidence (passes 36–37):
 
-- `mod.test.ts` proves `start` sends one DM with the guild-scoped verify button
-  and writes no member row, a closed DM throws the explicit refusal, and
-  `status` reads `2026-11-01T00:00:00.000Z` from the row and reports
-  `not quarantined` with the `members table` footer.
+- `security.test.ts` proves the join write: an enforced young-account hold
+  produces `{ quarantined: true, verifiedAt: undefined }` plus a verify button;
+  an account above the age threshold produces no row; a dry run produces no row;
+  and anti-raid quarantines produce neither a verify row nor a verify button.
+- `mod.test.ts` covers all four states: no record is refused with **No
+  quarantine is recorded** and sends no DM; a disabled gate and a verified row
+  are refused before a DM; a quarantined row gets one DM with the guild-scoped
+  button and stays quarantined; `status` renders no record, quarantined,
+  verified and disabled-gate states with their own next step.
+- `verification.test.ts` proves `completeVerification` refuses no record, a
+  non-quarantined record, an already-verified record and a disabled gate, and
+  writes `verified_at` only after `unquarantine` succeeds on a quarantined row.
 - `packages/db/src/member-store.test.ts` proves the SQL adapter upserts one
-  `members` row, clears `quarantined`, preserves `joined_at`, and advances
-  `verified_at` on a second completion.
-- **Live 2026-11-01:** `!config set module=moderation key=joinGate.enabled
-  value=true` enabled the gate; `!verify status` returned
-  `Verification status · No verification record.`; `!verify start` returned
-  `I could not DM you (Cannot send messages to this user). Open DMs from server
-  members and run /verify start again.`; a second `!verify status` still
-  returned no record. The MCP account is a bot and cannot receive a DM or click
-  the button, so completion was **not** invoked live.
+  `members` row, `markQuarantined` clears a previous verification and preserves
+  `joined_at`, and completion clears `quarantined`.
+- **Live 2026-11-01:** the gate was enabled and no hold existed;
+  `!verify status` returned `Verification status · No verification record.` and
+  `!verify start` returned `No quarantine is recorded for you in this server. If
+  you are restricted, ask a moderator.` The MCP account is a bot: it cannot make
+  a member join, receive the DM or click the button, so the join write and
+  completion were **not** invoked live; the tests above cover them.
 - `pnpm commands:doctor` read Discord and reported 17 roots / 117 subcommands /
   4 context menus with no drift.
 
@@ -176,7 +186,7 @@ P7 appeal-hub evidence (pass 35):
 | Gateway joins/messages/audit events | Messages yes (link/profanity/zalgo live); joins/audit no | A live guild with privileged intents |
 | Link filter on a real message | Yes, live with the dev marker in `#ai-chat` | Repeat with a human author in staging |
 | Appeal status after review | Yes, live: `#1` stayed `1 appeal` after `!mod review` changed its state to `reviewed`; another member's case was refused | Repeat with a human appellant and moderator |
-| Join-gate start/status and DM refusal | Yes, live in memory mode; the persisted row is PGlite-tested | Repeat `/verify start` with a human member who has DMs open |
+| Join-gate hold, start/status and DM refusal | Hold and command states tested; live no-record refusal in memory mode; the row is PGlite-tested | Repeat with a real member join and a human who has DMs open |
 | Link-filter delete action | Yes: temporary `dryRun: false` + `links: "delete"`; Discord returned `10008: Unknown Message` and the case survived | Re-run on a staging guild with a disposable message |
 | Profanity / zalgo findings | Yes, live with the safe alert seed; `/mod filters` and `/mod review` | Repeat with a human author in staging |
 | Profanity/zalgo delete action | Profanity yes (live 2026-11-01, message gone, case kept); zalgo no | Send a disposable zalgo fixture in staging with `dryRun: false` |

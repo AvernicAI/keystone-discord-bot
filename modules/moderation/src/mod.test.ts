@@ -384,8 +384,9 @@ describe("moderation module", () => {
     ).rejects.toThrow(/not one of your cases/i);
   });
 
-  it("starts verification with a DM button and leaves the member unverified", async () => {
+  it("starts verification with a DM button and leaves the member quarantined", async () => {
     const members = new InMemoryMemberStore();
+    await members.markQuarantined("guild-1", "new-member");
     const { port, dms } = communityWithDm();
     const verifyInteraction = new FakeInteraction({
       commandName: "verify",
@@ -412,11 +413,14 @@ describe("moderation module", () => {
     expect(dms[0]?.userId).toBe("new-member");
     expect(dms[0]?.customId).toMatch(/^keystone:verify:guild-1:new-member$/);
     expect(verifyInteraction.lastReply?.content).toContain("DMs");
-    expect(await members.get("guild-1", "new-member")).toBeUndefined();
+    expect(await members.get("guild-1", "new-member")).toMatchObject({
+      quarantined: true,
+      verifiedAt: undefined,
+    });
   });
 
-  it("refuses to start when the member's DMs are closed", async () => {
-    const { port } = communityWithDm({ ok: false, detail: "Cannot send messages to this user" });
+  it("refuses to start when no quarantine is recorded", async () => {
+    const { port, dms } = communityWithDm();
     const verifyInteraction = new FakeInteraction({
       commandName: "verify",
       guildId: "guild-1",
@@ -434,6 +438,91 @@ describe("moderation module", () => {
             cases: new CaseService(new InMemoryCaseStore()),
             actions: new RecordingActions(),
             members: new InMemoryMemberStore(),
+          },
+          community: port,
+        }),
+      ),
+    ).rejects.toThrow(/No quarantine is recorded/i);
+    expect(dms).toHaveLength(0);
+  });
+
+  it("refuses to start when the join gate is disabled", async () => {
+    const { port, dms } = communityWithDm();
+    const verifyInteraction = new FakeInteraction({
+      commandName: "verify",
+      guildId: "guild-1",
+      userId: "new-member",
+      subcommand: "start",
+    });
+
+    await expect(
+      verify.execute(
+        createTestContext({
+          interaction: verifyInteraction,
+          moduleId: "moderation",
+          settings: { joinGate: { enabled: false } },
+          moderation: {
+            cases: new CaseService(new InMemoryCaseStore()),
+            actions: new RecordingActions(),
+            members: new InMemoryMemberStore(),
+          },
+          community: port,
+        }),
+      ),
+    ).rejects.toThrow(/join gate is not enabled/i);
+    expect(dms).toHaveLength(0);
+  });
+
+  it("refuses to start for an already verified member", async () => {
+    const members = new InMemoryMemberStore();
+    await members.markVerified("guild-1", "new-member", "2026-11-01T00:00:00.000Z");
+    const { port, dms } = communityWithDm();
+    const verifyInteraction = new FakeInteraction({
+      commandName: "verify",
+      guildId: "guild-1",
+      userId: "new-member",
+      subcommand: "start",
+    });
+
+    await expect(
+      verify.execute(
+        createTestContext({
+          interaction: verifyInteraction,
+          moduleId: "moderation",
+          settings: { joinGate: { enabled: true } },
+          moderation: {
+            cases: new CaseService(new InMemoryCaseStore()),
+            actions: new RecordingActions(),
+            members,
+          },
+          community: port,
+        }),
+      ),
+    ).rejects.toThrow(/already verified/i);
+    expect(dms).toHaveLength(0);
+  });
+
+  it("refuses to start when the member's DMs are closed", async () => {
+    const members = new InMemoryMemberStore();
+    await members.markQuarantined("guild-1", "new-member");
+    const { port } = communityWithDm({ ok: false, detail: "Cannot send messages to this user" });
+    const verifyInteraction = new FakeInteraction({
+      commandName: "verify",
+      guildId: "guild-1",
+      userId: "new-member",
+      subcommand: "start",
+    });
+
+    await expect(
+      verify.execute(
+        createTestContext({
+          interaction: verifyInteraction,
+          moduleId: "moderation",
+          settings: { joinGate: { enabled: true } },
+          moderation: {
+            cases: new CaseService(new InMemoryCaseStore()),
+            actions: new RecordingActions(),
+            members,
           },
           community: port,
         }),
@@ -469,5 +558,93 @@ describe("moderation module", () => {
     expect(status.lastReply?.embeds?.[0]?.fields?.find((field) => field.name === "Quarantine record")?.value).toBe(
       "not quarantined",
     );
+  });
+
+  it("reports a quarantined row with the start step", async () => {
+    const members = new InMemoryMemberStore();
+    await members.markQuarantined("guild-1", "new-member");
+    const status = new FakeInteraction({
+      commandName: "verify",
+      guildId: "guild-1",
+      userId: "new-member",
+      subcommand: "status",
+    });
+
+    await verify.execute(
+      createTestContext({
+        interaction: status,
+        moduleId: "moderation",
+        settings: { joinGate: { enabled: true } },
+        moderation: {
+          cases: new CaseService(new InMemoryCaseStore()),
+          actions: new RecordingActions(),
+          members,
+        },
+      }),
+    );
+
+    expect(status.lastReply?.content).toContain("Quarantined; verification is not complete");
+    expect(status.lastReply?.embeds?.[0]?.fields?.find((field) => field.name === "Next step")?.value).toContain(
+      "/verify start",
+    );
+  });
+
+  it("reports no record without offering a dead-end start", async () => {
+    const status = new FakeInteraction({
+      commandName: "verify",
+      guildId: "guild-1",
+      userId: "new-member",
+      subcommand: "status",
+    });
+
+    await verify.execute(
+      createTestContext({
+        interaction: status,
+        moduleId: "moderation",
+        settings: { joinGate: { enabled: true } },
+        moderation: {
+          cases: new CaseService(new InMemoryCaseStore()),
+          actions: new RecordingActions(),
+          members: new InMemoryMemberStore(),
+        },
+      }),
+    );
+
+    expect(status.lastReply?.content).toContain("No verification record");
+    expect(status.lastReply?.embeds?.[0]?.fields?.find((field) => field.name === "Quarantine record")?.value).toBe(
+      "no record",
+    );
+    const next = status.lastReply?.embeds?.[0]?.fields?.find((field) => field.name === "Next step")?.value;
+    expect(next).toContain("Ask a moderator");
+    expect(next).not.toContain("/verify start");
+  });
+
+  it("reports a disabled gate without offering a start step", async () => {
+    const members = new InMemoryMemberStore();
+    await members.markQuarantined("guild-1", "new-member");
+    const status = new FakeInteraction({
+      commandName: "verify",
+      guildId: "guild-1",
+      userId: "new-member",
+      subcommand: "status",
+    });
+
+    await verify.execute(
+      createTestContext({
+        interaction: status,
+        moduleId: "moderation",
+        settings: { joinGate: { enabled: false } },
+        moderation: {
+          cases: new CaseService(new InMemoryCaseStore()),
+          actions: new RecordingActions(),
+          members,
+        },
+      }),
+    );
+
+    expect(status.lastReply?.content).toContain("join gate is disabled here");
+    const next = status.lastReply?.embeds?.[0]?.fields?.find((field) => field.name === "Next step")?.value;
+    expect(next).toContain("enable the join gate");
+    expect(next).not.toContain("/verify start");
   });
 });

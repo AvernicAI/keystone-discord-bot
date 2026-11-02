@@ -254,6 +254,7 @@ export async function createRuntime(
     engine: new SecurityEngine(),
     cases,
     actions: moderationActions,
+    members: memberStore,
     settings: settings.forModule("moderation"),
     logger: logger.child("security"),
   });

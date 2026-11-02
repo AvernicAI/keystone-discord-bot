@@ -70,7 +70,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Anti-nuke (webhook/bot add) | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 | Anti-raid (join burst) | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 | Quarantine role | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
-| Join gate / verification | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts`, `packages/db/src/member-store.test.ts` · live unverified |
+| Join gate / verification | P2 | ✅ in repo | `modules/moderation/src/security.test.ts`, `modules/moderation/src/verification.test.ts`, `modules/moderation/src/mod.test.ts`, `packages/db/src/member-store.test.ts` · live unverified |
 | Panic mode | P7 | ◐ open | Named as open in the moderation status; P7 parity completion owns it. · `modules/moderation/src/security.test.ts` |
 | Heat scoring | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 | Backup / restore | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live unverified |

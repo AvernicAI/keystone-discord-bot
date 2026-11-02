@@ -21,7 +21,7 @@ operator channel and a retained ledger), link/profanity/zalgo content filters,
 an auto-responder for exact, contains and regex triggers, guild analytics as an
 eighth module, and `/music` as a ninth module: a durable saved queue whose
 playback commands refuse with the exact missing backend instead of showing a
-queue that pretends to be audio. `/verify start | status` turns the join gate into a real DM flow: `start` sends the existing verification button after checking DM-ability and persisted state, `status` reads the `members` row written by the button instead of guessing from gateway roles. P7 also ships `/config list | get | set | export`, the in-bot
+queue that pretends to be audio. `/verify start | status` turns the join gate into a real DM flow: an enforced join-gate hold writes a quarantined `members` row, `start` accepts only that row and sends the existing verification button after checking DM-ability, and `status` reads the row instead of guessing from gateway roles. A member with no quarantine record gets an explicit refusal. P7 also ships `/config list | get | set | export`, the in-bot
 settings surface: it reads and writes any registered module's per-guild settings
 through the same `SettingsService` and Zod schema as the dashboard, with no
 second store. `/export guild | user | import | delete | drift | rollback` puts
@@ -29,7 +29,7 @@ the P5 portability service inside Discord: real JSON file attachments, a
 dry-run-first import, a confirmation-gated delete and live drift facts from the
 gateway cache. The command ledger is **17/100 roots** with **117 real
 subcommands**, **134 actions** and **4 context menus** (2 user, 2 message),
-there are **9 modules**, and `pnpm check` covers **371 tests across 57 files**
+there are **9 modules**, and `pnpm check` covers **385 tests across 58 files**
 without a Discord token, database or network. Live on 2026-11-01: the bot logged
 in and Discord reports **17 roots / 117 subcommands / 2 user menus / 2 message
 menus**, answered a Qwen3:8b mention in `#ai-chat`, and ran real
@@ -277,7 +277,7 @@ the same live registry.
 | `/export` | `guild`, `user`, `import`, `delete`, `drift`, `rollback` | Download a verified JSON bundle, export one member, preview/restore a bundle, delete with an exact-id confirmation, or compare stored ids with the live server |
 | `/mod` | `ban`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `links`, `filters`, `review` | Moderation with cases, reasons, evidence, a content-filter review queue and a case queue |
 | `/appeal` | `open`, `status` | Open an appeal on your own case, or read the append-only appeal events and the current case state |
-| `/verify` | `start`, `status` | Send the verification button by DM after prerequisite checks, or read the persisted verification and quarantine state |
+| `/verify` | `start`, `status` | Send the verification button by DM only for a persisted quarantined row, or read the persisted verification and quarantine state |
 | `/rank` | `view`, `leaderboard`, `rewards`, `admin`, `balance`, `daily`, `pay`, `shop`, `buy`, `gamble`, `ledger`, `season` | XP, levels, ledger-backed currency, shop and seasons |
 | `/ticket` | `panel`, `open`, `claim`, `close`, `add`, `transcript`, `summary`, `stats` | Thread tickets, claiming, transcripts, AI summary and SLA stats |
 | `/tools` | `embed`, `tag`, `reminder`, `schedule`, `giveaway`, `giveaway-end`, `giveaway-reroll`, `poll`, `feed`, `stat`, `welcome`, `roles`, `starboard`, `starboard-override`, `voice`, `birthdays`, `birthday`, `suggestions`, `suggestion`, `suggestion-decide`, `sticky`, `responder`, `responders`, `responder-remove` | Community utilities, panels and auto-responders |
@@ -401,8 +401,10 @@ Everything below is free. No feature is moved behind a paywall.
   edges, a configurable combining-mark threshold, and `/mod filters` as the
   combined content-filter review queue.
 - Native AutoMod plan and `Keystone ·` rule ownership.
-- Anti-nuke, anti-raid, quarantine and the join gate, with `/verify start`
-  sending the verifier and `/verify status` reading the persisted member row.
+- Anti-nuke, anti-raid, quarantine and the join gate. An enforced join-gate
+  hold persists a quarantined `members` row; `/verify start` requires that row
+  and sends the verifier, while `/verify status` reads it. Anti-raid holds stay
+  moderator actions and do not get a verify button.
 - Audit logging: message delete/edit, member join/leave and moderation cases in
   one operator channel, with five toggles, a 1–365 day retention window and a
   JSON export. Events are stored before delivery, so a broken channel keeps the
@@ -652,6 +654,28 @@ did not mark the member verified. The MCP account is a bot and cannot receive a
 DM or click a button, so the completion path is covered by the command test and
 PGlite member-store test, not claimed live. `commands:doctor` read Discord and
 reported **17 roots / 117 subcommands** with 0 drift.
+
+Join-gate state evidence (2026-11-01, pass 37): the security coordinator now
+writes a quarantined `members` row only after an enforced join-gate hold. The
+join path is covered by `security.test.ts` because the MCP account is a bot and
+cannot make a member join: a young account produced a row with `quarantined:
+true` and no `verifiedAt`; an old-enough account produced no row; a dry run
+produced no row; and anti-raid quarantines produced no verify row or button.
+`verification.test.ts` proves completion refuses no record, a non-quarantined
+record, an already-verified record and a disabled gate, and transitions only a
+quarantined row after the action succeeds. Live in `#ai-chat` with the gate
+enabled and no hold on record:
+
+```text
+> !verify status
+< Verification status · No verification record.
+
+> !verify start
+< No quarantine is recorded for you in this server. If you are restricted,
+  ask a moderator.
+```
+
+The join and completion paths are not claimed live; only the refusal is.
 
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and

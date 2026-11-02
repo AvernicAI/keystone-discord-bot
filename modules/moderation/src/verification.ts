@@ -19,9 +19,10 @@ export interface VerificationDeps {
 
 /**
  * The one completion path shared by the DM button and the legacy in-guild
- * verify button. It reads persisted state first, performs the existing
- * quarantine action, then records the successful verification. It never
- * derives "already verified" from gateway roles.
+ * verify button. It transitions only a persisted quarantined row: no record
+ * and a non-quarantined record are refusals, not implicit verifications. It
+ * performs the existing quarantine action before recording the completion, so
+ * a failed action cannot create a verified row.
  */
 export async function completeVerification(
   deps: VerificationDeps,
@@ -34,8 +35,20 @@ export async function completeVerification(
   }
 
   const existing = await deps.members.get(deps.guildId, deps.userId);
-  if (existing?.verifiedAt) {
+  if (!existing) {
+    return {
+      ok: false,
+      message: "No quarantine is recorded for you in this server. If you are restricted, ask a moderator.",
+    };
+  }
+  if (existing.verifiedAt) {
     return { ok: false, message: `You are already verified (${existing.verifiedAt}).` };
+  }
+  if (!existing.quarantined) {
+    return {
+      ok: false,
+      message: "No quarantine is recorded for you in this server. If you are restricted, ask a moderator.",
+    };
   }
 
   const result = await deps.actions.unquarantine(

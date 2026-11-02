@@ -469,6 +469,19 @@
         "budget": "17/100 roots · 117 subcommands · 4 context menus",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-37",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Join-gate state machine repair. An enforced join-gate hold now writes a quarantined `members` row through `SecurityCoordinator`; the write happens only after `actions.quarantine` succeeds, only for `join-gate.*` findings, and anti-raid/anti-nuke holds do not create a verify row or button. `MemberStore.markQuarantined` was added to the kernel port, the in-memory store and the Drizzle store; it clears any previous `verified_at`, preserves `joined_at`, and needs no migration. `/verify start` now refuses a member with no record and a record that is not quarantined, status reports no record without suggesting a dead-end start, and `completeVerification` refuses no record/non-quarantined/verified/disabled-gate and transitions only a quarantined row after the action succeeds. Tests: join path, four-case command behavior, six completion transitions and the SQL quarantine upsert. Live memory mode: `!verify status` read no record and `!verify start` returned `No quarantine is recorded for you in this server. If you are restricted, ask a moderator.`; the join path and button click are not live because the MCP account is a bot. Tests 385 / 58 files; .env DATABASE_URL and REDIS_URL still ECONNREFUSED.",
+      "journal": "journal/2026-11-01-pass-37.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "385",
+        "budget": "17/100 roots · 117 subcommands · 4 context menus",
+        "memory": "current"
+      }
     }
   ]
 }

@@ -139,22 +139,37 @@ a narrow port over it rather than a new table: read one row, and upsert
 the same contract, which is why the command tests and the PGlite test assert the
 same fields.
 
-`completeVerification` enforces the order that matters: check the actor and
-settings, perform the quarantine action, **then** write `verified_at`. If the
-role removal fails, the write never happens and `/verify status` keeps telling
-the truth. The DM button and the legacy in-guild button both call this function,
-so there is no second path that can drift.
+The row has to be written by the thing that actually holds the member. In
+`SecurityCoordinator`, an enforced `join-gate.*` quarantine calls
+`members.markQuarantined` **after** `actions.quarantine` succeeds. That order
+means a failed role grant cannot leave a hold that does not exist, and a dry run
+writes nothing because nothing happened. Anti-raid holds are deliberately
+excluded: they are moderator actions, not a verification queue, so they get no
+verify button either. Without this writer the button would be a bypass — any
+member could request it and completion would stamp `verified_at` for someone who
+was never held.
+
+`completeVerification` then enforces the rest of the order: check the actor,
+the gate, the persisted row and `verified_at`, perform the quarantine action,
+**then** write `verified_at`. It transitions only a `quarantined` row; no record
+and a row that is not quarantined are refusals. If the role removal fails, the
+write never happens and `/verify status` keeps telling the truth. The DM button
+and the legacy in-guild button both call this function, so there is no second
+path that can drift.
 
 `/verify start` is deliberately not the completion. It exists to answer "can
-this member actually complete the flow right now?" It parses the settings,
-checks the persisted state, and sends the button by DM. A closed DM becomes a
-specific refusal that names the fix (`Open DMs from server members`), which is
+this member actually complete the flow right now?" It requires the persisted
+quarantine, parses the settings, and sends the button by DM. A closed DM becomes
+a specific refusal that names the fix (`Open DMs from server members`), which is
 far more useful than a silent failure. `/verify status` then reads the row; it
-does not re-derive the answer from roles, and its footer says so.
+does not re-derive the answer from roles, and its footer says so. Its four states
+are no record, quarantined, verified and gate disabled, and only the quarantined
+state offers `/verify start` as the next step.
 
 If you extend this, add a `quarantined_at` timestamp rather than inferring when
-the gate started. Do not let the timeout job call `markVerified`; expiry is a
-different outcome and needs its own event.
+the gate started; the current row has `joined_at` but no hold timestamp. Do not
+let the timeout job call `markVerified`; expiry is a different outcome and needs
+its own event.
 
 ## Context menus are commands with a target
 

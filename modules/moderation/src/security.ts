@@ -1,4 +1,5 @@
 import type {
+  MemberStore,
   ModerationActions,
   ModerationActionResult,
   ModerationCase,
@@ -532,6 +533,7 @@ export interface SecurityCoordinatorOptions {
   engine: SecurityEngine;
   cases: CaseService;
   actions: ModerationActions;
+  members: MemberStore;
   settings: ModuleSettings;
   logger: Logger;
   now?: () => number;
@@ -603,13 +605,26 @@ export class SecurityCoordinator {
     switch (finding.kind) {
       case "alert":
         return { ok: true, detail: "alert recorded" };
-      case "quarantine":
-        return this.options.actions.quarantine(
+      case "quarantine": {
+        const result = await this.options.actions.quarantine(
           guildId,
           target,
           finding.reason,
           settings.quarantineRoleId,
         );
+        if (result.ok && finding.rule.startsWith("join-gate.")) {
+          try {
+            await this.options.members.markQuarantined(guildId, target);
+          } catch (error) {
+            this.options.logger.error("member quarantine state failed", {
+              guildId,
+              userId: target,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+        return result;
+      }
       case "timeout":
         return this.options.actions.timeout(
           guildId,
@@ -647,7 +662,11 @@ export class SecurityCoordinator {
   ): Promise<void> {
     const components: import("@keystone/kernel").ActionRow[] = [];
     if (settings.appealsEnabled && record.targetId) components.push(appealButton(record.id));
-    if (finding.kind === "quarantine" && record.targetId) {
+    if (
+      finding.kind === "quarantine" &&
+      finding.rule.startsWith("join-gate.") &&
+      record.targetId
+    ) {
       components.push(verifyButton(record.guildId, record.targetId));
     }
 

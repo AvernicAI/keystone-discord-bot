@@ -551,8 +551,10 @@
           "phase": "P2",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "Persisted members row; /verify start sends the DM button after prerequisite checks, status reads the row; completion not live-proven",
+          "note": "An enforced join-gate hold writes the quarantined members row; /verify start requires that row, status reads it, and completion transitions only a quarantined row. Join and button completion not live-proven",
           "evidence": [
+            "modules/moderation/src/security.test.ts",
+            "modules/moderation/src/verification.test.ts",
             "modules/moderation/src/mod.test.ts",
             "packages/db/src/member-store.test.ts"
           ],

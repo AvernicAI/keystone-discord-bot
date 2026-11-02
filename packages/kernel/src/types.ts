@@ -434,6 +434,11 @@ export interface MemberVerification {
 
 export interface MemberStore {
   get(guildId: string, userId: string): Promise<MemberVerification | undefined>;
+  /**
+   * Upsert a held member after an enforced quarantine. Clears any previous
+   * verification and preserves the original join time when a row exists.
+   */
+  markQuarantined(guildId: string, userId: string): Promise<MemberVerification>;
   /** Upsert a completed verification; clears the persisted quarantine flag. */
   markVerified(guildId: string, userId: string, verifiedAt: string): Promise<MemberVerification>;
 }

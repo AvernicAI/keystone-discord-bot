@@ -2,22 +2,24 @@
 
 ## Now
 
-**P7 `/verify` is a real two-subcommand hub and live-proven for its checks**
-(pass 36, 2026-11-01): the saved plan's last two names, `/verify start | status`,
-are registered, so the plan table is complete at **59 of 59**. `start` parses the
-join gate, refuses an already-verified member, refuses a record that is not
-quarantined, and sends the existing verification button by DM; a closed DM is a
-specific refusal. `status` reads a persisted `members` row through the new
-`MemberStore` instead of gateway roles. The in-guild and DM buttons share one
-`completeVerification` path, which performs the quarantine action before it
-writes `verified_at`. No new table or migration; the row already existed.
-Live in `#ai-chat`: `!verify status` read **No verification record**,
-`!verify start` returned the exact DM refusal, and a second status still read no
-record. The MCP account is a bot and cannot receive the DM or click the button,
-so completion is covered by command and PGlite tests, not claimed live.
-`commands:doctor` read Discord and reported **17 roots / 117 subcommands / 4
-context menus** with no drift. See
-[[04-Modules/moderation/Status|Moderation status]].
+**P7 `/verify` is a real two-subcommand hub with a complete persisted join gate**
+(pass 37, 2026-11-01): the saved plan's last two names, `/verify start | status`,
+are registered, so the plan table is complete at **59 of 59**. The join path now
+writes a quarantined `members` row when an enforced `join-gate.*` hold lands,
+and only then; dry runs and anti-raid holds create no verify row. `start`
+requires that row, refuses a disabled gate and an already-verified member, then
+sends the existing button by DM; a closed DM is a specific refusal. `status`
+reads the persisted row through `MemberStore` and reports one of the four real
+states. The in-guild and DM buttons share one `completeVerification` path, which
+refuses no record and any non-quarantined row, and performs the quarantine
+action before writing `verified_at`. No new table or migration; the row already
+existed. Live in `#ai-chat` with the gate enabled: `!verify status` read **No
+verification record**, `!verify start` returned **No quarantine is recorded for
+you in this server**, and no row was written. The MCP account is a bot and
+cannot make a member join, receive the DM or click the button, so the join and
+completion paths are covered by security, command and PGlite tests, not claimed
+live. `commands:doctor` reports **17 roots / 117 subcommands / 4 context menus**
+with no drift. See [[04-Modules/moderation/Status|Moderation status]].
 
 **P7 `/appeal` remains live-proven** (pass 35): `open` keeps the target-only
 guard and appends the existing `appealed` event; `status` reads those events
@@ -325,9 +327,9 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 371 tests / 57 files · budget 17/100 roots (117 subcommands · 134 actions · 4 context menus) · memory current
+pnpm check        exit 0 · typecheck 0 · 385 tests / 58 files · budget 17/100 roots (117 subcommands · 134 actions · 4 context menus) · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 17 roots / 117 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start DM refusal → status still no record
+live              2026-11-01 · AI Team#5758 · 2 guilds · 17 roots / 117 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)
 live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set · !export guild · !export user · !export drift · !music status · !music add · !music queue · !music play · !music remove · !music skip · !appeal open · !appeal status · !verify start · !verify status
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
@@ -394,14 +396,16 @@ read that file.
 
 | # | Criterion | Where it is asserted | Proven against |
 | --- | --- | --- | --- |
-| 1 | `start` sends the button but never marks verified | `mod.test.ts`: one DM to the caller with `keystone:verify:guild-1:new-member`; `members.get` is still undefined | In-memory member store |
-| 2 | A closed DM is an explicit refusal | `mod.test.ts`: a failed `sendDM` throws `could not DM you` with the provider detail; live printed **Cannot send messages to this user** and the fix | Unit + **live bridge** |
-| 3 | `status` reads persisted state, not roles | `mod.test.ts`: a pre-written row is reported as `Verified at …` and `not quarantined`, with the `members table` footer | In-memory row |
-| 4 | The SQL adapter is a real upsert | `member-store.test.ts`: one `members` row, verification clears `quarantined`, `joined_at` is preserved, a second completion advances `verified_at` | **PGlite** |
-| 5 | One completion path | `verification.ts` is imported by the DM/in-guild button handler in `apps/bot/src/index.ts`; it performs `unquarantine` before writing the row | Code path + tests |
-| 6 | One root, two subcommands, budget intact | `mod.test.ts` registry shape; `pnpm budget`: 17/100 roots, 117 subcommands | Registry + budget |
-| 7 | The live counts match Discord | `commands:doctor` read **17 roots / 117 subcommands / 4 context menus** with no drift | **Live Discord REST read** |
-| 8 | A member completed verification live | **Not performed** — the MCP account is a bot; it cannot receive the DM or click the button. Tests cover the write path. | Not claimed |
+| 1 | The join path persists a quarantined row only after an enforced hold | `security.test.ts`: a young account in enforcing mode produces `{ quarantined: true, verifiedAt: undefined }` and a verify button; an old-enough account, a dry run and an anti-raid hold produce no row and, for anti-raid, no verify button | In-memory member + case stores |
+| 2 | `start` requires a persisted quarantine | `mod.test.ts`: no record is refused with **No quarantine is recorded** and sends no DM; a disabled gate and an already-verified row are refused | In-memory member store |
+| 3 | `start` sends the button without completing | `mod.test.ts`: a quarantined row gets one DM with `keystone:verify:guild-1:new-member` and the row stays `quarantined: true` | In-memory member store |
+| 4 | A closed DM is an explicit refusal | `mod.test.ts`: a failed `sendDM` throws `could not DM you` with the provider detail; pass 36's live run printed **Cannot send messages to this user** and the fix | Unit + **pass-36 live bridge** |
+| 5 | `status` reads persisted state, not roles | `mod.test.ts`: quarantined, verified, no-record and disabled-gate rows each render their own state and next step, with the `members table` footer | In-memory rows |
+| 6 | The SQL adapter is a real upsert | `member-store.test.ts`: one `members` row, `markQuarantined` clears a previous verification, verification clears `quarantined`, `joined_at` is preserved | **PGlite** |
+| 7 | Completion transitions only a quarantined row | `verification.test.ts`: no record, non-quarantined, verified and disabled gate are refused; a quarantined row is written only after `unquarantine` succeeds | In-memory member store + recorder |
+| 8 | One root, two subcommands, budget intact | `mod.test.ts` registry shape; `pnpm budget`: 17/100 roots, 117 subcommands | Registry + budget |
+| 9 | The live counts match Discord | `commands:doctor` read **17 roots / 117 subcommands / 4 context menus** with no drift | **Live Discord REST read** |
+| 10 | A member joined and completed verification live | **Not performed** — the MCP account is a bot; it cannot make a member join, receive the DM or click the button. The join write, completion and SQL row are test-covered. | Not claimed |
 
 ## P8 music acceptance evidence
 
@@ -623,7 +627,7 @@ remain open.
 | 3 | Every action has reason and appeal | The same test asserts every case has a reason and every notification has a `keystone:appeal:` button; `/mod` test asserts the custom id | Recorder, not a live Discord button |
 | 4 | Dry-run is default and takes no punitive action | Default-settings test: zero action calls, every case `alerted`; `/mod` dry-run test: zero cases and zero action calls | Recorder |
 | 5 | `/mod` guarded and case-first | `modules/moderation/src/mod.test.ts`: dispatch blocks without `ModerateMembers`; enforced ban creates case/reason before the action; missing reason throws | Dispatch + fake action port |
-| 6 | Appeals and verification | `mod.test.ts`: target opens an appeal, event appended, other user rejected; `status` survives a state change and refuses another member's case; `/verify start` sends the button without writing a row, `status` reads a persisted row | In-memory case/member stores + recorder + **live bridge** |
+| 6 | Appeals and verification | `mod.test.ts`: target opens an appeal, event appended, other user rejected; `status` survives a state change and refuses another member's case; `/verify start` requires a persisted quarantine and sends the button without completing it, `status` reads that row | In-memory case/member stores + recorder + **live bridge** |
 | 7 | Native AutoMod plan | `security.test.ts`: two prefixed rules, alert action, disabled by default | Pure plan; Discord sync adapter unrun |
 | 8 | Records | this page, [[Roadmap]], [[ADR-0007-moderation-capability-port]], journal pass 05, `project.json` | Vault check |
 

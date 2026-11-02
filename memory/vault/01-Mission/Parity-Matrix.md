@@ -53,7 +53,7 @@ checked. See [[Master-Plan]] for the research program.
 | Anti-nuke (webhook/bot add) | ❌ | ❌ | ❌ | ❌ | ✅ | P2 | Bot-add block |
 | Anti-raid (join burst) | ❌ | ❌ | ❌ | ❌ | ✅ | P2 | Age + avatar heuristics |
 | Quarantine role | ❌ | ❌ | ❌ | ❌ | ✅ | P2 | Reversible by design |
-| Join gate / verification | ❌ | ❔ | ❔ | ❌ | ✅ | P2 | Button + timeout |
+| Join gate / verification | ❌ | ❔ | ❔ | ❌ | ✅ | P2 | Enforced hold writes a quarantined `members` row; `/verify start` requires it, `/verify status` reads it; timeout expiry still open |
 | Panic mode | ❌ | ❌ | ❌ | ❌ | ✅ | P2 | One command, logged |
 | Heat scoring | ❌ | ❌ | ❌ | ❌ | ✅ | P2 | Decays, so no permanent trip |
 | Backup / restore | ❌ | ❔ | ❔ | ❌ | 💰 | P5 | Structure + optional messages |

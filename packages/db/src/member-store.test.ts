@@ -50,4 +50,26 @@ describe("SQL member state", () => {
       await harness.runner.query("select * from members where guild_id = 'guild-a'"),
     ).toHaveLength(1);
   });
+
+  it("creates a quarantine row and clears a previous verification", async () => {
+    harness = await createMigratedPglite();
+    const store = new DrizzleMemberStore(harness.db);
+
+    const held = await store.markQuarantined("guild-a", "user-2");
+    expect(held).toMatchObject({
+      guildId: "guild-a",
+      userId: "user-2",
+      quarantined: true,
+    });
+    expect(held.verifiedAt).toBeUndefined();
+
+    await store.markVerified("guild-a", "user-2", "2026-11-01T00:00:00.000Z");
+    const reheld = await store.markQuarantined("guild-a", "user-2");
+    expect(reheld).toMatchObject({ quarantined: true });
+    expect(reheld.verifiedAt).toBeUndefined();
+    expect(reheld.joinedAt).toBe(held.joinedAt);
+    expect(
+      await harness.runner.query("select * from members where guild_id = 'guild-a'"),
+    ).toHaveLength(1);
+  });
 });

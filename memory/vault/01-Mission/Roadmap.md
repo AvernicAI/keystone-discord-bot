@@ -209,9 +209,13 @@ review that changes the case state cannot erase the appeal. Live: case #1 read
 review`; another member's case was refused. Pass 36 then closed the last two
 named plan gaps: `/verify start` sends the verification button by DM after
 checking the join gate, persisted state and DM-ability, and `/verify status`
-reads the `members` row instead of gateway roles. The ledger is now **17 roots /
-117 subcommands / 134 actions / 4 context menus**, and every name in the saved
-plan table (59 of 59) is registered. The rest of this phase is open.
+reads the `members` row instead of gateway roles. Pass 37 repaired the state
+machine behind that hub: an enforced join-gate hold writes the quarantined row,
+`start` requires it, `status` reports no record, quarantined, verified or a
+disabled gate, and completion transitions only a quarantined row. The ledger is
+now **17 roots / 117 subcommands / 134 actions / 4 context menus**, and every
+name in the saved plan table (59 of 59) is registered. The rest of this phase is
+open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.
