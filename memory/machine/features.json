@@ -1657,7 +1657,7 @@
           "phase": "P7",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "18 roots expose 125 real Discord subcommands instead of hidden flat action options. /help reads the live registry, the catalog is generated, boot sync compares the full option tree, commands:doctor reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for /mod ban. /appeal open | status, /verify start | status and /form create | edit | delete | list | panel | submit | review | export are registered. Gateway InteractionCreate remains human-only.",
+          "note": "19 roots expose 132 real Discord subcommands instead of hidden flat action options. /help reads the live registry, the catalog is generated, boot sync compares the full option tree, commands:doctor reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for /mod ban. /appeal open | status, /verify start | status, /form create | edit | delete | list | panel | submit | review | export and /event create | edit | delete | list | rsvp | remind | export are registered. Gateway InteractionCreate remains human-only.",
           "evidence": [
             "packages/kernel/src/registry.test.ts",
             "apps/bot/src/adapt.test.ts",
@@ -2124,19 +2124,28 @@
           "name": "Event creation",
           "competitors": {},
           "phase": "P7",
-          "status": "planned",
+          "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "One-off events with a channel post.",
-          "liveVerified": false
+          "note": "`/event create | edit | delete | list | export` writes `events` with a draft/open/closed lifecycle, a start and optional end, a location and an optional capacity. Live 2026-11-01: a draft was created, opened, edited, listed with 1/2 going, and exported as 1.2 KB of JSON.",
+          "evidence": [
+            "modules/events/src/events.test.ts",
+            "packages/db/src/event-store.test.ts",
+            "memory/journal/2026-11-01-pass-41.md"
+          ],
+          "liveVerified": true
         },
         {
           "id": "events.rsvp-buttons",
           "name": "RSVP buttons",
           "competitors": {},
           "phase": "P7",
-          "status": "planned",
+          "status": "open",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "Going / maybe / no, with counts.",
+          "note": "Command RSVP is shipped: `/event rsvp event:<key> rsvp:going|not_going`, one row per member, capacity counted from `event_rsvps`. Interactive going/maybe/no buttons are not built; a button needs the modal/component interaction layer this build does not have.",
+          "openReason": "A real RSVP button needs the component interaction layer (button ids, actor checks, component routing) that this build does not have; shipping an unclickable button would be a dead end.",
+          "evidence": [
+            "modules/events/src/events.test.ts"
+          ],
           "liveVerified": false
         },
         {
@@ -2144,20 +2153,29 @@
           "name": "Reminders",
           "competitors": {},
           "phase": "P7",
-          "status": "planned",
+          "status": "open",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "Scheduled reminders with a timezone.",
-          "liveVerified": false
+          "note": "Manual reminders are shipped and live-proven: `/event remind` posts a reminder for an open event and records `reminded_at`, `reminded_by` and `reminder_count`. Scheduled delivery and per-member timezones are not built; there is no scheduler job for events yet.",
+          "openReason": "Scheduled delivery needs a recurring queue job, a per-event wake-up and a delivery port; manual `remind` is real, and the scheduler is named rather than faked.",
+          "evidence": [
+            "modules/events/src/events.test.ts",
+            "packages/db/src/event-store.test.ts"
+          ],
+          "liveVerified": true
         },
         {
           "id": "events.ics-export",
           "name": "ICS export",
           "competitors": {},
           "phase": "P7",
-          "status": "planned",
+          "status": "open",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "Calendar file without a third-party OAuth dependency.",
-          "liveVerified": false
+          "note": "JSON export is shipped: `/event export` attaches `keystone.events` with events, RSVPs, counts and a SHA-256 checksum. An ICS calendar file is not built; the JSON is the portable format for now.",
+          "openReason": "ICS needs a calendar serializer and a real calendar consumer; the checksummed JSON is the portable format the other modules already export.",
+          "evidence": [
+            "modules/events/src/events.test.ts"
+          ],
+          "liveVerified": true
         }
       ]
     },

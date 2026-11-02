@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**123 features** across 16 domains: **95 in repo**, **11 open**, **13 planned**. Live behaviour is marked separately; a green
+**123 features** across 16 domains: **96 in repo**, **14 open**, **9 planned**. Live behaviour is marked separately; a green
 box means the code and its tests exist, not that a live guild has run it.
 
 ## Domains
@@ -26,7 +26,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Portability | 12 | 12 | 0 | 0 |
 | Invites | 3 | 3 | 0 | 0 |
 | Forms and applications | 3 | 3 | 0 | 0 |
-| Events and RSVP | 4 | 0 | 0 | 4 |
+| Events and RSVP | 4 | 1 | 3 | 0 |
 | Community parity extras | 8 | 3 | 0 | 5 |
 
 ## Moderation
@@ -214,10 +214,10 @@ box means the code and its tests exist, not that a live guild has run it.
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Event creation | P7 | ⏳ planned | One-off events with a channel post. |
-| RSVP buttons | P7 | ⏳ planned | Going / maybe / no, with counts. |
-| Reminders | P7 | ⏳ planned | Scheduled reminders with a timezone. |
-| ICS export | P7 | ⏳ planned | Calendar file without a third-party OAuth dependency. |
+| Event creation | P7 | ✅ in repo | `modules/events/src/events.test.ts`, `packages/db/src/event-store.test.ts`, `memory/journal/2026-11-01-pass-41.md` · live verified |
+| RSVP buttons | P7 | ◐ open | A real RSVP button needs the component interaction layer (button ids, actor checks, component routing) that this build does not have; shipping an unclickable button would be a dead end. · `modules/events/src/events.test.ts` |
+| Reminders | P7 | ◐ open | Scheduled delivery needs a recurring queue job, a per-event wake-up and a delivery port; manual `remind` is real, and the scheduler is named rather than faked. · `modules/events/src/events.test.ts`, `packages/db/src/event-store.test.ts` · live verified |
+| ICS export | P7 | ◐ open | ICS needs a calendar serializer and a real calendar consumer; the checksummed JSON is the portable format the other modules already export. · `modules/events/src/events.test.ts` · live verified |
 
 ## Community parity extras
 

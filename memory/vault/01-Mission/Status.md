@@ -2,6 +2,26 @@
 
 ## Now
 
+**P7 events are in repo and live-proven** (pass 41, 2026-11-01): `/event create |
+edit | delete | list | rsvp | remind | export` is the eleventh module. `events`
+and `event_rsvps` are real tables (migration 0012): a unique `(guild_id, key)`
+makes `event:launch-night` unambiguous, and a unique `(event_id, user_id)` makes
+one RSVP row per member structural. `EventService` owns the draft/open/closed
+lifecycle, date parsing, the event cap and the capacity bound; `rsvp` reads the
+member id from the interaction and has no user option, so no command can write
+another member's row. The SQL adapter locks the event row and counts `going`
+rows inside the write transaction, so the last seat cannot be sold twice; a
+decline frees a seat because `not_going` is a row, not a delete. `remind` records
+who sent it and when before the command posts the message; `delete` refuses
+while any RSVP exists. Live in `#ai-chat` with one memory-mode process: create
+wrote a draft, edit opened it, rsvp read **1/2 going**, remind posted **Reminder
+1** with 1 going, a decline read **0/2**, a second going read **1/2**, and export
+produced a **1.2 KB** file that downloaded (HTTP 200, 1242 bytes) and parsed as
+**1 event / 1 RSVP** with the same capacity, reminder count, reviewer id and a
+checksum that recomputes; delete was refused while the RSVP exists. Buttons,
+scheduled reminders and ICS are not shipped and are not claimed. See
+[[04-Modules/events/Status|Events status]].
+
 **P7 forms are in repo and live-proven** (pass 40, 2026-11-01): `/form create |
 edit | delete | list | panel | submit | review | export` is the tenth module.
 `forms` and `form_submissions` are real tables (migration 0011): a unique
@@ -21,7 +41,7 @@ wrote a draft, `edit` opened it, `panel` posted, `submit` wrote
 `delete` was refused while the history exists, and `export` produced a **1.5 KB**
 file that downloaded (HTTP 200, 1540 bytes) and parsed as **1 form / 1
 submission** with the same answers, reviewer and note and a checksum that
-recomputes. `commands:doctor` reports **18 roots / 125 subcommands / 4
+recomputes. `commands:doctor` now reports **19 roots / 132 subcommands / 4
 context menus** with no drift. See [[04-Modules/forms/Status|Forms status]].
 
 **P7 `/verify` is a real two-subcommand hub with a complete persisted join gate**
@@ -42,8 +62,8 @@ cannot make a member join, receive the DM or click the button, so the join and
 completion paths are covered by security, command and PGlite tests, not claimed
 live. Pass 39 moved the DM itself onto `ModerationActions.directMessage`, so the
 join gate no longer borrows the community adapter; the body, button and refusal
-text are unchanged. `commands:doctor` reports **18 roots / 125 subcommands / 4
-context menus** with no drift. See [[04-Modules/moderation/Status|Moderation
+text are unchanged. `commands:doctor` now reports **19 roots / 132 subcommands /
+4 context menus** with no drift. See [[04-Modules/moderation/Status|Moderation
 status]].
 
 **P7 `/appeal` remains live-proven** (pass 35): `open` keeps the target-only
@@ -140,7 +160,7 @@ subcommands, no module, no table and no second settings store. Live in
 read-back after each write; `bogus` returned `automod.links: Invalid enum value`
 and the next read still returned `"alert"`. Pass 31 added `/export` and pass 32 added
 `/music`, pass 35 split `/appeal` into two and pass 36 split `/verify` into two,
-so Discord now reports **18 roots / 125 subcommands / 143 actions** including
+so Discord now reports **19 roots / 132 subcommands / 151 actions** including
 `config`, `export`, `form`, `music`, the five `/setup` actions, the two
 `/appeal` actions and the two `/verify` actions. The MCP cannot invoke slash
 commands or render embeds, so the live proof is the message bridge with
@@ -241,15 +261,16 @@ subcommands, bringing the ledger to **13 roots · 84 subcommands · 97 actions**
 that point. Pass 29 added `/analytics` with six subcommands, pass 30 added
 `/config` with four, pass 31 added `/export` with six and pass 32 added `/music`
 with eight, pass 34 split `/setup` into five, pass 35 split `/appeal` into two,
-pass 36 split `/verify` into two, and pass 40 added `/form` with eight, so the
-current ledger is **18 roots · 125 subcommands · 143 actions**. After pass 30 the boot found
+pass 36 split `/verify` into two, pass 40 added `/form` with eight and pass 41
+added `/event` with seven, so the current ledger is **19 roots · 132 subcommands ·
+151 actions**. After pass 30 the boot found
 `config` missing, cleared the global set once and re-registered it; pass 31's
 boot found only `export` missing and did the same. Pass 33 now models context
 menus as application commands with their own type and budget, and its boot found
 all four menus missing and re-registered 21 commands. `commands:doctor` now
-reports 18 roots / 125 subcommands plus 2 user and 2 message menus, including
-`analytics`, `logging`, `config`, `export`, `form`, `music`, the five `/setup`
-actions, the two `/appeal` actions and the two `/verify` actions. See
+reports 19 roots / 132 subcommands plus 2 user and 2 message menus, including
+`analytics`, `logging`, `config`, `event`, `export`, `form`, `music`, the five
+`/setup` actions, the two `/appeal` actions and the two `/verify` actions. See
 [[03-Architecture/Command-Budget|Command budget]] and
 [[03-Architecture/ADR/ADR-0003-command-budget]].
 
@@ -313,15 +334,17 @@ pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
 `!invites leaderboard` and `!invites who`. Pass 26 re-registered 12 roots /
 77 subcommands at the time; pass 28 added `/logging`, pass 29 added
 `/analytics`, pass 30 added `/config`, pass 31 added `/export` and pass 32 added
-`/music`, pass 34's `/setup` hub, pass 35's `/appeal` hub and pass 36's `/verify`
-hub, so Discord's fetched shape now reports **18 roots / 125 subcommands** with
-no missing, extra or changed roots. The bridge
+`/music`, pass 34's `/setup` hub, pass 35's `/appeal` hub, pass 36's `/verify`
+hub, pass 40's `/form` and pass 41's `/event`, so Discord's fetched shape now
+reports **19 roots / 132 subcommands** with no missing, extra or changed roots.
+The bridge
 added `!help commands`, `!help browse`, `!help search query=ban`, `!mod history`,
 `!ai status`, `!logging status`, `!logging events`, `!logging retention`,
 `!logging export`, `!analytics overview`, `!analytics commands`, `!analytics
 messages`, `!config list`, `!config get`, `!config set`, `!export guild`, `!export user`,
 `!export drift`, `!music status | add | queue | play | remove | skip`,
-`!appeal open | status` and `!verify start | status` to the live list. Pass 23
+`!appeal open | status`, `!verify start | status` and `!event create | edit |
+rsvp | list | remind | export` to the live list. Pass 23
 added `!mod links` and a live link-filter proof: three marked MCP messages
 produced a blocklisted
 subdomain case, an apex case and a punycode case; `!mod review case=2` marked one
@@ -353,11 +376,11 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 413 tests / 61 files · budget 18/100 roots (125 subcommands · 143 actions · 4 context menus) · memory current
+pnpm check        exit 0 · typecheck 0 · 425 tests / 63 files · budget 19/100 roots (132 subcommands · 151 actions · 4 context menus) · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 18 roots / 125 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · /form create → open → panel → submit → 1 pending → accepted → 1.5 KB export parsed with the same answers and decision · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
+live              2026-11-01 · AI Team#5758 · 2 guilds · 19 roots / 132 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · /event create → open → rsvp 1/2 → reminder → decline → 1.2 KB export parsed with the same row · /form create → open → panel → submit → 1 pending → accepted → 1.5 KB export parsed with the same answers and decision · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)
-live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set · !export guild · !export user · !export drift · !music status · !music add · !music queue · !music play · !music remove · !music skip · !appeal open · !appeal status · !verify start · !verify status
+live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set · !export guild · !export user · !export drift · !music status · !music add · !music queue · !music play · !music remove · !music skip · !appeal open · !appeal status · !verify start · !verify status · !event create · !event edit · !event rsvp · !event list · !event remind · !event export
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
 live env blocker 2026-11-01 · DATABASE_URL localhost:5432 → ECONNREFUSED (4ms) · REDIS_URL localhost:6379 → ECONNREFUSED (1ms) · Docker/service absent
 live analytics    2026-11-01 · 2 stored audit rows = 2 logged events · 1 MCP edit + 1 delete = 1 edited / 1 deleted · command runs 0 → 3 → 4

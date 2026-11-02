@@ -237,6 +237,7 @@ describe("P6 web auth and authorization", () => {
         "analytics",
         "music",
         "forms",
+        "events",
       ]);
       expect(body.latestImport?.source).toBe("bundle");
 

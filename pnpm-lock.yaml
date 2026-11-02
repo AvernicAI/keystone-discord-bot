@@ -230,6 +230,9 @@ importers:
       '@keystone/module-diagnostics':
         specifier: workspace:*
         version: link:../../modules/diagnostics
+      '@keystone/module-events':
+        specifier: workspace:*
+        version: link:../../modules/events
       '@keystone/module-forms':
         specifier: workspace:*
         version: link:../../modules/forms
@@ -353,6 +356,19 @@ importers:
         version: link:../../packages/testing
 
   modules/diagnostics:
+    dependencies:
+      '@keystone/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@keystone/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
+
+  modules/events:
     dependencies:
       '@keystone/kernel':
         specifier: workspace:*
@@ -506,6 +522,9 @@ importers:
       '@keystone/module-diagnostics':
         specifier: workspace:*
         version: link:../../modules/diagnostics
+      '@keystone/module-events':
+        specifier: workspace:*
+        version: link:../../modules/events
       '@keystone/module-forms':
         specifier: workspace:*
         version: link:../../modules/forms

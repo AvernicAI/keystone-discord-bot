@@ -218,17 +218,24 @@ pass 39 moved the join-gate DM onto the moderation action port, so the two
 audit findings are cleared. Pass 40 added `/form create | edit | delete | list |
 panel | submit | review | export`: two owned tables, a pending-submission
 invariant, a real review transition and a checksummed export, with modal input
-deferred and named. The ledger is now **18 roots / 125 subcommands / 143 actions
-/ 4 context menus**, and every name in the saved plan table (59 of 59) is
-registered. The rest of this phase is open.
+deferred and named. Pass 41 added `/event create | edit | delete | list | rsvp |
+remind | export`: a draft/open/closed lifecycle, one RSVP row per member,
+capacity counted from `going` rows inside the store transaction, reminder
+bookkeeping and a checksummed export, with buttons, scheduling and ICS deferred
+and named. The ledger is now **19 roots / 132 subcommands / 151 actions / 4
+context menus**; the Master-Plan records 72 planned names across 13 built roots
+plus the unbuilt `/modmail`. Every recorded plan name is registered. The rest of
+this phase is open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.
-- New domains: events/RSVP, role persistence, modmail; plus goodbye messages,
+- New domains: role persistence and modmail; plus goodbye messages,
   YouTube/Twitch/RSS feeds, temp ban/role expiry, join-gate expiry, panic mode,
   case export and `command_usage` retention. Invites, the link, profanity and
   zalgo filters, auto-responders, analytics and the four context menus, the
-  `/setup` hub, the `/appeal` hub, the `/verify` hub and forms are done (above).
+  `/setup` hub, the `/appeal` hub, the `/verify` hub, forms and events are done
+  (above). Event buttons, scheduled reminders, per-member timezones and ICS
+  export remain open.
 - `/export`, `/config`, `/help` and the `/music` saved queue shipped; BYO
   Lavalink playback is the open half of `/music`; command-budget audit remains a
   gate, now covering the separate context-menu budgets.

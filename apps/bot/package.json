@@ -15,6 +15,7 @@
     "@keystone/kernel": "workspace:*",
     "@keystone/module-diagnostics": "workspace:*",
     "@keystone/module-forms": "workspace:*",
+    "@keystone/module-events": "workspace:*",
     "@keystone/module-community": "workspace:*",
     "@keystone/module-ai": "workspace:*",
     "@keystone/module-analytics": "workspace:*",

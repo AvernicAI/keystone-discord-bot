@@ -170,12 +170,6 @@ export class InMemoryFormStore implements FormStore {
     return updated;
   }
 
-  /** Read-only helper for the submission export; not part of the port. */
-  allSubmissions(guildId: string): readonly FormSubmission[] {
-    return [...this.#submissions.values()].filter(
-      (submission) => submission.guildId === guildId,
-    );
-  }
 }
 
 export type { FormState, FormSubmissionState };

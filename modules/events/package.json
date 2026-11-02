@@ -1,0 +1,17 @@
+{
+  "name": "@keystone/module-events",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Guild events: a lifecycle, a capacity-checked RSVP list, reminders and export.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/kernel": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@keystone/testing": "workspace:*"
+  }
+}

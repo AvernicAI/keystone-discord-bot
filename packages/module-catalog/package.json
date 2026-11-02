@@ -12,6 +12,7 @@
     "@keystone/module-analytics": "workspace:*",
     "@keystone/module-community": "workspace:*",
     "@keystone/module-diagnostics": "workspace:*",
+    "@keystone/module-events": "workspace:*",
     "@keystone/module-forms": "workspace:*",
     "@keystone/module-invites": "workspace:*",
     "@keystone/module-logging": "workspace:*",

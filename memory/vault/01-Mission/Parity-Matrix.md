@@ -147,7 +147,7 @@ checked. See [[Master-Plan]] for the research program.
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Web dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | P6 | Node/render first; field widgets and fleet open |
-| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 18 roots / 125 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human); `/music` pass 32; `/setup` hub pass 34; `/appeal` hub pass 35; `/verify` hub pass 36; `/form` pass 40. The saved plan table is 12 roots / 59 names, all 59 registered; the handoff's 18 / 160 has no per-root list and is unverified |
+| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 19 roots / 132 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human); `/music` pass 32; `/setup` hub pass 34; `/appeal` hub pass 35; `/verify` hub pass 36; `/form` pass 40; `/event` pass 41. The Master-Plan records 72 planned names across 13 built roots plus the unbuilt `/modmail`; all recorded names are registered, and the handoff's 18 / 160 still has 28 unnamed slots |
 | Context menus | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | 4 menus (Report message, Case history, Rank card, Explain with AI) registered live on the separate 15 + 15 budget; invocation is human-only because the MCP cannot right-click. Competitor presence not verified for every row |
 | In-bot configuration | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/config` (list, get, set, export) over every module's own schema; shipped pass 30; live-proven. Competitor in-Discord config not verified (all surveyed bots also ship a web dashboard) |
 | First-run setup hub | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/setup status | module | verify | import | reset`; real settings/health/export seams, settings-only reset; live pass 34 |
@@ -203,6 +203,7 @@ rule.
 | Auto-responder | 💰 | ✅ | ✅ | ❌ | ❔ | P7 | Exact/contains/regex triggers, one reply, per-trigger cooldown; `/tools`; shipped pass 25 |
 | Guild analytics | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/analytics` with overview, members, messages, commands, tickets and export; read-only aggregates over audit, cases, invites, tickets and command usage; shipped pass 29; competitor claims unverified |
 | Application forms | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/form create \| edit \| delete \| list \| panel \| submit \| review \| export`; real forms and submissions, one pending per member, an accept/deny review queue and a checksummed JSON export; shipped and live-proven pass 40. Modal input and forms in the guild bundle are open; competitor presence unverified |
+| Guild events | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/event create \| edit \| delete \| list \| rsvp \| remind \| export`; a draft/open/closed lifecycle, one RSVP row per member, capacity counted from `going` rows in the store transaction, manual reminder bookkeeping and a checksummed JSON export; shipped and live-proven pass 41. Buttons, scheduled reminders, per-member timezones and ICS export are open; competitor presence unverified |
 
 ## Tally
 

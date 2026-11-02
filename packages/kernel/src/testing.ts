@@ -160,6 +160,7 @@ export interface TestContextOptions {
   attachments?: import("./export").AttachmentReader;
   music?: import("./music").MusicPort;
   forms?: import("./forms").FormStore;
+  events?: import("./events").EventStore;
   catalog?: readonly CommandCatalogEntry[];
 }
 
@@ -194,5 +195,6 @@ export function createTestContext(options: TestContextOptions = {}): TestContext
     attachments: options.attachments,
     music: options.music,
     forms: options.forms,
+    events: options.events,
   };
 }

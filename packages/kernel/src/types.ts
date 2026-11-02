@@ -259,6 +259,8 @@ export interface CommandContext {
   readonly music?: import("./music").MusicPort;
   /** Present when the composition root wired the form store. */
   readonly forms?: import("./forms").FormStore;
+  /** Present when the composition root wired the event store. */
+  readonly events?: import("./events").EventStore;
 }
 
 /**

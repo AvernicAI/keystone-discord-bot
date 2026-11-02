@@ -6,13 +6,13 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-01",
   "phase": "P7",
-  "lastPass": "journal/2026-11-01-pass-40.md",
+  "lastPass": "journal/2026-11-01-pass-41.md",
   "metrics": {
-    "commands": 18,
-    "subcommands": 125,
+    "commands": 19,
+    "subcommands": 132,
     "commandLimit": 100,
-    "modules": 10,
-    "tests": 413
+    "modules": 11,
+    "tests": 425
   },
   "modules": [
     {
@@ -214,6 +214,23 @@
       "teachingPath": "vault/04-Modules/forms/Teaching.md",
       "commands": [
         "form"
+      ],
+      "intents": [
+        "Guilds"
+      ],
+      "premium": false
+    },
+    {
+      "id": "events",
+      "name": "Events",
+      "status": "beta",
+      "phase": "P7",
+      "codePath": "modules/events",
+      "specPath": "vault/04-Modules/events/Spec.md",
+      "statusPath": "vault/04-Modules/events/Status.md",
+      "teachingPath": "vault/04-Modules/events/Teaching.md",
+      "commands": [
+        "event"
       ],
       "intents": [
         "Guilds"

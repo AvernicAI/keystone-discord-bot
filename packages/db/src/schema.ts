@@ -389,6 +389,71 @@ export const formSubmissions = pgTable(
   ],
 );
 
+/**
+ * One row per operator-owned guild event.
+ *
+ * An event is configuration, but it has a lifecycle and a stable id that RSVPs
+ * reference. `(guild_id, key)` is unique so `/event rsvp event:launch` can never
+ * mean two different events. `capacity` is nullable: null means unlimited.
+ */
+export const events = pgTable(
+  "events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    guildId: text("guild_id").notNull(),
+    key: text("key").notNull(),
+    name: text("name").notNull(),
+    description: text("description").notNull().default(""),
+    state: text("state").notNull().default("draft"),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }),
+    location: text("location").notNull().default(""),
+    capacity: integer("capacity"),
+    createdBy: text("created_by").notNull(),
+    remindedAt: timestamp("reminded_at", { withTimezone: true }),
+    remindedBy: text("reminded_by"),
+    reminderCount: integer("reminder_count").notNull().default(0),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    uniqueIndex("events_guild_key_idx").on(table.guildId, table.key),
+    index("events_guild_state_idx").on(table.guildId, table.state),
+    index("events_guild_starts_idx").on(table.guildId, table.startsAt),
+  ],
+);
+
+/**
+ * One RSVP row per member per event.
+ *
+ * The unique index is the ownership rule made structural: a member can change
+ * only their own row, and no path can create a second membership. `going` rows
+ * are what capacity counts; `not_going` is kept as a real answer rather than a
+ * silent delete, so a reminder can name who declined.
+ */
+export const eventRsvps = pgTable(
+  "event_rsvps",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    guildId: text("guild_id").notNull(),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull(),
+    state: text("state").notNull().default("going"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    uniqueIndex("event_rsvps_event_user_idx").on(table.eventId, table.userId),
+    index("event_rsvps_guild_event_state_idx").on(
+      table.guildId,
+      table.eventId,
+      table.state,
+    ),
+  ],
+);
+
 /** Monotonic per-guild case numbers; the unique index on cases is the backstop. */
 export const caseCounters = pgTable("case_counters", {
   guildId: text("guild_id").primaryKey(),
@@ -458,6 +523,8 @@ export const schema = {
   commandUsage,
   forms,
   formSubmissions,
+  events,
+  eventRsvps,
   caseCounters,
   jobReceipts,
   imports,

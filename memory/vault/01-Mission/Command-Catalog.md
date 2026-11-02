@@ -5,7 +5,7 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**18 roots · 125 subcommands · 143 total actions · 4 context menus · 18/100 global roots used.**
+**19 roots · 132 subcommands · 151 total actions · 4 context menus · 19/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
@@ -32,6 +32,7 @@ and appear under right-click → Apps.
 | `/analytics` | `analytics` | 6 |
 | `/music` | `music` | 8 |
 | `/form` | `forms` | 8 |
+| `/event` | `events` | 7 |
 
 ## `/ping`
 
@@ -281,6 +282,20 @@ Build application forms, publish a panel and review submissions.
 | `/form submit` | Submit answers to an open form; one pending submission per member. | `form`, `answers` |
 | `/form review` | List pending submissions, read one, or accept/deny it. | `submission`, `decision`, `note` |
 | `/form export` | Download forms and submissions as a checksummed JSON file. | `form` |
+
+## `/event`
+
+Create guild events, take RSVPs, post reminders and export attendance.
+
+| Subcommand | Description | Options |
+| --- | --- | --- |
+| `/event create` | Create a draft event with a start time and optional capacity. | `name`, `key`, `description`, `starts`, `ends`, `location`, `capacity` |
+| `/event edit` | Change an event's details, capacity or draft/open/closed state. | `event`, `name`, `description`, `starts`, `ends`, `location`, `capacity`, `state` |
+| `/event delete` | Delete an event that has no RSVPs; attendance history is never deleted. | `event`, `confirm` |
+| `/event list` | List events with state, start time and RSVP counts. | — |
+| `/event rsvp` | Record your own going or not-going answer; one RSVP per member. | `event`, `rsvp` |
+| `/event remind` | Post a reminder for an open event and record who sent it. | `event` |
+| `/event export` | Download events and RSVPs as a checksummed JSON file. | `event` |
 
 ## Context menus
 

@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "updatedAt": "2026-11-02",
   "source": "packages/kernel ModuleRegistry catalog()",
-  "roots": 18,
-  "subcommands": 125,
-  "actions": 143,
+  "roots": 19,
+  "subcommands": 132,
+  "actions": 151,
   "contextMenus": 4,
   "userContextMenus": 2,
   "messageContextMenus": 2,
@@ -1055,6 +1055,76 @@
           "description": "Download forms and submissions as a checksummed JSON file.",
           "options": [
             "form"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "event",
+      "moduleId": "events",
+      "description": "Create guild events, take RSVPs, post reminders and export attendance.",
+      "options": [],
+      "subcommands": [
+        {
+          "name": "create",
+          "description": "Create a draft event with a start time and optional capacity.",
+          "options": [
+            "name",
+            "key",
+            "description",
+            "starts",
+            "ends",
+            "location",
+            "capacity"
+          ]
+        },
+        {
+          "name": "edit",
+          "description": "Change an event's details, capacity or draft/open/closed state.",
+          "options": [
+            "event",
+            "name",
+            "description",
+            "starts",
+            "ends",
+            "location",
+            "capacity",
+            "state"
+          ]
+        },
+        {
+          "name": "delete",
+          "description": "Delete an event that has no RSVPs; attendance history is never deleted.",
+          "options": [
+            "event",
+            "confirm"
+          ]
+        },
+        {
+          "name": "list",
+          "description": "List events with state, start time and RSVP counts.",
+          "options": []
+        },
+        {
+          "name": "rsvp",
+          "description": "Record your own going or not-going answer; one RSVP per member.",
+          "options": [
+            "event",
+            "rsvp"
+          ]
+        },
+        {
+          "name": "remind",
+          "description": "Post a reminder for an open event and record who sent it.",
+          "options": [
+            "event"
+          ]
+        },
+        {
+          "name": "export",
+          "description": "Download events and RSVPs as a checksummed JSON file.",
+          "options": [
+            "event"
           ]
         }
       ]

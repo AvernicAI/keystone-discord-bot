@@ -7,6 +7,7 @@ export * from "./analytics";
 export * from "./export";
 export * from "./music";
 export * from "./forms";
+export * from "./events";
 export * from "./errors";
 export * from "./logger";
 export * from "./manifest";

@@ -15,6 +15,7 @@ import { DrizzleAnalyticsStore } from "./analytics-store";
 import { DrizzleCommandUsageStore } from "./command-usage-store";
 import { DrizzleMusicStore } from "./music-store";
 import { DrizzleFormStore } from "./form-store";
+import { DrizzleEventStore } from "./event-store";
 
 /**
  * Factories so the composition root never needs Drizzle's generic types.
@@ -82,4 +83,8 @@ export function createMusicStore(handle: PostgresHandle): DrizzleMusicStore {
 
 export function createFormStore(handle: PostgresHandle): DrizzleFormStore {
   return new DrizzleFormStore(handle.db as never);
+}
+
+export function createEventStore(handle: PostgresHandle): DrizzleEventStore {
+  return new DrizzleEventStore(handle.db as never);
 }

@@ -521,6 +521,19 @@
         "budget": "18/100 roots · 125 subcommands · 4 context menus",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-41",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Events, the first of the two plan roots the inventory found unbuilt: `/event create | edit | delete | list | rsvp | remind | export` is the eleventh module. Migration 0012 adds `events` and `event_rsvps`; a table is justified because an RSVP is relational state with one row per member and a capacity check that must be atomic, which a settings blob cannot enforce. One `EventStore` has in-memory and Drizzle adapters; the SQL adapter locks the event row and counts `going` rows inside the transaction. `EventService` owns the draft/open/closed lifecycle, date parsing, the event cap, the capacity bound, the delete-only-without-attendance rule and reminder bookkeeping; `rsvp` takes the member id from the interaction and has no user option, so no command can write another member's row. PGlite tests cover the unique `(event_id, user_id)` row, capacity, a decline freeing a seat, reminder counts and cascade delete. Live memory mode (exactly one process): create draft → open → rsvp going 1/2 → remind (reminder 1, 1 going) → rsvp not going 0/2 → rsvp going 1/2 → export 1242 bytes / checksum `95023b52…`; the downloaded file carried the same event, capacity, reminder count, reviewer id and a checksum that recomputes; delete was refused while the RSVP exists. `commands:doctor` reports 19 roots / 132 subcommands / 2 user + 2 message menus with no drift. Also removed dead `allSubmissions` from the forms store and recorded the plan's per-root table in Master-Plan (72 planned names across 13 built roots plus /modmail; 132 registered). Tests 425 / 63 files; .env DATABASE_URL and REDIS_URL still ECONNREFUSED.",
+      "journal": "journal/2026-11-01-pass-41.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "425",
+        "budget": "19/100 roots · 132 subcommands · 4 context menus",
+        "memory": "current"
+      }
     }
   ]
 }

@@ -92,6 +92,7 @@ async function main(): Promise<void> {
     attachments: createDiscordAttachmentReader(),
     music: runtime.music,
     forms: runtime.forms,
+    events: runtime.events,
     usage: runtime.usage,
   };
 

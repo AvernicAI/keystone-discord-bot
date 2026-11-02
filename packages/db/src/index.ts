@@ -18,3 +18,4 @@ export * from "./analytics-store";
 export * from "./command-usage-store";
 export * from "./music-store";
 export * from "./form-store";
+export * from "./event-store";

@@ -143,31 +143,40 @@ same interfaces. No module changes when a port changes.
 
 ### Command allocation
 
-**Gap audit (passes 34–35, 2026-11-01):** the "18 roots / 160 subcommands" figure
-in the plan handoff has no per-root list in this repository. This table is the
-only saved allocation list; it names **12 roots / 59 subcommands**, not 160, and
-does not name the extra roots. The live registry now has **18 roots / 125
-subcommands** (see [[01-Mission/Command-Catalog|Command-Catalog]]); `/form` is a
-new domain shipped in pass 40, not one of the handoff's unlisted names. The 160
-figure still has no per-root list, so it remains unverified rather than
-reconstructed. Every name in this saved table is registered: `/setup`, `/appeal`
-and `/verify` were the last gaps. Do not invent the missing names: the generated
-catalog and this table are the evidence.
+**Plan record (pass 41, 2026-11-01):** this is the durable per-root source for
+the approved plan. It records **13 built roots plus the unbuilt `/modmail`**, for
+**72 planned subcommand names** where the plan has a record (59 from the original
+table, 7 for `/event`, 6 for `/modmail` whose individual names were not
+recorded). The live registry is **19 roots / 132 subcommands**. Six registered
+roots (`/ping`, `/about`, `/ai`, `/invites`, `/analytics`, `/form`) are not in
+the plan table. The handoff's **"18 roots / 160 subcommands"** still cannot be
+recomputed: 28 subcommand slots are unnamed and the plan's 18th root is not
+identified. Do not invent them, and do not treat 160 as a target — the plan's own
+non-goals reject feature-count marketing.
 
-| Root | Subcommands | Replaces |
-| --- | --- | --- |
-| `/setup` | status, module, import, verify, reset | onboarding wizards — **shipped pass 34** |
-| `/config` | get, set, list, export | per-feature config commands |
-| `/mod` | ban, kick, timeout, warn, purge, lock, slowmode, case, note, history | Dyno/Carl moderation |
-| `/ticket` | panel, claim, close, add, transcript, stats | Ticket Tool |
-| `/rank` | view, leaderboard, rewards, admin | MEE6 leveling |
-| `/tools` | embed, tag, reminder, giveaway, poll, feed, stat | Carl/MEE6 utilities |
-| `/help` | browse, search, privacy | every bot's help |
-| `/logging` | setup, channel, events, status, retention, export, disable | Dyno/Carl audit logging |
-| `/appeal` | open, status | nobody (our edge) — **shipped pass 35** |
-| `/export` | guild, user, import, delete, drift, rollback | nobody (our edge) |
-| `/verify` | start, status | Security Bot — **shipped pass 36** |
-| `/music` | play, queue, stop | BYO Lavalink |
+| Root | Planned subcommands (as recorded) | Planned | Registered | Replaces / notes |
+| --- | --- | ---: | ---: | --- |
+| `/ping` | — (not in the plan table) | — | 0 | P0 diagnostic root |
+| `/about` | — (not in the plan table) | — | 0 | P0 diagnostic root |
+| `/help` | browse, search, privacy | 3 | 5 | every bot's help; adds `commands`, `changelog` |
+| `/setup` | status, module, import, verify, reset | 5 | 5 | onboarding wizards — **shipped pass 34** |
+| `/config` | get, set, list, export | 4 | 4 | per-feature config commands |
+| `/export` | guild, user, import, delete, drift, rollback | 6 | 6 | nobody (our edge) |
+| `/mod` | ban, kick, timeout, warn, purge, lock, slowmode, case, note, history | 10 | 14 | Dyno/Carl moderation; adds `unlock`, `links`, `filters`, `review` |
+| `/appeal` | open, status | 2 | 2 | nobody (our edge) — **shipped pass 35** |
+| `/verify` | start, status | 2 | 2 | Security Bot — **shipped pass 36** |
+| `/rank` | view, leaderboard, rewards, admin | 4 | 12 | MEE6 leveling; adds the economy names |
+| `/ticket` | panel, claim, close, add, transcript, stats | 6 | 8 | Ticket Tool; adds `open`, `summary` |
+| `/tools` | embed, tag, reminder, giveaway, poll, feed, stat | 7 | 24 | Carl/MEE6 utilities; adds 17 names |
+| `/ai` | — (not in the plan table) | — | 11 | P4 AI layer |
+| `/invites` | — (not in the plan table) | — | 3 | P7 invite tracking |
+| `/logging` | setup, channel, events, status, retention, export, disable | 7 | 7 | Dyno/Carl audit logging |
+| `/analytics` | — (not in the plan table) | — | 6 | P7 read-only analytics |
+| `/music` | play, queue, stop | 3 | 8 | BYO Lavalink; adds `add`, `remove`, `clear`, `skip`, `status` |
+| `/form` | — (not in the plan table) | — | 8 | P7 forms — **shipped pass 40** |
+| `/event` | create, edit, delete, list, rsvp, remind, export | 7 | 7 | P7 events — **shipped pass 41** |
+| `/modmail` | 6 names not recorded | 6 | 0 | P7, **not built** |
+| **Totals** | 14 rows with a planned count | **72** | **132** | 19 registered roots; 28 of 160 still unnamed |
 
 ## Phases
 

@@ -6,8 +6,8 @@ P8 music is in repo and live-proven through the development bridge. It is the
 ninth module and the last named root in the approved v1.0 plan.
 
 - `/music` is registered with `play`, `queue`, `add`, `remove`, `clear`, `skip`,
-  `stop` and `status`. The command ledger is **18 roots / 125 subcommands / 143
-  actions**.
+  `stop` and `status`. The command ledger is now **19 roots / 132 subcommands /
+  151 actions** (it was 18 / 125 / 143 when `/music` shipped).
 - The saved queue is **real and durable in SQL mode**: one
   `community_records` row per guild under kind `music_queue`, key `default`.
   The SQL adapter locks the guild row, so the cap holds under concurrent adds.
