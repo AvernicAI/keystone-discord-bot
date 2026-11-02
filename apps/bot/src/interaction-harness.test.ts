@@ -75,6 +75,10 @@ class RecordingModerationActions implements ModerationActions {
   ): Promise<void> {
     this.notifications.push(notice);
   }
+
+  directMessage(): Promise<ModerationActionResult> {
+    return Promise.resolve({ ok: true });
+  }
 }
 
 function syntheticBanInteraction(): {

@@ -5,10 +5,9 @@ import {
   SettingsService,
   auditBudget,
   dispatchCommand,
-  type CommunityActions,
-  type CommunityStore,
   type ModerationActions,
   type ModerationActionResult,
+  type ModerationDirectMessage,
   type ModerationNotice,
 } from "@keystone/kernel";
 import { createTestContext, FakeInteraction, noopQueue, staticHealth } from "@keystone/testing";
@@ -22,6 +21,8 @@ import { moderationModule } from "./manifest";
 class RecordingActions implements ModerationActions {
   readonly calls: string[] = [];
   readonly notifications: ModerationNotice[] = [];
+  readonly dms: { userId: string; content?: string; customId?: string }[] = [];
+  dmResult: ModerationActionResult = { ok: true };
 
   private ok(): Promise<ModerationActionResult> {
     return Promise.resolve({ ok: true });
@@ -78,6 +79,18 @@ class RecordingActions implements ModerationActions {
   async notify(_guildId: string, _channelId: string | null | undefined, notice: ModerationNotice): Promise<void> {
     this.notifications.push(notice);
   }
+
+  async directMessage(
+    userId: string,
+    message: ModerationDirectMessage,
+  ): Promise<ModerationActionResult> {
+    this.dms.push({
+      userId,
+      content: message.content,
+      customId: message.components?.[0]?.components[0]?.customId,
+    });
+    return this.dmResult;
+  }
 }
 
 type OptionValues = Record<string, string | number | boolean | null>;
@@ -104,22 +117,30 @@ function buildContext(options: OptionValues, userId = "mod-1") {
   return { ctx, cases, actions, store, members };
 }
 
-function communityWithDm(result: { ok: boolean; detail?: string } = { ok: true }) {
-  const dms: { userId: string; content?: string; customId?: string }[] = [];
-  const actions = {
-    async sendDM(
-      userId: string,
-      message: { content?: string; components?: { components: { customId: string }[] }[] },
-    ) {
-      dms.push({
-        userId,
-        content: message.content,
-        customId: message.components?.[0]?.components[0]?.customId,
-      });
-      return result.ok ? { ok: true, id: "dm-1" } : { ok: false, detail: result.detail };
+function verificationStart(options: {
+  members: InMemoryMemberStore;
+  gateEnabled?: boolean;
+  dmResult?: ModerationActionResult;
+}) {
+  const actions = new RecordingActions();
+  if (options.dmResult) actions.dmResult = options.dmResult;
+  const interaction = new FakeInteraction({
+    commandName: "verify",
+    guildId: "guild-1",
+    userId: "new-member",
+    subcommand: "start",
+  });
+  const ctx = createTestContext({
+    interaction,
+    moduleId: "moderation",
+    settings: { joinGate: { enabled: options.gateEnabled ?? true } },
+    moderation: {
+      cases: new CaseService(new InMemoryCaseStore()),
+      actions,
+      members: options.members,
     },
-  } as unknown as CommunityActions;
-  return { port: { actions, store: {} as CommunityStore }, dms };
+  });
+  return { ctx, interaction, actions };
 }
 
 describe("moderation module", () => {
@@ -384,35 +405,20 @@ describe("moderation module", () => {
     ).rejects.toThrow(/not one of your cases/i);
   });
 
-  it("starts verification with a DM button and leaves the member quarantined", async () => {
+  it("starts verification with a DM through the moderation port and leaves the member quarantined", async () => {
     const members = new InMemoryMemberStore();
     await members.markQuarantined("guild-1", "new-member");
-    const { port, dms } = communityWithDm();
-    const verifyInteraction = new FakeInteraction({
-      commandName: "verify",
-      guildId: "guild-1",
-      userId: "new-member",
-      subcommand: "start",
-    });
+    const { ctx, interaction, actions } = verificationStart({ members });
 
-    await verify.execute(
-      createTestContext({
-        interaction: verifyInteraction,
-        moduleId: "moderation",
-        settings: { joinGate: { enabled: true } },
-        moderation: {
-          cases: new CaseService(new InMemoryCaseStore()),
-          actions: new RecordingActions(),
-          members,
-        },
-        community: port,
-      }),
+    await verify.execute(ctx);
+
+    expect(actions.dms).toHaveLength(1);
+    expect(actions.dms[0]?.userId).toBe("new-member");
+    expect(actions.dms[0]?.content).toBe(
+      "Keystone verification: click the button below to leave quarantine in this server. If you did not request this, ignore it.",
     );
-
-    expect(dms).toHaveLength(1);
-    expect(dms[0]?.userId).toBe("new-member");
-    expect(dms[0]?.customId).toMatch(/^keystone:verify:guild-1:new-member$/);
-    expect(verifyInteraction.lastReply?.content).toContain("DMs");
+    expect(actions.dms[0]?.customId).toMatch(/^keystone:verify:guild-1:new-member$/);
+    expect(interaction.lastReply?.content).toContain("DMs");
     expect(await members.get("guild-1", "new-member")).toMatchObject({
       quarantined: true,
       verifiedAt: undefined,
@@ -420,114 +426,43 @@ describe("moderation module", () => {
   });
 
   it("refuses to start when no quarantine is recorded", async () => {
-    const { port, dms } = communityWithDm();
-    const verifyInteraction = new FakeInteraction({
-      commandName: "verify",
-      guildId: "guild-1",
-      userId: "new-member",
-      subcommand: "start",
-    });
+    const { ctx, actions } = verificationStart({ members: new InMemoryMemberStore() });
 
-    await expect(
-      verify.execute(
-        createTestContext({
-          interaction: verifyInteraction,
-          moduleId: "moderation",
-          settings: { joinGate: { enabled: true } },
-          moderation: {
-            cases: new CaseService(new InMemoryCaseStore()),
-            actions: new RecordingActions(),
-            members: new InMemoryMemberStore(),
-          },
-          community: port,
-        }),
-      ),
-    ).rejects.toThrow(/No quarantine is recorded/i);
-    expect(dms).toHaveLength(0);
+    await expect(verify.execute(ctx)).rejects.toThrow(/No quarantine is recorded/i);
+    expect(actions.dms).toHaveLength(0);
   });
 
   it("refuses to start when the join gate is disabled", async () => {
-    const { port, dms } = communityWithDm();
-    const verifyInteraction = new FakeInteraction({
-      commandName: "verify",
-      guildId: "guild-1",
-      userId: "new-member",
-      subcommand: "start",
+    const { ctx, actions } = verificationStart({
+      members: new InMemoryMemberStore(),
+      gateEnabled: false,
     });
 
-    await expect(
-      verify.execute(
-        createTestContext({
-          interaction: verifyInteraction,
-          moduleId: "moderation",
-          settings: { joinGate: { enabled: false } },
-          moderation: {
-            cases: new CaseService(new InMemoryCaseStore()),
-            actions: new RecordingActions(),
-            members: new InMemoryMemberStore(),
-          },
-          community: port,
-        }),
-      ),
-    ).rejects.toThrow(/join gate is not enabled/i);
-    expect(dms).toHaveLength(0);
+    await expect(verify.execute(ctx)).rejects.toThrow(/join gate is not enabled/i);
+    expect(actions.dms).toHaveLength(0);
   });
 
   it("refuses to start for an already verified member", async () => {
     const members = new InMemoryMemberStore();
     await members.markVerified("guild-1", "new-member", "2026-11-01T00:00:00.000Z");
-    const { port, dms } = communityWithDm();
-    const verifyInteraction = new FakeInteraction({
-      commandName: "verify",
-      guildId: "guild-1",
-      userId: "new-member",
-      subcommand: "start",
-    });
+    const { ctx, actions } = verificationStart({ members });
 
-    await expect(
-      verify.execute(
-        createTestContext({
-          interaction: verifyInteraction,
-          moduleId: "moderation",
-          settings: { joinGate: { enabled: true } },
-          moderation: {
-            cases: new CaseService(new InMemoryCaseStore()),
-            actions: new RecordingActions(),
-            members,
-          },
-          community: port,
-        }),
-      ),
-    ).rejects.toThrow(/already verified/i);
-    expect(dms).toHaveLength(0);
+    await expect(verify.execute(ctx)).rejects.toThrow(/already verified/i);
+    expect(actions.dms).toHaveLength(0);
   });
 
   it("refuses to start when the member's DMs are closed", async () => {
     const members = new InMemoryMemberStore();
     await members.markQuarantined("guild-1", "new-member");
-    const { port } = communityWithDm({ ok: false, detail: "Cannot send messages to this user" });
-    const verifyInteraction = new FakeInteraction({
-      commandName: "verify",
-      guildId: "guild-1",
-      userId: "new-member",
-      subcommand: "start",
+    const { ctx, actions } = verificationStart({
+      members,
+      dmResult: { ok: false, detail: "Cannot send messages to this user" },
     });
 
-    await expect(
-      verify.execute(
-        createTestContext({
-          interaction: verifyInteraction,
-          moduleId: "moderation",
-          settings: { joinGate: { enabled: true } },
-          moderation: {
-            cases: new CaseService(new InMemoryCaseStore()),
-            actions: new RecordingActions(),
-            members,
-          },
-          community: port,
-        }),
-      ),
-    ).rejects.toThrow(/could not DM you.*Cannot send messages to this user/i);
+    await expect(verify.execute(ctx)).rejects.toThrow(
+      /could not DM you.*Cannot send messages to this user/i,
+    );
+    expect(actions.dms).toHaveLength(1);
   });
 
   it("reports the persisted status row rather than gateway presence", async () => {

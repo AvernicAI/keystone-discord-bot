@@ -18,8 +18,11 @@ verification record**, `!verify start` returned **No quarantine is recorded for
 you in this server**, and no row was written. The MCP account is a bot and
 cannot make a member join, receive the DM or click the button, so the join and
 completion paths are covered by security, command and PGlite tests, not claimed
-live. `commands:doctor` reports **17 roots / 117 subcommands / 4 context menus**
-with no drift. See [[04-Modules/moderation/Status|Moderation status]].
+live. Pass 39 moved the DM itself onto `ModerationActions.directMessage`, so the
+join gate no longer borrows the community adapter; the body, button and refusal
+text are unchanged. `commands:doctor` reports **17 roots / 117 subcommands / 4
+context menus** with no drift. See [[04-Modules/moderation/Status|Moderation
+status]].
 
 **P7 `/appeal` remains live-proven** (pass 35): `open` keeps the target-only
 guard and appends the existing `appealed` event; `status` reads those events
@@ -399,7 +402,7 @@ read that file.
 | 1 | The join path persists a quarantined row only after an enforced hold | `security.test.ts`: a young account in enforcing mode produces `{ quarantined: true, verifiedAt: undefined }` and a verify button; an old-enough account, a dry run and an anti-raid hold produce no row and, for anti-raid, no verify button | In-memory member + case stores |
 | 2 | `start` requires a persisted quarantine | `mod.test.ts`: no record is refused with **No quarantine is recorded** and sends no DM; a disabled gate and an already-verified row are refused | In-memory member store |
 | 3 | `start` sends the button without completing | `mod.test.ts`: a quarantined row gets one DM with `keystone:verify:guild-1:new-member` and the row stays `quarantined: true` | In-memory member store |
-| 4 | A closed DM is an explicit refusal | `mod.test.ts`: a failed `sendDM` throws `could not DM you` with the provider detail; pass 36's live run printed **Cannot send messages to this user** and the fix | Unit + **pass-36 live bridge** |
+| 4 | A closed DM is an explicit refusal | `mod.test.ts`: a failed `directMessage` on the moderation port throws `could not DM you` with the provider detail; pass 36's live run printed **Cannot send messages to this user** and the fix | Unit + **pass-36 live bridge** |
 | 5 | `status` reads persisted state, not roles | `mod.test.ts`: quarantined, verified, no-record and disabled-gate rows each render their own state and next step, with the `members table` footer | In-memory rows |
 | 6 | The SQL adapter is a real upsert | `member-store.test.ts`: one `members` row, `markQuarantined` clears a previous verification, verification clears `quarantined`, `joined_at` is preserved | **PGlite** |
 | 7 | Completion transitions only a quarantined row | `verification.test.ts`: no record, non-quarantined, verified and disabled gate are refused; a quarantined row is written only after `unquarantine` succeeds | In-memory member store + recorder |

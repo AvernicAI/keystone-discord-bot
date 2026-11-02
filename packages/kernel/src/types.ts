@@ -453,6 +453,12 @@ export interface ModerationNotice {
   readonly components?: ActionRow[];
 }
 
+/** The narrow direct-message shape moderation owns, without the community port. */
+export interface ModerationDirectMessage {
+  readonly content: string;
+  readonly components?: ActionRow[];
+}
+
 /**
  * The external actions moderation needs. Discord implements this in `apps/bot`;
  * tests implement it with a recorder, so no command or rule needs a gateway.
@@ -474,6 +480,11 @@ export interface ModerationActions {
     roleId?: string,
   ): Promise<ModerationActionResult>;
   notify(guildId: string, channelId: string | null | undefined, notice: ModerationNotice): Promise<void>;
+  /**
+   * DM one member, e.g. the join-gate verification button. `ok: false` carries
+   * the provider detail so the caller can name a closed DM instead of guessing.
+   */
+  directMessage(userId: string, message: ModerationDirectMessage): Promise<ModerationActionResult>;
 }
 
 export interface ModerationPort {

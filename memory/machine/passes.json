@@ -495,6 +495,19 @@
         "budget": "17/100 roots · 117 subcommands · 4 context menus",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-39",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Join-gate DM ownership. `/verify start` no longer calls `ctx.community.actions.sendDM`; moderation now delivers its own direct message through `ModerationActions.directMessage`, a narrow member on the existing moderation port, with `ModerationDirectMessage` carrying content and components. The Discord moderation adapter fetches the user and maps a closed DM to `{ ok: false, detail }`; the command preserves the DM body, verify button, success reply, ephemeral rule and refusal text. The moderation tests record direct messages on the moderation port and build the context without any community port, proving the dependency is gone. No new port, file, table, migration, command or dependency. Tests 398 / 59 files; ledger unchanged 17/100 roots · 117 subcommands · 4 context menus. Live memory mode proved the no-record refusal and that no row was written; the MCP bot cannot receive a DM, so the send-success path is test-covered only. Both deferred audit findings are now cleared.",
+      "journal": "journal/2026-11-01-pass-39.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "398",
+        "budget": "17/100 roots · 117 subcommands · 4 context menus",
+        "memory": "current"
+      }
     }
   ]
 }

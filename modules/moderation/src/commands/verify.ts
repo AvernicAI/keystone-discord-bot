@@ -4,19 +4,19 @@ import {
   defineCommand,
   requireGuild,
   type CommandContext,
-  type MemberStore,
   type MemberVerification,
+  type ModerationPort,
 } from "@keystone/kernel";
 import { verifyButton } from "../cases";
 import { moderationSettingsSchema } from "../settings";
 
-function memberStore(ctx: CommandContext): MemberStore {
-  if (!ctx.moderation?.members) {
+function moderationPort(ctx: CommandContext): ModerationPort {
+  if (!ctx.moderation) {
     throw new UserError(
       "Verification state is not configured in this process. Run /setup to check the database.",
     );
   }
-  return ctx.moderation.members;
+  return ctx.moderation;
 }
 
 interface VerificationView {
@@ -71,8 +71,8 @@ async function startVerification(ctx: CommandContext): Promise<void> {
     throw new UserError("The join gate is not enabled in this server.");
   }
 
-  const members = memberStore(ctx);
-  const existing = await members.get(guildId, ctx.userId);
+  const moderation = moderationPort(ctx);
+  const existing = await moderation.members.get(guildId, ctx.userId);
   if (!existing) {
     throw new UserError(
       "No quarantine is recorded for you in this server. If you are restricted, ask a moderator.",
@@ -87,13 +87,7 @@ async function startVerification(ctx: CommandContext): Promise<void> {
     );
   }
 
-  if (!ctx.community) {
-    throw new UserError(
-      "The DM verification path is not configured in this process. Ask a moderator for the in-server verify button.",
-    );
-  }
-
-  const sent = await ctx.community.actions.sendDM(ctx.userId, {
+  const sent = await moderation.actions.directMessage(ctx.userId, {
     content:
       "Keystone verification: click the button below to leave quarantine in this server. If you did not request this, ignore it.",
     components: [verifyButton(guildId, ctx.userId)],
@@ -114,7 +108,7 @@ async function startVerification(ctx: CommandContext): Promise<void> {
 async function verificationStatus(ctx: CommandContext): Promise<void> {
   const guildId = ctx.guildId!;
   const settings = moderationSettingsSchema.parse(await ctx.settings.get(guildId));
-  const record = await memberStore(ctx).get(guildId, ctx.userId);
+  const record = await moderationPort(ctx).members.get(guildId, ctx.userId);
   const gateEnabled = settings.joinGate.enabled;
   const view = verificationView(record, gateEnabled);
 

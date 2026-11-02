@@ -227,6 +227,19 @@ export function createDiscordModerationActions(client: Client): ModerationAction
         components: notice.components ? toComponents(notice.components) : [],
       });
     },
+
+    async directMessage(userId, message) {
+      try {
+        const user = await client.users.fetch(userId);
+        await user.send({
+          content: message.content,
+          components: message.components ? toComponents(message.components) : [],
+        });
+        return { ok: true };
+      } catch (error) {
+        return fromError(error);
+      }
+    },
   };
 }
 

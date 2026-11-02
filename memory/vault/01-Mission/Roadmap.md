@@ -212,10 +212,12 @@ checking the join gate, persisted state and DM-ability, and `/verify status`
 reads the `members` row instead of gateway roles. Pass 37 repaired the state
 machine behind that hub: an enforced join-gate hold writes the quarantined row,
 `start` requires it, `status` reports no record, quarantined, verified or a
-disabled gate, and completion transitions only a quarantined row. The ledger is
-now **17 roots / 117 subcommands / 134 actions / 4 context menus**, and every
-name in the saved plan table (59 of 59) is registered. The rest of this phase is
-open.
+disabled gate, and completion transitions only a quarantined row. Pass 38 moved
+the appeal/verify button parsing and member checks into a tested adapter, and
+pass 39 moved the join-gate DM onto the moderation action port, so the two
+audit findings are cleared. The ledger is now **17 roots / 117 subcommands / 134
+actions / 4 context menus**, and every name in the saved plan table (59 of 59)
+is registered. The rest of this phase is open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.

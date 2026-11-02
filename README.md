@@ -403,8 +403,9 @@ Everything below is free. No feature is moved behind a paywall.
 - Native AutoMod plan and `Keystone ·` rule ownership.
 - Anti-nuke, anti-raid, quarantine and the join gate. An enforced join-gate
   hold persists a quarantined `members` row; `/verify start` requires that row
-  and sends the verifier, while `/verify status` reads it. Anti-raid holds stay
-  moderator actions and do not get a verify button.
+  and sends the verifier through the moderation action port, while `/verify
+  status` reads it. The community adapter is not required for the DM. Anti-raid
+  holds stay moderator actions and do not get a verify button.
 - Audit logging: message delete/edit, member join/leave and moderation cases in
   one operator channel, with five toggles, a 1–365 day retention window and a
   JSON export. Events are stored before delivery, so a broken channel keeps the

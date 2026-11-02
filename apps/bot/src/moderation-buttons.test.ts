@@ -52,6 +52,7 @@ function actions(): { calls: string[]; port: ModerationActions } {
       async notify() {
         /* buttons do not notify */
       },
+      directMessage: ok,
     },
   };
 }

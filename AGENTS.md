@@ -171,6 +171,8 @@ rate-limited register leaves the app with no commands.
   claimed live. The saved plan table is complete at 59 of 59 names. The button
   id parsing and member-facing actor/policy checks live in
   `apps/bot/src/moderation-buttons.ts` (pass 38), not in the composition root.
+  The DM itself now goes through `ModerationActions.directMessage` (pass 39), so
+  moderation no longer borrows the community port.
 - P7 context menus are in repo and registered: `Report message` (message),
   `Case history` (user), `Rank card` (user) and `Explain with AI` (message).
   They reuse the case, level and AI services, consume Discord's separate 15 + 15

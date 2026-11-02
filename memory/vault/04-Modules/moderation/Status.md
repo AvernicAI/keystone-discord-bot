@@ -25,10 +25,12 @@ P2 core shipped in pass 05 (2026-11-01).
   `case_events` rows through `CaseStore.listEvents`, so a review that changes the
   case state cannot erase the appeal. The case-button path still calls
   `appealById`.
-- `/verify start | status` is a hub with a persisted join gate (passes 36–37).
-  An enforced `join-gate.*` hold writes a quarantined `members` row through
+- `/verify start | status` is a hub with a persisted join gate (passes 36–37,
+  39). An enforced `join-gate.*` hold writes a quarantined `members` row through
   `MemberStore`; a dry run and anti-raid holds do not. `start` requires that
-  row, checks the gate and DM-ability, and sends the existing button by DM;
+  row, checks the gate and DM-ability, and sends the existing button through
+  `ModerationActions.directMessage`; the join gate no longer depends on the
+  community adapter;
   `status` reads the row and reports no record, quarantined, verified or a
   disabled gate.  The in-guild and DM buttons share `completeVerification`, which
   refuses any non-quarantined row and performs the quarantine action before

@@ -81,6 +81,11 @@ class RecordingActions implements ModerationActions {
   ): Promise<void> {
     this.notifications.push({ guildId, channelId, notice });
   }
+
+  directMessage(): Promise<ModerationActionResult> {
+    this.calls.push("direct-message");
+    return this.ok();
+  }
 }
 
 function coordinator(settings: Record<string, unknown>): {

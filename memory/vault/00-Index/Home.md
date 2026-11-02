@@ -157,7 +157,9 @@ https://github.com/RNGBubba/keystone-discord-bot
   quarantine hold, so `/verify start` can no longer bypass the state it was
   meant to check. Pass 38 moved the appeal/verify button parsing and member
   checks into `apps/bot/src/moderation-buttons.ts` with 13 focused tests, so
-  `index.ts` no longer owns those rules. Also
+  `index.ts` no longer owns those rules. Pass 39 moved the join-gate DM onto
+  the moderation action port, so moderation no longer borrows the community
+  adapter. Also
   qwen3:8b via Ollama answered mentions in `#ai-chat`. A dev-only `!` bridge
   proved `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
   query=ban`, `!ai status`, `!mod history`, `!mod links`, `!mod filters`,

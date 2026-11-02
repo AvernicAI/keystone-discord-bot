@@ -166,6 +166,14 @@ does not re-derive the answer from roles, and its footer says so. Its four state
 are no record, quarantined, verified and gate disabled, and only the quarantined
 state offers `/verify start` as the next step.
 
+Delivery belongs to the same ownership boundary. `start` calls
+`ModerationActions.directMessage`, not `CommunityActions.sendDM`: a module must
+not borrow another module's adapter just because `CommandContext` happens to
+expose it. The port carries only content and components, and a closed DM comes
+back as `ok: false` with the provider detail, which the command turns into the
+same fix-it sentence. That is why the moderation tests can build a context with
+no community port and still prove the DM path.
+
 If you extend this, add a `quarantined_at` timestamp rather than inferring when
 the gate started; the current row has `joined_at` but no hold timestamp. Do not
 let the timeout job call `markVerified`; expiry is a different outcome and needs
