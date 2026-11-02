@@ -2,7 +2,6 @@ import "dotenv/config";
 import { Events, Routes } from "discord.js";
 import {
   ModuleRegistry,
-  UserError,
   auditBudget,
   createLogger,
   dispatchCommand,
@@ -10,7 +9,7 @@ import {
   type DispatchDeps,
 } from "@keystone/kernel";
 import { loadEnv, requireToken } from "@keystone/config";
-import { asInteractionLike, buildApplicationCommandJson } from "./adapt";
+import { asInteractionLike, buildApplicationCommandJson, toReplyOptions } from "./adapt";
 import { commandDrift, hasDrift, type CommandJson } from "./command-sync";
 import { createClient } from "./client";
 import { modules } from "./modules";
@@ -28,11 +27,8 @@ import { registerAiEvents } from "./ai-events";
 import { registerPrefixCommands } from "./prefix";
 import { createDiscordAttachmentReader, createDiscordExportFacts } from "./export-discord";
 import { LoggingService } from "@keystone/module-logging";
-import {
-  buildNativeAutoModPlan,
-  completeVerification,
-  moderationSettingsSchema,
-} from "@keystone/module-moderation";
+import { buildNativeAutoModPlan, moderationSettingsSchema } from "@keystone/module-moderation";
+import { handleModerationButton } from "./moderation-buttons";
 
 async function main(): Promise<void> {
   const env = loadEnv();
@@ -193,79 +189,22 @@ async function main(): Promise<void> {
 
   client.on(Events.InteractionCreate, (interaction) => {
     if (!interaction.isButton()) return;
-    const guildId = interaction.guildId;
-
-    if (interaction.customId.startsWith("keystone:appeal:")) {
-      if (!guildId) return;
-      const caseId = interaction.customId.slice("keystone:appeal:".length);
-      void (async () => {
-        try {
-          const settings = moderationSettingsSchema.parse(
-            await runtime.settings.get(guildId, "moderation"),
-          );
-          if (!settings.appealsEnabled) {
-            await interaction.reply({ content: "Appeals are disabled in this server.", ephemeral: true });
-            return;
-          }
-          const record = await runtime.moderation.cases.appealById(
-            caseId,
-            interaction.user.id,
-            "Appeal requested from the case button.",
-          );
-          await interaction.reply({
-            content: `Appeal opened for case #${record.caseNumber}. A moderator can review it with /mod review.`,
-            ephemeral: true,
-          });
-        } catch (error) {
-          await interaction.reply({
-            content: error instanceof UserError ? error.message : "Could not open that appeal.",
-            ephemeral: true,
-          });
-        }
-      })();
-      return;
-    }
-
-    if (interaction.customId.startsWith("keystone:verify:")) {
-      const rest = interaction.customId.slice("keystone:verify:".length);
-      const parts = rest.split(":");
-      // New buttons carry the guild id so the same button works in a DM; the
-      // one-part form is the legacy in-guild button and falls back to the
-      // interaction's guild.
-      const encodedGuildId = parts.length === 2 ? parts[0] : guildId;
-      const userId = parts.length === 2 ? parts[1] : parts[0];
-      if (!encodedGuildId || !userId) return;
-      const ephemeral = interaction.guildId !== null;
-
-      if (interaction.user.id !== userId) {
-        void interaction.reply({
-          content: "This verification belongs to another member.",
-          ephemeral,
-        });
-        return;
-      }
-      void (async () => {
-        try {
-          const settings = moderationSettingsSchema.parse(
-            await runtime.settings.get(encodedGuildId, "moderation"),
-          );
-          const outcome = await completeVerification({
-            guildId: encodedGuildId,
-            userId,
-            actorId: interaction.user.id,
-            settings,
-            members: runtime.moderation.members,
-            actions: runtime.moderation.actions,
-          });
-          await interaction.reply({ content: outcome.message, ephemeral });
-        } catch (error) {
-          await interaction.reply({
-            content: error instanceof Error ? error.message : "Could not verify you.",
-            ephemeral,
-          });
-        }
-      })();
-    }
+    void handleModerationButton(
+      {
+        customId: interaction.customId,
+        guildId: interaction.guildId,
+        userId: interaction.user.id,
+        reply: (input) => interaction.reply(toReplyOptions(input)),
+      },
+      {
+        settings: runtime.settings.forModule("moderation"),
+        moderation: runtime.moderation,
+      },
+    ).catch((error: unknown) => {
+      logger.error("moderation button failed", {
+        error: error instanceof Error ? (error.stack ?? error.message) : String(error),
+      });
+    });
   });
 
   const devTestGuild =

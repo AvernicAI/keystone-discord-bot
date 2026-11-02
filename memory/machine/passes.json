@@ -482,6 +482,19 @@
         "budget": "17/100 roots · 117 subcommands · 4 context menus",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-38",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Button wiring extraction. The appeal and verify rules moved out of `apps/bot/src/index.ts` (348 to 287 lines) into `apps/bot/src/moderation-buttons.ts`: `parseModerationButtonId` returns an appeal case id, a current guild-scoped verify route, or a legacy one-part verify route with the interaction guild; empty, foreign and over-segmented ids are ignored. `handleAppealButton` keeps the exact settings read, target-only case service call and replies; `handleVerifyButton` keeps the encoded-user identity check, DM/guild ephemeral rule and `completeVerification` call. No command, menu, reply string, registration or ledger count changed. `toReplyOptions` is exported from the adapter so button replies use the same conversion. 13 focused tests cover parsing, valid and refused appeal/verify paths, the DM reply route, malformed ids and the wrong-actor/gate-disabled refusals. The DM port move remains the only deferred audit finding. Tests 398 / 59 files; budget unchanged 17/100 roots · 117 subcommands · 4 context menus.",
+      "journal": "journal/2026-11-01-pass-38.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "398",
+        "budget": "17/100 roots · 117 subcommands · 4 context menus",
+        "memory": "current"
+      }
     }
   ]
 }

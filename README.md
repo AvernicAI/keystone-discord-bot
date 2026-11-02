@@ -29,7 +29,7 @@ the P5 portability service inside Discord: real JSON file attachments, a
 dry-run-first import, a confirmation-gated delete and live drift facts from the
 gateway cache. The command ledger is **17/100 roots** with **117 real
 subcommands**, **134 actions** and **4 context menus** (2 user, 2 message),
-there are **9 modules**, and `pnpm check` covers **385 tests across 58 files**
+there are **9 modules**, and `pnpm check` covers **398 tests across 59 files**
 without a Discord token, database or network. Live on 2026-11-01: the bot logged
 in and Discord reports **17 roots / 117 subcommands / 2 user menus / 2 message
 menus**, answered a Qwen3:8b mention in `#ai-chat`, and ran real

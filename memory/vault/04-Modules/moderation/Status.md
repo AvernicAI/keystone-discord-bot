@@ -30,16 +30,18 @@ P2 core shipped in pass 05 (2026-11-01).
   `MemberStore`; a dry run and anti-raid holds do not. `start` requires that
   row, checks the gate and DM-ability, and sends the existing button by DM;
   `status` reads the row and reports no record, quarantined, verified or a
-  disabled gate. The in-guild and DM buttons share `completeVerification`, which
+  disabled gate.  The in-guild and DM buttons share `completeVerification`, which
   refuses any non-quarantined row and performs the quarantine action before
-  writing `verified_at`.
+  writing `verified_at`. The button id parsing and member-facing checks now
+  live in `apps/bot/src/moderation-buttons.ts` and are covered by 13 focused
+  adapter tests; the reply strings did not change in that extraction.
 - Native AutoMod rules are built and synced only when explicitly enabled.
 - Dry-run is the default and produces alerts/cases without punitive calls.
 
 ## Verified
 
 ```
-pnpm test                                  # 385 tests / 58 files
+pnpm test                                  # 398 tests / 59 files
 pnpm vitest run modules/moderation         # 46 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal/status, verify start/status, join-gate state, native plan, context menus
 pnpm test -- packages/db/src/cases.test.ts # 2 PGlite case-store tests, including listEvents
 pnpm test -- packages/db/src/member-store.test.ts # PGlite member row + verification upsert

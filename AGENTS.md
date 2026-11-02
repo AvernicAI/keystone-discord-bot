@@ -168,7 +168,9 @@ rate-limited register leaves the app with no commands.
   `No quarantine is recorded`, and no row was written. The MCP account is a bot
   and cannot make a member join, receive a DM or click the button, so the join
   and completion paths are covered by command, security and PGlite tests, not
-  claimed live. The saved plan table is complete at 59 of 59 names.
+  claimed live. The saved plan table is complete at 59 of 59 names. The button
+  id parsing and member-facing actor/policy checks live in
+  `apps/bot/src/moderation-buttons.ts` (pass 38), not in the composition root.
 - P7 context menus are in repo and registered: `Report message` (message),
   `Case history` (user), `Rank card` (user) and `Explain with AI` (message).
   They reuse the case, level and AI services, consume Discord's separate 15 + 15
@@ -203,8 +205,8 @@ rate-limited register leaves the app with no commands.
   view prints its source row counts; there is no analytics table. Live: two
   stored audit rows matched two logged events, and one MCP edit plus one delete
   produced exactly one edited / one deleted.
-- 9 modules, 17 global command roots, 117 subcommands, 4 context menus, 385
-  tests in 58 files.
+- 9 modules, 17 global command roots, 117 subcommands, 4 context menus, 398
+  tests in 59 files.
 - Live: AI Team#5758 connected; 17 roots / 117 subcommands and 2 user / 2 message
   menus registered; one bot
   process (two trees were double-posting and were stopped); Qwen3:8b replied in

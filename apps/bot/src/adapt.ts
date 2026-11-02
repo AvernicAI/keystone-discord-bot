@@ -148,7 +148,7 @@ export function buildApplicationCommandJson(
  * Our embed type is a structural subset of Discord's. One cast here beats
  * importing discord.js into 40 modules.
  */
-function toReplyOptions(input: ReplyInput): InteractionReplyOptions {
+export function toReplyOptions(input: ReplyInput): InteractionReplyOptions {
   const { components, files, ...rest } = input;
   const options = rest as unknown as InteractionReplyOptions;
   if (components) options.components = toComponents(components);

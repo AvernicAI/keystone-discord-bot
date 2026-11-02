@@ -40,7 +40,7 @@ test rather than a live click.
 ## Verified
 
 ```text
-pnpm check                            exit 0 · 385 tests / 58 files
+pnpm check                            exit 0 · 398 tests / 59 files
   responder.test.ts                   5 tests (auto-responder service)
   community.test.ts                  12 tests
   extras.test.ts                      7 tests
