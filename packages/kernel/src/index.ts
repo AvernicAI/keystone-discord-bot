@@ -8,6 +8,7 @@ export * from "./export";
 export * from "./music";
 export * from "./forms";
 export * from "./events";
+export * from "./modmail";
 export * from "./errors";
 export * from "./logger";
 export * from "./manifest";

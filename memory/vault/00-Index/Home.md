@@ -109,8 +109,8 @@ https://github.com/RNGBubba/keystone-discord-bot
   export port and never applies it; reset clears one module's settings record.
   Live: 9 modules / 2 disabled, music enabled then reset to its default with a
   disabled read-back, and verify reported 17 roots / 113 subcommands. The saved
-  plan table records 72 planned names across 13 built roots plus the unbuilt
-  `/modmail`; the 160 figure still has no complete per-root list.
+  plan table records 72 planned names across 14 built roots; the 160 figure
+  still has no complete per-root list.
 - **Appeal hub** in repo and live-proven (pass 35): `/appeal open | status`.
   `open` appends the existing target-only appeal event; `status` reads
   `case_events` through `CaseStore.listEvents`, so it still reports an appeal
@@ -140,9 +140,16 @@ https://github.com/RNGBubba/keystone-discord-bot
   sent them, and export is a checksummed JSON file. Live: create → open → 1/2
   going → reminder 1 → decline 0/2 → going 1/2 → a 1.2 KB file that parsed with
   the same row. Buttons, scheduled reminders and ICS are open, not faked.
-- **Command tree** in repo (passes 26, 30, 31, 32, 33, 34, 35, 36, 40 and 41): real Discord
-  subcommands replaced the flat `action` option across every existing hub — 19
-  roots, 132 subcommands, 151 actions, 4 context menus. `/help` is generated
+- **Modmail** in repo and live-proven (pass 42): `/modmail setup | open | reply |
+  close | transcript | stats` is the twelfth and last plan root. A thread belongs
+  to its opener; another member gets the same refusal as a missing thread. The
+  first staff reply claims it, side-aware unread counters track the queue, and
+  close stores the transcript and SHA-256 once in a conditional update. Live:
+  2 messages archived, duplicate close refused, stats 1 thread / 0 active / 2
+  messages, disabled open refused. DM/thread relay is open, not faked.
+- **Command tree** in repo (passes 26, 30, 31, 32, 33, 34, 35, 36, 40, 41 and 42): real Discord
+  subcommands replaced the flat `action` option across every existing hub — 20
+  roots, 138 subcommands, 158 actions, 4 context menus. `/help` is generated
   from the live registry; `pnpm commands:catalog` writes [[Command-Catalog]] and
   `pnpm commands:doctor` checks the live shape. A human slash or right-click
   invocation remains the unobserved surface.
@@ -180,10 +187,13 @@ https://github.com/RNGBubba/keystone-discord-bot
   adapter. Pass 40 added `/form`, bringing the live ledger to 18 roots / 125
   subcommands; `!form create | edit | panel | submit | review | export` ran the
   whole flow, and the exported file parsed with the same pending → accepted
-  rows. Pass 41 added `/event`, bringing it to **19 roots / 132 subcommands**;
+  rows. Pass 41 added `/event`, bringing it to **20 roots / 138 subcommands**;
   `!event create | edit | rsvp | list | remind | export` ran draft → open → 1/2
   going → reminder → decline → going, and the exported file parsed with the same
-  RSVP row and a matching checksum. Also
+  RSVP row and a matching checksum. Pass 42 added `/modmail`, bringing the
+  ledger to **20 roots / 138 subcommands**; `!modmail setup | open | reply |
+  transcript | close | stats` ran an open thread through a 2-message archive, a
+  refused duplicate close and a 1/0/2 queue read. Also
   qwen3:8b via Ollama answered mentions in `#ai-chat`. A dev-only `!` bridge
   proved `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
   query=ban`, `!ai status`, `!mod history`, `!mod links`, `!mod filters`,
@@ -205,8 +215,8 @@ https://github.com/RNGBubba/keystone-discord-bot
 - Phase **P4** shipped the AI layer and the ledger-backed economy hardening.
 - Phase **P3** shipped the community suite: leveling, reaction roles, welcome,
   starboard, tickets, giveaways, temp voice, content and seasons.
-- 19 of Discord's 100 global roots used, with 132 subcommands and 4 context
-  menus (separate 15 + 15 budget); 11 modules registered.
+- 20 of Discord's 100 global roots used, with 138 subcommands and 4 context
+  menus (separate 15 + 15 budget); 12 modules registered.
 - The full suite covers the 5,000-row portability round trip and the failure,
   rollback and deletion paths; `pnpm check` also runs the intent, channel and
   memory audits.

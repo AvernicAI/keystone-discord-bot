@@ -7,7 +7,7 @@ eleventh module and the first of the two roots the pass-40 inventory found
 unbuilt.
 
 - `/event create | edit | delete | list | rsvp | remind | export` is registered
-  through the shared catalog. The ledger is **19 roots / 132 subcommands / 151
+  through the shared catalog. The ledger is **20 roots / 138 subcommands / 151
   actions / 4 context menus**.
 - The lifecycle is draft → open → closed. `rsvp` is refused outside `open`;
   `remind` is refused on a draft or closed event; existing RSVPs stay readable.
@@ -27,9 +27,9 @@ pnpm vitest run modules/events packages/db/src/event-store.test.ts
   ✓ modules/events/src/events.test.ts (9 tests)
   ✓ packages/db/src/event-store.test.ts (3 tests)
 
-pnpm test                          # 425 tests / 63 files
-pnpm budget                        # 19/100 roots · 132 subcommands · 151 actions · 4 context menus
-pnpm commands:doctor               # Registry 19 roots · 132 subcommands · 4 context menus
+pnpm test                          # 435 tests / 65 files
+pnpm budget                        # 20/100 roots · 138 subcommands · 158 actions · 4 context menus
+pnpm commands:doctor               # Registry 20 roots · 138 subcommands · 4 context menus
 ```
 
 Focused coverage:

@@ -24,7 +24,7 @@ up-sell.
 | `/ticket` | subcommands `panel`, `open`, `claim`, `close`, `add`, `transcript`, `summary`, `stats`; options `subject`, `user`, `channel`, `ticket`, `title` | guild-only; `ManageGuild` for panel/transcript/summary/stats | Posts a panel, opens a private thread, claims/closes it, adds a participant, returns a transcript, calls the AI summary port and reports SLA stats. |
 | `/tools` | subcommands `embed`, `tag`, `reminder`, `schedule`, `giveaway`, `giveaway-end`, `giveaway-reroll`, `poll`, `feed`, `stat`, `welcome`, `roles`, `starboard`, `starboard-override`, `voice`, `birthdays`, `birthday`, `suggestions`, `suggestion`, `suggestion-decide`, `sticky`, `responder`, `responders`, `responder-remove`; options `name`, `value`, `channel`, `target`, `role`, `user`, `duration`, `limit`, `url`, `match` | guild-only; `ManageGuild` for configuration and server-wide sends | One utility root for content, giveaways, feeds, stat channels, reaction-role buttons/selects, birthdays, suggestions, sticky messages, auto-responders and event configuration. |
 
-The three roots are part of the current **19 roots / 132 subcommands**. The P3
+The three roots are part of the current **20 roots / 138 subcommands**. The P3
 exit requires fewer than 20 roots; this is well inside it.
 
 ### Context menu
@@ -153,7 +153,7 @@ marker, then delete the projection. Modules never import a table; the module own
 
 ## Limits
 
-Commands: 3 global roots (19/100 total) plus one user context menu. Components: a select holds at most 25
+Commands: 3 global roots (20/100 total) plus one user context menu. Components: a select holds at most 25
 options and one action row; buttons are capped at five per row. Intents:
 `GuildMembers`, `GuildMessages`, `MessageContent`, `GuildMessageReactions`,
 `GuildVoiceStates`. `MessageContent` and `GuildMembers` are privileged and already

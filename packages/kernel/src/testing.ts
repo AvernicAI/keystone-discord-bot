@@ -161,6 +161,7 @@ export interface TestContextOptions {
   music?: import("./music").MusicPort;
   forms?: import("./forms").FormStore;
   events?: import("./events").EventStore;
+  modmail?: import("./modmail").ModmailStore;
   catalog?: readonly CommandCatalogEntry[];
 }
 
@@ -196,5 +197,6 @@ export function createTestContext(options: TestContextOptions = {}): TestContext
     music: options.music,
     forms: options.forms,
     events: options.events,
+    modmail: options.modmail,
   };
 }

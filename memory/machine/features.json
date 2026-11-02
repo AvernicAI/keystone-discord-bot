@@ -1657,7 +1657,7 @@
           "phase": "P7",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "19 roots expose 132 real Discord subcommands instead of hidden flat action options. /help reads the live registry, the catalog is generated, boot sync compares the full option tree, commands:doctor reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for /mod ban. /appeal open | status, /verify start | status, /form create | edit | delete | list | panel | submit | review | export and /event create | edit | delete | list | rsvp | remind | export are registered. Gateway InteractionCreate remains human-only.",
+          "note": "20 roots expose 138 real Discord subcommands instead of hidden flat action options. /help reads the live registry, the catalog is generated, boot sync compares the full option tree, commands:doctor reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for /mod ban. /appeal open | status, /verify start | status, /form create | edit | delete | list | panel | submit | review | export, /event create | edit | delete | list | rsvp | remind | export and /modmail setup | open | reply | close | transcript | stats are registered. Gateway InteractionCreate remains human-only.",
           "evidence": [
             "packages/kernel/src/registry.test.ts",
             "apps/bot/src/adapt.test.ts",
@@ -2180,6 +2180,100 @@
       ]
     },
     {
+      "id": "modmail",
+      "name": "Private modmail",
+      "source": "memory/vault/01-Mission/Master-Plan.md",
+      "features": [
+        {
+          "id": "modmail.setup",
+          "name": "Modmail setup",
+          "competitors": {},
+          "phase": "P7",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "`/modmail setup` reads the effective module settings and the thread counts, and writes `enabled` and `max_threads` through the shared settings service. Live 2026-11-01: enabled -> disabled -> enabled read back through the same command.",
+          "evidence": [
+            "modules/modmail/src/modmail.test.ts",
+            "memory/journal/2026-11-01-pass-42.md"
+          ],
+          "liveVerified": true
+        },
+        {
+          "id": "modmail.private-threads",
+          "name": "Private threads",
+          "competitors": {},
+          "phase": "P7",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "`/modmail open` writes a thread owned by the invoking member and its first message; a partial unique index allows one active thread per member. Another member gets the same refusal as a missing thread, so the command cannot confirm someone else's mail exists. Live 2026-11-01: one thread opened and read back through `/modmail transcript`.",
+          "evidence": [
+            "modules/modmail/src/modmail.test.ts",
+            "packages/db/src/modmail-store.test.ts",
+            "memory/journal/2026-11-01-pass-42.md"
+          ],
+          "liveVerified": true
+        },
+        {
+          "id": "modmail.replies",
+          "name": "Two-sided replies and unread counters",
+          "competitors": {},
+          "phase": "P7",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "`/modmail reply` resolves the caller to the member or staff side, appends one message, increments that side's unread counter and claims an open thread on the first staff reply. Live 2026-11-01: the owner reply read back as `member side`; staff replies and the claim transition are covered by the module and PGlite tests because the bot is the owner of its own thread.",
+          "evidence": [
+            "modules/modmail/src/modmail.test.ts",
+            "packages/db/src/modmail-store.test.ts"
+          ],
+          "liveVerified": true
+        },
+        {
+          "id": "modmail.transcripts",
+          "name": "Archived transcripts",
+          "competitors": {},
+          "phase": "P7",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "`/modmail close` builds the canonical JSON transcript, stores it with its SHA-256 checksum and message count in one conditional update, and a second close refuses without writing. `/modmail transcript` reads the stored archive after closing. Live 2026-11-01: 2 messages archived with checksum `c3c539706ed70e53…`, a duplicate close refused, and the archived read reported `archived`.",
+          "evidence": [
+            "modules/modmail/src/modmail.test.ts",
+            "packages/db/src/modmail-store.test.ts",
+            "memory/journal/2026-11-01-pass-42.md"
+          ],
+          "liveVerified": true
+        },
+        {
+          "id": "modmail.queue-stats",
+          "name": "Queue stats",
+          "competitors": {},
+          "phase": "P7",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "`/modmail stats` reads thread state counts, message count, staff unread and up to ten active thread ids from `modmail_threads` and `modmail_messages`; the ids are how staff discover a thread to answer. Live 2026-11-01: 1 thread / 0 active / 2 messages after the close.",
+          "evidence": [
+            "modules/modmail/src/modmail.test.ts",
+            "packages/db/src/modmail-store.test.ts",
+            "memory/journal/2026-11-01-pass-42.md"
+          ],
+          "liveVerified": true
+        },
+        {
+          "id": "modmail.gateway-delivery",
+          "name": "DM and thread relay",
+          "competitors": {},
+          "phase": "P7",
+          "status": "open",
+          "source": "memory/vault/01-Mission/Master-Plan.md",
+          "note": "The command surface is an inbox, not a live relay: replies are read with `/modmail transcript`, not delivered into a Discord DM or a private thread. That is deliberate this pass; a delivery port and the gateway message handler are not built.",
+          "openReason": "A real DM/thread relay needs a delivery port and a gateway message handler; borrowing another module's DM adapter is the coupling pass 39 removed, and an unverified relay is worse than a readable inbox.",
+          "evidence": [
+            "modules/modmail/src/modmail.test.ts"
+          ],
+          "liveVerified": false
+        }
+      ]
+    },
+    {
       "id": "parity-extra",
       "name": "Community parity extras",
       "source": "memory/vault/01-Mission/Master-Plan.md",
@@ -2192,16 +2286,6 @@
           "status": "planned",
           "source": "memory/vault/01-Mission/Master-Plan.md",
           "note": "Reapply roles on rejoin; requires GuildMembers.",
-          "liveVerified": false
-        },
-        {
-          "id": "parity-extra.modmail",
-          "name": "Modmail",
-          "competitors": {},
-          "phase": "P7",
-          "status": "planned",
-          "source": "memory/vault/01-Mission/Master-Plan.md",
-          "note": "DM-to-thread tickets with transcripts.",
           "liveVerified": false
         },
         {

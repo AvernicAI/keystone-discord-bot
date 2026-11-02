@@ -261,6 +261,8 @@ export interface CommandContext {
   readonly forms?: import("./forms").FormStore;
   /** Present when the composition root wired the event store. */
   readonly events?: import("./events").EventStore;
+  /** Present when the composition root wired the private modmail store. */
+  readonly modmail?: import("./modmail").ModmailStore;
 }
 
 /**

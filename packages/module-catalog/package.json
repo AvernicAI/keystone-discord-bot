@@ -15,6 +15,7 @@
     "@keystone/module-events": "workspace:*",
     "@keystone/module-forms": "workspace:*",
     "@keystone/module-invites": "workspace:*",
+    "@keystone/module-modmail": "workspace:*",
     "@keystone/module-logging": "workspace:*",
     "@keystone/module-moderation": "workspace:*",
     "@keystone/module-music": "workspace:*",

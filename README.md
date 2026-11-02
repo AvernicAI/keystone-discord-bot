@@ -34,15 +34,18 @@ explicitly not shipped; the panel prints the validated `answers` syntax instead
 of a button that opens nothing. `/event create | edit | delete | list | rsvp |
 remind | export` is the eleventh: a draft/open/closed lifecycle, one RSVP row per
 member, capacity counted from `going` rows inside the store transaction, manual
-reminder bookkeeping and a checksummed JSON export. The command ledger is
-**19/100 roots** with **132 real subcommands**, **151 actions** and **4 context
-menus** (2 user, 2 message), there are **11 modules**, and `pnpm check` covers
-**425 tests across 63 files** without a Discord token, database or network.
+reminder bookkeeping and a checksummed JSON export. `/modmail setup | open |
+reply | close | transcript | stats` is the twelfth and last plan root: private
+owner-or-staff threads, a first-staff-reply claim, side-aware unread counters and
+a transcript archived once by a conditional update. The command ledger is
+**20/100 roots** with **138 real subcommands**, **158 actions** and **4 context
+menus** (2 user, 2 message), there are **12 modules**, and `pnpm check` covers
+**435 tests across 65 files** without a Discord token, database or network.
 Live on 2026-11-01: the
-bot logged in and Discord reports **19 roots / 132 subcommands / 2 user menus /
+bot logged in and Discord reports **20 roots / 138 subcommands / 2 user menus /
 2 message menus**, answered a Qwen3:8b mention in `#ai-chat`, and ran real
 moderation, community, AI, invite, logging, analytics, configuration, music,
-forms, events and content-filter commands through a development message bridge,
+forms, events, modmail and content-filter commands through a development message bridge,
 including
 `/help`’s generated catalog. The dashboard was booted in memory mode and
 exercised over real HTTP, including authenticated settings writes against a fake
@@ -264,8 +267,8 @@ refusals. See [the community spec](memory/vault/04-Modules/community/Spec.md).
 
 ## Commands
 
-Discord's global limit is 100 **roots**; Keystone uses **18** and exposes **125
-real subcommands** (143 total actions), plus **4 context menus** on their own
+Discord's global limit is 100 **roots**; Keystone uses **20** and exposes **138
+real subcommands** (158 total actions), plus **4 context menus** on their own
 15 + 15 budget. A subcommand does not spend another global slot, which is why the
 picker now expands instead of showing one flat `action` option. Slash commands
 are the product surface; context menus appear under right-click → Apps. In
@@ -295,6 +298,7 @@ the same live registry.
 | `/logging` | `setup`, `channel`, `events`, `status`, `retention`, `export`, `disable` | One audit channel for message, member and moderation events, with per-event toggles and retention pruning |
 | `/analytics` | `overview`, `members`, `messages`, `commands`, `tickets`, `export` | Read-only aggregates over the audit ledger, cases, invite joins, tickets and command usage; every view names its source rows |
 | `/music` | `play`, `queue`, `add`, `remove`, `clear`, `skip`, `stop`, `status` | A durable saved queue in `community_records`; `play`, `skip` and `stop` refuse with the exact missing backend because no voice/Lavalink client is installed |
+| `/modmail` | `setup`, `open`, `reply`, `close`, `transcript`, `stats` | Private member-to-staff threads over `modmail_threads` and `modmail_messages`; owner-or-staff visibility, a first-staff-reply claim, side-aware unread and a transcript archived once |
 
 Four **context menus** (right-click → Apps) reuse the same services:
 
@@ -368,7 +372,7 @@ Everything below is free. No feature is moved behind a paywall.
 
 ### Platform and operations
 
-- Module registry with a CI-enforced 100-root budget (currently 19 roots, 132
+- Module registry with a CI-enforced 100-root budget (currently 20 roots, 138
   subcommands) and a separate 15 + 15 context-menu budget (currently 4 menus).
 - First-run `/setup` hub: readiness, a module switchboard, a read-only integrity
   check, a bundle preview and a settings-only module reset. Every write goes
@@ -452,6 +456,12 @@ Everything below is free. No feature is moved behind a paywall.
   `going` rows inside the store transaction, manual reminders that record who
   sent them, and a checksummed JSON export. Buttons, scheduled reminders and ICS
   are open, not faked.
+- Private modmail: `/modmail setup | open | reply | close | transcript | stats`.
+  A thread belongs to its opener; only the owner or staff can read or reply, and
+  a foreign thread gets the same refusal as a missing one. The first staff reply
+  claims the thread; close stores the canonical transcript and its SHA-256 in one
+  conditional update, so a duplicate close writes nothing. `stats` lists the
+  active queue with thread ids. DM/thread relay is open, not faked.
 
 ### AI (opt-in, capped, zero-retention by default)
 
@@ -473,8 +483,8 @@ Everything below is free. No feature is moved behind a paywall.
   per-token rate limits, idempotency, webhooks and OpenAPI.
 - **P7:** invite tracking, audit logging, the link/profanity/zalgo filters,
   auto-responders, guild analytics, `/config`, `/export`, the `/music` saved
-  queue, `/form` and the four context menus are done; the rest is parity
-  completion (events, role persistence, modmail), Components V2 UI and i18n.
+  queue, `/form`, `/event`, `/modmail` and the four context menus are done; the
+  rest is parity completion (role persistence), Components V2 UI and i18n.
 - **P8:** `/music` queue control ships disabled by default; bring-your-own
   Lavalink playback is the open piece (no bundled streamer).
 - **P9:** docs site, 14-lesson curriculum, release workflow, self-host kit.
@@ -495,7 +505,7 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
-| P7 Command tree | Done | 19 roots · 132 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
+| P7 Command tree | Done | 20 roots · 138 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
 | P7 Context menus | Done | 4 menus (2 user, 2 message) registered in Discord; report opens a real case, case history and rank card read existing rows, explain uses the capped AI path; invocation is human-only |
 | P7 Slash harness | Harness done | Synthetic nested `/mod ban` through the real adapter + dispatch; gateway `InteractionCreate` still human-only |
 | P7 Audit logging | Done | `/logging`; five event kinds, per-event toggles, append-only ledger, retention; message and moderation events live-proven |
@@ -503,15 +513,16 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P7 In-bot config | Done | `/config`; four subcommands over every module's own schema; live `alert → delete → alert` read-back and a rejected invalid value |
 | P7 Forms | Done | `/form`; eight subcommands over `forms` and `form_submissions`; live create → panel → submit → review accept → 1.5 KB export parsed with the same answers and decision; modal input open |
 | P7 Events | Done | `/event`; seven subcommands over `events` and `event_rsvps`; live create → open → RSVP 1/2 → reminder → decline → 1.2 KB export parsed with the same row; buttons, scheduling and ICS open |
+| P7 Modmail | Done | `/modmail`; six subcommands over `modmail_threads` and `modmail_messages`; owner-or-staff privacy, one active thread, a queue with ids and a transcript archived once; live open → reply → 2-message archive → duplicate close refused; DM relay open |
 | P7 Export surface | Done | `/export`; six subcommands, file attachments, dry-run import, exact-id delete, live drift; 12.8 KB live bundle parsed and checksum-verified |
 | P8 Music queue | Done | `/music`; eight subcommands over a durable `community_records` queue; SQL row lock holds the cap; live add/queue/remove plus disabled refusal |
 | P8 Music playback | **Open** | `play`, `skip` and `stop` refuse with the exact missing pieces (no voice/Lavalink client, no `LAVALINK_URL`); the refusal is live-proven, streaming is not shipped |
-| P7 Parity completion | **In progress** | Invite tracking, audit logging, link/profanity/zalgo filters, auto-responders, analytics, in-bot config, `/export`, forms, events and the music queue shipped; expiry, modmail, real playback and UI/i18n open |
+| P7 Parity completion | **In progress** | Invite tracking, audit logging, link/profanity/zalgo filters, auto-responders, analytics, in-bot config, `/export`, forms, events, modmail and the music queue shipped; expiry, real playback and UI/i18n open |
 
-Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 19
-global roots with 132 subcommands (including `/analytics`, `/config`, `/event`,
-`/export`, `/form`, `/help`, `/invites`, `/logging`, `/music`, the five `/setup`
-actions, the two `/appeal` actions and the two `/verify` actions) plus
+Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 20
+global roots with 138 subcommands (including `/analytics`, `/config`, `/event`,
+`/export`, `/form`, `/help`, `/invites`, `/logging`, `/modmail`, `/music`, the
+five `/setup` actions, the two `/appeal` actions and the two `/verify` actions) plus
 **2 user menus and 2 message menus** with no drift, and Qwen3:8b answered a
 mention in
 `#ai-chat`. A development `!`
@@ -588,8 +599,9 @@ pass 31's `/export` reached 16 roots / 100 subcommands, and pass 32's `/music`
 brought it to 17 roots / 108 subcommands; pass 34's `/setup` hub brought it to
 17 roots / 113 subcommands, pass 35's `/appeal` hub brought it to 17 roots / 115
 subcommands, and pass 36's `/verify` hub brought it to 17 roots / 117
-subcommands. Pass 40's `/form` hub brought it to 18 roots / 125 subcommands, and
-pass 41's `/event` hub is the current ledger: **19 roots / 132 subcommands**. The
+subcommands. Pass 40's `/form` hub brought it to 18 roots / 125 subcommands,
+pass 41's `/event` hub brought it to 19 roots / 132, and pass 42's `/modmail`
+hub is the current ledger: **20 roots / 138 subcommands**. The
 MCP text reader
 does not render embeds, so the embed fields, top-command list and JSON export
 were covered by [the command test](modules/analytics/src/analytics.test.ts), not
@@ -734,6 +746,23 @@ account is a bot, so its RSVP is the bot's own membership, not a human member;
 the second-member capacity refusal and a member without `ManageGuild` are
 command-tested. Buttons, scheduled reminders and ICS do not exist and are not
 claimed. See [pass 41](memory/journal/2026-11-01-pass-41.md).
+
+Modmail evidence (2026-11-01, pass 42): one memory-mode process served the bridge
+and was stopped afterwards. `!modmail setup` read **enabled · max 500 threads ·
+0 active**; `!modmail open` wrote thread `0f7dbc9c-5054-4d60-907b-f200fbe46206`;
+`!modmail reply` read back **member side · 2 messages**; `!modmail transcript`
+read **2 messages · live, not archived yet**; `!modmail close` archived **2
+messages** with checksum `c3c539706ed70e53…`; a duplicate `!modmail close` was
+refused with **already closed**; the archived transcript still read **2 messages
+· archived**; `!modmail stats` read **1 thread / 0 active / 2 messages**. A
+disabled `!modmail setup enabled=false` refused a member open with the exact
+reason, and `enabled=true` restored it. `commands:doctor` read Discord and
+reported **20 roots / 138 subcommands / 2 user + 2 message menus** with no drift.
+The MCP account is a bot and owns its own thread, so a second member, the
+staff-side claim and the foreign-thread refusal are command-tested; the bridge
+posts ordinary messages, so ephemerality and `InteractionCreate` are not claimed
+live. DM/thread relay does not exist and is not claimed. See
+[pass 42](memory/journal/2026-11-01-pass-42.md).
 
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and

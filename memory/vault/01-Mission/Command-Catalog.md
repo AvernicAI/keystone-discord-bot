@@ -5,7 +5,7 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**19 roots · 132 subcommands · 151 total actions · 4 context menus · 19/100 global roots used.**
+**20 roots · 138 subcommands · 158 total actions · 4 context menus · 20/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
@@ -33,6 +33,7 @@ and appear under right-click → Apps.
 | `/music` | `music` | 8 |
 | `/form` | `forms` | 8 |
 | `/event` | `events` | 7 |
+| `/modmail` | `modmail` | 6 |
 
 ## `/ping`
 
@@ -296,6 +297,19 @@ Create guild events, take RSVPs, post reminders and export attendance.
 | `/event rsvp` | Record your own going or not-going answer; one RSVP per member. | `event`, `rsvp` |
 | `/event remind` | Post a reminder for an open event and record who sent it. | `event` |
 | `/event export` | Download events and RSVPs as a checksummed JSON file. | `event` |
+
+## `/modmail`
+
+Private member-to-staff mail: open a thread, reply, close and read transcripts.
+
+| Subcommand | Description | Options |
+| --- | --- | --- |
+| `/modmail setup` | Show or change the modmail switches for this server. | `enabled`, `max_threads` |
+| `/modmail open` | Open a private thread; only you and staff can read it. | `subject`, `message` |
+| `/modmail reply` | Add a message to your thread, or answer as staff. | `thread`, `message` |
+| `/modmail close` | Close a thread and archive its transcript exactly once. | `thread`, `resolution` |
+| `/modmail transcript` | Read a thread you own, or any thread as staff. | `thread` |
+| `/modmail stats` | Staff queue counts read from the modmail tables. | — |
 
 ## Context menus
 

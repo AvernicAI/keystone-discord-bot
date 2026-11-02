@@ -28,6 +28,7 @@ import {
   type MusicStore,
   type FormStore,
   type EventStore,
+  type ModmailStore,
   type CaseStore,
   type MemberStore,
   type CommunityStore,
@@ -49,6 +50,7 @@ import {
   createMusicStore,
   createFormStore,
   createEventStore,
+  createModmailStore,
   createSettingsRepository,
   probeDatabase,
   type PostgresHandle,
@@ -71,6 +73,7 @@ import { AiService, InMemoryAiStore, createAiProvider } from "@keystone/module-a
 import { InMemoryMusicStore, UnavailableMusicPlayback } from "@keystone/module-music";
 import { InMemoryFormStore } from "@keystone/module-forms";
 import { InMemoryEventStore } from "@keystone/module-events";
+import { InMemoryModmailStore } from "@keystone/module-modmail";
 import { createMemoryExportPort, createSqlExportPort } from "./export-port";
 import { createCooldownStore, type CooldownHandle } from "@keystone/cache";
 import { BullJobQueue, InProcessJobQueue } from "@keystone/queue";
@@ -96,6 +99,7 @@ export interface Runtime {
   music: MusicPort;
   forms: FormStore;
   events: EventStore;
+  modmail: ModmailStore;
   usage: CommandUsageStore;
   security: SecurityCoordinator;
   mode: { database: DatabaseMode; cache: CacheMode; queue: QueueMode };
@@ -274,6 +278,9 @@ export async function createRuntime(
   };
   const formStore: FormStore = database ? createFormStore(database) : new InMemoryFormStore();
   const eventStore: EventStore = database ? createEventStore(database) : new InMemoryEventStore();
+  const modmailStore: ModmailStore = database
+    ? createModmailStore(database)
+    : new InMemoryModmailStore();
 
   let exportPort: ExportPort;
   if (database) {
@@ -325,6 +332,7 @@ export async function createRuntime(
     music,
     forms: formStore,
     events: eventStore,
+    modmail: modmailStore,
     usage,
     security,
     mode: {

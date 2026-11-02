@@ -143,16 +143,18 @@ same interfaces. No module changes when a port changes.
 
 ### Command allocation
 
-**Plan record (pass 41, 2026-11-01):** this is the durable per-root source for
-the approved plan. It records **13 built roots plus the unbuilt `/modmail`**, for
-**72 planned subcommand names** where the plan has a record (59 from the original
-table, 7 for `/event`, 6 for `/modmail` whose individual names were not
-recorded). The live registry is **19 roots / 132 subcommands**. Six registered
-roots (`/ping`, `/about`, `/ai`, `/invites`, `/analytics`, `/form`) are not in
-the plan table. The handoff's **"18 roots / 160 subcommands"** still cannot be
-recomputed: 28 subcommand slots are unnamed and the plan's 18th root is not
-identified. Do not invent them, and do not treat 160 as a target — the plan's own
-non-goals reject feature-count marketing.
+**Plan record (pass 42, 2026-11-01):** this is the durable per-root source for
+the approved plan. It records **14 built roots**, for **72 planned subcommand
+names** where the plan has a record (59 from the original table, 7 for `/event`,
+6 for `/modmail`). The live registry is **20 roots / 138 subcommands**. Six
+registered roots (`/ping`, `/about`, `/ai`, `/invites`, `/analytics`, `/form`)
+are not in the plan table. 66 of the 138 registered names are beyond the 72
+planned names (38 extra names inside plan roots, 28 in those six roots). The
+handoff's **"18 roots / 160 subcommands"** still cannot be recomputed: the plan
+records only 72 names, leaving **88 names unrecorded**, and it never identifies
+its 18 roots. Separately, the 138 registered names are 22 short of the raw 160
+count. Do not invent the missing names, and do not treat 160 as a target — the
+plan's own non-goals reject feature-count marketing.
 
 | Root | Planned subcommands (as recorded) | Planned | Registered | Replaces / notes |
 | --- | --- | ---: | ---: | --- |
@@ -175,8 +177,8 @@ non-goals reject feature-count marketing.
 | `/music` | play, queue, stop | 3 | 8 | BYO Lavalink; adds `add`, `remove`, `clear`, `skip`, `status` |
 | `/form` | — (not in the plan table) | — | 8 | P7 forms — **shipped pass 40** |
 | `/event` | create, edit, delete, list, rsvp, remind, export | 7 | 7 | P7 events — **shipped pass 41** |
-| `/modmail` | 6 names not recorded | 6 | 0 | P7, **not built** |
-| **Totals** | 14 rows with a planned count | **72** | **132** | 19 registered roots; 28 of 160 still unnamed |
+| `/modmail` | setup, open, reply, close, transcript, stats | 6 | 6 | P7 modmail — **shipped pass 42** |
+| **Totals** | 14 rows with a planned count | **72** | **138** | 20 registered roots; 88 names of the raw 160 are not recorded |
 
 ## Phases
 

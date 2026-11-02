@@ -6,13 +6,13 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-01",
   "phase": "P7",
-  "lastPass": "journal/2026-11-01-pass-41.md",
+  "lastPass": "journal/2026-11-01-pass-42.md",
   "metrics": {
-    "commands": 19,
-    "subcommands": 132,
+    "commands": 20,
+    "subcommands": 138,
     "commandLimit": 100,
-    "modules": 11,
-    "tests": 425
+    "modules": 12,
+    "tests": 435
   },
   "modules": [
     {
@@ -231,6 +231,23 @@
       "teachingPath": "vault/04-Modules/events/Teaching.md",
       "commands": [
         "event"
+      ],
+      "intents": [
+        "Guilds"
+      ],
+      "premium": false
+    },
+    {
+      "id": "modmail",
+      "name": "Modmail",
+      "status": "beta",
+      "phase": "P7",
+      "codePath": "modules/modmail",
+      "specPath": "vault/04-Modules/modmail/Spec.md",
+      "statusPath": "vault/04-Modules/modmail/Status.md",
+      "teachingPath": "vault/04-Modules/modmail/Teaching.md",
+      "commands": [
+        "modmail"
       ],
       "intents": [
         "Guilds"

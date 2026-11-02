@@ -40,7 +40,7 @@ test rather than a live click.
 ## Verified
 
 ```text
-pnpm check                            exit 0 · 425 tests / 63 files
+pnpm check                            exit 0 · 435 tests / 65 files
   responder.test.ts                   5 tests (auto-responder service)
   community.test.ts                  12 tests
   extras.test.ts                      7 tests
@@ -51,7 +51,7 @@ pnpm check                            exit 0 · 425 tests / 63 files
   context.test.ts                     2 tests (Rank card menu)
   packages/db/src/community.test.ts   5 tests (incl. responder reopen)
   packages/db/src/economy.test.ts     2 tests
-pnpm budget                           19/100 roots · 132 subcommands · 151 actions · 4 context menus, status OK
+pnpm budget                           20/100 roots · 138 subcommands · 158 actions · 4 context menus, status OK
 pnpm memory:check                     current (pass 33)
 ```
 

@@ -534,6 +534,19 @@
         "budget": "19/100 roots · 132 subcommands · 4 context menus",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-42",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Modmail, the last plan root: `/modmail setup | open | reply | close | transcript | stats` is the twelfth module. Migration 0013 adds `modmail_threads` and `modmail_messages`; tables are justified because the product is an ownership rule, one active thread per member (partial unique index), an append-only conversation and a transcript archived exactly once. One `ModmailStore` port has in-memory and Drizzle adapters; `ModmailService` owns the privacy check, the open → claimed → closed lifecycle, the first-staff-reply claim, unread counters per side, message/subject caps and the SHA-256 transcript. A caller who is neither owner nor staff gets the same `was not found` refusal as a missing thread, so the command cannot confirm someone else's mail. Closing is a single conditional update that stores the transcript, checksum and message count; a duplicate close refuses and writes nothing. `stats` lists up to ten active thread ids so staff can discover a thread to answer instead of counting only. Tests: 6 module tests cover the positive flow, owner/staff visibility, foreign and missing threads, closed-thread reply, duplicate close, one-active-thread, setup write, disabled drain and caps; 4 PGlite tests read the raw tables for the active-owner index, claim counters, single archive and guild-scoped stats. Live memory mode (exactly one process): setup enabled, open `0f7dbc9c…`, member reply 2 messages, live transcript, close with 2 messages archived and checksum `c3c539706ed70e53…`, duplicate close refused, archived transcript read back, stats 1/0/2, disabled open refused and setup restored. `commands:doctor` reports 20 roots / 138 subcommands / 2 user + 2 message menus with no drift. The Master-Plan now records all six modmail names: 72 planned names across 14 built roots, 66 registered names beyond those (38 extra names inside plan roots, 28 in six roots the plan never named), and the handoff's 160 still has 88 unrecorded names and still does not name its 18 roots; the bot's 138 are 22 short of the raw count. Tests 435 / 65 files; .env DATABASE_URL and REDIS_URL still ECONNREFUSED.",
+      "journal": "journal/2026-11-01-pass-42.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "435",
+        "budget": "20/100 roots · 138 subcommands · 4 context menus",
+        "memory": "current"
+      }
     }
   ]
 }

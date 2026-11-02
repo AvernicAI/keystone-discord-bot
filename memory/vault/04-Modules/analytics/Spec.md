@@ -100,7 +100,7 @@ configured, `DrizzleAnalyticsStore` is used instead.
 
 ## Limits respected
 
-- One new global root; after pass 40 the ledger was `18/100` (now `19/100` with `/event`), and six subcommands cost no extra slot.
+- One new global root; after pass 40 the ledger was `18/100` (now `20/100` with `/event`), and six subcommands cost no extra slot.
 - No new intents, permissions or paid service.
 - Queries are guild-scoped and bounded to 90 days.
 - `command_usage` adds one insert per dispatched guild command.

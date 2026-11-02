@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**123 features** across 16 domains: **96 in repo**, **14 open**, **9 planned**. Live behaviour is marked separately; a green
+**128 features** across 17 domains: **101 in repo**, **15 open**, **8 planned**. Live behaviour is marked separately; a green
 box means the code and its tests exist, not that a live guild has run it.
 
 ## Domains
@@ -27,7 +27,8 @@ box means the code and its tests exist, not that a live guild has run it.
 | Invites | 3 | 3 | 0 | 0 |
 | Forms and applications | 3 | 3 | 0 | 0 |
 | Events and RSVP | 4 | 1 | 3 | 0 |
-| Community parity extras | 8 | 3 | 0 | 5 |
+| Private modmail | 6 | 5 | 1 | 0 |
+| Community parity extras | 7 | 3 | 0 | 4 |
 
 ## Moderation
 
@@ -219,12 +220,22 @@ box means the code and its tests exist, not that a live guild has run it.
 | Reminders | P7 | ◐ open | Scheduled delivery needs a recurring queue job, a per-event wake-up and a delivery port; manual `remind` is real, and the scheduler is named rather than faked. · `modules/events/src/events.test.ts`, `packages/db/src/event-store.test.ts` · live verified |
 | ICS export | P7 | ◐ open | ICS needs a calendar serializer and a real calendar consumer; the checksummed JSON is the portable format the other modules already export. · `modules/events/src/events.test.ts` · live verified |
 
+## Private modmail
+
+| Feature | Phase | Status | Evidence / note |
+| --- | --- | --- | --- |
+| Modmail setup | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `memory/journal/2026-11-01-pass-42.md` · live verified |
+| Private threads | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `packages/db/src/modmail-store.test.ts`, `memory/journal/2026-11-01-pass-42.md` · live verified |
+| Two-sided replies and unread counters | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `packages/db/src/modmail-store.test.ts` · live verified |
+| Archived transcripts | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `packages/db/src/modmail-store.test.ts`, `memory/journal/2026-11-01-pass-42.md` · live verified |
+| Queue stats | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `packages/db/src/modmail-store.test.ts`, `memory/journal/2026-11-01-pass-42.md` · live verified |
+| DM and thread relay | P7 | ◐ open | A real DM/thread relay needs a delivery port and a gateway message handler; borrowing another module's DM adapter is the coupling pass 39 removed, and an unverified relay is worse than a readable inbox. · `modules/modmail/src/modmail.test.ts` |
+
 ## Community parity extras
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
 | Role persistence | P7 | ⏳ planned | Reapply roles on rejoin; requires GuildMembers. |
-| Modmail | P7 | ⏳ planned | DM-to-thread tickets with transcripts. |
 | Auto-responder | P7 | ✅ in repo | `modules/community/src/responder.test.ts`, `modules/community/src/commands.test.ts`, `apps/bot/src/community-events.test.ts`, `packages/db/src/community.test.ts` · live verified |
 | Message and member analytics | P7 | ✅ in repo | `modules/analytics/src/analytics.test.ts`, `modules/analytics/src/memory.ts`, `memory/vault/04-Modules/analytics/Status.md` · live verified |
 | Command usage analytics | P7 | ✅ in repo | `packages/kernel/src/dispatch.ts`, `packages/db/src/command-usage-store.ts`, `packages/db/src/analytics-store.test.ts`, `memory/vault/04-Modules/analytics/Status.md` · live verified |

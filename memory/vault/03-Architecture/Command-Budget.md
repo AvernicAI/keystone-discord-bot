@@ -10,8 +10,8 @@ refuses to boot when it fails.
 ## Current ledger
 
 ```text
-19/100 global roots used (81 left)
-132 subcommands · 151 total actions
+20/100 global roots used (80 left)
+138 subcommands · 158 total actions
 4 context menus (2 user · 2 message; 15 each)
 status: OK
 
@@ -31,6 +31,7 @@ status: OK
   /appeal     moderation      2     2    575
   /mod        moderation     14     4   3991
   /verify     moderation      2     0    306
+  /modmail    modmail         6     2   1614
   /music      music           8     2   1322
   /config     setup           4     3   1106
   /export     setup           6     3   1445

@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -451,6 +452,72 @@ export const eventRsvps = pgTable(
       table.eventId,
       table.state,
     ),
+  ],
+);
+
+/**
+ * One private mail thread per member at a time.
+ *
+ * The partial unique index on `(guild_id, owner_id) WHERE state <> 'closed'`
+ * is the structural version of "one active thread per member": a closed thread
+ * frees the member to open a new one. The transcript is stored on the row by
+ * the same conditional update that closes it, so it cannot be archived twice.
+ */
+export const modmailThreads = pgTable(
+  "modmail_threads",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    guildId: text("guild_id").notNull(),
+    ownerId: text("owner_id").notNull(),
+    subject: text("subject").notNull(),
+    state: text("state").notNull().default("open"),
+    claimedBy: text("claimed_by"),
+    claimedAt: timestamp("claimed_at", { withTimezone: true }),
+    closedBy: text("closed_by"),
+    closedAt: timestamp("closed_at", { withTimezone: true }),
+    resolution: text("resolution"),
+    memberUnread: integer("member_unread").notNull().default(0),
+    staffUnread: integer("staff_unread").notNull().default(0),
+    messageCount: integer("message_count").notNull().default(0),
+    transcript: text("transcript"),
+    transcriptChecksum: text("transcript_checksum"),
+    transcriptMessageCount: integer("transcript_message_count"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    uniqueIndex("modmail_threads_active_owner_idx")
+      .on(table.guildId, table.ownerId)
+      .where(sql`${table.state} <> 'closed'`),
+    index("modmail_threads_guild_state_idx").on(
+      table.guildId,
+      table.state,
+      table.updatedAt,
+    ),
+    index("modmail_threads_guild_owner_idx").on(table.guildId, table.ownerId),
+  ],
+);
+
+/**
+ * Append-only conversation rows. The thread owns the lifecycle; a message only
+ * records who spoke on which side, so the transcript can be rebuilt from rows
+ * and archived verbatim on close.
+ */
+export const modmailMessages = pgTable(
+  "modmail_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    guildId: text("guild_id").notNull(),
+    threadId: uuid("thread_id")
+      .notNull()
+      .references(() => modmailThreads.id, { onDelete: "cascade" }),
+    authorId: text("author_id").notNull(),
+    side: text("side").notNull(),
+    body: text("body").notNull(),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    index("modmail_messages_thread_idx").on(table.threadId, table.createdAt),
   ],
 );
 

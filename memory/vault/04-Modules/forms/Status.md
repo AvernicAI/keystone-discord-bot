@@ -6,7 +6,7 @@ The tenth module is in repo and live-proven in memory mode. `/form` is the first
 root added after the saved plan table reached 59 of 59.
 
 - `/form create | edit | delete | list | panel | submit | review | export` is
-  registered. The ledger is **19 roots / 132 subcommands / 151 actions / 4
+  registered. The ledger is **20 roots / 138 subcommands / 158 actions / 4
   context menus**.
 - Forms and submissions are **real rows** in `forms` and `form_submissions`
   (migration `0011_forms`). `FormStore` has one in-memory and one Drizzle
@@ -33,9 +33,9 @@ pnpm vitest run modules/forms packages/db/src/form-store.test.ts
   ✓ modules/forms/src/forms.test.ts (12 tests)
   ✓ packages/db/src/form-store.test.ts (3 tests)
 pnpm test
-  425 tests / 63 files
+  435 tests / 65 files
 pnpm budget
-  19/100 roots · 132 subcommands · 151 actions · 4 context menus, OK
+  20/100 roots · 138 subcommands · 158 actions · 4 context menus, OK
 ```
 
 - Parsing: derived and explicit keys, empty/duplicate/oversized field lists,

@@ -137,7 +137,7 @@ store returns a typed `duplicate-key` result instead of leaking a Postgres error
 
 ## Limits respected
 
-- One new global root; the ledger became 18/100 at this pass (now 19/100) and eight subcommands cost no
+- One new global root; the ledger became 18/100 at this pass (now 20/100) and eight subcommands cost no
   extra slot.
 - No new dependency, paid service or gateway intent (`Guilds` only).
 - One migration for the two tables, justified by the review transition and the

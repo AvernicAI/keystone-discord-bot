@@ -36,6 +36,7 @@ export interface DispatchDeps {
   music?: import("./music").MusicPort;
   forms?: import("./forms").FormStore;
   events?: import("./events").EventStore;
+  modmail?: import("./modmail").ModmailStore;
   /** Optional: records one real row per dispatched guild command. */
   usage?: import("./analytics").CommandUsageStore;
   /** Optional: when absent, tracing is a no-op and costs nothing. */
@@ -135,6 +136,7 @@ export async function dispatchCommand(
     music: deps.music,
     forms: deps.forms,
     events: deps.events,
+    modmail: deps.modmail,
   };
 
   const startedAt = deps.now?.() ?? Date.now();

@@ -93,6 +93,7 @@ async function main(): Promise<void> {
     music: runtime.music,
     forms: runtime.forms,
     events: runtime.events,
+    modmail: runtime.modmail,
     usage: runtime.usage,
   };
 

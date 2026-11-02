@@ -245,6 +245,9 @@ importers:
       '@keystone/module-moderation':
         specifier: workspace:*
         version: link:../../modules/moderation
+      '@keystone/module-modmail':
+        specifier: workspace:*
+        version: link:../../modules/modmail
       '@keystone/module-music':
         specifier: workspace:*
         version: link:../../modules/music
@@ -433,6 +436,19 @@ importers:
         specifier: workspace:*
         version: link:../../packages/testing
 
+  modules/modmail:
+    dependencies:
+      '@keystone/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@keystone/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
+
   modules/music:
     dependencies:
       '@keystone/kernel':
@@ -537,6 +553,9 @@ importers:
       '@keystone/module-moderation':
         specifier: workspace:*
         version: link:../../modules/moderation
+      '@keystone/module-modmail':
+        specifier: workspace:*
+        version: link:../../modules/modmail
       '@keystone/module-music':
         specifier: workspace:*
         version: link:../../modules/music

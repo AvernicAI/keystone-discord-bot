@@ -43,11 +43,11 @@ P2 core shipped in pass 05 (2026-11-01).
 ## Verified
 
 ```
-pnpm test                                  # 425 tests / 63 files
+pnpm test                                  # 435 tests / 65 files
 pnpm vitest run modules/moderation         # 46 tests: link/profanity/zalgo, raid, dry-run, /mod, appeal/status, verify start/status, join-gate state, native plan, context menus
 pnpm test -- packages/db/src/cases.test.ts # 2 PGlite case-store tests, including listEvents
 pnpm test -- packages/db/src/member-store.test.ts # PGlite member row + verification upsert
-pnpm budget                                # 19/100 roots · 132 subcommands · 151 actions · 4 context menus, status OK
+pnpm budget                                # 20/100 roots · 138 subcommands · 158 actions · 4 context menus, status OK
 pnpm build                                 # bot, worker, migrate artefacts
 ```
 
@@ -160,7 +160,7 @@ P7 verify-hub evidence (passes 36–37):
   completion were **not** invoked live; the tests above cover them.
 - `pnpm commands:doctor` read Discord after the `!form` proof and reported 18
   roots / 125 subcommands / 4 context menus with no drift; with `/event`
-  registered in pass 41 it reports **19 roots / 132 subcommands / 4 context
+  registered in pass 41 it reports **20 roots / 138 subcommands / 4 context
   menus**.
 
 P7 appeal-hub evidence (pass 35):

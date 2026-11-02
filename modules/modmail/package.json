@@ -1,0 +1,17 @@
+{
+  "name": "@keystone/module-modmail",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Private member-to-staff mail with owner-or-staff visibility and archived transcripts.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@keystone/kernel": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@keystone/testing": "workspace:*"
+  }
+}

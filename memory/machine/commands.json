@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "updatedAt": "2026-11-02",
   "source": "packages/kernel ModuleRegistry catalog()",
-  "roots": 19,
-  "subcommands": 132,
-  "actions": 151,
+  "roots": 20,
+  "subcommands": 138,
+  "actions": 158,
   "contextMenus": 4,
   "userContextMenus": 2,
   "messageContextMenus": 2,
@@ -1126,6 +1126,58 @@
           "options": [
             "event"
           ]
+        }
+      ]
+    },
+    {
+      "name": "modmail",
+      "moduleId": "modmail",
+      "description": "Private member-to-staff mail: open a thread, reply, close and read transcripts.",
+      "options": [],
+      "subcommands": [
+        {
+          "name": "setup",
+          "description": "Show or change the modmail switches for this server.",
+          "options": [
+            "enabled",
+            "max_threads"
+          ]
+        },
+        {
+          "name": "open",
+          "description": "Open a private thread; only you and staff can read it.",
+          "options": [
+            "subject",
+            "message"
+          ]
+        },
+        {
+          "name": "reply",
+          "description": "Add a message to your thread, or answer as staff.",
+          "options": [
+            "thread",
+            "message"
+          ]
+        },
+        {
+          "name": "close",
+          "description": "Close a thread and archive its transcript exactly once.",
+          "options": [
+            "thread",
+            "resolution"
+          ]
+        },
+        {
+          "name": "transcript",
+          "description": "Read a thread you own, or any thread as staff.",
+          "options": [
+            "thread"
+          ]
+        },
+        {
+          "name": "stats",
+          "description": "Staff queue counts read from the modmail tables.",
+          "options": []
         }
       ]
     }
