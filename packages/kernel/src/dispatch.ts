@@ -34,6 +34,7 @@ export interface DispatchDeps {
   exportFacts?: import("./export").ExportFacts;
   attachments?: import("./export").AttachmentReader;
   music?: import("./music").MusicPort;
+  forms?: import("./forms").FormStore;
   /** Optional: records one real row per dispatched guild command. */
   usage?: import("./analytics").CommandUsageStore;
   /** Optional: when absent, tracing is a no-op and costs nothing. */
@@ -131,6 +132,7 @@ export async function dispatchCommand(
     exportFacts: deps.exportFacts,
     attachments: deps.attachments,
     music: deps.music,
+    forms: deps.forms,
   };
 
   const startedAt = deps.now?.() ?? Date.now();

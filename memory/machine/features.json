@@ -1657,7 +1657,7 @@
           "phase": "P7",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "17 roots expose 117 real Discord subcommands instead of hidden flat action options. /help reads the live registry, the catalog is generated, boot sync compares the full option tree, commands:doctor reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for /mod ban. /appeal open | status and /verify start | status shipped in passes 35-36. Gateway InteractionCreate remains human-only.",
+          "note": "18 roots expose 125 real Discord subcommands instead of hidden flat action options. /help reads the live registry, the catalog is generated, boot sync compares the full option tree, commands:doctor reports the live shape, and a synthetic slash harness crosses the real adapter and dispatch for /mod ban. /appeal open | status, /verify start | status and /form create | edit | delete | list | panel | submit | review | export are registered. Gateway InteractionCreate remains human-only.",
           "evidence": [
             "packages/kernel/src/registry.test.ts",
             "apps/bot/src/adapt.test.ts",
@@ -2074,30 +2074,43 @@
           "name": "Application forms",
           "competitors": {},
           "phase": "P7",
-          "status": "planned",
+          "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "Modal forms with validated fields.",
-          "liveVerified": false
+          "note": "`/form create | edit | delete | list | panel | submit | export` over `forms` and `form_submissions`. Fields are validated, required and capped; a pending row is unique per member and form. Modal input is deferred: the panel prints the validated `answers` syntax instead of shipping a button that opens nothing. Live 2026-11-01: create → open → panel → submit → review accept → export, with the downloaded file matching the rows.",
+          "evidence": [
+            "modules/forms/src/forms.test.ts",
+            "packages/db/src/form-store.test.ts",
+            "memory/journal/2026-11-01-pass-40.md"
+          ],
+          "liveVerified": true
         },
         {
           "id": "forms.review-queue",
           "name": "Review queue",
           "competitors": {},
           "phase": "P7",
-          "status": "planned",
+          "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "Accept, deny and note with an audit trail.",
-          "liveVerified": false
+          "note": "`/form review` lists pending rows, reads one submission's answers, and transitions only a `submitted` row to accepted or denied with a reviewer id and optional note. A second decision is refused; the status change is one conditional SQL update. Live 2026-11-01: 1 pending submission → accepted by the invoking moderator.",
+          "evidence": [
+            "modules/forms/src/forms.test.ts",
+            "packages/db/src/form-store.test.ts"
+          ],
+          "liveVerified": true
         },
         {
           "id": "forms.submission-export",
           "name": "Submission export",
           "competitors": {},
           "phase": "P7",
-          "status": "planned",
+          "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "JSON/CSV export with a receipt.",
-          "liveVerified": false
+          "note": "`/form export` attaches a `keystone.forms` JSON file with forms, submissions, counts and a SHA-256 checksum. Live 2026-11-01: a 1.5 KB file downloaded and parsed with 1 form / 1 submission, the accepted state and the decision note. CSV is not implemented; the JSON is the portable format.",
+          "evidence": [
+            "modules/forms/src/forms.test.ts",
+            "memory/vault/04-Modules/forms/Status.md"
+          ],
+          "liveVerified": true
         }
       ]
     },

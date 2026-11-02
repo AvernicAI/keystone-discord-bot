@@ -257,6 +257,8 @@ export interface CommandContext {
   readonly attachments?: import("./export").AttachmentReader;
   /** Present when the composition root wired the saved queue and playback status. */
   readonly music?: import("./music").MusicPort;
+  /** Present when the composition root wired the form store. */
+  readonly forms?: import("./forms").FormStore;
 }
 
 /**

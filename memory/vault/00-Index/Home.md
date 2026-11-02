@@ -122,9 +122,18 @@ https://github.com/RNGBubba/keystone-discord-bot
   row, not gateway roles. Live: no record, then the exact DM refusal, then still
   no record. The DM button click is covered by tests; the MCP bot cannot receive
   it. The saved plan table is now complete at 59 of 59 names.
-- **Command tree** in repo (passes 26, 30, 31, 32, 33, 34, 35 and 36): real Discord
-  subcommands replaced the flat `action` option across every existing hub — 17
-  roots, 117 subcommands, 134 actions, 4 context menus. `/help` is generated
+- **Forms** in repo and live-proven (pass 40): `/form create | edit | delete |
+  list | panel | submit | review | export` is the tenth module. `forms` and
+  `form_submissions` hold the rows; `(guild_id, key)` is unique and a partial
+  unique index allows one pending submission per member per form. A review only
+  transitions a `submitted` row, deletion is refused while history exists, and
+  export is a checksummed JSON file. Live: create → open → panel → submit → 1
+  pending → accepted with a note → a 1.5 KB file that downloaded and parsed with
+  the same answers. Modal input is not shipped; `submit` takes the validated
+  `answers` option.
+- **Command tree** in repo (passes 26, 30, 31, 32, 33, 34, 35, 36 and 40): real Discord
+  subcommands replaced the flat `action` option across every existing hub — 18
+  roots, 125 subcommands, 143 actions, 4 context menus. `/help` is generated
   from the live registry; `pnpm commands:catalog` writes [[Command-Catalog]] and
   `pnpm commands:doctor` checks the live shape. A human slash or right-click
   invocation remains the unobserved surface.
@@ -159,7 +168,10 @@ https://github.com/RNGBubba/keystone-discord-bot
   checks into `apps/bot/src/moderation-buttons.ts` with 13 focused tests, so
   `index.ts` no longer owns those rules. Pass 39 moved the join-gate DM onto
   the moderation action port, so moderation no longer borrows the community
-  adapter. Also
+  adapter. Pass 40 added `/form` and re-registered the set, bringing the live
+  ledger to **18 roots / 125 subcommands**; `!form create | edit | panel |
+  submit | review | export` ran the whole flow, and the exported file parsed
+  with the same pending → accepted rows. Also
   qwen3:8b via Ollama answered mentions in `#ai-chat`. A dev-only `!` bridge
   proved `!ping`, `!about`, `!help commands`, `!help browse`, `!help search
   query=ban`, `!ai status`, `!mod history`, `!mod links`, `!mod filters`,
@@ -181,8 +193,8 @@ https://github.com/RNGBubba/keystone-discord-bot
 - Phase **P4** shipped the AI layer and the ledger-backed economy hardening.
 - Phase **P3** shipped the community suite: leveling, reaction roles, welcome,
   starboard, tickets, giveaways, temp voice, content and seasons.
-- 17 of Discord's 100 global roots used, with 117 subcommands and 4 context
-  menus (separate 15 + 15 budget); 9 modules registered.
+- 18 of Discord's 100 global roots used, with 125 subcommands and 4 context
+  menus (separate 15 + 15 budget); 10 modules registered.
 - The full suite covers the 5,000-row portability round trip and the failure,
   rollback and deletion paths; `pnpm check` also runs the intent, channel and
   memory audits.

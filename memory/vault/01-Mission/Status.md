@@ -2,6 +2,28 @@
 
 ## Now
 
+**P7 forms are in repo and live-proven** (pass 40, 2026-11-01): `/form create |
+edit | delete | list | panel | submit | review | export` is the tenth module.
+`forms` and `form_submissions` are real tables (migration 0011): a unique
+`(guild_id, key)` makes `form:staff` unambiguous, and a partial unique index on
+`(form_id, user_id) WHERE state = 'submitted'` enforces one pending application
+per member. `FormService` validates fields and answers, gates draft/open/closed,
+refuses deletion while any submission exists, and transitions only a `submitted`
+row with a conditional update; a second reviewer gets "already accepted/denied"
+and nothing is written. `/form panel` refuses a non-open form, posts in the
+invoking channel and records it; `/form export` attaches a `keystone.forms` JSON
+file with a SHA-256 checksum. **Modal input is not shipped**: `submit` takes the
+validated `answers` option and the panel prints the syntax, so there is no button
+that opens nothing. Live in `#ai-chat` with one memory-mode process: `create`
+wrote a draft, `edit` opened it, `panel` posted, `submit` wrote
+`31778bdb-6180-4671-afab-03d4f880a626`, `review` read **1 pending**, a decision
+`accepted` with a note transitioned it, a second `review` read **0 pending**,
+`delete` was refused while the history exists, and `export` produced a **1.5 KB**
+file that downloaded (HTTP 200, 1540 bytes) and parsed as **1 form / 1
+submission** with the same answers, reviewer and note and a checksum that
+recomputes. `commands:doctor` reports **18 roots / 125 subcommands / 4
+context menus** with no drift. See [[04-Modules/forms/Status|Forms status]].
+
 **P7 `/verify` is a real two-subcommand hub with a complete persisted join gate**
 (pass 37, 2026-11-01): the saved plan's last two names, `/verify start | status`,
 are registered, so the plan table is complete at **59 of 59**. The join path now
@@ -20,7 +42,7 @@ cannot make a member join, receive the DM or click the button, so the join and
 completion paths are covered by security, command and PGlite tests, not claimed
 live. Pass 39 moved the DM itself onto `ModerationActions.directMessage`, so the
 join gate no longer borrows the community adapter; the body, button and refusal
-text are unchanged. `commands:doctor` reports **17 roots / 117 subcommands / 4
+text are unchanged. `commands:doctor` reports **18 roots / 125 subcommands / 4
 context menus** with no drift. See [[04-Modules/moderation/Status|Moderation
 status]].
 
@@ -118,9 +140,9 @@ subcommands, no module, no table and no second settings store. Live in
 read-back after each write; `bogus` returned `automod.links: Invalid enum value`
 and the next read still returned `"alert"`. Pass 31 added `/export` and pass 32 added
 `/music`, pass 35 split `/appeal` into two and pass 36 split `/verify` into two,
-so Discord now reports **17 roots / 117 subcommands / 134 actions** including
-`config`, `export`, `music`, the five `/setup` actions, the two `/appeal`
-actions and the two `/verify` actions. The MCP cannot invoke slash
+so Discord now reports **18 roots / 125 subcommands / 143 actions** including
+`config`, `export`, `form`, `music`, the five `/setup` actions, the two
+`/appeal` actions and the two `/verify` actions. The MCP cannot invoke slash
 commands or render embeds, so the live proof is the message bridge with
 plain-text replies; list/export embeds are covered by a command test. See
 [[04-Modules/setup/Spec|Setup spec]] and [[04-Modules/setup/Status|Setup status]].
@@ -138,8 +160,9 @@ one MCP edit plus one delete appeared as **1 edited / 1 deleted**. Command runs
 rose 0 → 3 → 4 as bridge commands completed; the current invocation is recorded
 after its reply. At pass 29 Discord reported **14 roots / 90 subcommands / 104
 actions**; pass 30 added `/config`, pass 31 added `/export` and pass 32 added
-`/music`, pass 35 split `/appeal` into two and pass 36 split `/verify` into two,
-so the current ledger is **17 / 117 / 134**.
+`/music`, pass 35 split `/appeal` into two, pass 36 split `/verify` into two and
+pass 40 added `/form` with eight, so the current ledger is
+**18 / 125 / 143**.
 The MCP text reader does not render embeds, so the live transcript proves the
 summary text while the embed fields and JSON export are covered by a command
 test. See [[04-Modules/analytics/Spec|Analytics spec]] and
@@ -218,15 +241,15 @@ subcommands, bringing the ledger to **13 roots · 84 subcommands · 97 actions**
 that point. Pass 29 added `/analytics` with six subcommands, pass 30 added
 `/config` with four, pass 31 added `/export` with six and pass 32 added `/music`
 with eight, pass 34 split `/setup` into five, pass 35 split `/appeal` into two,
-and pass 36 split `/verify` into two, so the current ledger is **17 roots · 117
-subcommands · 134 actions**. After pass 30 the boot found
+pass 36 split `/verify` into two, and pass 40 added `/form` with eight, so the
+current ledger is **18 roots · 125 subcommands · 143 actions**. After pass 30 the boot found
 `config` missing, cleared the global set once and re-registered it; pass 31's
 boot found only `export` missing and did the same. Pass 33 now models context
 menus as application commands with their own type and budget, and its boot found
 all four menus missing and re-registered 21 commands. `commands:doctor` now
-reports 17 roots / 117 subcommands plus 2 user and 2 message menus, including
-`analytics`, `logging`, `config`, `export`, `music`, the five `/setup` actions,
-the two `/appeal` actions and the two `/verify` actions. See
+reports 18 roots / 125 subcommands plus 2 user and 2 message menus, including
+`analytics`, `logging`, `config`, `export`, `form`, `music`, the five `/setup`
+actions, the two `/appeal` actions and the two `/verify` actions. See
 [[03-Architecture/Command-Budget|Command budget]] and
 [[03-Architecture/ADR/ADR-0003-command-budget]].
 
@@ -291,8 +314,8 @@ pipeline in `DEV_GUILD_ID`: `!ping`, `!about`, `!ai status`, `!mod history` and
 77 subcommands at the time; pass 28 added `/logging`, pass 29 added
 `/analytics`, pass 30 added `/config`, pass 31 added `/export` and pass 32 added
 `/music`, pass 34's `/setup` hub, pass 35's `/appeal` hub and pass 36's `/verify`
-hub, so Discord's fetched shape now reports **17 roots / 117 subcommands** with no
-missing, extra or changed roots. The bridge
+hub, so Discord's fetched shape now reports **18 roots / 125 subcommands** with
+no missing, extra or changed roots. The bridge
 added `!help commands`, `!help browse`, `!help search query=ban`, `!mod history`,
 `!ai status`, `!logging status`, `!logging events`, `!logging retention`,
 `!logging export`, `!analytics overview`, `!analytics commands`, `!analytics
@@ -330,9 +353,9 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 398 tests / 59 files · budget 17/100 roots (117 subcommands · 134 actions · 4 context menus) · memory current
+pnpm check        exit 0 · typecheck 0 · 413 tests / 61 files · budget 18/100 roots (125 subcommands · 143 actions · 4 context menus) · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
-live              2026-11-01 · AI Team#5758 · 2 guilds · 17 roots / 117 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
+live              2026-11-01 · AI Team#5758 · 2 guilds · 18 roots / 125 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · /form create → open → panel → submit → 1 pending → accepted → 1.5 KB export parsed with the same answers and decision · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)
 live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set · !export guild · !export user · !export drift · !music status · !music add · !music queue · !music play · !music remove · !music skip · !appeal open · !appeal status · !verify start · !verify status
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
@@ -356,7 +379,7 @@ read that file.
 | --- | --- | --- | --- |
 | 1 | The four menus exist with the right types | `context-menus.test.ts` asserts `contextMenuNames()` and type-keyed lookup; `commands:doctor` reads Discord and prints `2 user menus · 2 message menus` | Unit + **live Discord API** |
 | 2 | A menu cannot declare options or subcommands | `context-menus.test.ts` registration throws on both | Unit |
-| 3 | Menus have their own budget, not the 100 roots | `context-menus.test.ts` audits 1 root + 2 menus and 16 user menus; `pnpm budget` prints 17 roots, 4 menus | Unit + budget |
+| 3 | Menus have their own budget, not the 100 roots | `context-menus.test.ts` audits 1 root + 2 menus and 16 user menus; `pnpm budget` prints 18 roots, 4 menus | Unit + budget |
 | 4 | The adapter exposes a user target and a message target | `adapt.test.ts` maps `targetId` for a user menu and `targetId`/`targetUserId`/`targetContent` for a message menu | Unit |
 | 5 | Report message opens a real case with the message id | `context.test.ts` reads the case row back (`messageId: "message-1"`, `channelId: "channel-a"`, excerpt) | In-memory store |
 | 6 | Case history reads the same rows behind `ModerateMembers` | `context.test.ts` seeds a `warn` case and reads it through the menu; the manifest declares `requirePermissions("ModerateMembers")`, and the shared dispatch tests prove permission guards run before `execute` | Unit + dispatch |

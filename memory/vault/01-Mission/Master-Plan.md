@@ -146,12 +146,13 @@ same interfaces. No module changes when a port changes.
 **Gap audit (passes 34–35, 2026-11-01):** the "18 roots / 160 subcommands" figure
 in the plan handoff has no per-root list in this repository. This table is the
 only saved allocation list; it names **12 roots / 59 subcommands**, not 160, and
-does not name an 18th root. The live registry now has **17 roots / 117
-subcommands** (see [[01-Mission/Command-Catalog|Command-Catalog]]); 47 names in
-the 160 figure remain unaccounted for. Every name in this saved table is now
-registered: `/setup`, `/appeal` and `/verify` were the last gaps, and `/verify
-start | status` shipped in pass 36. Do not invent the missing 47 names or an
-18th root: the generated catalog and this table are the evidence.
+does not name the extra roots. The live registry now has **18 roots / 125
+subcommands** (see [[01-Mission/Command-Catalog|Command-Catalog]]); `/form` is a
+new domain shipped in pass 40, not one of the handoff's unlisted names. The 160
+figure still has no per-root list, so it remains unverified rather than
+reconstructed. Every name in this saved table is registered: `/setup`, `/appeal`
+and `/verify` were the last gaps. Do not invent the missing names: the generated
+catalog and this table are the evidence.
 
 | Root | Subcommands | Replaces |
 | --- | --- | --- |

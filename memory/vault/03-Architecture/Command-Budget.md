@@ -10,8 +10,8 @@ refuses to boot when it fails.
 ## Current ledger
 
 ```text
-17/100 global roots used (83 left)
-117 subcommands · 134 total actions
+18/100 global roots used (82 left)
+125 subcommands · 143 total actions
 4 context menus (2 user · 2 message; 15 each)
 status: OK
 
@@ -24,6 +24,7 @@ status: OK
   /about      diagnostics     0     0    131
   /help       diagnostics     5     1    816
   /ping       diagnostics     0     0    103
+  /form       forms           8     5   2709
   /invites    invites         3     1    672
   /logging    logging         7     2   1606
   /appeal     moderation      2     2    575

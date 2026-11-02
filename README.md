@@ -27,14 +27,19 @@ through the same `SettingsService` and Zod schema as the dashboard, with no
 second store. `/export guild | user | import | delete | drift | rollback` puts
 the P5 portability service inside Discord: real JSON file attachments, a
 dry-run-first import, a confirmation-gated delete and live drift facts from the
-gateway cache. The command ledger is **17/100 roots** with **117 real
-subcommands**, **134 actions** and **4 context menus** (2 user, 2 message),
-there are **9 modules**, and `pnpm check` covers **398 tests across 59 files**
-without a Discord token, database or network. Live on 2026-11-01: the bot logged
-in and Discord reports **17 roots / 117 subcommands / 2 user menus / 2 message
-menus**, answered a Qwen3:8b mention in `#ai-chat`, and ran real
-moderation, community, AI, invite, logging, analytics, configuration, music and
-content-filter commands through a development message bridge, including
+gateway cache. `/form create | edit | delete | list | panel | submit | review |
+export` is the tenth module: a real application form with a persisted pending
+submission, a review transition and a checksummed JSON export. Modal input is
+explicitly not shipped; the panel prints the validated `answers` syntax instead
+of a button that opens nothing. The command ledger is **18/100 roots** with
+**125 real subcommands**, **143 actions** and **4 context menus** (2 user, 2
+message), there are **10 modules**, and `pnpm check` covers **413 tests across
+61 files** without a Discord token, database or network. Live on 2026-11-01: the
+bot logged in and Discord reports **18 roots / 125 subcommands / 2 user menus /
+2 message menus**, answered a Qwen3:8b mention in `#ai-chat`, and ran real
+moderation, community, AI, invite, logging, analytics, configuration, music,
+forms and content-filter commands through a development message bridge,
+including
 `/help`’s generated catalog. The dashboard was booted in memory mode and
 exercised over real HTTP, including authenticated settings writes against a fake
 OAuth port; live Discord OAuth is not claimed. Slash `InteractionCreate` from a
@@ -255,8 +260,8 @@ refusals. See [the community spec](memory/vault/04-Modules/community/Spec.md).
 
 ## Commands
 
-Discord's global limit is 100 **roots**; Keystone uses **17** and exposes **117
-real subcommands** (134 total actions), plus **4 context menus** on their own
+Discord's global limit is 100 **roots**; Keystone uses **18** and exposes **125
+real subcommands** (143 total actions), plus **4 context menus** on their own
 15 + 15 budget. A subcommand does not spend another global slot, which is why the
 picker now expands instead of showing one flat `action` option. Slash commands
 are the product surface; context menus appear under right-click → Apps. In
@@ -359,7 +364,7 @@ Everything below is free. No feature is moved behind a paywall.
 
 ### Platform and operations
 
-- Module registry with a CI-enforced 100-root budget (currently 17 roots, 117
+- Module registry with a CI-enforced 100-root budget (currently 18 roots, 125
   subcommands) and a separate 15 + 15 context-menu budget (currently 4 menus).
 - First-run `/setup` hub: readiness, a module switchboard, a read-only integrity
   check, a bundle preview and a settings-only module reset. Every write goes
@@ -433,6 +438,11 @@ Everything below is free. No feature is moved behind a paywall.
   reply per message and a per-trigger cooldown. Configuration is `/tools
   responder`, `/tools responders` and `/tools responder-remove`; records are
   guild-scoped and survive a restart through the same record seam as tags.
+- Application forms: `/form create | edit | delete | list | panel | submit |
+  review | export`. Fields are validated and required; one pending submission
+  per member per form is a database invariant; review accepts, denies and notes
+  only a pending row; export is a checksummed JSON file. Modal input is not in
+  this build and the panel prints the exact `answers` syntax.
 
 ### AI (opt-in, capped, zero-retention by default)
 
@@ -454,8 +464,8 @@ Everything below is free. No feature is moved behind a paywall.
   per-token rate limits, idempotency, webhooks and OpenAPI.
 - **P7:** invite tracking, audit logging, the link/profanity/zalgo filters,
   auto-responders, guild analytics, `/config`, `/export`, the `/music` saved
-  queue and the four context menus are done; the rest is parity completion
-  (forms, events, role persistence, modmail), Components V2 UI and i18n.
+  queue, `/form` and the four context menus are done; the rest is parity
+  completion (events, role persistence, modmail), Components V2 UI and i18n.
 - **P8:** `/music` queue control ships disabled by default; bring-your-own
   Lavalink playback is the open piece (no bundled streamer).
 - **P9:** docs site, 14-lesson curriculum, release workflow, self-host kit.
@@ -476,21 +486,22 @@ See [the parity matrix](memory/vault/01-Mission/Parity-Matrix.md) and
 | P4.5 Platform hardening | Done | Channel resolver, intents, capability report |
 | P5 Portability | Done | Export/restore/rollback, importers, drift |
 | P6 Dashboard + API | **In progress** | OAuth/PKCE sessions, per-guild authz, schema-validated settings writes and `/api/v1` |
-| P7 Command tree | Done | 17 roots · 117 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
+| P7 Command tree | Done | 18 roots · 125 real subcommands; `/help`; generated catalog; shape-aware sync and doctor |
 | P7 Context menus | Done | 4 menus (2 user, 2 message) registered in Discord; report opens a real case, case history and rank card read existing rows, explain uses the capped AI path; invocation is human-only |
 | P7 Slash harness | Harness done | Synthetic nested `/mod ban` through the real adapter + dispatch; gateway `InteractionCreate` still human-only |
 | P7 Audit logging | Done | `/logging`; five event kinds, per-event toggles, append-only ledger, retention; message and moderation events live-proven |
 | P7 Analytics | Done | `/analytics`; six read-only views over audit, cases, invites, tickets and command usage; live counts cross-checked against the ledger |
 | P7 In-bot config | Done | `/config`; four subcommands over every module's own schema; live `alert → delete → alert` read-back and a rejected invalid value |
+| P7 Forms | Done | `/form`; eight subcommands over `forms` and `form_submissions`; live create → panel → submit → review accept → 1.5 KB export parsed with the same answers and decision; modal input open |
 | P7 Export surface | Done | `/export`; six subcommands, file attachments, dry-run import, exact-id delete, live drift; 12.8 KB live bundle parsed and checksum-verified |
 | P8 Music queue | Done | `/music`; eight subcommands over a durable `community_records` queue; SQL row lock holds the cap; live add/queue/remove plus disabled refusal |
 | P8 Music playback | **Open** | `play`, `skip` and `stop` refuse with the exact missing pieces (no voice/Lavalink client, no `LAVALINK_URL`); the refusal is live-proven, streaming is not shipped |
-| P7 Parity completion | **In progress** | Invite tracking, audit logging, link/profanity/zalgo filters, auto-responders, analytics, in-bot config, `/export` and the music queue shipped; forms, events, expiry, modmail, real playback and UI/i18n open |
+| P7 Parity completion | **In progress** | Invite tracking, audit logging, link/profanity/zalgo filters, auto-responders, analytics, in-bot config, `/export`, forms and the music queue shipped; events, expiry, modmail, real playback and UI/i18n open |
 
-Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 17
-global roots with 117 subcommands (including `/analytics`, `/config`, `/export`,
-`/help`, `/invites`, `/logging`, `/music`, the five `/setup` actions, the two
-`/appeal` actions and the two `/verify` actions) plus
+Live evidence (2026-11-01): `AI Team#5758` connected and Discord reported 18
+global roots with 125 subcommands (including `/analytics`, `/config`, `/export`,
+`/form`, `/help`, `/invites`, `/logging`, `/music`, the five `/setup` actions,
+the two `/appeal` actions and the two `/verify` actions) plus
 **2 user menus and 2 message menus** with no drift, and Qwen3:8b answered a
 mention in
 `#ai-chat`. A development `!`
@@ -566,7 +577,8 @@ subcommands`; after pass 30's `/config` it reported 15 roots / 94 subcommands,
 pass 31's `/export` reached 16 roots / 100 subcommands, and pass 32's `/music`
 brought it to 17 roots / 108 subcommands; pass 34's `/setup` hub brought it to
 17 roots / 113 subcommands, pass 35's `/appeal` hub brought it to 17 roots / 115
-subcommands, and pass 36's `/verify` hub brought it to **17 roots / 117
+subcommands, and pass 36's `/verify` hub brought it to 17 roots / 117
+subcommands. Pass 40's `/form` hub is the current ledger: **18 roots / 125
 subcommands**. The MCP text reader
 does not render embeds, so the embed fields, top-command list and JSON export
 were covered by [the command test](modules/analytics/src/analytics.test.ts), not
@@ -678,6 +690,24 @@ enabled and no hold on record:
 
 The join and completion paths are not claimed live; only the refusal is.
 
+Forms evidence (2026-11-01, pass 40): one memory-mode process served the bridge
+(a stale process from an earlier session was stopped first). `!form create` wrote
+`live-test` as a draft with two fields; `!form edit ... state=open` opened it;
+`!form panel` posted the panel and recorded the channel; `!form submit` wrote
+pending submission `31778bdb-6180-4671-afab-03d4f880a626`; `!form review` read
+**1 pending submission**; a decision `accepted` with a note transitioned the row
+and a second `!form review` read **0 pending**; `!form delete` was refused
+because the history exists; `!form export` attached a **1.5 KB**
+`keystone.forms` file with checksum `d1fd6d9105a54056…`. The file was downloaded
+(HTTP 200, 1540 bytes) and parsed: **1 form / 1 submission**, the same
+`why=One clean bot process on the real bridge` and `tz=UTC` answers, state
+`accepted`, reviewer id and note, and a SHA-256 that recomputes to the same
+value. `commands:doctor` read Discord and reported **18 roots / 125 subcommands /
+2 user + 2 message menus** with no drift. Modal input, the panel embed's rendered
+text and a human staff member without `ManageGuild` were not exercised live; the
+command and PGlite tests cover them. See
+[pass 40](memory/journal/2026-11-01-pass-40.md).
+
 P6 web evidence (2026-11-01): the dashboard process booted in memory mode and
 real HTTP requests returned `/healthz` `200`, `/` `200`, `/api/v1/nope` `404` and
 `/login` `503` with the OAuth-unconfigured message. The authenticated read and
@@ -698,6 +728,8 @@ Still open and not claimed as done:
 - pgvector ANN at 1M×1536 with production embeddings; the exact index is the
   portable path today.
 - MEE6 import is file-based, not a live fetch.
+- Forms modal input is not implemented; `/form submit` takes the validated
+  `answers` option. Forms are not yet part of the `/export guild` bundle.
 - Live Discord OAuth, a Postgres-backed session smoke, fleet actions and scoped
   API tokens are the remaining P6 work.
 

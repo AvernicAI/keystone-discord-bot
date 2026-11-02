@@ -215,18 +215,20 @@ machine behind that hub: an enforced join-gate hold writes the quarantined row,
 disabled gate, and completion transitions only a quarantined row. Pass 38 moved
 the appeal/verify button parsing and member checks into a tested adapter, and
 pass 39 moved the join-gate DM onto the moderation action port, so the two
-audit findings are cleared. The ledger is now **17 roots / 117 subcommands / 134
-actions / 4 context menus**, and every name in the saved plan table (59 of 59)
-is registered. The rest of this phase is open.
+audit findings are cleared. Pass 40 added `/form create | edit | delete | list |
+panel | submit | review | export`: two owned tables, a pending-submission
+invariant, a real review transition and a checksummed export, with modal input
+deferred and named. The ledger is now **18 roots / 125 subcommands / 143 actions
+/ 4 context menus**, and every name in the saved plan table (59 of 59) is
+registered. The rest of this phase is open.
 
 - `packages/ui`: Components V2 budgeter (40 components, ~4,000 text), primitives,
   defer-then-edit, modal Label/FileUpload/Radio/Checkbox.
-- New domains: forms/applications, events/RSVP, role persistence, modmail; plus
-  goodbye messages, YouTube/Twitch/RSS feeds, temp ban/role expiry, join-gate
-  expiry, panic mode, case export and `command_usage` retention. Invites, the
-  link, profanity and zalgo filters, auto-responders, analytics and the four
-  context menus, the `/setup` hub, the `/appeal` hub and the `/verify` hub are
-  done (above).
+- New domains: events/RSVP, role persistence, modmail; plus goodbye messages,
+  YouTube/Twitch/RSS feeds, temp ban/role expiry, join-gate expiry, panic mode,
+  case export and `command_usage` retention. Invites, the link, profanity and
+  zalgo filters, auto-responders, analytics and the four context menus, the
+  `/setup` hub, the `/appeal` hub, the `/verify` hub and forms are done (above).
 - `/export`, `/config`, `/help` and the `/music` saved queue shipped; BYO
   Lavalink playback is the open half of `/music`; command-budget audit remains a
   gate, now covering the separate context-menu budgets.

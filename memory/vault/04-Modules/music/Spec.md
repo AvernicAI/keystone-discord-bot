@@ -105,7 +105,7 @@ cannot join a channel should not ask for the intent.
 
 ## Limits respected
 
-- One new global root; the ledger is `17/100` and eight subcommands cost no
+- One new global root; the ledger is `18/100` and eight subcommands cost no
   extra slot.
 - No new dependency, no paid service, no new intent.
 - The SQL adapter uses the existing guild row for locking; no advisory-lock

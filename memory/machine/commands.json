@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-01",
+  "updatedAt": "2026-11-02",
   "source": "packages/kernel ModuleRegistry catalog()",
-  "roots": 17,
-  "subcommands": 117,
-  "actions": 134,
+  "roots": 18,
+  "subcommands": 125,
+  "actions": 143,
   "contextMenus": 4,
   "userContextMenus": 2,
   "messageContextMenus": 2,
@@ -983,6 +983,79 @@
           "name": "status",
           "description": "Show module state, queue count and the exact playback blocker.",
           "options": []
+        }
+      ]
+    },
+    {
+      "name": "form",
+      "moduleId": "forms",
+      "description": "Build application forms, publish a panel and review submissions.",
+      "options": [],
+      "subcommands": [
+        {
+          "name": "create",
+          "description": "Create a draft form from a comma-separated field list.",
+          "options": [
+            "name",
+            "key",
+            "description",
+            "fields"
+          ]
+        },
+        {
+          "name": "edit",
+          "description": "Change a form's name, description, fields or draft/open/closed state.",
+          "options": [
+            "form",
+            "name",
+            "description",
+            "fields",
+            "state"
+          ]
+        },
+        {
+          "name": "delete",
+          "description": "Delete a form that has no submissions; history is never deleted.",
+          "options": [
+            "form",
+            "confirm"
+          ]
+        },
+        {
+          "name": "list",
+          "description": "List forms with state, submission counts and panel channel.",
+          "options": []
+        },
+        {
+          "name": "panel",
+          "description": "Post the application panel for an open form in this channel.",
+          "options": [
+            "form"
+          ]
+        },
+        {
+          "name": "submit",
+          "description": "Submit answers to an open form; one pending submission per member.",
+          "options": [
+            "form",
+            "answers"
+          ]
+        },
+        {
+          "name": "review",
+          "description": "List pending submissions, read one, or accept/deny it.",
+          "options": [
+            "submission",
+            "decision",
+            "note"
+          ]
+        },
+        {
+          "name": "export",
+          "description": "Download forms and submissions as a checksummed JSON file.",
+          "options": [
+            "form"
+          ]
         }
       ]
     }

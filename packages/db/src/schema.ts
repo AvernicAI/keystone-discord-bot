@@ -328,6 +328,67 @@ export const commandUsage = pgTable(
   ],
 );
 
+/**
+ * One row per operator-owned application form.
+ *
+ * A form is configuration, but it is not a settings key: every submission
+ * references it by id, so deleting a form must be a deliberate operation that
+ * the store can refuse while submissions exist. `(guild_id, key)` is unique so
+ * `/form submit form:staff` can never mean two different forms.
+ */
+export const forms = pgTable(
+  "forms",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    guildId: text("guild_id").notNull(),
+    key: text("key").notNull(),
+    name: text("name").notNull(),
+    description: text("description").notNull().default(""),
+    fields: jsonValue("fields").notNull(),
+    state: text("state").notNull().default("draft"),
+    panelChannelId: text("panel_channel_id"),
+    createdBy: text("created_by").notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    uniqueIndex("forms_guild_key_idx").on(table.guildId, table.key),
+    index("forms_guild_state_idx").on(table.guildId, table.state),
+  ],
+);
+
+/**
+ * One row per member submission. Answers are JSONB keyed by field key; the
+ * partial unique index in migration 0011 allows at most one pending
+ * submission per member per form, so a double click cannot create two review
+ * items, while a denied applicant can apply again later.
+ */
+export const formSubmissions = pgTable(
+  "form_submissions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    guildId: text("guild_id").notNull(),
+    formId: uuid("form_id")
+      .notNull()
+      .references(() => forms.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull(),
+    answers: jsonValue("answers").notNull(),
+    state: text("state").notNull().default("submitted"),
+    reviewedBy: text("reviewed_by"),
+    decisionNote: text("decision_note"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    index("form_submissions_guild_form_idx").on(
+      table.guildId,
+      table.formId,
+      table.createdAt,
+    ),
+    index("form_submissions_guild_user_idx").on(table.guildId, table.userId),
+  ],
+);
+
 /** Monotonic per-guild case numbers; the unique index on cases is the backstop. */
 export const caseCounters = pgTable("case_counters", {
   guildId: text("guild_id").primaryKey(),
@@ -395,6 +456,8 @@ export const schema = {
   inviteJoins,
   loggingEvents,
   commandUsage,
+  forms,
+  formSubmissions,
   caseCounters,
   jobReceipts,
   imports,

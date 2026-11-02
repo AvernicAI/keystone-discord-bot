@@ -6,13 +6,13 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-01",
   "phase": "P7",
-  "lastPass": "journal/2026-11-01-pass-39.md",
+  "lastPass": "journal/2026-11-01-pass-40.md",
   "metrics": {
-    "commands": 17,
-    "subcommands": 117,
+    "commands": 18,
+    "subcommands": 125,
     "commandLimit": 100,
-    "modules": 9,
-    "tests": 398
+    "modules": 10,
+    "tests": 413
   },
   "modules": [
     {
@@ -197,6 +197,23 @@
       "teachingPath": "vault/04-Modules/music/Teaching.md",
       "commands": [
         "music"
+      ],
+      "intents": [
+        "Guilds"
+      ],
+      "premium": false
+    },
+    {
+      "id": "forms",
+      "name": "Forms",
+      "status": "beta",
+      "phase": "P7",
+      "codePath": "modules/forms",
+      "specPath": "vault/04-Modules/forms/Spec.md",
+      "statusPath": "vault/04-Modules/forms/Status.md",
+      "teachingPath": "vault/04-Modules/forms/Teaching.md",
+      "commands": [
+        "form"
       ],
       "intents": [
         "Guilds"

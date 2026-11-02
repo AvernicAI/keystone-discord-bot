@@ -105,7 +105,7 @@ the `schema_migrations` ledger. It never runs a migration.
 
 - 3 of Discord's 100 global roots (`/setup`, `/config`, `/export`); `/config` has
   four and `/export` six subcommands that cost no additional slot. The current
-  ledger is `17/100` roots.
+  ledger is `18/100` roots.
 - `/config` and `/export` have at most three options on one subcommand, well
   under Discord's 25.
 - No privileged intents.

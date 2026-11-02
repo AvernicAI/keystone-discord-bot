@@ -508,6 +508,19 @@
         "budget": "17/100 roots · 117 subcommands · 4 context menus",
         "memory": "current"
       }
+    },
+    {
+      "id": "pass-40",
+      "date": "2026-11-01",
+      "phase": "P7",
+      "summary": "Forms, the first new root after the saved plan was completed: `/form create | edit | delete | list | panel | submit | review | export` is the tenth module. Two tables in migration 0011 — `forms` with a unique `(guild_id, key)` and `form_submissions` with a partial unique index on `(form_id, user_id) WHERE state = 'submitted'` — are justified by the review transition and the one-pending-application invariant. One `FormStore` has in-memory and Drizzle adapters; `FormService` owns field/answer validation, the draft/open/closed gates, the form and submission caps, the delete-only-without-history rule and the conditional `submitted → accepted/denied` transition. `panel` refuses a non-open form, posts in the invoking channel and records it; `delete` requires the key and refuses once a submission exists; `export` attaches `keystone.forms` JSON with a SHA-256 checksum. Modal input is deferred and named: `submit` takes the validated `answers` option, not a dead button. Live memory mode (exactly one process; no other bot was running): create → open → panel → submit `31778bdb…` → 1 pending → accepted with a note → 0 pending → export 1540 bytes / checksum `d1fd6d91…`; the downloaded file parsed as 1 form / 1 submission with the same panel channel, answers, state, reviewer and a checksum that recomputes. `commands:doctor` reports 18 roots / 125 subcommands / 2 user + 2 message menus with no drift. Tests 413 / 61 files; .env DATABASE_URL and REDIS_URL still ECONNREFUSED.",
+      "journal": "journal/2026-11-01-pass-40.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "413",
+        "budget": "18/100 roots · 125 subcommands · 4 context menus",
+        "memory": "current"
+      }
     }
   ]
 }

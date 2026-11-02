@@ -91,6 +91,7 @@ async function main(): Promise<void> {
     exportFacts: createDiscordExportFacts(client),
     attachments: createDiscordAttachmentReader(),
     music: runtime.music,
+    forms: runtime.forms,
     usage: runtime.usage,
   };
 

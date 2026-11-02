@@ -5,7 +5,7 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**17 roots · 117 subcommands · 134 total actions · 4 context menus · 17/100 global roots used.**
+**18 roots · 125 subcommands · 143 total actions · 4 context menus · 18/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
@@ -31,6 +31,7 @@ and appear under right-click → Apps.
 | `/logging` | `logging` | 7 |
 | `/analytics` | `analytics` | 6 |
 | `/music` | `music` | 8 |
+| `/form` | `forms` | 8 |
 
 ## `/ping`
 
@@ -265,6 +266,21 @@ Save tracks in a durable queue and inspect playback readiness.
 | `/music skip` | Skip the current track; refuses when there is no player. | — |
 | `/music stop` | Stop playback; refuses when there is no player. | — |
 | `/music status` | Show module state, queue count and the exact playback blocker. | — |
+
+## `/form`
+
+Build application forms, publish a panel and review submissions.
+
+| Subcommand | Description | Options |
+| --- | --- | --- |
+| `/form create` | Create a draft form from a comma-separated field list. | `name`, `key`, `description`, `fields` |
+| `/form edit` | Change a form's name, description, fields or draft/open/closed state. | `form`, `name`, `description`, `fields`, `state` |
+| `/form delete` | Delete a form that has no submissions; history is never deleted. | `form`, `confirm` |
+| `/form list` | List forms with state, submission counts and panel channel. | — |
+| `/form panel` | Post the application panel for an open form in this channel. | `form` |
+| `/form submit` | Submit answers to an open form; one pending submission per member. | `form`, `answers` |
+| `/form review` | List pending submissions, read one, or accept/deny it. | `submission`, `decision`, `note` |
+| `/form export` | Download forms and submissions as a checksummed JSON file. | `form` |
 
 ## Context menus
 

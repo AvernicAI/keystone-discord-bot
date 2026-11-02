@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**123 features** across 16 domains: **92 in repo**, **11 open**, **16 planned**. Live behaviour is marked separately; a green
+**123 features** across 16 domains: **95 in repo**, **11 open**, **13 planned**. Live behaviour is marked separately; a green
 box means the code and its tests exist, not that a live guild has run it.
 
 ## Domains
@@ -25,7 +25,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Operations | 11 | 5 | 3 | 3 |
 | Portability | 12 | 12 | 0 | 0 |
 | Invites | 3 | 3 | 0 | 0 |
-| Forms and applications | 3 | 0 | 0 | 3 |
+| Forms and applications | 3 | 3 | 0 | 0 |
 | Events and RSVP | 4 | 0 | 0 | 4 |
 | Community parity extras | 8 | 3 | 0 | 5 |
 
@@ -206,9 +206,9 @@ box means the code and its tests exist, not that a live guild has run it.
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Application forms | P7 | ⏳ planned | Modal forms with validated fields. |
-| Review queue | P7 | ⏳ planned | Accept, deny and note with an audit trail. |
-| Submission export | P7 | ⏳ planned | JSON/CSV export with a receipt. |
+| Application forms | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `packages/db/src/form-store.test.ts`, `memory/journal/2026-11-01-pass-40.md` · live verified |
+| Review queue | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `packages/db/src/form-store.test.ts` · live verified |
+| Submission export | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `memory/vault/04-Modules/forms/Status.md` · live verified |
 
 ## Events and RSVP
 
