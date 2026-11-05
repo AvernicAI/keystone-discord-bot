@@ -1002,6 +1002,22 @@
         "claims": "35/35",
         "build": "not run (no build step changed)"
       }
+    },
+    {
+      "id": "pass-73",
+      "date": "2026-11-05",
+      "phase": "P7.5",
+      "summary": "Event RSVP buttons, one automatic reminder and an ICS export ship on the existing event surface. `/event edit state:open` posts a panel whose Going and Not going buttons are signed, expiring ids routed through the component router; both call the same `EventService.rsvp` as the command, so capacity, ownership and the open-state gate are decided once. Opening and `/event remind` record the panel channel on the event row (migration 0021), which is how the existing 60-second community tick finds its audience: one reminder per open event inside `reminderLeadMinutes`, claimed by a conditional update, released when the post fails, with no second scheduler. `/event export` adds an `.ics` serialized from the exact JSON payload (one VEVENT per event, one ATTENDEE per RSVP, RFC 5545 escaping and 75-octet folding). Tests: 656 in 95 files (2 ICS cases, 3 reminder-tick cases, 3 router cases, 1 new PGlite case and the command panel path); budget stays 20/100 roots and 141 subcommands with no new root or subcommand. A real button press, a real calendar application and a live automatic reminder are not claimed.",
+      "journal": "journal/2026-11-05-pass-73.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "656",
+        "budget": "20/100 roots · 141 subcommands · 161 actions · 4 context menus",
+        "live": "28/28 (not rerun)",
+        "memory": "current",
+        "claims": "35/35",
+        "build": "not run (no build step changed)"
+      }
     }
   ]
 }

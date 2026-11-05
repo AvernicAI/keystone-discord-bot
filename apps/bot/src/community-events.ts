@@ -12,6 +12,7 @@ import {
 import type {
   CommunityPort,
   ComponentSigner,
+  EventStore,
   Logger,
   ModuleSettings,
 } from "@keystone/kernel";
@@ -29,12 +30,18 @@ import {
   communitySettingsSchema,
 } from "@keystone/module-community";
 import { botFixtureContent } from "./dev-fixture";
+import { createDiscordEventPoster, sweepEventReminders } from "./event-reminders";
 
 export interface CommunityEventOptions {
   /** Development-only guild where a bot marker may drive the real message path. */
   readonly botTestGuildId?: string;
   /** Signs the disabled button on a giveaway that the tick ends. */
   readonly componentSigner?: Pick<ComponentSigner, "sign">;
+  /** Event rows the same tick sweeps for a due reminder. */
+  readonly events?: {
+    readonly store: EventStore;
+    readonly settings: ModuleSettings;
+  };
 }
 
 /**
@@ -229,6 +236,8 @@ export function registerCommunityEvents(
   // `components.ts`, which verifies the signature, the expiry and the guild
   // before a handler runs; a legacy `keystone:` id is unhandled by design.
 
+  const eventPoster = options.events ? createDiscordEventPoster(client) : undefined;
+
   let lastFeedPoll = 0;
   const interval = setInterval(() => {
     void (async () => {
@@ -248,6 +257,26 @@ export function registerCommunityEvents(
           await new WelcomeService(port.actions, current, port.store).applyDueAutoroles(guild.id);
           await new BirthdayService(port.store, port.actions, current).announceDue(guild.id);
           await new SeasonService(port.store).rollover(guild.id);
+
+          if (options.events && options.componentSigner && eventPoster) {
+            try {
+              await sweepEventReminders(
+                {
+                  store: options.events.store,
+                  settings: options.events.settings,
+                  signer: options.componentSigner,
+                  poster: eventPoster,
+                },
+                logger,
+                guild.id,
+              );
+            } catch (error) {
+              logger.warn("event reminder sweep failed", {
+                guild: guild.id,
+                error: messageOf(error),
+              });
+            }
+          }
 
           for (const record of await port.store.listRecords<{ metric: string }>(
             guild.id,

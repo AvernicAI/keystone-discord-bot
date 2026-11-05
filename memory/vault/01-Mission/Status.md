@@ -2,6 +2,20 @@
 
 ## Now
 
+**Pass 73 shipped the event surface** (2026-11-05): `/event edit state:open`
+posts a panel with signed, expiring Going and Not going buttons, and both
+handlers call the same `EventService.rsvp` as the command, so capacity and the
+open-state gate stay in one place. Opening an event records its channel on the
+event row (migration 0021); the existing 60-second community tick then sends one
+reminder inside `reminderLeadMinutes` (default 60) using a conditional claim
+that releases on a failed post — no second scheduler. `/event export` attaches an
+`.ics` serialized from the same JSON payload, with one VEVENT per event and one
+ATTENDEE per RSVP. Tests are **656 / 95 files**, including two ICS cases, three
+reminder-tick cases, three router cases and one new PGlite case; a real button
+press, a calendar import and a live automatic reminder are not claimed. The
+budget stays 20/100 roots and 141 subcommands. See
+[pass 73](../../journal/2026-11-05-pass-73.md).
+
 **Pass 72 shipped portable case export** (2026-11-05): `/mod case
 case:<n> format:json|csv` and `/mod history count:<1-50> format:json|csv` attach
 the existing case and event rows with a SHA-256 content checksum. JSON nests the
@@ -879,7 +893,7 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 644 tests / 94 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · live 28/28 · memory current
+pnpm check        exit 0 · typecheck 0 · 656 tests / 95 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · live 28/28 · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 20 roots / 138 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · /modmail open → reply → 2-message archive → duplicate close refused → stats 1/0/2 · /event create → open → rsvp 1/2 → reminder → decline → 1.2 KB export parsed with the same row · /form create → open → panel → submit → 1 pending → accepted → 1.5 KB export parsed with the same answers and decision · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)
@@ -1298,8 +1312,8 @@ P7 parity work continues alongside the P6 exit items. Auto-responders, audit
 logging, the content filters, guild analytics, in-bot configuration,
 `/export`, the `/music` saved queue, forms, events, modmail, temporary
 moderation, panic mode and goodbye are done; the next open rows are real music
-playback (a voice/Lavalink client), scheduled event reminders/ICS, modmail DM
-relay, role persistence and case export.
+playback (a voice/Lavalink client), per-member event timezones, modmail DM
+relay and forms in the guild portability bundle.
 `automod.false-positive-report` is still the smallest useful moderation
 follow-up. P6 remains the active phase
 for the dashboard. The auth gate, settings writes, schema-generated widgets and

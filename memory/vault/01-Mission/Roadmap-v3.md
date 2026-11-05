@@ -17,7 +17,7 @@
 
 ### 0.1 Where Keystone is
 
-Keystone is no longer a prototype. At pass 65 it has:
+**Pass 65 snapshot.** Keystone is no longer a prototype. It has:
 
 - **12 modules** registered: diagnostics, setup, moderation, community, AI,
   invites, logging, analytics, music, forms, events and modmail.
@@ -26,8 +26,8 @@ Keystone is no longer a prototype. At pass 65 it has:
 - **134 parity rows**: 114 shipped in repo, 10 open, 6 planned and 4 explicit
   non-goals. **48 rows** carry a live-verification flag, but only 23 of those have
   a named `liveEvidence` check; the audit treats that as a vocabulary problem.
-- **644 tests in 94 files**, all token-free; the full gate passes without a
-  Discord token, a database or the network.
+- At pass 65 the suite was **644 tests in 94 files**, all token-free; the gate
+  passed without a Discord token, a database or the network.
 - **28 live probe checks** on Postgres, Redis, the queue, the web process and the
   signed component router.
 - A real portability wedge: checksummed export, dry-run import, rollback,

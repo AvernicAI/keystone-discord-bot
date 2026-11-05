@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-73",
+    date: "2026-11-05",
+    summary:
+      "P7.5 events: opening an event posts signed Going/Not going buttons, the existing 60-second tick sends one claimed reminder, and `/event export` also attaches an RFC 5545 calendar built from the same RSVP rows.",
+    journal: "memory/journal/2026-11-05-pass-73.md",
+  },
+  {
     pass: "pass-72",
     date: "2026-11-05",
     summary:

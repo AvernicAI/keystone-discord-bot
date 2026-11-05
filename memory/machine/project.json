@@ -6,8 +6,8 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-05",
   "phase": "P7.5",
-  "lastPass": "journal/2026-11-05-pass-72.md",
-  "nextAction": "Case export shipped pass 72 as an option on `/mod case` and `/mod history`. Pass 73 adds event RSVP buttons, scheduled reminders and ICS. Pass 74 puts forms in the guild bundle. Then the P7.5 tail is closed and the gate runs on the whole branch.",
+  "lastPass": "journal/2026-11-05-pass-73.md",
+  "nextAction": "Events now take RSVPs from signed buttons, send one claimed reminder from the community tick and export ICS from the same rows. Pass 74 puts forms in the guild bundle. Then the P7.5 tail is closed and the gate runs on the whole branch.",
   "live": {
     "report": "machine/live.json",
     "id": "live-2026-11-03"
@@ -19,7 +19,7 @@
     "contextMenus": 4,
     "commandLimit": 100,
     "modules": 12,
-    "tests": 644
+    "tests": 656
   },
   "modules": [
     {

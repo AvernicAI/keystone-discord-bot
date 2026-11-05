@@ -20,15 +20,33 @@ unbuilt.
   cascades.
 - The SQL capacity check locks the event row and counts inside the transaction.
   The service pre-check only chooses the message.
+- **Pass 73** added the interaction and calendar surface without a new command:
+  - `/event edit state:open` posts one panel whose Going and Not going buttons
+    are signed, expiring ids routed through the shared component router. Both
+    handlers call `EventService.rsvp`, the same service the command uses, so
+    capacity, ownership and the open-state gate are decided once.
+  - `panel_channel_id` (migration 0021, nullable) records where the panel was
+    posted. The existing 60-second community tick sends one reminder inside
+    `reminderLeadMinutes` (5–10080, default 60); `claimReminder` makes two ticks
+    race on one conditional update, and a failed post releases the claim.
+  - `/event export` attaches the checksummed JSON plus an `.ics` serialized from
+    that exact payload: one VEVENT per event, one ATTENDEE per RSVP row, escaped
+    TEXT and lines folded at 75 octets.
+- No new root or subcommand; the budget stayed **20 roots / 141 subcommands /
+  161 actions / 4 context menus**.
 
 ## Verified
 
 ```text
-pnpm vitest run modules/events packages/db/src/event-store.test.ts
-  ✓ modules/events/src/events.test.ts (9 tests)
-  ✓ packages/db/src/event-store.test.ts (3 tests)
+pnpm vitest run modules/events packages/db/src/event-store.test.ts \
+  apps/bot/src/components.test.ts apps/bot/src/event-reminders.test.ts
+  ✓ modules/events/src/events.test.ts (14 tests)
+  ✓ apps/bot/src/components.test.ts (15 tests)
+  ✓ apps/bot/src/event-reminders.test.ts (3 tests)
+  ✓ packages/db/src/event-store.test.ts (4 tests)
+  Test Files 4 passed · Tests 36 passed
 
-pnpm test                          # 644 tests / 94 files
+pnpm test                          # 656 tests / 95 files
 pnpm budget                        # 20/100 roots · 141 subcommands · 161 actions · 4 context menus
 pnpm commands:doctor               # Registry 20 roots · 141 subcommands · 4 context menus
 ```
@@ -48,8 +66,20 @@ Focused coverage:
   the event cap and capacity bound come from the module schema.
 - Export: the attached JSON parses, counts are `1 / 1`, and the SHA-256 matches
   a recomputation over the payload without its checksum.
+- Panel: the signer is required; the embed reads the same counts; the buttons
+  carry the event id and a TTL that ends after the event, and are disabled
+  outside `open`.
+- Router: a signed Going press writes one row and reports the new count; a full
+  event refuses the last seat; a decline frees it; expired, forged, cross-guild
+  and closed-event presses write nothing and reply ephemerally.
+- Reminder tick: one post through the recorded channel, idle on the next tick,
+  nothing while the module is disabled, and a failed send releasing the claim.
+- ICS: reserved characters escaped, octet folding with a space continuation,
+  one ATTENDEE per RSVP, a missing end becoming one hour, and the same counts as
+  the JSON payload.
 - PGlite: unique `(guild_id, key)`, get by key and id, guild scoping, update,
-  one RSVP row, capacity/seat release, reminder increment, cascade delete.
+  one RSVP row, capacity/seat release, reminder increment, cascade delete,
+  panel-channel round-trip, one winner from two `claimReminder` calls, release.
 
 The SQL cross-check is the raw query in `event-store.test.ts`
 (`select user_id, state from event_rsvps ...` and `select count(*) from
@@ -121,16 +151,23 @@ bot's own membership, not a human member. A second distinct member competing for
 the last seat, and a member without `ManageGuild`, cannot be produced with one
 bot account; the capacity refusal and the permission branch are covered by
 `events.test.ts`. Slash `InteractionCreate` was not exercised — the bridge is a
-message. The interactive RSVP buttons, scheduled reminders and ICS export do not
-exist, so they were not claimed. The SQL adapters were not live because Postgres
-is unreachable; PGlite covers them.
+message. The SQL adapters were not live because Postgres is unreachable; PGlite
+covers them.
+
+This transcript predates pass 73. The signed RSVP buttons, the automatic
+reminder and the ICS export now exist but were not driven live in that window:
+the MCP cannot press a message button, no calendar application imported the
+file, and no automatic reminder was delivered to a real guild. Each is covered
+on the adapter and router path with a fake interaction, not observed.
 
 ## Open
 
-- Scheduled reminders and per-member timezones.
-- RSVP buttons with a maybe answer. The component layer now exists (pass 58);
-  the buttons themselves are not built.
-- ICS calendar export.
+- Per-member timezones and more than one reminder per event; the lead is a
+  guild-wide setting, not a per-event schedule.
+- A `maybe` answer. The panel deliberately offers two states, matching the
+  command and the capacity rule.
+- A real calendar consumer for the `.ics` and a live button press; both are
+  adapter-tested only.
 - A delivery port for event-open notifications if it is ever wanted.
 - Include events and RSVPs in the guild portability bundle so `/export guild`
   covers the new rows; `/event export` is the truthful dedicated export today.

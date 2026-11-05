@@ -42,8 +42,8 @@
       "featureIds": ["events.rsvp-buttons", "events.reminders", "events.ics-export"],
       "competitors": ["apollo"],
       "claimIds": ["R-033"],
-      "nextStep": "Mint a signed RSVP button per event, schedule reminders through the existing timer, and export the same RSVP rows as ICS.",
-      "note": "Creation, capacity and RSVP rows ship. The missing half is the interaction and calendar surface."
+      "nextStep": "Live-prove one signed button press and one downloaded `.ics` in a real calendar; the router path and the serializer are adapter-tested only.",
+      "note": "Shipped in pass 73: opening an event posts signed Going/Not going buttons that call the same rsvp service, the existing 60-second tick sends one claimed reminder, and `/event export` adds an ICS built from the same payload. Per-member timezones and a real calendar consumer remain open."
     },
     {
       "id": "gap.ticket-kb",

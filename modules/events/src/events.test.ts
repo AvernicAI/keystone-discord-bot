@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
+import { createComponentSigner } from "@keystone/kernel";
 import { createTestContext, FakeInteraction } from "@keystone/testing";
 import type { EventStore } from "@keystone/kernel";
 import { event } from "./commands/event";
 import { EventService, parseInstant } from "./events";
+import { buildEventCalendar } from "./ics";
+import { buildEventPanel, eventPanelTtlMs, type EventPanel } from "./panel";
+import { EventReminderService } from "./reminders";
 import { eventDefaultSettings } from "./settings";
 import { InMemoryEventStore } from "./store";
 
@@ -392,5 +396,235 @@ describe("/event vertical slice", () => {
     await expect(
       limited.create("1", "mod-1", { name: "Bad", starts: STARTS, ends: "2026-11-05T17:00:00Z" }),
     ).rejects.toThrow(/ends before it starts/);
+  });
+});
+
+describe("event panel, calendar and tick reminder", () => {
+  async function openWithPanel(store: InMemoryEventStore) {
+    await createOpenEvent(store, 2);
+    const event = await store.getEvent("1", "launch-night");
+    if (!event) throw new Error("event fixture missing");
+    return event;
+  }
+
+  function reminderService(
+    store: EventStore,
+    posted: { channelId: string; panel: EventPanel }[],
+    now: number,
+    failOnce = false,
+  ): EventReminderService {
+    const signer = createComponentSigner("keystone-test-secret");
+    let failed = false;
+    return new EventReminderService(
+      store,
+      { ...eventDefaultSettings, reminderLeadMinutes: 60 },
+      signer,
+      {
+        async post(channelId, panel) {
+          if (failOnce && !failed) {
+            failed = true;
+            throw new Error("discord said no");
+          }
+          posted.push({ channelId, panel });
+        },
+      },
+      () => now,
+    );
+  }
+
+  async function seedDueEvent(store: InMemoryEventStore): Promise<void> {
+    await store.createEvent({
+      guildId: "1",
+      key: "launch-night",
+      name: "Launch night",
+      description: "Ship it",
+      state: "open",
+      startsAt: "2026-11-05T18:00:00.000Z",
+      location: "voice stage",
+      createdBy: "mod-1",
+    });
+    const created = await store.getEvent("1", "launch-night");
+    if (!created) throw new Error("event fixture missing");
+    await store.attachPanel("1", created.id, "chan-9");
+  }
+
+  it("opens as a public panel with two signed buttons and records the channel", async () => {
+    const store = new InMemoryEventStore();
+    await event.execute(
+      context(store, {
+        subcommand: "create",
+        values: { name: "Launch night", starts: STARTS, capacity: 2 },
+      }),
+    );
+    const opened = context(store, {
+      subcommand: "edit",
+      values: { event: "launch-night", state: "open" },
+    });
+    await event.execute(opened);
+
+    const row = await store.getEvent("1", "launch-night");
+    expect(row?.panelChannelId).toBe("99");
+    const reply = opened.interaction.lastReply;
+    expect(reply?.ephemeral).toBeUndefined();
+    expect(reply?.embeds?.[0]?.title).toBe("Event open: Launch night");
+
+    const buttons = (reply?.components?.[0]?.components ?? []).map((component) =>
+      "customId" in component ? component.customId : "",
+    );
+    expect(buttons).toHaveLength(2);
+    const signer = createComponentSigner("keystone-test-secret");
+    expect(buttons.map((id) => signer.parse(id, opened.now()))).toEqual([
+      expect.objectContaining({
+        ok: true,
+        namespace: "event",
+        action: "going",
+        payload: row?.id,
+      }),
+      expect.objectContaining({
+        ok: true,
+        namespace: "event",
+        action: "not_going",
+        payload: row?.id,
+      }),
+    ]);
+    // The panel outlives the command, but it is not immortal.
+    const parsed = signer.parse(buttons[0] ?? "", opened.now());
+    expect(parsed.ok && parsed.expiresAt > Date.parse(ENDS)).toBe(true);
+  });
+
+  it("attaches an ICS calendar derived from the same exported RSVP rows", async () => {
+    const store = new InMemoryEventStore();
+    await openWithPanel(store);
+    await event.execute(
+      context(store, {
+        subcommand: "rsvp",
+        userId: "member-1",
+        permissions: [],
+        values: { event: "launch-night", rsvp: "going" },
+      }),
+    );
+    await event.execute(
+      context(store, {
+        subcommand: "rsvp",
+        userId: "member-2",
+        permissions: [],
+        values: { event: "launch-night", rsvp: "not_going" },
+      }),
+    );
+
+    const exported = context(store, {
+      subcommand: "export",
+      values: { event: "launch-night" },
+    });
+    await event.execute(exported);
+    const files = exported.interaction.lastReply?.files ?? [];
+    expect(files.map((file) => file.name)).toEqual([
+      "keystone.events.1.launch-night.json",
+      "keystone.events.1.launch-night.ics",
+    ]);
+
+    const payload = JSON.parse(files[0]?.content ?? "{}") as {
+      counts: { events: number; rsvps: number };
+      events: { id: string }[];
+    };
+    const ics = files[1]?.content ?? "";
+    expect(payload.counts).toEqual({ events: 1, rsvps: 2 });
+    expect(ics.startsWith("BEGIN:VCALENDAR\r\n")).toBe(true);
+    expect(ics.endsWith("END:VCALENDAR\r\n")).toBe(true);
+    expect(ics).toContain(`UID:${payload.events[0]?.id}@keystone`);
+    expect(ics).toContain("DTSTART:20261105T180000Z");
+    expect(ics).toContain("DTEND:20261105T200000Z");
+    expect(ics).toContain("SUMMARY:Launch night");
+    expect(ics).toContain("ATTENDEE;CN=member-1;PARTSTAT=ACCEPTED");
+    expect(ics).toContain("ATTENDEE;CN=member-2;PARTSTAT=DECLINED");
+    expect(ics).toContain("X-KEYSTONE-GOING:1");
+    // One attendee line per RSVP row in the JSON: no second read path.
+    expect(ics.match(/^ATTENDEE/gm)).toHaveLength(payload.counts.rsvps);
+  });
+
+  it("escapes reserved calendar text and folds lines at 75 octets", () => {
+    const ics = buildEventCalendar({
+      generatedAt: "2026-11-01T00:00:00.000Z",
+      events: [
+        {
+          id: "event-1",
+          guildId: "1",
+          key: "launch",
+          name: "Launch, night; part 2",
+          description: `${"long ".repeat(24)}\nsecond line`,
+          state: "open",
+          startsAt: "2026-11-05T18:00:00.000Z",
+          location: "Stage, left",
+          createdBy: "mod-1",
+          createdAt: "2026-11-01T00:00:00.000Z",
+          updatedAt: "2026-11-01T00:00:00.000Z",
+          reminderCount: 0,
+        },
+      ],
+      rsvps: [],
+    });
+
+    expect(ics).toContain(String.raw`SUMMARY:Launch\, night\; part 2`);
+    expect(ics).toContain(String.raw`LOCATION:Stage\, left`);
+    expect(ics).toContain(String.raw`\nsecond line`);
+    const lines = ics.split("\r\n");
+    expect(lines.every((line) => Buffer.byteLength(line, "utf8") <= 75)).toBe(true);
+    expect(lines.some((line) => line.startsWith(" "))).toBe(true);
+  });
+
+  it("sends one reminder from the tick and skips events with no panel or lead window", async () => {
+    const store = new InMemoryEventStore();
+    await seedDueEvent(store);
+    await store.createEvent({
+      guildId: "1",
+      key: "late",
+      name: "Late",
+      description: "",
+      state: "open",
+      startsAt: "2026-11-05T21:00:00.000Z",
+      location: "",
+      createdBy: "mod-1",
+    });
+    await store.createEvent({
+      guildId: "1",
+      key: "unannounced",
+      name: "Unannounced",
+      description: "",
+      state: "open",
+      startsAt: "2026-11-05T17:45:00.000Z",
+      location: "",
+      createdBy: "mod-1",
+    });
+
+    const posted: { channelId: string; panel: EventPanel }[] = [];
+    const now = Date.parse("2026-11-05T17:30:00.000Z");
+    const service = reminderService(store, posted, now);
+    const sweep = await service.sweep("1");
+
+    expect(sweep.sent).toEqual(["launch-night"]);
+    expect(sweep.skipped).toBe(2);
+    expect(posted).toHaveLength(1);
+    expect(posted[0]?.channelId).toBe("chan-9");
+    const row = await store.getEvent("1", "launch-night");
+    expect(row).toMatchObject({
+      remindedBy: "system",
+      reminderCount: 1,
+      remindedAt: "2026-11-05T17:30:00.000Z",
+    });
+    expect((await service.sweep("1")).sent).toEqual([]);
+    expect(posted).toHaveLength(1);
+  });
+
+  it("releases a failed reminder claim so the next tick can retry", async () => {
+    const store = new InMemoryEventStore();
+    await seedDueEvent(store);
+    const posted: { channelId: string; panel: EventPanel }[] = [];
+    const now = Date.parse("2026-11-05T17:30:00.000Z");
+    const service = reminderService(store, posted, now, true);
+
+    expect((await service.sweep("1")).failed).toEqual(["launch-night"]);
+    expect((await store.getEvent("1", "launch-night"))?.remindedAt).toBeUndefined();
+    expect((await service.sweep("1")).sent).toEqual(["launch-night"]);
+    expect(posted).toHaveLength(1);
   });
 });

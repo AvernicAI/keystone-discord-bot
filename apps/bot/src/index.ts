@@ -234,6 +234,10 @@ async function main(): Promise<void> {
       actions: runtime.community.actions,
       settings: runtime.settings.forModule("community"),
     },
+    events: {
+      store: runtime.events,
+      settings: runtime.settings.forModule("events"),
+    },
     config: runtime.settings,
     logger: logger.child("components"),
   });
@@ -248,7 +252,16 @@ async function main(): Promise<void> {
     runtime.community,
     runtime.settings.forModule("community"),
     logger.child("community"),
-    { botTestGuildId: devTestGuild, componentSigner },
+    {
+      botTestGuildId: devTestGuild,
+      componentSigner,
+      // The community tick already runs every minute; the event reminder rides
+      // it instead of starting a second scheduler.
+      events: {
+        store: runtime.events,
+        settings: runtime.settings.forModule("events"),
+      },
+    },
   );
   registerInviteEvents(
     client,

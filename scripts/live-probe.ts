@@ -2581,6 +2581,10 @@ async function main(): Promise<void> {
         actions: {} as never,
         settings: { get: async () => ({}), update: async () => ({}) },
       },
+      events: {
+        store: {} as never,
+        settings: { get: async () => ({}), update: async () => ({}) },
+      },
       logger: createSilentLogger(),
       now: () => now,
     });
@@ -2904,6 +2908,10 @@ async function main(): Promise<void> {
         store: communityStore,
         actions: communityActions,
         settings: { get: async () => communitySettings, update: async () => communitySettings },
+      },
+      events: {
+        store: {} as never,
+        settings: { get: async () => ({}), update: async () => ({}) },
       },
       config: settings,
       logger: createSilentLogger(),
@@ -3255,6 +3263,10 @@ async function main(): Promise<void> {
       community: {
         store: {} as never,
         actions: {} as never,
+        settings: { get: async () => ({}), update: async () => ({}) },
+      },
+      events: {
+        store: {} as never,
         settings: { get: async () => ({}), update: async () => ({}) },
       },
       logger: createSilentLogger(),
