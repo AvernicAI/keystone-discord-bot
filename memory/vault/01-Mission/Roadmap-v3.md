@@ -26,7 +26,7 @@ Keystone is no longer a prototype. At pass 65 it has:
 - **134 parity rows**: 114 shipped in repo, 10 open, 6 planned and 4 explicit
   non-goals. **48 rows** carry a live-verification flag, but only 23 of those have
   a named `liveEvidence` check; the audit treats that as a vocabulary problem.
-- **631 tests in 92 files**, all token-free; the full gate passes without a
+- **637 tests in 93 files**, all token-free; the full gate passes without a
   Discord token, a database or the network.
 - **28 live probe checks** on Postgres, Redis, the queue, the web process and the
   signed component router.
@@ -372,7 +372,7 @@ Twelve unmet needs, ranked by defensibility:
 
 1. **The record is real.** One settings store, one case file, one economy ledger,
    one audit trail, one export port. This is the architectural moat.
-2. **The gates are real.** `pnpm check` runs typecheck, 631 tests, budget, claims,
+2. **The gates are real.** `pnpm check` runs typecheck, 637 tests, budget, claims,
    intents, channels and memory, token-free.
 3. **The component router is real.** Every component id is signed and expiring;
    the router checks kind, signature, expiry, guild and permission before a

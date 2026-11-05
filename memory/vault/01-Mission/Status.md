@@ -2,6 +2,16 @@
 
 ## Now
 
+**Pass 71 shipped role persistence** (2026-11-05): `RolePersistenceService`
+snapshots a departing member's role ids into one `role_snapshot` record and
+restores them once on rejoin, opt-in through `/tools roles persist:on` with a
+cap of 20. The snapshot is taken before the goodbye send; Discord refuses a
+managed or above-bot role and the refusal is counted, not retried. Discord's
+25-subcommand cap ruled out a new `/tools` subcommand, so the setting rides the
+existing `roles` command. Tests are **637 / 93 files**, including a gateway
+leave/join seam; a human rejoin is not claimed. See
+[pass 71](../../journal/2026-11-05-pass-71.md).
+
 **Pass 70 wrote down the MCP proof surface** (2026-11-05): the configured
 `discord-mcp` server exposes **189 tools** in nine groups, so
 [[03-Architecture/Live-Testing|Live-Testing]] now records what each group proves
@@ -41,8 +51,8 @@ live probe is **28/28**, and memory is **4,550 / 4,550**. See
 244 lines and AGENTS from 455 to 148. The pitch, quickstarts, 12-module map,
 20-root command table, environment, proof and pass protocol remain; every
 pass-by-pass narrative and live-evidence transcript now links to the journals
-and the vault. Tests remain **631 / 92 files**, the last live probe is
-**28/28**, and the claim audit is 35/35. See
+and the vault. Tests were **631 / 92 files** at that pass, the last live probe
+is **28/28**, and the claim audit is 35/35. See
 [pass 67](../../journal/2026-11-05-pass-67.md).
 
 **Pass 66 audited the memory and proposed Roadmap v3** (2026-11-03): no product
@@ -859,7 +869,7 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 631 tests / 92 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · live 28/28 · memory current
+pnpm check        exit 0 · typecheck 0 · 637 tests / 93 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · live 28/28 · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 20 roots / 138 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · /modmail open → reply → 2-message archive → duplicate close refused → stats 1/0/2 · /event create → open → rsvp 1/2 → reminder → decline → 1.2 KB export parsed with the same row · /form create → open → panel → submit → 1 pending → accepted → 1.5 KB export parsed with the same answers and decision · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)

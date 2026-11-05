@@ -256,7 +256,11 @@ const commandCopyDe: Record<string, () => string> = {
   "command.tools.goodbye.description": () =>
     `Richtet die Abschiedsnachricht für austretende Mitglieder ein.`,
   "command.tools.roles.description": () =>
-    `Veröffentlicht ein Reaktionsrollen- oder Auswahlrollen-Panel.`,
+    `Veröffentlicht ein Rollen-Panel oder schaltet die Rollenwiederherstellung ein und aus.`,
+  "command.tools.option.persist.description": () =>
+    `Schaltet die Rollenwiederherstellung beim Wiedereintritt ein oder aus.`,
+  "command.tools.roles.option.persist.description": () =>
+    `Schaltet die Rollenwiederherstellung beim Wiedereintritt ein oder aus.`,
   "command.tools.starboard.description": () =>
     `Richtet Starboard-Kanal und Schwellenwert ein.`,
   "command.tools.starboard-override.description": () =>

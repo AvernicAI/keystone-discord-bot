@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**134 features** across 17 domains: **114 in repo**, **4 partial**, **6 open**, **6 planned**. Live behaviour is marked 
+**134 features** across 17 domains: **115 in repo**, **4 partial**, **6 open**, **5 planned**. Live behaviour is marked 
 separately; a box means the code and its tests exist, not that a live guild has run it.
 
 `partial` means the foundation ships with evidence and a named visible capability is
@@ -32,7 +32,7 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 | Forms and applications | 3 | 3 | 0 | 0 | 0 |
 | Events and RSVP | 4 | 1 | 2 | 1 | 0 |
 | Private modmail | 6 | 5 | 0 | 1 | 0 |
-| Community parity extras | 7 | 3 | 0 | 0 | 4 |
+| Community parity extras | 7 | 4 | 0 | 0 | 3 |
 
 ## Moderation
 
@@ -245,7 +245,7 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Role persistence | P7 | ⏳ planned | live unverified |
+| Role persistence | P7.5 | ✅ in repo | `modules/community/src/role-persistence.ts`, `modules/community/src/role-persistence.test.ts`, `modules/community/src/settings.ts`, `modules/community/src/commands/tools.ts`, `apps/bot/src/community-events.ts`, `apps/bot/src/community-events.test.ts` · live unverified |
 | Auto-responder | P7 | ✅ in repo | `modules/community/src/responder.test.ts`, `modules/community/src/commands.test.ts`, `apps/bot/src/community-events.test.ts`, `packages/db/src/community.test.ts` · live: manual run |
 | Message and member analytics | P7 | ✅ in repo | `modules/analytics/src/analytics.test.ts`, `modules/analytics/src/memory.ts`, `memory/vault/04-Modules/analytics/Status.md` · live: manual run |
 | Command usage analytics | P7 | ✅ in repo | `packages/kernel/src/dispatch.ts`, `packages/db/src/command-usage-store.ts`, `packages/db/src/analytics-store.test.ts`, `memory/vault/04-Modules/analytics/Status.md` · live: manual run |

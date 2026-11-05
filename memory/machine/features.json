@@ -2780,12 +2780,20 @@
           "id": "parity-extra.role-persistence",
           "name": "Role persistence",
           "competitors": {},
-          "phase": "P7",
-          "status": "planned",
+          "phase": "P7.5",
+          "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Master-Plan.md",
-          "note": "Reapply roles on rejoin; requires GuildMembers.",
+          "note": "Opt-in `roles.persist` with a cap (`roles.persistMax`, default 20). On `GuildMemberRemove` the adapter stores the member's role ids in one `role_snapshot` record; on `GuildMemberAdd` the same service adds each still-valid role once and deletes the snapshot. Discord remains the authority: a managed or above-bot role is refused and counted as failed, never escalated. `/tools roles persist:on|off limit:<n>` configures it; the restore writes a structured log line. Gateway join/leave is adapter-tested only.",
           "liveVerified": false,
-          "liveScope": "none"
+          "liveScope": "none",
+          "evidence": [
+            "modules/community/src/role-persistence.ts",
+            "modules/community/src/role-persistence.test.ts",
+            "modules/community/src/settings.ts",
+            "modules/community/src/commands/tools.ts",
+            "apps/bot/src/community-events.ts",
+            "apps/bot/src/community-events.test.ts"
+          ]
         },
         {
           "id": "parity-extra.auto-responder",

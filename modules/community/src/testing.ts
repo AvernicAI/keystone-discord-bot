@@ -26,6 +26,8 @@ export class RecordingCommunityActions implements CommunityActions {
   readonly deletedMessages: { channelId: string; messageId: string }[] = [];
   readonly botIds = new Set<string>();
   readonly holders = new Map<string, Set<string>>();
+  /** Role ids the fake should refuse, to exercise a partial restore. */
+  readonly refusedRoles = new Set<string>();
   memberCount = 0;
   #next = 1;
 
@@ -42,6 +44,7 @@ export class RecordingCommunityActions implements CommunityActions {
     this.deletedMessages.length = 0;
     this.botIds.clear();
     this.holders.clear();
+    this.refusedRoles.clear();
     this.memberCount = 0;
     this.#next = 1;
   }
@@ -86,6 +89,9 @@ export class RecordingCommunityActions implements CommunityActions {
     roleId: string,
   ): Promise<CommunityActionResult> {
     this.roleCalls.push({ userId, roleId, added: true });
+    if (this.refusedRoles.has(roleId)) {
+      return { ok: false, detail: "Missing Access" };
+    }
     const key = `${userId}:${roleId}`;
     this.holders.set(key, new Set([roleId]));
     return { ok: true };

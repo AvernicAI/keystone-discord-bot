@@ -970,6 +970,22 @@
         "claims": "35/35",
         "build": "not run (docs only)"
       }
+    },
+    {
+      "id": "pass-71",
+      "date": "2026-11-05",
+      "phase": "P7.5",
+      "summary": "Role persistence ships as its own community service, not a welcome branch. Opt-in `roles.persist` (default off) snapshots a departing member's role ids into one `role_snapshot` record, capped by `roles.persistMax` (default 20), and restores each role once on rejoin before deleting the snapshot. Discord stays the authority: a managed, deleted or above-bot role is refused and counted, never escalated, and is not retried forever. The adapter snapshots before the goodbye send, so a broken channel cannot lose the roles. Discord's 25-subcommand cap ruled out a new `/tools` subcommand, so `/tools roles persist:on|off limit:<n>` configures it and the panel path is unchanged. Tests: 637 in 93 files (4 service cases, the command settings path and the gateway leave/join seam); budget stays 20/100 roots and 141 subcommands. A human leave/rejoin is not claimed.",
+      "journal": "journal/2026-11-05-pass-71.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "637",
+        "budget": "20/100 roots · 141 subcommands · 4 context menus",
+        "live": "28/28 (not rerun)",
+        "memory": "current",
+        "claims": "35/35",
+        "build": "not run (no build step changed)"
+      }
     }
   ]
 }

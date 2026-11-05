@@ -20,6 +20,7 @@ import {
   BirthdayService,
   ContentService,
   GiveawayService,
+  RolePersistenceService,
   SeasonService,
   StarboardService,
   StickyService,
@@ -152,11 +153,43 @@ export function registerCommunityEvents(
     } catch (error) {
       logger.warn("welcome failed", { error: messageOf(error) });
     }
+
+    try {
+      const current = await config(member.guild.id);
+      const result = await new RolePersistenceService(
+        port.store,
+        port.actions,
+        current,
+      ).restore(member.guild.id, member.id);
+      if (!result.skipped && (result.restored > 0 || result.failed > 0)) {
+        logger.info("role persistence restore", {
+          guild: member.guild.id,
+          user: member.id,
+          restored: result.restored,
+          failed: result.failed,
+        });
+      }
+    } catch (error) {
+      logger.warn("role persistence restore failed", { error: messageOf(error) });
+    }
   };
 
   const onMemberLeave = async (
     member: GuildMember | PartialGuildMember,
   ): Promise<void> => {
+    // Snapshot first: a failing goodbye channel must not cost the member's roles.
+    try {
+      const current = await config(member.guild.id);
+      const roles = [...(member.roles?.cache?.values() ?? [])].map((role) => role.id);
+      await new RolePersistenceService(port.store, port.actions, current).save(
+        member.guild.id,
+        member.id,
+        roles,
+      );
+    } catch (error) {
+      logger.warn("role persistence snapshot failed", { error: messageOf(error) });
+    }
+
     try {
       const current = await config(member.guild.id);
       await new WelcomeService(port.actions, current, port.store).handleLeave(

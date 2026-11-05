@@ -2,6 +2,17 @@
 
 ## Now
 
+Pass 71 added opt-in role persistence. `roles.persist` is off by default;
+`/tools roles persist:on limit:<n>` turns it on with a cap of 20 by default.
+`RolePersistenceService` stores the departing member's role ids in one
+`role_snapshot` record on `GuildMemberRemove` and, on `GuildMemberAdd`, adds each
+role once and deletes the snapshot. Discord remains the authority: a managed or
+above-bot role is refused and counted as failed, never escalated. The snapshot is
+taken before the goodbye send, so a broken goodbye channel cannot cost the
+member's roles. The module tests cover disabled mode, dedupe/cap, one-shot
+restore and a refused role; the gateway adapter test emits a real leave and join
+against the recorder. A human member leaving and rejoining is not claimed.
+
 Pass 61 moved the last five community component families onto the signed,
 expiring router. `ReactionRoleService`, `GiveawayService`, `SuggestionService`
 and `ContentService` now mint `k1:` ids with the bot's signer; posting a panel
@@ -91,7 +102,7 @@ the guild.
 ## Verified
 
 ```text
-pnpm check                            exit 0 · 631 tests / 92 files
+pnpm check                            exit 0 · 637 tests / 93 files
   responder.test.ts                   5 tests (auto-responder service)
   community.test.ts                  15 tests (including timer delivery, a concurrent claim and goodbye)
   extras.test.ts                      7 tests
@@ -122,6 +133,7 @@ Feature proofs (P3 plus the P4 economy hardening):
 | Gambling | Disabled by default; cap enforced; a seeded RNG proves a win and a loss debits once |
 | Welcome | Text placeholders, immediate autorole and DM are recorded |
 | Delayed autorole | Join records a pending role; before due applies zero; after due applies once; second tick no-op |
+| Role persistence | Disabled writes nothing; save dedupes and caps; restore adds each role once and deletes the snapshot; a refused role is counted, not retried |
 | Button reaction roles | Panel carries a signed `role:toggle` id; first toggle adds, second removes; a legacy id is unhandled |
 | Select reaction roles | Panel has a signed select with managed options; applying a subset adds; repeat is a no-op; unmanaged value rejected; changing subset removes old roles |
 | Starboard | Below threshold sends nothing; threshold sends once; the next count edits the same record |
@@ -174,7 +186,7 @@ No feature is paid.
 
 Not green and not claimed:
 
-- Live Discord role grants and live gateway interaction retries.
+- Live Discord role grants, a real leave/rejoin restore and live gateway interaction retries.
 - The guild-row lock against a real Postgres server (PGlite runs the same
   transaction path).
 - Automatic refund/repair for a shop role grant that Discord rejects after the

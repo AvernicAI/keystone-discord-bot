@@ -9,13 +9,13 @@
       "domain": "community",
       "phase": "P7.5",
       "priority": 1,
-      "status": "open",
+      "status": "covered",
       "size": "M",
       "featureIds": ["parity-extra.role-persistence"],
       "competitors": ["carl-bot"],
       "claimIds": ["R-023"],
-      "nextStep": "Snapshot a member's role ids on leave and restore only those roles on rejoin, opt-in, with an audited reason.",
-      "note": "Carl-bot sells levels and voice-role links, but neither restores a member's roles after a leave. The differentiator is an explicit, reversible restore with a case event."
+      "nextStep": "Live-prove one real leave and rejoin with role persistence on; the adapter path is tested.",
+      "note": "Shipped in pass 71: an opt-in snapshot on leave and a one-shot restore on rejoin, capped and with Discord as the final authority. Carl-bot sells levels and voice-role links; neither is the same promise."
     },
     {
       "id": "gap.case-export",

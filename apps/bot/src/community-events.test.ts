@@ -27,7 +27,10 @@ function message(input: MessageFixture = {}) {
   };
 }
 
-async function setup(overrides: Record<string, unknown> = { responders: { enabled: true } }) {
+async function setup(
+  overrides: Record<string, unknown> = { responders: { enabled: true } },
+  extraActions: Record<string, unknown> = {},
+) {
   const store = new InMemoryCommunityStore();
   await store.putRecord("dev-guild", "responder", "dev-hello", {
     id: "dev-hello",
@@ -44,7 +47,7 @@ async function setup(overrides: Record<string, unknown> = { responders: { enable
   const client = new FakeClient();
   const stop = registerCommunityEvents(
     client as unknown as Client,
-    { store, actions: { sendMessage } as never },
+    { store, actions: { sendMessage, ...extraActions } as never },
     settings,
     createSilentLogger(),
     { botTestGuildId: "dev-guild" },
@@ -107,6 +110,31 @@ describe("community event adapter", () => {
     const farewell = sendMessage.mock.calls[0]?.[2] as { v2?: unknown; content?: string };
     expect(JSON.stringify(farewell.v2)).toContain("Bye <@leaver-1> from Keystone");
     expect(farewell.content).toBeUndefined();
+    stop();
+  });
+
+  it("snapshots roles on leave and restores them on rejoin when persistence is on", async () => {
+    const addRole = vi.fn().mockResolvedValue({ ok: true });
+    const { store, client, stop } = await setup(
+      { roles: { persist: true, persistMax: 5 } },
+      { addRole },
+    );
+    client.emit(Events.GuildMemberRemove, {
+      id: "leaver-2",
+      guild: { id: "dev-guild", name: "Keystone" },
+      roles: { cache: new Map([["role-a", { id: "role-a" }], ["role-b", { id: "role-b" }]]) },
+    });
+    await vi.waitFor(async () => {
+      expect(await store.getRecord("dev-guild", "role_snapshot", "leaver-2")).toBeTruthy();
+    });
+
+    client.emit(Events.GuildMemberAdd, {
+      id: "leaver-2",
+      guild: { id: "dev-guild", name: "Keystone" },
+    });
+    await vi.waitFor(() => expect(addRole).toHaveBeenCalledTimes(2));
+    expect(addRole).toHaveBeenCalledWith("dev-guild", "leaver-2", "role-a", "Role persistence restore");
+    expect(await store.getRecord("dev-guild", "role_snapshot", "leaver-2")).toBeUndefined();
     stop();
   });
 

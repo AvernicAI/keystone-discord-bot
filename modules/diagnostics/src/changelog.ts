@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-71",
+    date: "2026-11-05",
+    summary:
+      "P7.5 role persistence: `/tools roles persist:on` remembers a member's roles when they leave and restores them once when they rejoin, capped and with Discord as the final authority.",
+    journal: "memory/journal/2026-11-05-pass-71.md",
+  },
+  {
     pass: "pass-70",
     date: "2026-11-05",
     summary:
