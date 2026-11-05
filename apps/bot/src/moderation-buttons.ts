@@ -1,10 +1,27 @@
 import { UserError, type ComponentRouter } from "@keystone/kernel";
-import type { ModerationPort, ModuleSettings, ReplyInput } from "@keystone/kernel";
+import type {
+  ComponentSigner,
+  ModerationPort,
+  ModuleSettings,
+  ReplyInput,
+} from "@keystone/kernel";
 import {
   completeVerification,
+  memberTimelinePanel,
   moderationSettingsSchema,
   parseVerifyPayload,
+  timelineRefreshCustomId,
+  type MemberTimeline,
 } from "@keystone/module-moderation";
+
+/**
+ * The same read model `/mod history` renders, built once by the composition
+ * root. Typed here so the bot never imports a store shape it does not own.
+ */
+export type MemberTimelineLoader = (
+  guildId: string,
+  userId: string,
+) => Promise<MemberTimeline>;
 
 /**
  * The slice of an interaction the moderation handlers need. The router passes
@@ -15,12 +32,17 @@ export interface ModerationButtonInteraction {
   readonly guildId: string | null;
   readonly userId: string;
   reply(input: ReplyInput): Promise<unknown>;
+  update?(input: ReplyInput): Promise<unknown>;
 }
 
 export interface ModerationButtonDeps {
   /** Already scoped to the moderation module by the composition root. */
   readonly settings: ModuleSettings;
   readonly moderation: ModerationPort;
+  /** Re-reads the same read model `/mod history` rendered. */
+  readonly timeline?: MemberTimelineLoader;
+  /** Re-signs the refresh id; absent means the panel is read-only. */
+  readonly signer?: ComponentSigner;
 }
 
 /**
@@ -40,6 +62,21 @@ export function registerModerationRoutes(
     async handle({ interaction, payload, guildId }) {
       if (!guildId) return;
       await handleAppealButton(interaction, guildId, payload, deps);
+    },
+  });
+
+  router.register({
+    namespace: "timeline",
+    action: "refresh",
+    kind: "button",
+    guildOnly: true,
+    // The panel is a staff view: reading another member's cross-module history
+    // is exactly what `ModerateMembers` grants. A member-facing button would be
+    // a privacy hole, so the router refuses before the handler runs.
+    permissions: ["ModerateMembers"],
+    async handle({ interaction, payload, guildId, now }) {
+      if (!guildId) return;
+      await handleTimelineRefresh(interaction, guildId, payload, deps, now);
     },
   });
 
@@ -145,4 +182,47 @@ export async function handleVerifyButton(
       ephemeral,
     });
   }
+}
+
+const MEMBER_ID = /^\d{5,25}$/;
+
+/**
+ * Refresh edits the panel it was clicked on; it never posts a second message.
+ * That is the whole point of the control: a moderator watching a member can see
+ * a new case appear where they are already looking.
+ *
+ * The id is re-signed on every render, so a panel that is refreshed stays
+ * refreshable for as long as the viewer keeps using it, while an untouched
+ * panel still expires with the standard refusal.
+ */
+export async function handleTimelineRefresh(
+  button: ModerationButtonInteraction,
+  guildId: string,
+  userId: string,
+  deps: ModerationButtonDeps,
+  now = Date.now(),
+): Promise<void> {
+  if (!MEMBER_ID.test(userId)) throw new UserError("That panel is not valid.");
+  if (!deps.timeline || !deps.signer) {
+    throw new UserError("This bot cannot re-read a timeline. Run /mod history again.");
+  }
+  if (!button.update) {
+    throw new UserError("This panel cannot refresh in place. Run /mod history again.");
+  }
+
+  let timeline: MemberTimeline;
+  try {
+    timeline = await deps.timeline(guildId, userId);
+  } catch {
+    // A store that is down must read as "try again", not as an unacknowledged
+    // interaction Discord shows as "This interaction failed".
+    throw new UserError("Could not read that member's timeline just now. Try again.");
+  }
+
+  await button.update({
+    v2: memberTimelinePanel(timeline, {
+      refreshId: timelineRefreshCustomId(userId, deps.signer, now),
+      readAt: now,
+    }),
+  });
 }

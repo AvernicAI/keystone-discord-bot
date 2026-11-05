@@ -20,7 +20,7 @@ import { registerCommunityRoutes } from "./community-interactions";
 import { registerEventRoutes } from "./event-interactions";
 import { registerFormRoutes } from "./form-interactions";
 import { registerHelpRoutes } from "./help-interactions";
-import { registerModerationRoutes } from "./moderation-buttons";
+import { registerModerationRoutes, type MemberTimelineLoader } from "./moderation-buttons";
 
 export interface ComponentRuntimeDeps {
   /** Signs every button and modal id; only the composition root holds it. */
@@ -31,6 +31,11 @@ export interface ComponentRuntimeDeps {
     readonly settings: ModuleSettings;
     readonly moderation: ModerationPort;
   };
+  /**
+   * The read model behind the member timeline, built once by the composition
+   * root so the panel's refresh button and `/mod history` read the same stores.
+   */
+  readonly timeline?: MemberTimelineLoader;
   /** Ticket panel writes and reads through the same community port as `/ticket`. */
   readonly community: {
     readonly store: CommunityStore;
@@ -79,7 +84,11 @@ export function createComponentRouter(deps: ComponentRuntimeDeps): ComponentRout
   });
   // The verify id carries its guild inside the signed payload, because a DM has
   // none; the route itself lives beside moderation's button handlers.
-  registerModerationRoutes(router, deps.moderation);
+  registerModerationRoutes(router, {
+    ...deps.moderation,
+    signer: deps.signer,
+    timeline: deps.timeline,
+  });
   // The help hub reads the catalog and health the bot already has, rather than
   // a second copy of either. Its routes are guild-only and signed like every
   // other panel.

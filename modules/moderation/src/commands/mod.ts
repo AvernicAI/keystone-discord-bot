@@ -15,8 +15,8 @@ import {
 } from "@keystone/kernel";
 import { caseEmbed, caseListEmbed } from "../format";
 import { CaseExportService, type CaseExportResult } from "../case-export";
-import { MemberTimelineService } from "../member-timeline";
-import { memberTimelinePanel } from "../member-timeline-panel";
+import { memberTimelineLoader } from "../member-timeline";
+import { memberTimelinePanel, timelineRefreshCustomId } from "../member-timeline-panel";
 import { appealButton } from "../cases";
 import { PanicService } from "../panic";
 import { TemporaryActionService } from "../temporary";
@@ -268,7 +268,11 @@ export const mod = defineCommand({
     { name: "panic", description: "Lock down every text channel, or restore the last snapshot.", options: opts("state", "reason", "dry_run") },
     { name: "kick", description: "Kick a member with a case and reason.", options: opts("user", "reason", "dry_run") },
     { name: "timeout", description: "Time out a member for a number of minutes.", options: opts("user", "reason", "duration", "dry_run") },
-    { name: "warn", description: "Record a warning on a member's case history.", options: opts("user", "reason") },
+    // `warn` is the only punitive-shaped action with no external call, so the
+    // dry-run override is safe here: it writes a case, never a Discord ban. The
+    // dry-run refusal tells every action it can pass `dry_run: false`, so the
+    // option must exist or that sentence is a lie.
+    { name: "warn", description: "Record a warning on a member's case history.", options: opts("user", "reason", "dry_run") },
     { name: "purge", description: "Bulk-delete recent messages in a channel.", options: opts("channel", "limit", "reason", "dry_run") },
     { name: "lock", description: "Lock a channel so members cannot post.", options: opts("channel", "reason", "dry_run") },
     { name: "unlock", description: "Unlock a channel again.", options: opts("channel", "reason", "dry_run") },
@@ -366,7 +370,7 @@ export const mod = defineCommand({
         // One member timeline, read from the stores the command already has.
         // No target keeps the compact recent-case list; no format keeps the
         // case export above untouched.
-        const timeline = await new MemberTimelineService({
+        const timeline = await memberTimelineLoader({
           cases: ports.cases,
           community: ctx.community?.store,
           invites: ctx.invites?.store,
@@ -374,8 +378,17 @@ export const mod = defineCommand({
           events: ctx.events,
           modmail: ctx.modmail,
           members: ports.members,
-        }).load(guildId, target);
-        await ctx.interaction.reply({ ephemeral: true, v2: memberTimelinePanel(timeline) });
+        })(guildId, target);
+        // The button is signed by the same composition root that signs every
+        // other panel. A bot built without a signer still gets the read model,
+        // just no control: it refuses to ship an unsigned button.
+        const refreshId = ctx.componentSigner
+          ? timelineRefreshCustomId(target, ctx.componentSigner, ctx.now())
+          : undefined;
+        await ctx.interaction.reply({
+          ephemeral: true,
+          v2: memberTimelinePanel(timeline, { refreshId, readAt: ctx.now() }),
+        });
         return;
       }
       const records = await ports.cases.list(guildId, { targetId: target, limit: 10 });

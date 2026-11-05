@@ -441,6 +441,18 @@ export class MemberTimelineService {
   }
 }
 
+/**
+ * One construction of the read model, shared by `/mod history` and the panel's
+ * refresh route. A second copy of this port mapping is how a button and the
+ * command it belongs to start disagreeing about which stores they read.
+ */
+export function memberTimelineLoader(
+  ports: MemberTimelinePorts,
+): (guildId: string, userId: string) => Promise<MemberTimeline> {
+  const service = new MemberTimelineService(ports);
+  return (guildId, userId) => service.load(guildId, userId);
+}
+
 function describeCaseEvent(data: unknown): string {
   if (!data || typeof data !== "object") return "recorded";
   const record = data as Record<string, unknown>;

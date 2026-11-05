@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-11-05",
+  "criteria": ["structure", "density", "honesty", "freshness", "action", "copy"],
+  "surfaces": [
+    {
+      "id": "moderation.timeline",
+      "module": "moderation",
+      "where": "/mod history user:@member",
+      "file": "modules/moderation/src/member-timeline-panel.ts",
+      "component": "v2",
+      "grades": {
+        "structure": "A",
+        "density": "A",
+        "honesty": "A",
+        "freshness": "A",
+        "action": "A",
+        "copy": "A"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "gateway",
+        "date": "2026-11-05",
+        "note": "A signed-in Discord web client ran /mod history user:@Mr Bubba in #general of the development guild; the panel read two real cases from 10/10 stores, and ↻ Refresh edited that same message in place (the client marks it edited) with a new read stamp."
+      },
+      "next": "Avatar thumbnail in the header section, once the grammar has a section primitive with a thumbnail accessory."
+    },
+    {
+      "id": "diagnostics.help",
+      "module": "diagnostics",
+      "where": "/help and its select/back buttons",
+      "file": "modules/diagnostics/src/help/panel.ts",
+      "component": "v2",
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "B",
+        "freshness": "F",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": false,
+      "tokens": "pending",
+      "proof": null,
+      "next": "Convert to the grammar: heading + read stamp + footer, then prove it in the client."
+    },
+    {
+      "id": "forms.panel",
+      "module": "forms",
+      "where": "/form panel and Apply",
+      "file": "modules/forms/src/panel.ts",
+      "component": "v2",
+      "grades": {
+        "structure": "C",
+        "density": "B",
+        "honesty": "C",
+        "freshness": "F",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": false,
+      "tokens": "pending",
+      "proof": null,
+      "next": "Heading with the form name and a footer naming the submission cap."
+    },
+    {
+      "id": "community.panels",
+      "module": "community",
+      "where": "/ticket panel, /tools roles, role select",
+      "file": "modules/community/src/panels.ts",
+      "component": "v2",
+      "grades": {
+        "structure": "C",
+        "density": "C",
+        "honesty": "C",
+        "freshness": "F",
+        "action": "C",
+        "copy": "B"
+      },
+      "hasFooter": false,
+      "tokens": "pending",
+      "proof": null,
+      "next": "One grammar for all three panels, then a read stamp so a stale panel says so."
+    },
+    {
+      "id": "moderation.case",
+      "module": "moderation",
+      "where": "/mod case, /mod history (recent cases)",
+      "file": "modules/moderation/src/format.ts",
+      "component": "embed",
+      "grades": {
+        "structure": "D",
+        "density": "C",
+        "honesty": "C",
+        "freshness": "F",
+        "action": "D",
+        "copy": "C"
+      },
+      "hasFooter": false,
+      "tokens": "pending",
+      "proof": null,
+      "next": "Convert the case view to V2 with the appeal button already in its action row."
+    },
+    {
+      "id": "community.ticket",
+      "module": "community",
+      "where": "/ticket stats, /ticket summary",
+      "file": "modules/community/src/commands/ticket.ts",
+      "component": "embed",
+      "grades": {
+        "structure": "C",
+        "density": "C",
+        "honesty": "C",
+        "freshness": "F",
+        "action": "C",
+        "copy": "C"
+      },
+      "hasFooter": false,
+      "tokens": "pending",
+      "proof": null,
+      "next": "One grammar for ticket stats and summary, with a read stamp."
+    },
+    {
+      "id": "community.giveaway",
+      "module": "community",
+      "where": "/tools giveaway, giveaway-end, reroll",
+      "file": "modules/community/src/engagement.ts",
+      "component": "embed",
+      "grades": {
+        "structure": "C",
+        "density": "C",
+        "honesty": "C",
+        "freshness": "F",
+        "action": "C",
+        "copy": "C"
+      },
+      "hasFooter": false,
+      "tokens": "pending",
+      "proof": null,
+      "next": "A countdown-aware header and an action row that disables after the draw."
+    },
+    {
+      "id": "community.suggestions",
+      "module": "community",
+      "where": "/tools suggestion, suggestion-decide",
+      "file": "modules/community/src/extras.ts",
+      "component": "embed",
+      "grades": {
+        "structure": "C",
+        "density": "C",
+        "honesty": "C",
+        "freshness": "F",
+        "action": "C",
+        "copy": "C"
+      },
+      "hasFooter": false,
+      "tokens": "pending",
+      "proof": null,
+      "next": "State colour from the token palette and a footer naming the deciding moderator."
+    },
+    {
+      "id": "community.rank",
+      "module": "community",
+      "where": "/rank, /rank leaderboard",
+      "file": "modules/community/src/commands/rank.ts",
+      "component": "embed",
+      "grades": {
+        "structure": "C",
+        "density": "C",
+        "honesty": "C",
+        "freshness": "F",
+        "action": "C",
+        "copy": "C"
+      },
+      "hasFooter": false,
+      "tokens": "pending",
+      "proof": null,
+      "next": "Replace the three ad-hoc colours with the palette, then add a next-rank progress bar."
+    },
+    {
+      "id": "events.panel",
+      "module": "events",
+      "where": "/event list, /event panel, RSVP buttons",
+      "file": "modules/events/src/panel.ts",
+      "component": "embed",
+      "grades": {
+        "structure": "C",
+        "density": "B",
+        "honesty": "C",
+        "freshness": "F",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": false,
+      "tokens": "pending",
+      "proof": null,
+      "next": "Convert to V2 so RSVP counts and buttons share one card."
+    },
+    {
+      "id": "analytics.overview",
+      "module": "analytics",
+      "where": "/analytics overview and its siblings",
+      "file": "modules/analytics/src/format.ts",
+      "component": "embed",
+      "grades": {
+        "structure": "C",
+        "density": "C",
+        "honesty": "B",
+        "freshness": "F",
+        "action": "C",
+        "copy": "C"
+      },
+      "hasFooter": false,
+      "tokens": "pending",
+      "proof": null,
+      "next": "A window line (from/to) and a read stamp, so a number cannot be read as live."
+    },
+    {
+      "id": "setup.status",
+      "module": "setup",
+      "where": "/setup status, /config",
+      "file": "modules/setup/src/commands/setup.ts",
+      "component": "embed",
+      "grades": {
+        "structure": "C",
+        "density": "C",
+        "honesty": "C",
+        "freshness": "F",
+        "action": "C",
+        "copy": "C"
+      },
+      "hasFooter": false,
+      "tokens": "pending",
+      "proof": null,
+      "next": "Convert the checklist to V2 so each module has one line and one fix link."
+    }
+  ]
+}

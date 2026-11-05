@@ -84,6 +84,7 @@ pnpm typecheck          # tsc --noEmit, no secrets
 pnpm test               # the full token-free suite
 pnpm budget             # command-root ledger; must stay below 100
 pnpm audit:claims       # documented counts, paths and pointers vs the code
+pnpm audit:visuals      # surface ledger, proof evidence, palette, footers
 pnpm check              # typecheck, tests, budget, claims, audits, memory
 pnpm memory:render      # regenerate vault pages from machine truth
 pnpm memory:check       # validate machine files, generated pages and wikilinks
@@ -137,8 +138,8 @@ rate-limited register leaves the app with no commands.
 
 ## Current state (2026-11-05)
 
-- 12 modules, 20 global command roots, 141 subcommands, 4 context menus, 693 tests in 100 files.
-- **693 tests across 100 files**, all token-free.
+- 12 modules, 20 global command roots, 141 subcommands, 4 context menus, 743 tests in 101 files.
+- **743 tests across 101 files**, all token-free.
 - **Docker Desktop 29.9.2** runs the compose Postgres 16.15 and Redis;
   `pnpm probe:live` is 28/28.
 - 20/100 global roots are used.

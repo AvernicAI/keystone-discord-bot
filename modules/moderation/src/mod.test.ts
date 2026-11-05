@@ -476,6 +476,36 @@ describe("moderation module", () => {
     expect(interaction.lastReply?.content).toContain("Dry run");
   });
 
+  it("lets an operator record the first warning in a dry-run guild by passing dry_run:false", async () => {
+    const store = new InMemoryCaseStore();
+    const cases = new CaseService(store);
+    const actions = new RecordingActions();
+    const interaction = new FakeInteraction({
+      commandName: "mod",
+      guildId: "guild-1",
+      permissions: ["ModerateMembers"],
+      options: { user: "target-1", reason: "live proof", dry_run: false },
+      subcommand: "warn",
+    });
+    const ctx = createTestContext({
+      interaction,
+      moduleId: "moderation",
+      settings: {},
+      moderation: { cases, actions, members: new InMemoryMemberStore() },
+    });
+
+    await mod.execute(ctx);
+
+    // A warn writes a case and notifies; it never calls a punitive action.
+    expect(actions.calls).toEqual([]);
+    const records = await cases.list("guild-1");
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({ action: "warn", targetId: "target-1", reason: "live proof" });
+    // `warn` replies through the notification port, so there may be no content;
+    // what matters is that the refusal path did not run.
+    expect(interaction.lastReply?.content ?? "").not.toContain("Dry run");
+  });
+
   it("lists recent link-filter findings through /mod links", async () => {
     const { ctx, cases, actions } = buildContext({ action: "links" });
     await cases.open({

@@ -248,7 +248,8 @@
           "description": "Record a warning on a member's case history.",
           "options": [
             "user",
-            "reason"
+            "reason",
+            "dry_run"
           ]
         },
         {

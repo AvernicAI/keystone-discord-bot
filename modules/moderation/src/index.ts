@@ -22,6 +22,22 @@ export {
   type ModerationSettings,
 } from "./settings";
 export { caseEmbed, caseListEmbed } from "./format";
+export {
+  MemberTimelineService,
+  TIMELINE_DISPLAY_LIMIT,
+  TIMELINE_SOURCES,
+  memberTimelineLoader,
+  type MemberTimeline,
+  type MemberTimelineEntry,
+  type MemberTimelinePorts,
+  type TimelineSource,
+} from "./member-timeline";
+export {
+  TIMELINE_PANEL_TTL_MS,
+  memberTimelinePanel,
+  timelineRefreshCustomId,
+  type MemberTimelinePanelOptions,
+} from "./member-timeline-panel";
 export { TemporaryActionService, type ExpiryOutcome } from "./temporary";
 export {
   InMemoryPanicStore,

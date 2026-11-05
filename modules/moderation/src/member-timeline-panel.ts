@@ -1,18 +1,54 @@
-import type { V2Component } from "@keystone/kernel";
-import { layout } from "@keystone/ui";
+import type { PanelSigner, V2Component } from "@keystone/kernel";
+import {
+  ACCENTS,
+  GLYPHS,
+  actionRow,
+  emptyState,
+  facts,
+  footer,
+  heading,
+  layout,
+  readStamp,
+  row,
+  rows,
+} from "@keystone/ui";
 import type { MemberTimeline, TimelineSource } from "./member-timeline";
 
+/**
+ * A refresh id outlives a single click, but not a review session. Thirty
+ * minutes is long enough for a moderator to open a case, refresh and read the
+ * row; short enough that a leaked screenshot's button is already dead.
+ */
+export const TIMELINE_PANEL_TTL_MS = 30 * 60_000;
+
+/**
+ * The payload is just the member id: the interaction already carries the guild,
+ * and the router refuses a click from another server before this handler runs.
+ * That keeps the id far inside the signer's 40-character payload budget instead
+ * of packing two snowflakes into it.
+ */
+export function timelineRefreshCustomId(
+  userId: string,
+  signer: PanelSigner,
+  now = Date.now(),
+): string {
+  return signer.sign(
+    { namespace: "timeline", action: "refresh", payload: userId, ttlMs: TIMELINE_PANEL_TTL_MS },
+    now,
+  );
+}
+
 const ICONS: Record<TimelineSource, string> = {
-  cases: "🛡️",
-  case_events: "📎",
-  tickets: "🎫",
-  levels: "📈",
-  economy_ledger: "🪙",
-  invite_joins: "🤝",
-  form_submissions: "📝",
-  event_rsvps: "📅",
-  modmail_threads: "✉️",
-  members: "🪪",
+  cases: GLYPHS.shield,
+  case_events: GLYPHS.shield,
+  tickets: GLYPHS.ticket,
+  levels: GLYPHS.levels,
+  economy_ledger: GLYPHS.economy,
+  invite_joins: GLYPHS.invites,
+  form_submissions: GLYPHS.forms,
+  event_rsvps: GLYPHS.events,
+  modmail_threads: GLYPHS.modmail,
+  members: GLYPHS.member,
 };
 
 function unix(at: string): number | undefined {
@@ -30,83 +66,129 @@ function count(value: number | undefined, noun: string): string | undefined {
   return `${noun} **${value}${value >= 8 ? "+" : ""} open**`;
 }
 
+export interface MemberTimelinePanelOptions {
+  /** Signed `timeline:refresh` id; without one the panel is read-only. */
+  readonly refreshId?: string;
+  /** Injected so the read stamp is deterministic in a test. */
+  readonly readAt?: number;
+}
+
 /**
  * One screen for "what happened with this member?".
  *
- * The rows are deliberately source-tagged: a moderator must be able to see that
- * a line came from `tickets` or `modmail_threads`, and the footer must say which
- * stores could not be read at all. A clean-looking panel that silently omits a
- * failed source would be worse than no panel.
+ * The panel is built from the shared grammar, not from hand-written markdown,
+ * so it has the same header, facts, section, footer and action rhythm as every
+ * other Keystone surface. Two rules survive from the first version because they
+ * are the point of the screen: every row names its source table, and a store
+ * that failed is named instead of rendered as "no activity".
  */
-export function memberTimelinePanel(timeline: MemberTimeline): V2Component[] {
-  const { facts } = timeline;
+export function memberTimelinePanel(
+  timeline: MemberTimeline,
+  options: MemberTimelinePanelOptions = {},
+): V2Component[] {
+  const { facts: factsRecord } = timeline;
+  const readAt = options.readAt ?? Date.now();
+
+  const summary = facts([
+    factsRecord.level === undefined ? "Level not recorded" : `**Level ${factsRecord.level}**`,
+    factsRecord.xp === undefined ? undefined : `${factsRecord.xp.toLocaleString("en-US")} XP`,
+    factsRecord.rank === undefined ? undefined : `rank #${factsRecord.rank}`,
+    factsRecord.balance === undefined
+      ? undefined
+      : `${factsRecord.balance.toLocaleString("en-US")} coins`,
+  ]);
+
+  const membership = facts([
+    factsRecord.joinedAt ? `Joined ${stamp(factsRecord.joinedAt)}` : undefined,
+    factsRecord.invitedBy ? `invited by <@${factsRecord.invitedBy}>` : undefined,
+    factsRecord.invitesRetained === undefined
+      ? undefined
+      : `${factsRecord.invitesRetained} invites retained`,
+    factsRecord.quarantined === true ? "**Quarantined**" : undefined,
+    factsRecord.verifiedAt ? `verified ${stamp(factsRecord.verifiedAt)}` : undefined,
+  ]);
+
+  const counters = facts([
+    count(factsRecord.openCases, "Cases"),
+    count(factsRecord.openTickets, "Tickets"),
+    count(factsRecord.openModmail, "Modmail"),
+  ]);
+
+  const activity = rows(
+    timeline.entries.map((entry) =>
+      row({
+        at: unix(entry.at),
+        text: `${ICONS[entry.source]} ${entry.text}`,
+        source: entry.source,
+        link: entry.link,
+      }),
+    ),
+  );
+
+  const wired = timeline.sources.filter((source) => source.state === "ok");
+  const seen = wired
+    .filter((source) => source.rows > 0)
+    .map((source) => `${source.source} ${source.rows}`);
+  const failed = timeline.sources.filter((source) => source.state === "failed");
+  const notWired = timeline.sources.filter((source) => source.state === "not-wired");
+  const problems = [
+    failed.length > 0 ? `Failed: ${failed.map((source) => source.source).join(", ")}` : undefined,
+    notWired.length > 0
+      ? `Not wired: ${notWired.map((source) => source.source).join(", ")}`
+      : undefined,
+    "Not joined: logs (no member index), AI labels (advisory only).",
+  ].filter((part): part is string => Boolean(part));
+
   return layout((ui) => {
-    ui.container({ accentColor: 0x5865f2 }, (box) => {
-      box.text(`## <@${facts.userId}> · Member timeline`);
-
-      const summary = [
-        facts.level === undefined ? "No level row" : `**Level ${facts.level}**`,
-        facts.xp === undefined ? undefined : `${facts.xp.toLocaleString("en-US")} XP`,
-        facts.rank === undefined ? undefined : `rank #${facts.rank}`,
-        facts.balance === undefined ? undefined : `${facts.balance.toLocaleString("en-US")} coins`,
-      ].filter((part): part is string => Boolean(part));
-      box.text(summary.join(" · "));
-
-      const membership = [
-        facts.joinedAt ? `Joined ${stamp(facts.joinedAt)}` : undefined,
-        facts.invitedBy ? `invited by <@${facts.invitedBy}>` : undefined,
-        facts.invitesRetained === undefined ? undefined : `${facts.invitesRetained} invites retained`,
-        facts.quarantined === true ? "**Quarantined**" : undefined,
-        facts.verifiedAt ? `verified ${stamp(facts.verifiedAt)}` : undefined,
-      ].filter((part): part is string => Boolean(part));
-      if (membership.length > 0) box.text(membership.join(" · "));
-
-      const counters = [
-        count(facts.openCases, "Cases"),
-        count(facts.openTickets, "Tickets"),
-        count(facts.openModmail, "Modmail"),
-      ].filter((part): part is string => Boolean(part));
-      if (counters.length > 0) box.text(counters.join(" · "));
-
-      box.separator();
-
-      box.text("**Recent activity**");
-      if (timeline.entries.length === 0) {
-        box.text("-# No activity is recorded in the joined stores.");
-      } else {
+    ui.container(
+      { accentColor: factsRecord.quarantined === true ? ACCENTS.attention : ACCENTS.brand },
+      (box) => {
         box.text(
-          timeline.entries
-            .map((entry) => {
-              const link = entry.link ? ` · [channel](${entry.link})` : "";
-              return `• ${ICONS[entry.source]} ${stamp(entry.at)} · ${entry.text}${link} · \`${entry.source}\``;
-            })
-            .join("\n"),
+          heading({
+            glyph: GLYPHS.timeline,
+            title: `<@${factsRecord.userId}> · Member timeline`,
+            context: "this server · events from every module",
+          }),
         );
-      }
 
-      box.separator();
+        if (summary) box.text(summary);
+        if (membership) box.text(membership);
+        if (counters) box.text(counters);
 
-      const read = timeline.sources
-        .filter((source) => source.state === "ok")
-        .map((source) => (source.rows > 0 ? `${source.source} (${source.rows})` : source.source));
-      const notWired = timeline.sources
-        .filter((source) => source.state === "not-wired")
-        .map((source) => source.source);
-      const failed = timeline.sources
-        .filter((source) => source.state === "failed")
-        .map((source) => source.source);
-      const footer = [
-        `-# Sources read: ${read.length > 0 ? read.join(" · ") : "none"}`,
-        notWired.length > 0 ? `-# Not wired: ${notWired.join(", ")}` : undefined,
-        failed.length > 0 ? `-# Failed: ${failed.join(", ")}` : undefined,
-        timeline.truncated > 0
-          ? `-# +${timeline.truncated} older row${timeline.truncated === 1 ? "" : "s"} not shown.`
-          : undefined,
-        "-# Not joined: logs (no member index), AI labels (advisory only).",
-      ]
-        .filter((line): line is string => Boolean(line))
-        .join("\n");
-      box.text(footer);
-    });
+        box.separator({ spacing: "small" });
+        box.text("**Recent activity**");
+
+        // The count belongs to the list, not to the footer: the service already
+        // cut rows at its own cap, so hiding the total would understate what a
+        // moderator cannot see. It stays inside the same text display because
+        // a container holds ten children and the action row is the tenth.
+        const hidden = activity.hidden + timeline.truncated;
+        const hiddenNote =
+          hidden > 0 ? `\n-# +${hidden} older row${hidden === 1 ? "" : "s"} not shown.` : "";
+        box.text(
+          (timeline.entries.length === 0
+            ? emptyState({
+                fact: "No activity is recorded in the joined stores.",
+                next: "Run /mod warn user:@member reason:… to open the first case; tickets, forms, RSVPs and invites land here too.",
+              })
+            : activity.block) + hiddenNote,
+        );
+
+        box.separator({ spacing: "small" });
+        box.text(
+          footer([
+            readStamp(readAt, `${wired.length}/${timeline.sources.length} stores joined`),
+            seen.length > 0 ? `Rows: ${seen.join(" · ")}` : "Rows: none in the joined stores",
+            problems.join(" · "),
+          ]),
+        );
+
+        if (options.refreshId) {
+          actionRow(box, ui, [
+            { label: "↻ Refresh", variant: "secondary", customId: options.refreshId },
+          ]);
+        }
+      },
+    );
   });
 }

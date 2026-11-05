@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { ACCENTS, GLYPHS } from "@keystone/ui";
 import type { MemberTimeline } from "./member-timeline";
-import { memberTimelinePanel } from "./member-timeline-panel";
+import { TIMELINE_PANEL_TTL_MS, memberTimelinePanel } from "./member-timeline-panel";
 
 function timeline(overrides: Partial<MemberTimeline> = {}): MemberTimeline {
   return {
@@ -54,9 +55,11 @@ function timeline(overrides: Partial<MemberTimeline> = {}): MemberTimeline {
   };
 }
 
-function rendered(value: MemberTimeline): string {
-  return JSON.stringify(memberTimelinePanel(value));
+function rendered(value: MemberTimeline, options?: Parameters<typeof memberTimelinePanel>[1]): string {
+  return JSON.stringify(memberTimelinePanel(value, options));
 }
+
+const READ_AT = Date.parse("2026-11-05T12:00:30.000Z");
 
 describe("member timeline panel", () => {
   it("renders facts, source-tagged rows and a ticket link in one V2 container", () => {
@@ -82,16 +85,58 @@ describe("member timeline panel", () => {
 
   it("names failed and unwired sources instead of rendering them as empty", () => {
     const text = rendered(timeline());
-    expect(text).toContain("Sources read:");
+    expect(text).toContain("Rows: cases 1 · tickets 1 · levels 1 · economy_ledger 1");
     expect(text).toContain("Failed: form_submissions");
     expect(text).toContain("Not wired: event_rsvps");
     expect(text).toContain("Not joined: logs (no member index), AI labels (advisory only).");
   });
 
-  it("renders an honest empty state", () => {
+  it("stamps the panel with when it was read, and how many stores answered", () => {
+    const text = rendered(timeline(), { readAt: READ_AT });
+    expect(text).toContain("-# Read <t:1793880030:R> · 8/10 stores joined");
+    expect(text).not.toContain("-# -#");
+  });
+
+  it("renders an honest empty state with the next action", () => {
     const text = rendered(timeline({ entries: [], truncated: 0 }));
     expect(text).toContain("No activity is recorded in the joined stores.");
+    expect(text).toContain("Run /mod warn user:@member reason:… to open the first case");
     expect(text).not.toContain("older row");
+  });
+
+  it("is read-only without a signed refresh id", () => {
+    const panel = memberTimelinePanel(timeline(), { readAt: READ_AT });
+    expect(JSON.stringify(panel)).not.toContain("action-row");
+    expect(JSON.stringify(panel)).not.toContain("Refresh");
+  });
+
+  it("adds the signed refresh button when the command has a signer", () => {
+    const panel = memberTimelinePanel(timeline(), {
+      readAt: READ_AT,
+      refreshId: "k1:abc:1:timeline:refresh:123",
+    });
+    const container = panel[0] as {
+      components: { type: string; components?: { label?: string; customId?: string }[] }[];
+    };
+    const actions = container.components.find((child) => child.type === "action-row");
+    expect(actions?.components).toEqual([
+      { type: "button", style: "secondary", label: "↻ Refresh", customId: "k1:abc:1:timeline:refresh:123" },
+    ]);
+  });
+
+  it("uses the attention accent for a quarantined member and brand otherwise", () => {
+    expect(memberTimelinePanel(timeline())[0]).toMatchObject({ accentColor: ACCENTS.brand });
+    expect(
+      memberTimelinePanel(timeline({ facts: { ...timeline().facts, quarantined: true } }))[0],
+    ).toMatchObject({ accentColor: ACCENTS.attention });
+  });
+
+  it("gives every row its source glyph and keeps the panel inside one container", () => {
+    const text = rendered(timeline());
+    expect(text).toContain(GLYPHS.economy);
+    expect(text).toContain(GLYPHS.shield);
+    expect(text).toContain(GLYPHS.ticket);
+    expect(text).toContain("## " + GLYPHS.timeline);
   });
 
   it("stays inside the Components V2 layout budget", () => {
@@ -106,5 +151,9 @@ describe("member timeline panel", () => {
     );
     expect(panel).toHaveLength(1);
     expect(JSON.stringify(panel).length).toBeLessThan(8_000);
+  });
+
+  it("exports a refresh ttl a moderator can leave a panel open for", () => {
+    expect(TIMELINE_PANEL_TTL_MS).toBe(30 * 60_000);
   });
 });

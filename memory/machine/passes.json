@@ -1066,6 +1066,22 @@
         "claims": "35/35",
         "build": "not run (no build step changed)"
       }
+    },
+    {
+      "id": "pass-77",
+      "date": "2026-11-05",
+      "phase": "P7.5",
+      "summary": "Pass 77 opens the visual mission and ships its first slice. `memory/vault/01-Mission/Visual-Mission.md` states the grammar and the six-criterion rubric; `memory/machine/surfaces.json` grades twelve visible surfaces and names the single next fix for each; `scripts/audit-visuals.ts` runs inside `pnpm check` and fails when a `layout(` call site has no ledger row, when an A has no live proof or no footer, or when an enforced file writes a raw hex. It prints the weakest surface, which is the next pass's brief. `packages/ui` gains `theme.ts` (five state accents, one glyph set) and six primitives with caps and markdown-safety tests: heading, facts, row/rows, emptyState, footer and actionRow. `/mod history user:@member` is rebuilt on them, its header no longer leaks the raw guild id, its footer says `Rows:` before the count list instead of `Read:`, and its signed, guild-bound Refresh route re-reads the same loader and edits the panel in place. The dry-run refusal told every action it could pass `dry_run: false` while `warn` had no such option; the option now exists and is tested. No root, subcommand, table or migration was added. Tests: 743 in 101 files (31 grammar, 10 panel, 10 refresh-route cases beside the existing appeal/verify suites, and the dry-run override). Live 2026-11-05: two stale bot processes were stopped, one boot logged `commands current`, a signed-in Discord web client ran `/mod history user:@Mr Bubba` in the development guild (the panel read two real cases from 10/10 stores), and Refresh re-rendered that message as edited.",
+      "journal": "journal/2026-11-05-pass-77.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "743",
+        "budget": "20/100 roots · 141 subcommands · 161 actions · 4 context menus",
+        "live": "gateway: signed-in Discord client ran /mod history user: in the development guild (2 real cases, 10/10 stores) and Refresh edited the panel in place; one boot, commands current",
+        "memory": "current",
+        "claims": "35/35",
+        "build": "not run (no build step changed)"
+      }
     }
   ]
 }
