@@ -6,8 +6,8 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-05",
   "phase": "P7",
-  "lastPass": "journal/2026-11-05-pass-67.md",
-  "nextAction": "Pass 67 replaced the 1,136-line README and 455-line AGENTS ledger with a 244/148-line front door; no product behaviour changed. Pass 68 now maps the 18 competitors into memory/machine/competitors.json and gaps.json with sourced, expiring claims. Pass 69 makes partial and liveScope real, fixing the form modal and feed claims. Pass 70 records the Discord MCP proof surface. Then the first product wave closes P7.5: role persistence, case export, event buttons/reminders/ICS and forms in the bundle.",
+  "lastPass": "journal/2026-11-05-pass-68.md",
+  "nextAction": "Pass 68 mapped 18 competitors into `competitors.json` and turned the market into an 18-row `gaps.json` register, with R-021..R-038 sourced and expiring. Pass 69 makes `partial` and `liveScope` real, correcting the form-modal and feed rows. Pass 70 records the Discord MCP proof surface. Then the first product wave closes P7.5: role persistence, case export, event buttons/reminders/ICS and forms in the bundle.",
   "live": {
     "report": "machine/live.json",
     "id": "live-2026-11-03"

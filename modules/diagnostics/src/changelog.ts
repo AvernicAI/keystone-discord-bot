@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-68",
+    date: "2026-11-05",
+    summary:
+      "Research pass: 18 competitors and an 18-row build-gap register are now machine truth, generated into the vault and cross-checked by the memory gate. No command, reply or interaction changed.",
+    journal: "memory/journal/2026-11-05-pass-68.md",
+  },
+  {
     pass: "pass-67",
     date: "2026-11-05",
     summary:

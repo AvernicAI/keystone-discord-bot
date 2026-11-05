@@ -51,6 +51,8 @@ export async function renderAll() {
   const passes = await readJson("machine/passes.json");
   const decisions = await readJson("machine/decisions.json");
   const live = await readJson("machine/live.json");
+  const competitors = await readJson("machine/competitors.json");
+  const gaps = await readJson("machine/gaps.json");
 
   const total = features.domains.reduce((sum, domain) => sum + domain.features.length, 0);
   const shipped = features.domains.reduce(
@@ -209,9 +211,89 @@ export async function renderAll() {
     "",
   ].join("\n");
 
+  const competitorPage = [
+    HEADER,
+    "",
+    "# Competitor ledger",
+    "",
+    "> Machine truth: [`competitors.json`](../../machine/competitors.json). This page is generated.",
+    "> One official source and one research claim per bot. A price is the vendor's list price",
+    "> at the retrieval date, not a promotional rate.",
+    "",
+    `**${competitors.bots.length} bots** from a mid-size server's stack: ` +
+      `${competitors.bots.filter((bot) => bot.kind === "generalist").length} generalists, ` +
+      `${competitors.bots.filter((bot) => bot.kind === "specialist").length} specialists and ` +
+      `${competitors.bots.filter((bot) => bot.kind === "ai-native").length} AI-native entrants.`,
+    "",
+    "| Bot | Kind | Free tier | Paid tier | Strongest capability | Gap to close | Source |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    ...competitors.bots.map(
+      (bot) =>
+        `| [${cell(bot.name)}](${bot.site}) | ${cell(bot.kind)} | ${cell(bot.freeTier)} | ${cell(bot.paidTier)} | ${cell(bot.strongest)} | ${cell(bot.gapNote)} | [source](${bot.source}) |`,
+    ),
+    "",
+    "## What this ledger is for",
+    "",
+    "- **Copy the capability, not the paywall.** A paid boundary is evidence that admins need the job done, not evidence that the job should cost money.",
+    "- **A gap is a build candidate.** The prioritised list with the smallest next step is [Gap-Register](Gap-Register.md).",
+    "- **A price is not a promise.** Re-check the source before quoting it; a claim expires on its own date.",
+    "- **A vendor claim is not a benchmark.** Rows marked medium confidence are a third-party read or a partly rendered page.",
+    "",
+    "## How to change this page",
+    "",
+    "1. Edit [`competitors.json`](../../machine/competitors.json), not this file.",
+    "2. Add or refresh the matching claim in [`research.json`](../../machine/research.json).",
+    "3. Run `pnpm memory:render` and then `pnpm memory:check`.",
+    "",
+  ].join("\n");
+
+  const GAP_STATUS = { open: "◐ open", partial: "◑ partial", covered: "✅ covered" };
+  const gapPage = [
+    HEADER,
+    "",
+    "# Gap register",
+    "",
+    "> Machine truth: [`gaps.json`](../../machine/gaps.json). This page is generated.",
+    "> The register is ordered by priority, not by domain. A row names the competitor that",
+    "> proves demand, the feature rows it would change and the smallest next step.",
+    "",
+    `**${gaps.gaps.length} gaps**: ` +
+      `${gaps.gaps.filter((gap) => gap.status === "open").length} open, ` +
+      `${gaps.gaps.filter((gap) => gap.status === "partial").length} partial. ` +
+      "`partial` means the foundation ships and one visible capability is missing.",
+    "",
+    "| # | Gap | Domain | Phase | Status | Size | Targets | Feature rows | Next step |",
+    "| ---: | --- | --- | --- | --- | --- | --- | --- | --- |",
+    ...gaps.gaps
+      .slice()
+      .sort((a, b) => a.priority - b.priority)
+      .map(
+        (gap) =>
+          `| ${gap.priority} | ${cell(gap.title)} | ${cell(gap.domain)} | ${cell(gap.phase)} | ${cell(GAP_STATUS[gap.status] ?? gap.status)} | ${cell(gap.size)} | ${cell(gap.competitors.join(", "))} | ${cell((gap.featureIds ?? []).map((id) => "`" + id + "`").join(", ") || "—")} | ${cell(gap.nextStep)} |`,
+      ),
+    "",
+    "## Why a gap is on this list",
+    "",
+    "- It removes a bot an admin actually runs, or it closes a hole in the record that no surveyed bot closes.",
+    "- It is free to ship: no paid service, no artificial cap and no second store.",
+    "- It has a smallest next step that can be tested without a live guild.",
+    "- It names the research claim behind the demand, so the list cannot drift into folklore.",
+    "",
+    "The evidence behind each row is in [Competitor-Index](Competitor-Index.md) and [Claims](Claims.md).",
+    "",
+    "## How to change this page",
+    "",
+    "1. Edit [`gaps.json`](../../machine/gaps.json), not this file.",
+    "2. Keep the feature ids and competitor ids real; `pnpm memory:check` cross-checks them.",
+    "3. Run `pnpm memory:render` and then `pnpm memory:check`.",
+    "",
+  ].join("\n");
+
   return new Map([
     ["vault/01-Mission/Feature-Status.md", featurePage],
     ["vault/02-Research/Claims.md", claimPage],
+    ["vault/02-Research/Competitor-Index.md", competitorPage],
+    ["vault/02-Research/Gap-Register.md", gapPage],
     ["vault/99-Meta/Decision-Index.md", decisionPage],
     ["vault/05-Learning/Pass-Ledger.md", passPage],
     ["vault/06-Operations/Live-Window.md", livePage],

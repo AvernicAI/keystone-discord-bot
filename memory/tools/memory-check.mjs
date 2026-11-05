@@ -18,9 +18,12 @@ const memoryDir = path.join(root, "memory");
 const vaultDir = path.join(memoryDir, "vault");
 const projectPath = path.join(memoryDir, "machine/project.json");
 
-const PHASES = ["P0", "P1", "P2", "P3", "P4", "P4.5", "P5", "P6", "P7", "P8", "P9", "P10", "none"];
+const PHASES = ["P0", "P1", "P2", "P3", "P4", "P4.5", "P5", "P6", "P7", "P7.5", "P8", "P9", "P10", "none"];
 const FEATURE_STATUSES = ["shipped-in-repo", "open", "planned", "non-goal"];
 const CONFIDENCE = ["high", "medium", "low"];
+const BOT_KINDS = ["generalist", "specialist", "ai-native"];
+const GAP_STATUSES = ["open", "partial", "covered"];
+const GAP_SIZES = ["S", "M", "L"];
 
 const errors = [];
 const warnings = [];
@@ -227,6 +230,106 @@ async function checkResearch() {
   }
 
   console.log(`memory: ${research.claims?.length ?? 0} research claims checked`);
+}
+
+async function checkCompetitors() {
+  const competitors = await readJson("machine/competitors.json");
+  const gaps = await readJson("machine/gaps.json");
+  const research = await readJson("machine/research.json");
+  const claims = new Map((research.claims ?? []).map((claim) => [claim.id, claim]));
+  const gapIds = new Set((gaps.gaps ?? []).map((gap) => gap.id));
+
+  check("competitors schemaVersion is 1", competitors.schemaVersion === 1, "competitors.json schemaVersion must be 1");
+  check("competitors updatedAt is a date", isDate(competitors.updatedAt), "competitors.json updatedAt must be YYYY-MM-DD");
+  check("competitors retrievedAt is a date", isDate(competitors.retrievedAt), "competitors.json retrievedAt must be YYYY-MM-DD");
+  check("competitors has 18 bots", competitors.bots?.length === 18, `competitors.json has ${competitors.bots?.length ?? 0} bots, expected 18`);
+
+  const ids = new Set();
+  const kinds = new Map(BOT_KINDS.map((kind) => [kind, 0]));
+  for (const bot of competitors.bots ?? []) {
+    const label = `competitor ${bot.id ?? "<unnamed>"}`;
+    check(`${label} id is unique`, Boolean(bot.id) && !ids.has(bot.id), `${label} id is missing or duplicated`);
+    ids.add(bot.id);
+    check(`${label} has a name`, typeof bot.name === "string" && bot.name.length > 0, `${label} is missing a name`);
+    check(`${label} kind is known`, BOT_KINDS.includes(bot.kind), `${label} has unknown kind ${bot.kind}`);
+    kinds.set(bot.kind, (kinds.get(bot.kind) ?? 0) + 1);
+    check(`${label} site is a URL`, isUrl(bot.site), `${label} site is not an http(s) URL`);
+    check(`${label} source is a URL`, isUrl(bot.source), `${label} source is not an http(s) URL`);
+    check(`${label} free tier is described`, typeof bot.freeTier === "string" && bot.freeTier.length > 20, `${label} freeTier is too short`);
+    check(`${label} paid tier is described`, typeof bot.paidTier === "string" && bot.paidTier.length > 20, `${label} paidTier is too short`);
+    check(`${label} strongest capability is described`, typeof bot.strongest === "string" && bot.strongest.length > 10, `${label} strongest is too short`);
+    check(`${label} weakness is described`, typeof bot.weakness === "string" && bot.weakness.length > 10, `${label} weakness is too short`);
+    check(`${label} confidence is known`, CONFIDENCE.includes(bot.confidence), `${label} has unknown confidence ${bot.confidence}`);
+    const claim = claims.get(bot.claimId);
+    check(`${label} names a research claim`, Boolean(claim), `${label} claimId does not exist: ${bot.claimId}`);
+    check(`${label} claim is about a competitor`, claim?.topic === "competitor", `${label} claim ${bot.claimId} is not topic competitor`);
+    check(`${label} gapIds is a list`, Array.isArray(bot.gapIds), `${label} gapIds must be an array`);
+    for (const gapId of bot.gapIds ?? []) {
+      check(`${label} gap exists`, gapIds.has(gapId), `${label} names a missing gap: ${gapId}`);
+    }
+    if ((bot.gapIds ?? []).length === 0) {
+      check(`${label} explains an empty gap list`, typeof bot.gapNote === "string" && /parity/i.test(bot.gapNote), `${label} has no gapIds but does not explain why`);
+    }
+  }
+
+  for (const kind of BOT_KINDS) {
+    check(`competitors include ${kind} bots`, (kinds.get(kind) ?? 0) > 0, `competitors.json has no ${kind} rows`);
+  }
+
+  console.log(`memory: ${competitors.bots?.length ?? 0} competitors checked`);
+}
+
+async function checkGaps() {
+  const gaps = await readJson("machine/gaps.json");
+  const features = await readJson("machine/features.json");
+  const competitors = await readJson("machine/competitors.json");
+  const research = await readJson("machine/research.json");
+  const featureIds = new Set((features.domains ?? []).flatMap((domain) => (domain.features ?? []).map((feature) => feature.id)));
+  const competitorIds = new Set((competitors.bots ?? []).map((bot) => bot.id));
+  const claims = new Map((research.claims ?? []).map((claim) => [claim.id, claim]));
+
+  check("gaps schemaVersion is 1", gaps.schemaVersion === 1, "gaps.json schemaVersion must be 1");
+  check("gaps updatedAt is a date", isDate(gaps.updatedAt), "gaps.json updatedAt must be YYYY-MM-DD");
+  check("gaps has entries", Array.isArray(gaps.gaps) && gaps.gaps.length > 0, "gaps.json has no gaps");
+
+  const ids = new Set();
+  const priorities = new Set();
+  const referenced = new Set();
+  for (const gap of gaps.gaps ?? []) {
+    const label = `gap ${gap.id ?? "<unnamed>"}`;
+    check(`${label} id is unique`, Boolean(gap.id) && !ids.has(gap.id), `${label} id is missing or duplicated`);
+    ids.add(gap.id);
+    check(`${label} has a title`, typeof gap.title === "string" && gap.title.length > 5, `${label} is missing a title`);
+    check(`${label} has a domain`, typeof gap.domain === "string" && gap.domain.length > 0, `${label} is missing a domain`);
+    check(`${label} phase is known`, PHASES.includes(gap.phase), `${label} has unknown phase ${gap.phase}`);
+    check(`${label} priority is a positive integer`, Number.isInteger(gap.priority) && gap.priority > 0, `${label} priority must be a positive integer`);
+    check(`${label} priority is unique`, !priorities.has(gap.priority), `${label} reuses priority ${gap.priority}`);
+    priorities.add(gap.priority);
+    check(`${label} status is known`, GAP_STATUSES.includes(gap.status), `${label} has unknown status ${gap.status}`);
+    check(`${label} size is known`, GAP_SIZES.includes(gap.size), `${label} has unknown size ${gap.size}`);
+    check(`${label} featureIds is a list`, Array.isArray(gap.featureIds), `${label} featureIds must be an array`);
+    for (const featureId of gap.featureIds ?? []) {
+      check(`${label} feature exists`, featureIds.has(featureId), `${label} names a missing feature: ${featureId}`);
+    }
+    check(`${label} names at least one competitor`, Array.isArray(gap.competitors) && gap.competitors.length > 0, `${label} has no competitors`);
+    for (const competitorId of gap.competitors ?? []) {
+      check(`${label} competitor exists`, competitorIds.has(competitorId), `${label} names a missing competitor: ${competitorId}`);
+      referenced.add(competitorId);
+    }
+    check(`${label} names at least one claim`, Array.isArray(gap.claimIds) && gap.claimIds.length > 0, `${label} has no claimIds`);
+    for (const claimId of gap.claimIds ?? []) {
+      check(`${label} claim exists`, claims.has(claimId), `${label} names a missing claim: ${claimId}`);
+    }
+    check(`${label} names a next step`, typeof gap.nextStep === "string" && gap.nextStep.length > 20, `${label} nextStep is too short`);
+    check(`${label} explains the gap`, typeof gap.note === "string" && gap.note.length > 20, `${label} note is too short`);
+  }
+
+  for (const bot of competitors.bots ?? []) {
+    if ((bot.gapIds ?? []).length === 0) continue;
+    check(`competitor ${bot.id} is the target of a gap`, referenced.has(bot.id), `competitor ${bot.id} names a gap but no gap names it`);
+  }
+
+  console.log(`memory: ${gaps.gaps?.length ?? 0} gaps checked`);
 }
 
 async function checkPasses() {
@@ -1083,6 +1186,8 @@ async function main() {
   await checkFeatures();
   await checkLive();
   await checkResearch();
+  await checkCompetitors();
+  await checkGaps();
   await checkPasses();
   await checkDecisions();
   await checkGenerated();

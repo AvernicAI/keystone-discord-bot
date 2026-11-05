@@ -2,6 +2,17 @@
 
 ## Now
 
+**Pass 68 turned the market into a register** (2026-11-05): `competitors.json`
+records 18 bots — 6 generalists, 9 specialists and 3 AI-native — with one
+source, one expiring claim and the exact free/paid boundary each. `gaps.json`
+orders 18 build gaps by priority, 7 open and 11 partial, each naming the feature
+rows it would change, the competitors that prove demand and the smallest next
+step. `memory:check` cross-checks ids in both directions and `memory:render`
+generates [[Competitor-Index]] and [[Gap-Register]]; R-021..R-038 are the sourced
+claims. No product behaviour changed; tests remain **631 / 92 files**, the last
+live probe is **28/28**, and memory is **4,550 / 4,550**. See
+[pass 68](../../journal/2026-11-05-pass-68.md).
+
 **Pass 67 replaced the front door** (2026-11-05): README went from 1,136 to
 244 lines and AGENTS from 455 to 148. The pitch, quickstarts, 12-module map,
 20-root command table, environment, proof and pass protocol remain; every

@@ -23,7 +23,7 @@ https://github.com/RNGBubba/keystone-discord-bot
 | Understand the 100-command wall | [[Command-Budget]] · [[Command-Catalog]] |
 | Add a feature | [[04-Modules/diagnostics/Spec\|Diagnostics spec]] then copy the folder |
 | Know what is actually shipped | [[Feature-Status]] · [[Pass-Ledger]] |
-| Know what competitors do | [[02-Research/Competitors/MEE6\|MEE6]] · [[Dyno]] · [[Carl-bot]] · [[Competitive-2026]] |
+| Know what competitors do | [[Competitor-Index]] · [[Gap-Register]] · [[Competitive-2026]] |
 | Know the platform limits | [[Platform-Limits]] · [[Platform-2026]] |
 | Know what can be imported | [[Import-Formats]] · [[Migration-Guides]] |
 | Export, restore or delete a guild | [[Portability]] · [[Portability-Runbook]] |

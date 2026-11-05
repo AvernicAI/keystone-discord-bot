@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-03",
+  "updatedAt": "2026-11-05",
   "passes": [
     {
       "id": "pass-01",
@@ -921,6 +921,22 @@
         "memory": "3746/3746",
         "claims": "35/35",
         "build": "not run (docs only)"
+      }
+    },
+    {
+      "id": "pass-68",
+      "date": "2026-11-05",
+      "phase": "P7",
+      "summary": "The market became a governed register instead of a reading list. `competitors.json` records 18 bots (6 generalists, 9 specialists, 3 AI-native), each with one official source, one expiring research claim, the exact free/paid boundary, its strongest capability, its weakness and the gaps it proves. `gaps.json` orders 18 build gaps by priority (7 open, 11 partial) with feature ids, target competitors, claim ids and a smallest next step. `memory-check` now cross-checks ids in both directions, priorities, feature ids and claim topics; `memory:render` generates Competitor-Index.md and Gap-Register.md. R-021 to R-038 add one sourced, dated claim per bot. No code, command, reply, interaction or test changed.",
+      "journal": "journal/2026-11-05-pass-68.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "631",
+        "budget": "20/100 roots · 141 subcommands · 4 context menus",
+        "live": "28/28 (not rerun)",
+        "memory": "4550/4550",
+        "claims": "35/35",
+        "build": "not run (docs/research only)"
       }
     }
   ]

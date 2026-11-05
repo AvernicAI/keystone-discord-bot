@@ -1,7 +1,9 @@
 # Competitive research — paid all-in-one bots (2026)
 
-> Research wave for [[ADR-0013-roadmap-v2-portability-first]]. Claims and
-> confidence live in [[Claims]]; raw machine truth is `memory/machine/research.json`.
+> Research wave for [[ADR-0013-roadmap-v2-portability-first]]. The current 18-bot
+> ledger is [[Competitor-Index]]; the build order it implies is [[Gap-Register]].
+> Claims and confidence live in [[Claims]]; raw machine truth is
+> `memory/machine/competitors.json`, `gaps.json` and `research.json`.
 
 ## What was read
 
