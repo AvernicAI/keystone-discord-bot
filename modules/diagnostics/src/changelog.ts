@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-70",
+    date: "2026-11-05",
+    summary:
+      "Documentation pass: the Discord MCP proof surface (189 tools) is recorded with the interaction, join, DM, voice and file-upload limits it cannot cross. No command, reply or interaction changed.",
+    journal: "memory/journal/2026-11-05-pass-70.md",
+  },
+  {
     pass: "pass-69",
     date: "2026-11-05",
     summary:

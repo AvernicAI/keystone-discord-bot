@@ -107,10 +107,12 @@ message bridge that runs the real registry, guards, cooldowns and reply adapter:
 - It is never registered in production and does not answer in other guilds.
 - Bot-authored mention chat is allowed only in that same guild.
 
-A Discord MCP can prove real REST delivery, permission shape, command
-registration, scheduled events and rich messages. It **cannot** invoke a slash
-command, click a button, submit a modal, make a human join/leave or receive a DM.
-Do not claim those without a human client or a real interaction tool. See
+The `discord-mcp` server in this workspace exposes **189 tools** (2026-11-05): it
+can prove real REST delivery, read-back state, permission shape, command
+registration, scheduled events, threads, webhooks and rich V2 messages. It
+**cannot** invoke a slash command, click a button, submit a modal, make a human
+join, receive a DM or upload a file. Do not claim those without a human client or
+a real interaction tool. The proof classes and their limits are in
 [Live-Testing](memory/vault/03-Architecture/Live-Testing.md).
 
 Discord allows **two global bulk overwrites per ten minutes**. At boot the bot

@@ -6,8 +6,8 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-05",
   "phase": "P7.5",
-  "lastPass": "journal/2026-11-05-pass-69.md",
-  "nextAction": "Pass 69 made `partial` and `liveScope` real: 4 rows moved from open to partial and all 48 live rows now name either a probe check or a written record. Pass 70 records the Discord MCP proof surface. Then the first product wave closes P7.5: role persistence, case export, event buttons/scheduled reminders/ICS and forms in the bundle.",
+  "lastPass": "journal/2026-11-05-pass-70.md",
+  "nextAction": "The truth block is complete: partial/liveScope are enforced and the 189-tool Discord MCP proof surface is documented with its interaction/join/DM/voice/file limits. The first product wave now closes P7.5: role persistence, case export, event buttons/scheduled reminders/ICS and forms in the bundle.",
   "live": {
     "report": "machine/live.json",
     "id": "live-2026-11-03"

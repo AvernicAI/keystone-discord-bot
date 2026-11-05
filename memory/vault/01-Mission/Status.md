@@ -2,6 +2,18 @@
 
 ## Now
 
+**Pass 70 wrote down the MCP proof surface** (2026-11-05): the configured
+`discord-mcp` server exposes **189 tools** in nine groups, so
+[[03-Architecture/Live-Testing|Live-Testing]] now records what each group proves
+and the five things it cannot reach — `InteractionCreate`, a member join, a DM,
+voice audio and a file upload. The intro was corrected: the server can register
+a guild command with `commands_create_guild`, but it cannot invoke one. The page
+maps `probe`, `mcp` and `gateway` proofs onto `liveScope`, and `AGENTS.md` links
+it. A read-only check confirmed the connection: 1 guild, 3 members, 7 channels
+including `#ai-chat`. No product behaviour changed; tests remain **631 / 92
+files**, the last probe is **28/28**, and memory is green. See
+[pass 70](../../journal/2026-11-05-pass-70.md).
+
 **Pass 69 made the truth vocabulary real** (2026-11-05): `partial` is now a
 status with required `shippedParts`, `openParts`, evidence and a reason, and
 four rows moved from `open` because each ships a real foundation with one named
