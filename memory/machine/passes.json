@@ -906,6 +906,22 @@
         "memory": "current",
         "build": "not run (docs/tooling only)"
       }
+    },
+    {
+      "id": "pass-67",
+      "date": "2026-11-05",
+      "phase": "P7",
+      "summary": "The front door stops repeating the ledger. README went from 1,136 to 244 lines and AGENTS from 455 to 148: pitch, exact facts, quickstarts, module and command maps, environment, proof and pass protocol, with every pass narrative and live-evidence transcript replaced by a link to the journals and vault. The gate-required count lines and the Docker/Postgres/Redis facts stayed verbatim. No command, reply, interaction, dependency or test changed; tests remain 631/92 and the live probe 28/28 (not rerun).",
+      "journal": "journal/2026-11-05-pass-67.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "631",
+        "budget": "20/100 roots · 141 subcommands · 4 context menus",
+        "live": "28/28 (not rerun)",
+        "memory": "3746/3746",
+        "claims": "35/35",
+        "build": "not run (docs only)"
+      }
     }
   ]
 }

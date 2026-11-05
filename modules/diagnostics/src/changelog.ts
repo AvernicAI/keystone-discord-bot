@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-67",
+    date: "2026-11-05",
+    summary:
+      "Documentation pass: the README and AGENTS became a 244/148-line front door, with the pass history and live evidence linked instead of duplicated. No command, reply or interaction changed.",
+    journal: "memory/journal/2026-11-05-pass-67.md",
+  },
+  {
     pass: "pass-66",
     date: "2026-11-03",
     summary:

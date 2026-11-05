@@ -2,6 +2,14 @@
 
 ## Now
 
+**Pass 67 replaced the front door** (2026-11-05): README went from 1,136 to
+244 lines and AGENTS from 455 to 148. The pitch, quickstarts, 12-module map,
+20-root command table, environment, proof and pass protocol remain; every
+pass-by-pass narrative and live-evidence transcript now links to the journals
+and the vault. Tests remain **631 / 92 files**, the last live probe is
+**28/28**, and the claim audit is 35/35. See
+[pass 67](../../journal/2026-11-05-pass-67.md).
+
 **Pass 66 audited the memory and proposed Roadmap v3** (2026-11-03): no product
 behaviour changed. The audit records the initial 3,712/3,715 gate as a CRLF
 artifact, fixes the P0 drift and proposes a `partial`/`liveScope` vocabulary;
