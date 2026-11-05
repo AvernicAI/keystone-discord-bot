@@ -106,7 +106,7 @@ Moderate members, inspect cases and review the queue.
 | `/mod panic` | Lock down every text channel, or restore the last snapshot. | `state`, `reason`, `dry_run` |
 | `/mod kick` | Kick a member with a case and reason. | `user`, `reason`, `dry_run` |
 | `/mod timeout` | Time out a member for a number of minutes. | `user`, `reason`, `duration`, `dry_run` |
-| `/mod warn` | Record a warning on a member's case history. | `user`, `reason` |
+| `/mod warn` | Record a warning on a member's case history. | `user`, `reason`, `dry_run` |
 | `/mod purge` | Bulk-delete recent messages in a channel. | `channel`, `limit`, `reason`, `dry_run` |
 | `/mod lock` | Lock a channel so members cannot post. | `channel`, `reason`, `dry_run` |
 | `/mod unlock` | Unlock a channel again. | `channel`, `reason`, `dry_run` |

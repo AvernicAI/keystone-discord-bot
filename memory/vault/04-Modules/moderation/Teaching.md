@@ -9,7 +9,9 @@
 3. `modules/moderation/src/commands/mod.ts` — one hub command, dry-run gate,
    case-before-action ordering, and where a temporary action writes `expires_at`.
 4. `modules/moderation/src/member-timeline.ts` + `member-timeline-panel.ts` —
-   the read model, source statuses and the one member-history screen.
+   the read model, source statuses and the one member-history screen, built from
+   the `packages/ui` grammar and refreshed in place by
+   `apps/bot/src/moderation-buttons.ts`.
 5. `modules/moderation/src/temporary.ts` — the release service, the atomic
    `claimExpiry`, and why a failed release restores the timestamp.
 6. `modules/moderation/src/commands/appeal.ts` — a two-subcommand hub; note that
@@ -88,6 +90,44 @@ fighting the 4,000-character budget, so the model returns twelve and a separate
 `truncated` count. It does not silently drop the rest, and it does not pretend
 the twelve are the whole history. A future signed “older” control can page the
 same in-memory projection; no table is needed for that either.
+
+## A screen is a composition, not a string
+
+Pass 77 made this the rule for every surface: `member-timeline-panel.ts` builds
+no markdown by hand. It calls `heading`, `facts`, `rows`, `emptyState`, `footer`
+and `actionRow` from `packages/ui`, and the only strings left in the file are the
+labels the reader sees.
+
+That is not tidiness for its own sake. Discord gives a bot one accent colour per
+container, markdown, relative timestamps and buttons — so the layout *is* the
+design, and a layout written by hand is re-decided in every module. The
+grammar makes the decision once:
+
+- programme error throws (an empty heading, two primary buttons), data clips (a
+  long reason, a huge guild name);
+- the accent is a state token (`ACCENTS.attention` for a quarantined member),
+  never a colour an author liked;
+- the footer always carries a read stamp and the named omissions, so a screenshot
+  says when it was true and what it could not see;
+- the one action row is the next move, which is why the timeline's only button is
+  **↻ Refresh**.
+
+`scripts/audit-visuals.ts` is the enforcement: a `layout(` file without a ledger
+row fails, an A without live proof or a footer fails, and an enforced file that
+writes `0x…` fails. The ledger's `next` field is the teaching loop — the weakest
+surface is already the next pass's brief.
+
+The refresh route teaches one more thing: a button and the command it belongs to
+must read the same loader. `memberTimelineLoader` is built once by the
+composition root and handed to both, so `/mod history` and the button cannot
+disagree about which stores exist. The id is signed, guild-bound and 30 minutes
+long, and the handler calls `update`, not `reply` — editing the panel the
+moderator is already looking at, instead of posting a second one.
+
+Finally, the client is part of the test. Reading the panel live found a raw guild
+snowflake in the header, `Read: cases 2` where a noun phrase was meant, and a
+dry-run refusal that told the caller to pass an option `warn` did not have. Tests
+had passed for all three, because a unit test asserts what you thought to ask.
 
 ## Temporary actions are a claim, not a countdown
 

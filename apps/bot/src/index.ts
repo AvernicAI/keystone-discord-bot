@@ -33,6 +33,7 @@ import { registerComponentInteractions } from "./components";
 import {
   TemporaryActionService,
   buildNativeAutoModPlan,
+  memberTimelineLoader,
   moderationSettingsSchema,
 } from "@keystone/module-moderation";
 
@@ -221,6 +222,19 @@ async function main(): Promise<void> {
     });
   });
 
+  // One timeline loader for the command and the panel's refresh button. Both
+  // read every store the runtime actually has, and a store this deployment does
+  // not run is reported as "not wired" instead of silently disappearing.
+  const loadMemberTimeline = memberTimelineLoader({
+    cases: runtime.moderation.cases,
+    community: runtime.community.store,
+    invites: runtime.invites.store,
+    forms: runtime.forms,
+    events: runtime.events,
+    modmail: runtime.modmail,
+    members: runtime.moderation.members,
+  });
+
   registerComponentInteractions(client, {
     signer: componentSigner,
     forms: runtime.forms,
@@ -229,6 +243,7 @@ async function main(): Promise<void> {
       settings: runtime.settings.forModule("moderation"),
       moderation: runtime.moderation,
     },
+    timeline: loadMemberTimeline,
     community: {
       store: runtime.community.store,
       actions: runtime.community.actions,

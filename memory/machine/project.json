@@ -6,8 +6,8 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-05",
   "phase": "P7.5",
-  "lastPass": "journal/2026-11-05-pass-76.md",
-  "nextAction": "Deliver the member timeline with the branch gate green; a real Discord invocation and a live source-store read are the remaining proof. Then open the approved support-depth wave.",
+  "lastPass": "journal/2026-11-05-pass-77.md",
+  "nextAction": "Keep the visual mission moving: the audit now names the weakest surface, so convert the next one (the case embed) onto the grammar and prove it in the client before opening new feature work.",
   "live": {
     "report": "machine/live.json",
     "id": "live-2026-11-05"
@@ -19,7 +19,7 @@
     "contextMenus": 4,
     "commandLimit": 100,
     "modules": 12,
-    "tests": 693
+    "tests": 743
   },
   "modules": [
     {

@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-77",
+    date: "2026-11-05",
+    summary:
+      "Visual mission: every visible surface now has a graded ledger row and a gate (`pnpm audit:visuals`) that fails on an unledgered panel, an unproven A, an inline accent hex or a missing footer. `packages/ui` gains the shared grammar — heading, facts, rows, empty state, footer and one action row — with state accents and one glyph set; `/mod history user:@member` is the first panel rebuilt on it, and its Refresh button now edits the panel in place instead of posting a second message.",
+    journal: "memory/journal/2026-11-05-pass-77.md",
+  },
+  {
     pass: "pass-76",
     date: "2026-11-05",
     summary:

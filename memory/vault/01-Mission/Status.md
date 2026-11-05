@@ -2,6 +2,29 @@
 
 ## Now
 
+**Pass 77 opened the visual mission and rebuilt its first panel** (2026-11-05):
+the goal "visually above the top bots" is now machinery, not a wish. Every
+visible surface has a row in `memory/machine/surfaces.json` with a grade for
+structure, density, honesty, freshness, action and copy, its last live proof and
+its single next fix; `pnpm audit:visuals` fails `pnpm check` when a `layout(`
+call site has no row, when an A has no live proof or no footer, or when an
+enforced panel writes a raw accent hex, and it prints the weakest surface as the
+next pass's brief. `packages/ui` gained the state palette and one glyph set plus
+six primitives (`heading`, `facts`, `row`/`rows`, `emptyState`, `footer`,
+`actionRow`) with caps and markdown-safety tests. `/mod history user:@member` is
+the first panel rebuilt on them: the raw guild id is gone from its header, the
+footer says `Rows:` before a count list, and its signed, guild-bound **↻
+Refresh** button re-reads the same loader and edits the panel in place. The
+live run also exposed a real bug: the dry-run refusal told every action it could
+pass `dry_run: false` while `warn` had no such option, so the option now exists
+and is tested. No root, subcommand, table or migration was added. Tests are
+**743 / 101 files**; the budget is unchanged at 20/100 roots, 141 subcommands,
+161 actions and 4 context menus. Live proof is **gateway**: a signed-in Discord
+web client ran the command in the development guild, the panel read two real
+cases from 10/10 stores, and Refresh edited that message in place. Two stale bot
+processes were stopped first; one boot logged `commands current`. See
+[pass 77](../../journal/2026-11-05-pass-77.md).
+
 **Pass 76 made member history one screen** (2026-11-05): `/mod history
 user:@member` now renders a Components V2 timeline instead of a case list. A
 pure read model joins the cases and their append-only events with tickets,
@@ -942,12 +965,13 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 693 tests / 100 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · live 28/28 · memory current
+pnpm check        exit 0 · typecheck 0 · 743 tests / 101 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · visuals 12 surfaces · live 28/28 · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 20 roots / 138 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · /modmail open → reply → 2-message archive → duplicate close refused → stats 1/0/2 · /event create → open → rsvp 1/2 → reminder → decline → 1.2 KB export parsed with the same row · /form create → open → panel → submit → 1 pending → accepted → 1.5 KB export parsed with the same answers and decision · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)
 live commands     2026-11-01 · !ping · !about · !help commands · !help browse · !help search query=ban · !ai status · !mod history · !mod links · !mod filters · !rank leaderboard · !invites leaderboard · !invites who · !logging status · !logging events · !logging retention · !logging export · !config list · !config get · !config set · !export guild · !export user · !export drift · !music status · !music add · !music queue · !music play · !music remove · !music skip · !appeal open · !appeal status · !verify start · !verify status · !event create · !event edit · !event rsvp · !event list · !event remind · !event export · !modmail setup · !modmail open · !modmail reply · !modmail close · !modmail transcript · !modmail stats
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
+live member timeline 2026-11-05 UTC · signed-in Discord web client · /mod history user:@Mr Bubba returned the grammar panel with 2 real cases and 10/10 stores · /mod warn dry_run:false wrote case #1, the default still wrote nothing · ↻ Refresh edited the message in place · two stale bot processes stopped, one boot logged commands current
 live substrate  2026-11-03 UTC · Docker 29.9.2 · Postgres 16.15 with 17/17 migrations · Redis reachable · pnpm probe:live 20/20 · /healthz database=postgres · migration runner transaction defect fixed
 live web widgets 2026-11-03 UTC · real local HTTP login/session/CSRF · AI form generated from schema · saved 9 · one audit row actor live-probe-web-user source dashboard · 5000 rejected at 400 with field preserved · OAuth exchange fake, live Discord OAuth open
 live fleet     2026-11-03 UTC · real local HTTP fleet page listed two Postgres-backed guilds · strict-moderation preview diff · wrong fingerprint 409 · apply 302 · one moderation write + one dashboard audit row per guild · OAuth exchange fake

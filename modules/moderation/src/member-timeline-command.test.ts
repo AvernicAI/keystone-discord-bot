@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createComponentSigner } from "@keystone/kernel";
 import type {
   CommunityPort,
   CommunityStore,
@@ -184,6 +185,34 @@ describe("mod history member timeline", () => {
     expect(text).toContain("`economy_ledger`");
     expect(text).toContain("`form_submissions`");
     expect(text).toContain("`invite_joins`");
+  });
+
+  it("ships a signed refresh button that names the same member", async () => {
+    const { ctx, interaction } = await buildContext({ user: "target" });
+    await mod.execute(ctx);
+
+    const text = JSON.stringify(interaction.lastReply?.v2);
+    expect(text).toContain("↻ Refresh");
+    const id = text.match(/k1:[^"]+timeline:refresh:target/)?.[0];
+    expect(id).toBeDefined();
+
+    // The test context freezes the clock, so the id must be parsed with that
+    // same clock rather than wall time.
+    const parsed = createComponentSigner("keystone-test-secret").parse(id!, ctx.now());
+    expect(parsed).toMatchObject({
+      ok: true,
+      namespace: "timeline",
+      action: "refresh",
+      payload: "target",
+    });
+  });
+
+  it("stamps the panel with the command's clock", async () => {
+    const { ctx, interaction } = await buildContext({ user: "target" });
+    await mod.execute(ctx);
+
+    const seconds = Math.floor(ctx.now() / 1_000);
+    expect(JSON.stringify(interaction.lastReply?.v2)).toContain(`Read <t:${seconds}:R>`);
   });
 
   it("keeps the recent-case embed when no user is supplied", async () => {

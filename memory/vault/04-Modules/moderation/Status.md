@@ -2,6 +2,26 @@
 
 ## Now
 
+Pass 77 rebuilt the **member timeline** on the shared visual grammar and proved
+it in a real client. The panel now opens with `## 🧭 <@member> · Member timeline`
+and a context line naming the server, then facts, one section of source-tagged
+rows, a three-line footer and a single action row — all from `packages/ui`
+primitives, so it has the same rhythm as every future conversion. The live run
+removed two copy defects (`guild <snowflake>` in the header, `Read: cases 2`
+where a noun phrase was meant) and one real bug: the dry-run refusal tells the
+caller to pass `dry_run: false`, but `warn` did not offer the option; it does
+now, and a test proves the override writes a case while the default writes
+nothing. The signed, guild-bound **↻ Refresh** button re-reads the same
+`memberTimelineLoader` the command uses and edits the panel in place instead of
+posting a second message; it requires `ModerateMembers` because cross-module
+history is staff data, and a bot without a signer ships the panel read-only
+rather than a dead button. Live proof is **gateway**: a signed-in Discord web
+client ran `/mod history user:@Mr Bubba` in the development guild, the panel
+read two real cases from 10/10 stores, and Refresh re-rendered it as edited. Two
+stale bot processes were answering the same interactions and were stopped first.
+No root, subcommand, table or migration was added. See
+[pass 77](../../../journal/2026-11-05-pass-77.md).
+
 Pass 76 turned `/mod history user:@member` into one **member timeline** instead
 of a case list. A pure read model joins cases and their append-only events,
 tickets, levels, the economy ledger, invite joins, form submissions, event
@@ -86,8 +106,8 @@ P2 core shipped in pass 05 (2026-11-01).
 ## Verified
 
 ```
-pnpm test                                  # 693 tests / 100 files
-pnpm vitest run modules/moderation         # 81 tests (including 11 member-timeline, 4 export, 7 temporary-expiry and 5 panic tests)
+pnpm test                                  # 743 tests / 101 files
+pnpm vitest run modules/moderation         # 90 tests (including 11 member-timeline, 10 timeline-panel, 4 export, 7 temporary-expiry and 5 panic tests)
 pnpm test -- packages/db/src/cases.test.ts # 4 PGlite case-store tests, including listEvents and atomic expiry claims
 pnpm test -- packages/db/src/panic.test.ts # PGlite panic snapshot scope and clear
 pnpm test -- packages/db/src/member-store.test.ts # PGlite member row + verification upsert

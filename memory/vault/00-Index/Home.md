@@ -24,6 +24,7 @@ https://github.com/RNGBubba/keystone-discord-bot
 | Add a feature | [[04-Modules/diagnostics/Spec\|Diagnostics spec]] then copy the folder |
 | Know what is actually shipped | [[Feature-Status]] · [[Pass-Ledger]] |
 | Know what competitors do | [[Competitor-Index]] · [[Gap-Register]] · [[Competitive-2026]] |
+| See the visual standard and the surface grades | [[Visual-Mission]] |
 | Know the platform limits | [[Platform-Limits]] · [[Platform-2026]] |
 | Know what can be imported | [[Import-Formats]] · [[Migration-Guides]] |
 | Export, restore or delete a guild | [[Portability]] · [[Portability-Runbook]] |

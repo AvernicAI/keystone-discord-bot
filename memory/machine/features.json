@@ -60,16 +60,19 @@
           "phase": "P2",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "One case file for all actions. `/mod history user:@member` now opens one member timeline across cases, case events, tickets, levels, the economy ledger, invite joins, form submissions, event RSVPs, modmail threads and the member row. Every row names its source; a store that is not wired or fails is named instead of being rendered as no activity, and the display is capped at 12 rows with an older-row count. No new table, root or subcommand.",
+          "note": "One case file for all actions. `/mod history user:@member` opens one member timeline across cases, case events, tickets, levels, the economy ledger, invite joins, form submissions, event RSVPs, modmail threads and the member row. Every row names its source; a store that is not wired or fails is named instead of rendered as no activity, and the display is capped at 12 rows with an older-row count. Pass 77 rebuilt the panel on the shared grammar in `packages/ui` — heading, facts, rows, footer and one action row — and its Refresh button edits the panel in place through a signed, guild-bound route that reads the same loader as the command. Live 2026-11-05: a signed-in Discord web client ran the command in the development guild (two real cases on the panel) and pressed Refresh, which re-rendered the same message as edited.",
           "evidence": [
             "modules/moderation/src/mod.test.ts",
             "modules/moderation/src/member-timeline.ts",
             "modules/moderation/src/member-timeline-panel.ts",
             "modules/moderation/src/member-timeline.test.ts",
-            "modules/moderation/src/member-timeline-command.test.ts"
+            "modules/moderation/src/member-timeline-command.test.ts",
+            "apps/bot/src/moderation-buttons.ts",
+            "packages/ui/src/grammar.ts"
           ],
-          "liveVerified": false,
-          "liveScope": "none"
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "moderation.bulk-purge",
