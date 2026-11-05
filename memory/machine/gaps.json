@@ -268,6 +268,20 @@
       "claimIds": ["R-036", "R-037"],
       "nextStep": "Ask a provider for a schema-validated settings patch, preview the exact diff with the audit helper, bind apply to its fingerprint, and refuse a stale plan.",
       "note": "The AI-native entrants sell setup speed. Keystone can match it only with a preview and an approval gate; AI may propose, never write."
+    },
+    {
+      "id": "gap.help-hub",
+      "title": "One help hub that knows this server",
+      "domain": "operations",
+      "phase": "P7.5",
+      "priority": 20,
+      "status": "covered",
+      "size": "S",
+      "featureIds": ["operations.help-hub"],
+      "competitors": ["mee6", "dyno", "carl-bot"],
+      "claimIds": ["R-020", "R-021"],
+      "nextStep": "Live-prove one module pick and one Overview press through a human client; the signed routes and panel trees are adapter-tested only.",
+      "note": "Shipped in pass 75: `/help` reads the modules, tickets, cases, health and registry the bot already owns and renders them as a V2 hub with signed controls. The surveyed generalists ship a command list and a separate dashboard; the hub is the in-Discord bridge between them."
     }
   ]
 }

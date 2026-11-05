@@ -121,6 +121,13 @@ async function fixture(fieldSpec = "why:Why join, tz:Timezone") {
       settings: communitySettings,
     },
     events: { store: eventStore, settings: eventSettings },
+    catalog: [],
+    health: {
+      probe: async () => ({
+        database: { configured: false, reachable: false, migrated: false },
+        cache: { configured: false, reachable: false },
+      }),
+    },
     logger: createSilentLogger(),
     now: () => NOW,
   };

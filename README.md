@@ -11,7 +11,7 @@ tickets, economy and AI all stand on.
 > feature in an afternoon.
 
 **Current facts:** **20/100 roots** · **141 real subcommands** · **161 actions** ·
-**4 context menus** · **12 modules** · **659 tests across 95 files**. The full
+**4 context menus** · **12 modules** · **682 tests across 97 files**. The full
 gate is token-free.
 
 This repo is both the product and the course: every module has a spec, tests, a
@@ -85,7 +85,7 @@ database or the network.
 
 | Module | Roots | What it owns |
 | --- | --- | --- |
-| Diagnostics | `/ping`, `/about`, `/help` | Liveness, version, the generated command catalog |
+| Diagnostics | `/ping`, `/about`, `/help` | Liveness, version, and a server-aware V2 help hub over the generated catalog |
 | Setup | `/setup`, `/config`, `/export` | Readiness, module switches, in-bot settings, bundles and drift |
 | Moderation | `/mod`, `/appeal`, `/verify` | Cases, evidence, dry-run automod, appeals and the join gate |
 | Community | `/rank`, `/ticket`, `/tools` | XP, economy, tickets, reaction roles, giveaways, feeds, temp voice |
@@ -113,7 +113,7 @@ and `Explain with AI` — sit on the separate menu budget.
 | --- | ---: | --- |
 | `/ping` | — | Confirm the gateway is alive and show uptime |
 | `/about` | — | Version, module state, teaching link |
-| `/help` | 5 | Browse and search the generated catalog, privacy, changelog |
+| `/help` | 5 | Server state, module browser and the generated catalog with signed controls; search and privacy remain text |
 | `/setup` | 5 | Readiness, module switchboard, integrity check, preview, reset |
 | `/config` | 4 | Read or change any module's settings through its own Zod schema |
 | `/export` | 6 | Download, preview, restore, delete, drift and rollback |
@@ -179,7 +179,7 @@ open; the read/write path is proven over real local HTTP and Postgres. See
 
 ## Proof
 
-- `pnpm check` covers **659 tests across 95 files**, 35/35 claim checks and
+- `pnpm check` covers **682 tests across 97 files**, 35/35 claim checks and
   4,886 memory checks without a token, database or network.
 - `pnpm probe:live` is **28/28** on the local stack: SQL, Redis, the queue,
   settings survival, temporary expiry, scheduled delivery, portability, web and

@@ -6,7 +6,7 @@
 > The register is ordered by priority, not by domain. A row names the competitor that
 > proves demand, the feature rows it would change and the smallest next step.
 
-**19 gaps**: 5 open, 11 partial. `partial` means the foundation ships and one visible capability is missing.
+**20 gaps**: 5 open, 11 partial. `partial` means the foundation ships and one visible capability is missing.
 
 | # | Gap | Domain | Phase | Status | Size | Targets | Feature rows | Next step |
 | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -29,6 +29,7 @@
 | 17 | Statroles from member activity | community | P8 | ◑ partial | M | statbot | `community.stat-channels` | Grant or remove a role from a bounded activity condition on a scheduled reconciliation, with a dry run and an audit row. |
 | 18 | Jobs, custom income and item actions | economy | P8 | ◑ partial | M | unbelievaboat | `economy.shop-inventory` | Add cooldown-based jobs and custom income commands that write the existing ledger, plus item actions with an explicit idempotency key. |
 | 19 | AI setup planner with approval | operations | P8 | ◐ open | M | peakbot, yourbot | — | Ask a provider for a schema-validated settings patch, preview the exact diff with the audit helper, bind apply to its fingerprint, and refuse a stale plan. |
+| 20 | One help hub that knows this server | operations | P7.5 | ✅ covered | S | mee6, dyno, carl-bot | `operations.help-hub` | Live-prove one module pick and one Overview press through a human client; the signed routes and panel trees are adapter-tested only. |
 
 ## Why a gap is on this list
 

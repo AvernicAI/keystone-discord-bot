@@ -30,7 +30,7 @@ pnpm db:migrate
 pnpm probe:live
 ```
 
-The probe opens the configured Postgres, checks that the 20 migrations are current,
+The probe opens the configured Postgres, checks that the 21 migrations are current,
 writes a settings row, closes the pool, reopens it and reads the row again. It
 uses two Redis clients to prove a cooldown is shared. It runs a BullMQ job twice
 with one idempotency key and waits for one Postgres receipt. It expires a real

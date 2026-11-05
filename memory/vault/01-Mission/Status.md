@@ -2,6 +2,27 @@
 
 ## Now
 
+**Pass 75 rebuilt the front door** (2026-11-05): in a server, `/help` is now a
+Components V2 hub instead of a flat command embed. It reads only state the bot
+already owns — module on/off from settings, open tickets, open cases for a
+caller with `ModerateMembers`, database and cache health, and the live registry
+totals — and degrades an unavailable source to `unknown` or an omitted row
+rather than failing the command. The module picker and the Overview, privacy and
+changelog buttons are signed, 15-minute, guild-bound ids routed beside the other
+panels; every update re-reads facts and re-mints the controls, and a module page
+keeps every module in its picker. A DM keeps the flat card because there is no
+guild to bind. The development bridge now sends through the interaction adapter,
+so `!help` reaches Discord as a real V2 panel instead of a flattened message.
+The live boot also exposed four German descriptions over Discord's
+100-character limit, which had left the guild with no commands after the
+clear; they are shortened and a length guard now fails the suite before
+registration can. The live probe is **28/28** and drives the German V2 hub and
+its signed picker on Postgres. Tests are **682 / 97 files** (12 pure panel
+cases, 5 route cases, 4 command cases and the length guard); the budget is
+unchanged at 20/100 roots, 141 subcommands, 161 actions and 4 context menus. A
+human button press is not claimed. See
+[pass 75](../../journal/2026-11-05-pass-75.md).
+
 **Pass 74 put forms in the guild bundle** (2026-11-05): `/export guild` now
 writes a version 2 `GuildSnapshot` with `forms` and `formSubmissions` and
 preserves their ids, so a form's definition and every answer survive an
@@ -907,7 +928,7 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 659 tests / 95 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · live 28/28 · memory current
+pnpm check        exit 0 · typecheck 0 · 682 tests / 97 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · live 28/28 · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 20 roots / 138 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · /modmail open → reply → 2-message archive → duplicate close refused → stats 1/0/2 · /event create → open → rsvp 1/2 → reminder → decline → 1.2 KB export parsed with the same row · /form create → open → panel → submit → 1 pending → accepted → 1.5 KB export parsed with the same answers and decision · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)

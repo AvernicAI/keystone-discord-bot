@@ -69,6 +69,84 @@ describe("/help", () => {
     expect(embed?.fields?.map((field) => field.name)).toContain("/help · 5 subcommands");
   });
 
+  it("renders the server-aware V2 hub by default in a guild", async () => {
+    const registry = new ModuleRegistry().register(diagnosticsModule);
+    const interaction = new FakeInteraction({ commandName: "help" });
+    const ctx = createTestContext({
+      interaction,
+      moduleId: "diagnostics",
+      catalog: registry.catalog(),
+    });
+
+    await help.execute(ctx);
+
+    expect(interaction.lastReply?.ephemeral).toBe(true);
+    expect(interaction.lastReply?.embeds).toBeUndefined();
+    expect(interaction.lastReply?.v2?.[0]?.type).toBe("container");
+    const json = JSON.stringify(interaction.lastReply?.v2);
+    expect(json).toContain("## Keystone");
+    expect(json).toContain("**This server**");
+    expect(json).toContain("Pick a module");
+  });
+
+  it("keeps the flat card in a DM, where there is no server state or signed guild", async () => {
+    const registry = new ModuleRegistry().register(diagnosticsModule);
+    const interaction = new FakeInteraction({ commandName: "help", guildId: null });
+    const ctx = createTestContext({
+      interaction,
+      moduleId: "diagnostics",
+      catalog: registry.catalog(),
+    });
+
+    await help.execute(ctx);
+
+    expect(interaction.lastReply?.v2).toBeUndefined();
+    expect(interaction.lastReply?.embeds?.[0]?.title).toBe("Keystone commands");
+  });
+
+  it("opens a module page directly for the module filter", async () => {
+    const registry = new ModuleRegistry().register(diagnosticsModule);
+    const interaction = new FakeInteraction({
+      commandName: "help",
+      subcommand: "browse",
+      options: { module: "moderation" },
+    });
+    const ctx = createTestContext({
+      interaction,
+      moduleId: "diagnostics",
+      catalog: [
+        ...registry.catalog(),
+        {
+          name: "mod",
+          moduleId: "moderation",
+          description: "Moderation",
+          options: [],
+          subcommands: [
+            { name: "ban", description: "Ban a member", options: [] },
+          ],
+        },
+      ],
+    });
+
+    await help.execute(ctx);
+
+    const json = JSON.stringify(interaction.lastReply?.v2);
+    expect(json).toContain("## moderation");
+    expect(json).toContain("`ban`");
+  });
+
+  it("refuses the hub when no signer is wired", async () => {
+    const registry = new ModuleRegistry().register(diagnosticsModule);
+    const base = createTestContext({
+      interaction: new FakeInteraction({ commandName: "help" }),
+      moduleId: "diagnostics",
+      catalog: registry.catalog(),
+    });
+    const ctx = { ...base, componentSigner: undefined } as unknown as typeof base;
+
+    await expect(help.execute(ctx)).rejects.toThrow(/Interactive panels are not configured/);
+  });
+
   it("searches roots and subcommands", async () => {
     const registry = new ModuleRegistry().register(diagnosticsModule);
     const interaction = new FakeInteraction({

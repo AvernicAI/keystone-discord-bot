@@ -1,6 +1,7 @@
 import { Events, type Client } from "discord.js";
 import {
   ComponentRouter,
+  type CommandCatalogEntry,
   type CommunityActions,
   type CommunityStore,
   type ComponentInteractionLike,
@@ -8,6 +9,7 @@ import {
   type ConfigPort,
   type EventStore,
   type FormStore,
+  type HealthProbe,
   type Logger,
   type ModerationPort,
   type ModuleSettings,
@@ -17,6 +19,7 @@ import { asComponentInteraction } from "./adapt";
 import { registerCommunityRoutes } from "./community-interactions";
 import { registerEventRoutes } from "./event-interactions";
 import { registerFormRoutes } from "./form-interactions";
+import { registerHelpRoutes } from "./help-interactions";
 import { registerModerationRoutes } from "./moderation-buttons";
 
 export interface ComponentRuntimeDeps {
@@ -41,6 +44,9 @@ export interface ComponentRuntimeDeps {
   };
   /** Reads the setup module's per-guild locale; absent means English. */
   readonly config?: ConfigPort;
+  /** The live registry, so /help cannot advertise a command that is not there. */
+  readonly catalog: readonly CommandCatalogEntry[];
+  readonly health: HealthProbe;
   readonly logger: Logger;
   /** Injectable clock so id expiry and submission timestamps are deterministic. */
   readonly now?: () => number;
@@ -74,6 +80,18 @@ export function createComponentRouter(deps: ComponentRuntimeDeps): ComponentRout
   // The verify id carries its guild inside the signed payload, because a DM has
   // none; the route itself lives beside moderation's button handlers.
   registerModerationRoutes(router, deps.moderation);
+  // The help hub reads the catalog and health the bot already has, rather than
+  // a second copy of either. Its routes are guild-only and signed like every
+  // other panel.
+  registerHelpRoutes(router, {
+    signer: deps.signer,
+    catalog: deps.catalog,
+    health: deps.health,
+    config: deps.config,
+    moderation: deps.moderation.moderation,
+    community: deps.community,
+    now: deps.now,
+  });
 
   return router;
 }

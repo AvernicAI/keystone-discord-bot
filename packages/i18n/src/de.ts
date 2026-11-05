@@ -28,7 +28,7 @@ const commandCopyDe: Record<string, () => string> = {
   "command.help.option.query.description": () =>
     `Wort, nach dem gesucht wird`,
   "command.setup.description": () =>
-    `Prüft die Betriebsbereitschaft, verwaltet Module, zeigt einen Import als Vorschau oder setzt Einstellungen zurück.`,
+    `Prüft den Betrieb, verwaltet Module, zeigt Importe als Vorschau und setzt Einstellungen zurück.`,
   "command.setup.status.description": () =>
     `Prüft Datenbank, Migrationen, Cache und Module.`,
   "command.setup.module.description": () =>
@@ -234,7 +234,7 @@ const commandCopyDe: Record<string, () => string> = {
   "command.ticket.option.user.description": () =>
     `Mitglied, das hinzugefügt wird`,
   "command.tools.description": () =>
-    `Community-Werkzeuge: Geburtstage, Vorschläge, Inhalte, Rollen, Gewinnspiele, Feeds und Auto-Antworten.`,
+    `Community-Werkzeuge: Geburtstage, Vorschläge, Rollen, Gewinnspiele, Feeds und Auto-Antworten.`,
   "command.tools.embed.description": () =>
     `Sendet einen einfachen Embed in einen Kanal.`,
   "command.tools.tag.description": () =>
@@ -384,7 +384,7 @@ const commandCopyDe: Record<string, () => string> = {
   "command.logging.option.days.description": () =>
     `Aufbewahrungsdauer in Tagen (1–365)`,
   "command.analytics.description": () =>
-    `Nur lesende Server-Analysen aus den eigenen Logs, Fällen, Einladungen, Tickets und Befehlsnutzungen des Bots.`,
+    `Lesende Analysen aus Logs, Fällen, Einladungen, Tickets und Befehlsnutzung, ohne eigene Tabelle.`,
   "command.analytics.overview.description": () =>
     `Zusammenfassung des gewählten Zeitraums auf einer Seite.`,
   "command.analytics.members.description": () =>
@@ -502,7 +502,7 @@ const commandCopyDe: Record<string, () => string> = {
   "command.event.option.rsvp.description": () =>
     `Deine Antwort für dieses Event`,
   "command.modmail.description": () =>
-    `Private Nachrichten von Mitgliedern an das Team: Thread öffnen, antworten, schließen und Transkripte lesen.`,
+    `Private Nachrichten von Mitgliedern an das Team: öffnen, antworten, schließen, Transkript lesen.`,
   "command.modmail.setup.description": () =>
     `Zeigt oder ändert die Modmail-Schalter für diesen Server.`,
   "command.modmail.open.description": () =>
@@ -617,6 +617,47 @@ export const de: Catalog = {
   "help.changelog.latest": (version, pass) => `**${version}** · zuletzt: ${pass}`,
   "help.changelog.entry": (pass, date, summary) => `**${pass}** (${date}) — ${summary}`,
   "help.unknown": () => "Unbekannte Hilfe-Aktion. Nutze /help browse.",
+
+  "help.hub.server": () => "Dieser Server",
+  "help.hub.modules": (on, total) => `Module **${on}/${total} an**`,
+  "help.hub.modulesUnknown": (total) =>
+    `Module **${total} registriert** · Einstellungen nicht verfügbar`,
+  "help.hub.tickets": (count) => `Tickets **${count} offen**`,
+  "help.hub.cases": (count) => `Fälle **${count} offen**`,
+  "help.hub.data": (state) => `Daten **${state}**`,
+  "help.hub.cache": (state) => `Cache **${state}**`,
+  "help.hub.disabled": (features) => `Hier nicht verfügbar: ${features}`,
+  "help.hub.registry": (roots, subcommands, menus) =>
+    `${roots} Wurzeln · ${subcommands} Unterbefehle · ${menus} Kontextmenüs, aus der laufenden Registry gelesen.`,
+  "help.hub.option": (roots, subcommands, state) =>
+    `${roots} Wurzeln · ${subcommands} Unterbefehle · ${state}`,
+  "help.hub.optionLimit": (hidden) =>
+    `+${hidden} Module fehlen in der Auswahl; nutze \`/help browse module:<id>\`.`,
+  "help.hub.pick": () => "Wähle ein Modul, um seine Befehle zu sehen.",
+  "help.hub.button.privacy": () => "Datenschutz",
+  "help.hub.button.changelog": () => "Changelog",
+  "help.hub.footer": (minutes) =>
+    `Neu hier? Starte mit \`/setup\`. Auswahl und Buttons funktionieren nach ${minutes} Minuten nicht mehr; führe \`/help\` erneut aus.`,
+  "help.hub.state.ready": () => "bereit",
+  "help.hub.state.memory": () => "Speicher",
+  "help.hub.state.pending": () => "Migrationen ausstehend",
+  "help.hub.state.unreachable": () => "nicht erreichbar",
+  "help.hub.state.unknown": () => "unbekannt",
+  "help.hub.cache.redis": () => "Redis",
+  "help.module.on": () => "an",
+  "help.module.off": () => "aus",
+  "help.module.unknown": () => "Status unbekannt",
+  "help.module.summary": (roots, subcommands, state) =>
+    `**${roots} Wurzeln · ${subcommands} Unterbefehle** · ${state}`,
+  "help.module.offHint": () =>
+    "Dieses Modul ist auf diesem Server aus. Aktiviere es in \`/setup\`.",
+  "help.module.more": (count, moduleId) =>
+    `+${count} weitere Wurzeln — siehe \`/help commands module:${moduleId}\`.`,
+  "help.page.overview": () => "Übersicht",
+  "help.page.footer": (minutes) =>
+    `Dieses Panel funktioniert nach ${minutes} Minuten nicht mehr; führe \`/help\` erneut aus.`,
+  "help.panel.noUpdate": () => "Dieses Steuerelement kann das Panel nicht aktualisieren.",
+  "help.changelog.journal": (path) => `Journal: \`${path}\``,
 
   "rank.card.noTarget": () => "Dieses Menü enthielt kein Mitglied.",
   "rank.leaderboard.title": () => "XP-Rangliste",

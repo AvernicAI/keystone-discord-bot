@@ -106,6 +106,48 @@ export const en = {
     `**${pass}** (${date}) — ${summary}`,
   "help.unknown": () => "Unknown help action. Use /help browse.",
 
+  // The /help hub: server state, module pages and the component pages.
+  "help.hub.server": () => "This server",
+  "help.hub.modules": (on: number, total: number) => `Modules **${on}/${total} on**`,
+  "help.hub.modulesUnknown": (total: number) =>
+    `Modules **${total} registered** · settings unavailable`,
+  "help.hub.tickets": (count: string) => `Tickets **${count} open**`,
+  "help.hub.cases": (count: string) => `Cases **${count} open**`,
+  "help.hub.data": (state: string) => `Data **${state}**`,
+  "help.hub.cache": (state: string) => `Cache **${state}**`,
+  "help.hub.disabled": (features: string) => `Not available here: ${features}`,
+  "help.hub.registry": (roots: number, subcommands: number, menus: number) =>
+    `${roots} roots · ${subcommands} subcommands · ${menus} context menus, read from the live registry.`,
+  "help.hub.option": (roots: number, subcommands: number, state: string) =>
+    `${roots} roots · ${subcommands} subcommands · ${state}`,
+  "help.hub.optionLimit": (hidden: number) =>
+    `+${hidden} modules are not in the picker; use \`/help browse module:<id>\`.`,
+  "help.hub.pick": () => "Pick a module to see its commands.",
+  "help.hub.button.privacy": () => "Privacy",
+  "help.hub.button.changelog": () => "Changelog",
+  "help.hub.footer": (minutes: number) =>
+    `New here? Start with \`/setup\`. The picker and buttons stop working after ${minutes} minutes; run \`/help\` again.`,
+  "help.hub.state.ready": () => "ready",
+  "help.hub.state.memory": () => "memory",
+  "help.hub.state.pending": () => "migrations pending",
+  "help.hub.state.unreachable": () => "unreachable",
+  "help.hub.state.unknown": () => "unknown",
+  "help.hub.cache.redis": () => "Redis",
+  "help.module.on": () => "on",
+  "help.module.off": () => "off",
+  "help.module.unknown": () => "state unknown",
+  "help.module.summary": (roots: number, subcommands: number, state: string) =>
+    `**${roots} roots · ${subcommands} subcommands** · ${state}`,
+  "help.module.offHint": () =>
+    "This module is off in this server. Turn it on in \`/setup\`.",
+  "help.module.more": (count: number, moduleId: string) =>
+    `+${count} more roots — see \`/help commands module:${moduleId}\`.`,
+  "help.page.overview": () => "Overview",
+  "help.page.footer": (minutes: number) =>
+    `This panel stops working after ${minutes} minutes; run \`/help\` again.`,
+  "help.panel.noUpdate": () => "That control cannot update this panel.",
+  "help.changelog.journal": (path: string) => `Journal: \`${path}\``,
+
   "rank.card.noTarget": () => "That menu did not include a member.",
   "rank.leaderboard.title": () => "XP leaderboard",
   "rank.leaderboard.empty": () => "No XP recorded yet.",
