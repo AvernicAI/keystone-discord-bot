@@ -40,7 +40,7 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 | --- | --- | --- | --- |
 | Ban / kick | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
 | Timeout | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
-| Warn + history | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
+| Warn + history | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts`, `modules/moderation/src/member-timeline.ts`, `modules/moderation/src/member-timeline-panel.ts`, `modules/moderation/src/member-timeline.test.ts`, `modules/moderation/src/member-timeline-command.test.ts` · live unverified |
 | Bulk purge | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
 | Slowmode / lockdown | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
 | Temp ban / temp role | P7 | ✅ in repo | `modules/moderation/src/temporary.test.ts`, `modules/moderation/src/mod.test.ts`, `packages/db/src/cases.test.ts`, `apps/bot/src/timers.test.ts`, `scripts/live-probe.ts` · live unverified |

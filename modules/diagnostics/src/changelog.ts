@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-76",
+    date: "2026-11-05",
+    summary:
+      "P7.5 member history: `/mod history user:@member` is now one Components V2 timeline across cases, tickets, levels, economy, invites, forms, events, modmail and the member row. Every row names its source table, a store that could not be read is named rather than shown as empty, and the last 12 rows plus an older-row count fit one screen.",
+    journal: "memory/journal/2026-11-05-pass-76.md",
+  },
+  {
     pass: "pass-75",
     date: "2026-11-05",
     summary:

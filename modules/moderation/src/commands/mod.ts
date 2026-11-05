@@ -15,6 +15,8 @@ import {
 } from "@keystone/kernel";
 import { caseEmbed, caseListEmbed } from "../format";
 import { CaseExportService, type CaseExportResult } from "../case-export";
+import { MemberTimelineService } from "../member-timeline";
+import { memberTimelinePanel } from "../member-timeline-panel";
 import { appealButton } from "../cases";
 import { PanicService } from "../panic";
 import { TemporaryActionService } from "../temporary";
@@ -273,7 +275,7 @@ export const mod = defineCommand({
     { name: "slowmode", description: "Set channel slowmode in seconds.", options: opts("channel", "duration", "reason", "dry_run") },
     { name: "case", description: "Show one case by number, or export it.", options: opts("case", "format") },
     { name: "note", description: "Append a moderator note to a case.", options: opts("case", "reason") },
-    { name: "history", description: "List or export recent cases, optionally for one member.", options: opts("user", "count", "format") },
+    { name: "history", description: "List cases, or open a member's full timeline across modules.", options: opts("user", "count", "format") },
     { name: "links", description: "Review recent link-filter findings." },
     { name: "filters", description: "Review link, profanity and zalgo findings." },
     { name: "review", description: "Show the review queue or close one case.", options: opts("case") },
@@ -358,6 +360,22 @@ export const mod = defineCommand({
           exported,
           target ? `Cases for <@${target}>` : "Recent cases",
         );
+        return;
+      }
+      if (target) {
+        // One member timeline, read from the stores the command already has.
+        // No target keeps the compact recent-case list; no format keeps the
+        // case export above untouched.
+        const timeline = await new MemberTimelineService({
+          cases: ports.cases,
+          community: ctx.community?.store,
+          invites: ctx.invites?.store,
+          forms: ctx.forms,
+          events: ctx.events,
+          modmail: ctx.modmail,
+          members: ports.members,
+        }).load(guildId, target);
+        await ctx.interaction.reply({ ephemeral: true, v2: memberTimelinePanel(timeline) });
         return;
       }
       const records = await ports.cases.list(guildId, { targetId: target, limit: 10 });
@@ -594,7 +612,7 @@ export const mod = defineCommand({
     await replyResult(ctx, record, result);
   },
   notes:
-    "One hub command for manual moderation. Every enforced action creates a case before the external call, so a failed ban still leaves a reviewable record. `links` and `filters` read the newest local content-filter findings without widening the command budget. `case format:json|csv` and `history format:json|csv` export the same rows as a private attachment with a content checksum, so a case can leave the bot without a new root or subcommand.",
+    "One hub command for manual moderation. Every enforced action creates a case before the external call, so a failed ban still leaves a reviewable record. `history user:@member` reads one timeline from cases, tickets, levels, economy, invites, forms, events, modmail and the member row; every row names its source and a missing store is named rather than shown as empty. `links` and `filters` read the newest local content-filter findings without widening the command budget. `case format:json|csv` and `history format:json|csv` export the same case rows as a private attachment with a content checksum, so a case can leave the bot without a new root or subcommand.",
 });
 
 function describeAction(ctx: CommandContext, action: ModAction): string {

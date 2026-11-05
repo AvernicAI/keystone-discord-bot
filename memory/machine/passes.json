@@ -1050,6 +1050,22 @@
         "claims": "35/35",
         "build": "not run (no build step changed)"
       }
+    },
+    {
+      "id": "pass-76",
+      "date": "2026-11-05",
+      "phase": "P7.5",
+      "summary": "`/mod history user:@member` becomes one member timeline instead of a case list. A pure read model joins the stores the command already receives — moderation cases and their append-only events, community levels, the economy ledger and tickets, invite joins, form submissions, event RSVPs, modmail threads and the member row — sorts the rows newest first, and renders the last 12 with an older-row count. Every line names its source table, and a store that is missing or throws is reported as `not-wired` or `failed` rather than being shown as no activity. The command remains a read: no table, migration, root or subcommand was added, and `format:json|csv` still exports the same case rows before the panel branch. Tests: 693 in 100 files (5 service, 4 panel and 2 command cases); budget stays 20/100 roots, 141 subcommands, 161 actions and 4 context menus. A real Discord invocation and a live cross-store read are not claimed.",
+      "journal": "journal/2026-11-05-pass-76.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "693",
+        "budget": "20/100 roots · 141 subcommands · 161 actions · 4 context menus",
+        "live": "MCP read-only: 1 guild / 7 channels / 3 members; one fresh boot re-registered 24 commands; doctor clean 20 roots · 141 subcommands · 4 menus; no invocation",
+        "memory": "current",
+        "claims": "35/35",
+        "build": "not run (no build step changed)"
+      }
     }
   ]
 }

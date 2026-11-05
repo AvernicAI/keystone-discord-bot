@@ -307,7 +307,7 @@
         },
         {
           "name": "history",
-          "description": "List or export recent cases, optionally for one member.",
+          "description": "List cases, or open a member's full timeline across modules.",
           "options": [
             "user",
             "count",
@@ -1095,7 +1095,7 @@
     {
       "name": "event",
       "moduleId": "events",
-      "description": "Create guild events, take RSVPs, post reminders and export attendance.",
+      "description": "Create guild events, take RSVPs with buttons, post reminders and export JSON or ICS.",
       "options": [],
       "subcommands": [
         {
@@ -1155,7 +1155,7 @@
         },
         {
           "name": "export",
-          "description": "Download events and RSVPs as a checksummed JSON file.",
+          "description": "Download events and RSVPs as checksummed JSON plus an ICS calendar.",
           "options": [
             "event"
           ]

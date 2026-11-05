@@ -8,22 +8,24 @@
    model, and why an appeal is a new event.
 3. `modules/moderation/src/commands/mod.ts` — one hub command, dry-run gate,
    case-before-action ordering, and where a temporary action writes `expires_at`.
-4. `modules/moderation/src/temporary.ts` — the release service, the atomic
+4. `modules/moderation/src/member-timeline.ts` + `member-timeline-panel.ts` —
+   the read model, source statuses and the one member-history screen.
+5. `modules/moderation/src/temporary.ts` — the release service, the atomic
    `claimExpiry`, and why a failed release restores the timestamp.
-5. `modules/moderation/src/commands/appeal.ts` — a two-subcommand hub; note that
+6. `modules/moderation/src/commands/appeal.ts` — a two-subcommand hub; note that
    `status` reads the event log, not the case state.
-6. `packages/db/src/case-store.ts` + `migrations/0003-case-counters.ts` — the
+7. `packages/db/src/case-store.ts` + `migrations/0003-case-counters.ts` — the
    atomic case-number allocation, `listEvents`, and `claimExpiry`'s conditional
    update.
-7. `modules/moderation/src/commands/verify.ts` + `verification.ts` + `members.ts`
+8. `modules/moderation/src/commands/verify.ts` + `verification.ts` + `members.ts`
    — the two-subcommand hub, the one completion path, and the state port.
-8. `packages/db/src/member-store.ts` — the SQL upsert over the existing
+9. `packages/db/src/member-store.ts` — the SQL upsert over the existing
    `members` table, including why the join time is preserved.
-9. `apps/bot/src/moderation-actions.ts` — permission prechecks and the only file
-   that turns a case action into a Discord call.
-10. `apps/bot/src/timers.ts` — the bot-side delayed consumer and the split
+10. `apps/bot/src/moderation-actions.ts` — permission prechecks and the only file
+    that turns a case action into a Discord call.
+11. `apps/bot/src/timers.ts` — the bot-side delayed consumer and the split
     between database jobs and gateway jobs.
-11. `apps/bot/src/moderation-events.ts` — the gateway-to-structural-event seam.
+12. `apps/bot/src/moderation-events.ts` — the gateway-to-structural-event seam.
 
 ## The idea to take away
 
@@ -51,6 +53,41 @@ the same content exported twice keeps the same digest. JSON is the reviewer
 format because it nests every event; CSV is one row per case with an escaped
 history cell, because that is what a spreadsheet can open. No export table: the
 case file is already the record.
+
+## A timeline is a read model, not a second record
+
+`/mod history user:@member` is the exercise in joining without duplicating. The
+tempting implementation is a `member_timeline` table written by every module when
+something happens. It looks convenient and is a trap: every writer must remember
+to append, every failure has two records to repair, and the timeline can disagree
+with the case it claims to describe.
+
+`MemberTimelineService` instead takes narrow `Pick` slices of the ports the
+command already receives. It reads, sorts and caps. There is no write and no
+schema change. The sources are deliberately not uniform:
+
+- cases and their events come from `CaseService`;
+- levels, the ledger and tickets come from `CommunityStore`;
+- forms, events, modmail, invites and the member row come from their own stores.
+
+The `MemberTimelinePorts` type is the important design choice. Each entry is a
+`Pick` of exactly the methods the screen calls, so a test fake is the size of the
+read, not the size of the store. It also makes the missing dependency explicit:
+if the composition root does not pass `events`, the panel says `event_rsvps` was
+not wired instead of pretending the member has no RSVPs.
+
+The second lesson is **failure is not absence**. A moderator uses this screen to
+decide whether to trust a member. `ok` with zero rows means “nothing recorded”;
+`failed` means “the database did not answer”; `not-wired` means “this deployment
+never configured that store.” Collapsing those into an empty list is a lie that
+looks tidy. The panel keeps a `TimelineSourceStatus` for all ten sources and
+prints the non-ok ones in the footer.
+
+The cap is part of the honesty. Twelve rows fit one Discord message without
+fighting the 4,000-character budget, so the model returns twelve and a separate
+`truncated` count. It does not silently drop the rest, and it does not pretend
+the twelve are the whole history. A future signed “older” control can page the
+same in-memory projection; no table is needed for that either.
 
 ## Temporary actions are a claim, not a countdown
 

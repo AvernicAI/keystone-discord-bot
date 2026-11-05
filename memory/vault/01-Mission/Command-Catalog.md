@@ -113,7 +113,7 @@ Moderate members, inspect cases and review the queue.
 | `/mod slowmode` | Set channel slowmode in seconds. | `channel`, `duration`, `reason`, `dry_run` |
 | `/mod case` | Show one case by number, or export it. | `case`, `format` |
 | `/mod note` | Append a moderator note to a case. | `case`, `reason` |
-| `/mod history` | List or export recent cases, optionally for one member. | `user`, `count`, `format` |
+| `/mod history` | List cases, or open a member's full timeline across modules. | `user`, `count`, `format` |
 | `/mod links` | Review recent link-filter findings. | — |
 | `/mod filters` | Review link, profanity and zalgo findings. | — |
 | `/mod review` | Show the review queue or close one case. | `case` |
@@ -289,7 +289,7 @@ Build application forms, publish a panel and review submissions.
 
 ## `/event`
 
-Create guild events, take RSVPs, post reminders and export attendance.
+Create guild events, take RSVPs with buttons, post reminders and export JSON or ICS.
 
 | Subcommand | Description | Options |
 | --- | --- | --- |
@@ -299,7 +299,7 @@ Create guild events, take RSVPs, post reminders and export attendance.
 | `/event list` | List events with state, start time and RSVP counts. | — |
 | `/event rsvp` | Record your own going or not-going answer; one RSVP per member. | `event`, `rsvp` |
 | `/event remind` | Post a reminder for an open event and record who sent it. | `event` |
-| `/event export` | Download events and RSVPs as a checksummed JSON file. | `event` |
+| `/event export` | Download events and RSVPs as checksummed JSON plus an ICS calendar. | `event` |
 
 ## `/modmail`
 

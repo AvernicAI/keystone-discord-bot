@@ -60,9 +60,13 @@
           "phase": "P2",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "One case file for all actions",
+          "note": "One case file for all actions. `/mod history user:@member` now opens one member timeline across cases, case events, tickets, levels, the economy ledger, invite joins, form submissions, event RSVPs, modmail threads and the member row. Every row names its source; a store that is not wired or fails is named instead of being rendered as no activity, and the display is capped at 12 rows with an older-row count. No new table, root or subcommand.",
           "evidence": [
-            "modules/moderation/src/mod.test.ts"
+            "modules/moderation/src/mod.test.ts",
+            "modules/moderation/src/member-timeline.ts",
+            "modules/moderation/src/member-timeline-panel.ts",
+            "modules/moderation/src/member-timeline.test.ts",
+            "modules/moderation/src/member-timeline-command.test.ts"
           ],
           "liveVerified": false,
           "liveScope": "none"
