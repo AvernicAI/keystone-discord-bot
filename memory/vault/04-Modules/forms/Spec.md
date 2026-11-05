@@ -119,8 +119,34 @@ store returns a typed `duplicate-key` result instead of leaking a Postgres error
 - `modules/forms/src/commands/form.ts` — guards, permissions and rendering.
 - `modules/forms/src/settings.ts` — the Zod schema.
 - `packages/db/src/form-store.ts` — Drizzle adapter.
+- `packages/importer/src/types.ts` — the v2 `GuildSnapshot` form and submission
+  rows, and the counts that include `formsUnique`.
+- `packages/db/src/portability-store.ts` — bundle export and restore; forms are
+  inserted before submissions so the foreign key still resolves.
+- `apps/bot/src/export-port.ts` — the in-memory bundle reads the same rows
+  through `allForms`/`allSubmissions`, which are export-only accessors, not new
+  methods on `FormStore`.
 - `packages/db/src/migrations/0011-forms.ts` — the two tables and the partial
   unique index.
+
+## Portability
+
+A guild bundle carries forms. `/export guild` writes a `GuildSnapshot` whose
+`forms` array holds each definition (id, key, name, description, fields, state,
+panel channel and author) and whose `formSubmissions` array holds every answer
+with its review decision. Ids are preserved in both directions: restore inserts
+definitions first, then submissions, so `form_submissions.form_id` points at the
+form that arrived with it.
+
+The manifest counts `forms`, `formSubmissions` and `formsUnique` (distinct keys)
+next to the other tables, and the existing SHA-256 checksum runs over the whole
+snapshot, so an edited answer is refused exactly like an edited setting. The
+format is version 2; a version 1 bundle is refused by name instead of being read
+as a guild with no forms. Merge mode deliberately leaves forms and answers
+alone, and its warning says so; only `replace` restores them.
+
+`/form export` remains the per-form file. It is the smaller shape for one
+application set, while the bundle is the whole-server restore.
 
 ## Non-goals
 
@@ -130,9 +156,6 @@ store returns a typed `duplicate-key` result instead of leaking a Postgres error
 - Editing a form key. It is the stable reference in panels and exports; create a
   new form instead.
 - Deleting review history. Close the form and export it.
-- Adding form rows to the `/export` guild bundle. The bundle is generated from
-  `PortabilityService`, which does not yet know these tables; `/form export` is
-  the dedicated file, and the gap is stated in [[04-Modules/forms/Status|Status]].
 - Per-field types other than text. A number or attachment field needs a renderer
   and a validation rule that does not exist yet.
 - Cross-guild forms.
@@ -152,5 +175,10 @@ store returns a typed `duplicate-key` result instead of leaking a Postgres error
 create → open → panel → submit → review flow, duplicate pending, closed/draft
 refusals, delete rules, permission routing, disabled policy, export checksum and
 the form cap) and `packages/db/src/form-store.test.ts` (3 PGlite tests: unique
-key, pending uniqueness, review transition, cascade and guild scoping). The live
-transcript is in [[04-Modules/forms/Status|Status]].
+key, pending uniqueness, review transition, cascade and guild scoping).
+`apps/bot/src/export-port.test.ts` adds the bundle round trip: a seeded SQL guild
+is exported and imported into itself, then the restored form and both answers are
+read back through `createFormStore` rather than through the portability snapshot
+that wrote them. `packages/importer/src/importer.test.ts` covers the version 1
+refusal and proves an edited answer breaks the same checksum as any other row.
+The live transcript is in [[04-Modules/forms/Status|Status]].

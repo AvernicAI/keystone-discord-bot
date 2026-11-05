@@ -38,6 +38,8 @@ function fixture(overrides: Partial<GuildSnapshot> = {}): GuildSnapshot {
     cases: [],
     caseEvents: [],
     tickets: [],
+    forms: [],
+    formSubmissions: [],
     levels: [
       { userId: USER_A, xp: 1200, level: 12, updatedAt: "2026-10-31T00:00:00.000Z" },
       { userId: USER_B, xp: 300, level: 3, updatedAt: "2026-10-31T00:00:00.000Z" },
@@ -83,6 +85,67 @@ describe("portability bundles", () => {
     const bundle = JSON.parse(serializeBundle(createBundle(fixture())));
     bundle.manifest.version = 99;
     expect(() => parseBundle(JSON.stringify(bundle))).toThrow(/version 99 is not supported/);
+  });
+
+  it("refuses a version 1 bundle instead of reading it as a guild with no forms", () => {
+    const raw = JSON.parse(serializeBundle(createBundle(fixture())));
+    // The exact shape the previous release wrote: no forms arrays anywhere.
+    raw.manifest.version = 1;
+    delete raw.snapshot.forms;
+    delete raw.snapshot.formSubmissions;
+    delete raw.manifest.counts.forms;
+    delete raw.manifest.counts.formSubmissions;
+    delete raw.manifest.counts.formsUnique;
+
+    try {
+      parseBundle(JSON.stringify(raw));
+      throw new Error("expected an unsupported-version failure");
+    } catch (error) {
+      expect(error).toBeInstanceOf(BundleError);
+      // Not a generic schema error: the refusal names the version it can read.
+      expect((error as BundleError).code).toBe("unsupported-version");
+      expect((error as BundleError).message).toContain("this build reads version 2");
+    }
+  });
+
+  it("covers forms and their answers with the same checksum", () => {
+    const form = {
+      id: "333333333333333333",
+      key: "apply",
+      name: "Staff application",
+      description: "Tell us about you.",
+      fields: [{ key: "why", label: "Why join?", required: true, maxLength: 400 }],
+      state: "open",
+      panelChannelId: null,
+      createdBy: USER_B,
+      createdAt: "2026-10-31T00:00:00.000Z",
+      updatedAt: "2026-10-31T00:00:00.000Z",
+    };
+    const snapshot = fixture({
+      forms: [form],
+      formSubmissions: [
+        {
+          id: "444444444444444444",
+          formId: form.id,
+          userId: USER_A,
+          answers: { why: "I like this server" },
+          state: "submitted",
+          reviewedBy: null,
+          decisionNote: null,
+          createdAt: "2026-10-31T00:00:00.000Z",
+          updatedAt: "2026-10-31T00:00:00.000Z",
+        },
+      ],
+    });
+
+    const bundle = createBundle(snapshot);
+    expect(bundle.manifest.counts.forms).toBe(1);
+    expect(bundle.manifest.counts.formSubmissions).toBe(1);
+    expect(bundle.manifest.counts.formsUnique).toBe(1);
+
+    const parsed = parseBundle(serializeBundle(bundle));
+    parsed.snapshot.formSubmissions[0]!.answers.why = "edited after export";
+    expect(() => parseBundle(JSON.stringify(parsed))).toThrow(/checksum/);
   });
 
   it("canonical JSON ignores key order", () => {

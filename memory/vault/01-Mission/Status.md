@@ -2,6 +2,20 @@
 
 ## Now
 
+**Pass 74 put forms in the guild bundle** (2026-11-05): `/export guild` now
+writes a version 2 `GuildSnapshot` with `forms` and `formSubmissions` and
+preserves their ids, so a form's definition and every answer survive an
+export/import round trip. The manifest counts both arrays plus `formsUnique`,
+the existing SHA-256 checksum covers the rows, and a version 1 bundle is refused
+by name instead of being read as a guild with no forms. Restore inserts
+definitions before submissions so `form_submissions.form_id` still resolves;
+merge mode leaves forms alone and its warning says so. The SQL round trip
+imports into the same guild and reads the restored rows back through
+`createFormStore`, not only through the snapshot that wrote them. Tests are
+**659 / 95 files**, including the v1 refusal, a checksum edit and the round trip;
+no root, subcommand, table or migration was added. A live Postgres restore is
+not claimed. See [pass 74](../../journal/2026-11-05-pass-74.md).
+
 **Pass 73 shipped the event surface** (2026-11-05): `/event edit state:open`
 posts a panel with signed, expiring Going and Not going buttons, and both
 handlers call the same `EventService.rsvp` as the command, so capacity and the
@@ -893,7 +907,7 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 656 tests / 95 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · live 28/28 · memory current
+pnpm check        exit 0 · typecheck 0 · 659 tests / 95 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · live 28/28 · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 20 roots / 138 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · /modmail open → reply → 2-message archive → duplicate close refused → stats 1/0/2 · /event create → open → rsvp 1/2 → reminder → decline → 1.2 KB export parsed with the same row · /form create → open → panel → submit → 1 pending → accepted → 1.5 KB export parsed with the same answers and decision · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)

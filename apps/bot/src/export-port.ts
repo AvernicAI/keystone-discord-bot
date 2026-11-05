@@ -27,6 +27,7 @@ import {
 } from "@keystone/importer";
 import { InMemoryAiStore } from "@keystone/module-ai";
 import { InMemoryCommunityStore } from "@keystone/module-community";
+import { InMemoryFormStore } from "@keystone/module-forms";
 import { InMemoryCaseStore } from "@keystone/module-moderation";
 
 const MAX_BUNDLE_BYTES = 25 * 1024 * 1024;
@@ -157,6 +158,7 @@ export interface MemoryExportDeps {
   readonly cases: InMemoryCaseStore;
   readonly community: InMemoryCommunityStore;
   readonly ai: InMemoryAiStore;
+  readonly forms: InMemoryFormStore;
   readonly now?: () => number;
 }
 
@@ -250,6 +252,34 @@ async function memorySnapshot(
       createdAt: event.createdAt,
     })),
   );
+  const forms = deps.forms.allForms(guildId).map((form) => ({
+    id: form.id,
+    key: form.key,
+    name: form.name,
+    description: form.description,
+    fields: form.fields.map((field) => ({
+      key: field.key,
+      label: field.label,
+      required: field.required,
+      maxLength: field.maxLength,
+    })),
+    state: form.state,
+    panelChannelId: form.panelChannelId ?? null,
+    createdBy: form.createdBy,
+    createdAt: form.createdAt,
+    updatedAt: form.updatedAt,
+  }));
+  const formSubmissions = deps.forms.allSubmissions(guildId).map((submission) => ({
+    id: submission.id,
+    formId: submission.formId,
+    userId: submission.userId,
+    answers: { ...submission.answers },
+    state: submission.state,
+    reviewedBy: submission.reviewedBy ?? null,
+    decisionNote: submission.decisionNote ?? null,
+    createdAt: submission.createdAt,
+    updatedAt: submission.updatedAt,
+  }));
   const tickets = deps.community.tickets(guildId).map((ticket) => ({
     id: ticket.id,
     channelId: ticket.channelId,
@@ -336,6 +366,8 @@ async function memorySnapshot(
     })),
     caseEvents,
     tickets,
+    forms,
+    formSubmissions,
     levels,
     xpEvents,
     economyLedger,

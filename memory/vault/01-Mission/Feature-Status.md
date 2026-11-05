@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**134 features** across 17 domains: **118 in repo**, **3 partial**, **4 open**, **5 planned**. Live behaviour is marked 
+**135 features** across 17 domains: **119 in repo**, **3 partial**, **4 open**, **5 planned**. Live behaviour is marked 
 separately; a box means the code and its tests exist, not that a live guild has run it.
 
 `partial` means the foundation ships with evidence and a named visible capability is
@@ -29,7 +29,7 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 | Operations | 17 | 15 | 1 | 0 | 1 |
 | Portability | 12 | 12 | 0 | 0 | 0 |
 | Invites | 3 | 3 | 0 | 0 | 0 |
-| Forms and applications | 3 | 3 | 0 | 0 | 0 |
+| Forms and applications | 4 | 4 | 0 | 0 | 0 |
 | Events and RSVP | 4 | 3 | 1 | 0 | 0 |
 | Private modmail | 6 | 5 | 0 | 1 | 0 |
 | Community parity extras | 7 | 4 | 0 | 0 | 3 |
@@ -220,6 +220,7 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 | Application forms | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `modules/forms/src/panel.ts`, `apps/bot/src/form-interactions.ts`, `packages/db/src/form-store.test.ts`, `memory/journal/2026-11-01-pass-40.md` · live: probe check |
 | Review queue | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `packages/db/src/form-store.test.ts` · live: manual run |
 | Submission export | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `memory/vault/04-Modules/forms/Status.md` · live: manual run |
+| Forms in the guild bundle | P7.5 | ✅ in repo | `apps/bot/src/export-port.test.ts`, `packages/importer/src/importer.test.ts`, `packages/importer/src/types.ts`, `packages/db/src/portability-store.ts`, `memory/journal/2026-11-05-pass-74.md` · live unverified |
 
 ## Events and RSVP
 

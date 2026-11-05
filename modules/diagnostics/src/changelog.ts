@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-74",
+    date: "2026-11-05",
+    summary:
+      "P7.5 portability: `/export guild` now carries every form and every submitted answer with its review decision, under the same version 2 snapshot, checksum and count rules as the other rows. A bundle from before this change is refused by version instead of restoring a server with no forms.",
+    journal: "memory/journal/2026-11-05-pass-74.md",
+  },
+  {
     pass: "pass-73",
     date: "2026-11-05",
     summary:

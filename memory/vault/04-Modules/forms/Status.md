@@ -4,7 +4,8 @@
 
 The tenth module is in repo and live-proven through the development bridge in
 the pass-40 memory window. `/form` is the first root added after the saved plan
-table reached 59 of 59.
+table reached 59 of 59. Pass 74 closed the last portability gap: a form and its
+answers now travel in the whole-server bundle, not only in `/form export`.
 
 - `/form create | edit | delete | list | panel | submit | review | export` is
   registered. The ledger is **20 roots / 141 subcommands / 161 actions / 4
@@ -39,6 +40,14 @@ table reached 59 of 59.
 - Legacy moderation buttons still use their pre-pass-58 ids; new panels use
   HMAC-signed `k1:` ids whose signature, expiry, guild and route permission are
   checked before a handler runs.
+- **Forms travel in the guild bundle (pass 74).** `/export guild` writes
+  `forms` and `formSubmissions` into the v2 snapshot with ids preserved; restore
+  inserts definitions before answers so `form_submissions.form_id` still
+  resolves. The manifest counts both arrays and `formsUnique`, the existing
+  SHA-256 checksum covers them, and a version 1 bundle is refused by name
+  instead of being read as a guild with no forms. Merge mode leaves forms alone
+  and says so; only `replace` restores them. `/form export` remains the
+  per-form file.
 - Forms are enabled by default; `enabled: false` blocks `create` and `submit`,
   not `list`, `review` or `export`.
 - The module requests only `Guilds`; no gateway event or privileged intent is
@@ -51,7 +60,7 @@ pnpm vitest run modules/forms packages/db/src/form-store.test.ts
   ✓ modules/forms/src/forms.test.ts (12 tests)
   ✓ packages/db/src/form-store.test.ts (3 tests)
 pnpm test
-  656 tests / 95 files
+  659 tests / 95 files
 pnpm budget
   20/100 roots · 141 subcommands · 161 actions · 4 context menus, OK
 ```
@@ -66,6 +75,10 @@ pnpm budget
   form, key collision, missing `ManageGuild`, disabled forms.
 - Export: the attached JSON parses; counts are `1 / 1`; the checksum is a
   64-hex SHA-256 and matches a recomputation over the payload without it.
+- Bundle: a version 1 file is refused with `unsupported-version` and the
+  readable version named; an edited answer breaks the checksum; the SQL round
+  trip restores one form and two submissions (one pending, one accepted with its
+  reviewer and note) and reads them back through `createFormStore`.
 - PGlite: unique `(guild_id, key)`, get by key and id, guild scoping, update,
   one pending submission, review only `submitted`, re-apply after a decision,
   cascade delete.
@@ -157,9 +170,11 @@ including `form`, and no drift.
   path, not the rendered panel.
 - The live window was memory mode at pass 40; pass 44 has since opened
   Postgres and Redis.
-- `/export guild` (the portability bundle) does **not** include `forms` or
-  `form_submissions`. The dedicated `/form export` is the truthful export; the
-  guild bundle gap is open.
+- The bundle round trip is proven on PGlite and the in-memory port, not on a
+  live Postgres export/restore; the SQL adapter path is the same one the
+  pass-44 portability probe used.
+- A version 1 bundle is intentionally unreadable. An operator holding one must
+  export again from the build that wrote it.
 - A form with more than five fields cannot use the modal; that is a Discord
   limit, not a silent truncation.
 - A human slash `InteractionCreate` was not observed; the bridge is message-based.
@@ -168,8 +183,6 @@ including `form`, and no drift.
 
 ## Next
 
-- Add forms to `GuildSnapshot` / `PortabilityService` so `/export guild` includes
-  them, with a restore test that preserves form ids and submission states.
 - Decide whether a denied applicant should have a cooldown; the current rule
   allows immediate re-application after a decision.
 - Add a per-form review channel and delivery through a narrow forms port, so a

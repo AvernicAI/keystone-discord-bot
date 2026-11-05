@@ -2580,6 +2580,24 @@
           "liveVerified": true,
           "liveScope": "manual",
           "liveRecord": "memory/vault/01-Mission/Status.md"
+        },
+        {
+          "id": "forms.bundle-round-trip",
+          "name": "Forms in the guild bundle",
+          "competitors": {},
+          "phase": "P7.5",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/02-Research/Competitive-2026.md",
+          "note": "Pass 74 makes a form definition and every response travel in the `/export guild` bundle instead of only in `/form export`. `GuildSnapshot` v2 gains `forms` and `formSubmissions`; the manifest counts both plus `formsUnique`, and the existing SHA-256 checksum covers the rows, so an edited answer fails the same check as any other field. Restore inserts definitions before answers and preserves ids, so `form_submissions.form_id` still points at its form. A v1 bundle is refused by version rather than read as a guild with no forms, and merge mode still leaves forms alone and says so in its warning. The SQL round trip reads the restored rows back through `createFormStore`, not only through the portability snapshot that wrote them. Not live-proven on Postgres or Discord; PGlite and the in-memory port carry the tests.",
+          "evidence": [
+            "apps/bot/src/export-port.test.ts",
+            "packages/importer/src/importer.test.ts",
+            "packages/importer/src/types.ts",
+            "packages/db/src/portability-store.ts",
+            "memory/journal/2026-11-05-pass-74.md"
+          ],
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
