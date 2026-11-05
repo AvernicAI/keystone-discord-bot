@@ -986,6 +986,22 @@
         "claims": "35/35",
         "build": "not run (no build step changed)"
       }
+    },
+    {
+      "id": "pass-72",
+      "date": "2026-11-05",
+      "phase": "P7.5",
+      "summary": "Case export ships as an option on the existing moderation reads, not a new subcommand. `/mod case case:<n> format:json|csv` attaches one case with its append-only events; `/mod history user:<id> count:<1-50> format:json|csv` attaches the recent range. JSON carries every event; CSV is one row per case with an escaped event history. Both formats hash the same normalized case/event payload, so the checksum in the reply and inside the file agrees across formats, and no new table is written. Export is read-only and keeps the embed path when no format is given. Tests: 644 in 94 files (4 service cases and 3 command cases); budget stays 20/100 roots and 141 subcommands. A real Discord download is adapter-tested, not live-proven.",
+      "journal": "journal/2026-11-05-pass-72.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "644",
+        "budget": "20/100 roots · 141 subcommands · 4 context menus",
+        "live": "28/28 (not rerun)",
+        "memory": "current",
+        "claims": "35/35",
+        "build": "not run (no build step changed)"
+      }
     }
   ]
 }

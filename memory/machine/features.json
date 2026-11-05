@@ -226,14 +226,16 @@
             "ticket-tool": "❌",
             "wick-security": "❌"
           },
-          "phase": "P7",
-          "status": "open",
+          "phase": "P7.5",
+          "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "JSON + CSV",
+          "note": "`/mod case case:<n> format:json|csv` exports one case with its append-only events; `/mod history format:json|csv count:<1-50>` exports the recent range, optionally for one member. JSON carries every event, CSV is one row per case with an escaped history cell. Both formats hash the same normalized case/event content, so the checksum in the file and in the reply agrees across formats. No new root, subcommand or table.",
           "evidence": [
+            "modules/moderation/src/case-export.ts",
+            "modules/moderation/src/case-export.test.ts",
+            "modules/moderation/src/commands/mod.ts",
             "modules/moderation/src/mod.test.ts"
           ],
-          "openReason": "Export commands are part of the P5/P7 data-ownership work.",
           "liveVerified": false,
           "liveScope": "none"
         },

@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**134 features** across 17 domains: **115 in repo**, **4 partial**, **6 open**, **5 planned**. Live behaviour is marked 
+**134 features** across 17 domains: **116 in repo**, **4 partial**, **5 open**, **5 planned**. Live behaviour is marked 
 separately; a box means the code and its tests exist, not that a live guild has run it.
 
 `partial` means the foundation ships with evidence and a named visible capability is
@@ -16,7 +16,7 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 
 | Domain | Features | In repo | Partial | Open | Planned |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Moderation | 13 | 12 | 0 | 1 | 0 |
+| Moderation | 13 | 13 | 0 | 0 | 0 |
 | Automod | 10 | 9 | 0 | 0 | 1 |
 | Security | 9 | 9 | 0 | 0 | 0 |
 | Leveling | 7 | 7 | 0 | 0 | 0 |
@@ -48,7 +48,7 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 | Evidence card | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
 | Dry-run default | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
 | Appeal from the DM | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts`, `packages/db/src/cases.test.ts`, `scripts/live-probe.ts` · live: probe check |
-| Case export | P7 | ◐ open | Export commands are part of the P5/P7 data-ownership work. · `modules/moderation/src/mod.test.ts` · live unverified |
+| Case export | P7.5 | ✅ in repo | `modules/moderation/src/case-export.ts`, `modules/moderation/src/case-export.test.ts`, `modules/moderation/src/commands/mod.ts`, `modules/moderation/src/mod.test.ts` · live unverified |
 | Report message menu | P7 | ✅ in repo | `modules/moderation/src/context.test.ts` · live unverified |
 | Case history menu | P7 | ✅ in repo | `modules/moderation/src/context.test.ts` · live unverified |
 

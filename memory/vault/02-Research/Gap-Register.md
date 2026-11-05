@@ -6,12 +6,12 @@
 > The register is ordered by priority, not by domain. A row names the competitor that
 > proves demand, the feature rows it would change and the smallest next step.
 
-**18 gaps**: 6 open, 11 partial. `partial` means the foundation ships and one visible capability is missing.
+**18 gaps**: 5 open, 11 partial. `partial` means the foundation ships and one visible capability is missing.
 
 | # | Gap | Domain | Phase | Status | Size | Targets | Feature rows | Next step |
 | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Restore roles after a member leaves | community | P7.5 | ✅ covered | M | carl-bot | `parity-extra.role-persistence` | Live-prove one real leave and rejoin with role persistence on; the adapter path is tested. |
-| 2 | Portable case export | moderation | P7.5 | ◐ open | S | dyno, carl-bot | `moderation.case-export` | Add `/mod case export` in JSON and CSV over the existing case and event rows, with a checksum and no new table. |
+| 2 | Portable case export | moderation | P7.5 | ✅ covered | S | dyno, carl-bot | `moderation.case-export` | Live-prove one real download through the Discord adapter and read the attachment back; the service and command paths are tested. |
 | 3 | Event buttons, reminders and ICS | events | P7.5 | ◑ partial | M | apollo | `events.rsvp-buttons`, `events.reminders`, `events.ics-export` | Mint a signed RSVP button per event, schedule reminders through the existing timer, and export the same RSVP rows as ICS. |
 | 4 | Searchable ticket knowledge base | tickets | P8 | ◐ open | L | ticket-tool, helper-gg, wallu | `tickets.knowledge-base` | Store guild-scoped articles, retrieve exact matches first, and answer only with a citation; no match hands off with no model call. |
 | 5 | Captcha and alt-account signals | security | P8 | ◐ open | M | wick, double-counter | `parity-extra.captcha-verification` | Add a local challenge behind the existing join gate and an optional provider port; add local account-age, avatar and invite heuristics with no IP by default. |

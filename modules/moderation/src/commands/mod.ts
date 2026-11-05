@@ -14,6 +14,7 @@ import {
   type PanicStore,
 } from "@keystone/kernel";
 import { caseEmbed, caseListEmbed } from "../format";
+import { CaseExportService, type CaseExportResult } from "../case-export";
 import { appealButton } from "../cases";
 import { PanicService } from "../panic";
 import { TemporaryActionService } from "../temporary";
@@ -66,6 +67,22 @@ const OPTIONS = {
     ],
   },
   dry_run: { type: "boolean", name: "dry_run", description: "Preview only; never overrides a safe default" },
+  format: {
+    type: "string",
+    name: "format",
+    description: "Attach the cases as a JSON or CSV file",
+    choices: [
+      { name: "json", value: "json" },
+      { name: "csv", value: "csv" },
+    ],
+  },
+  count: {
+    type: "integer",
+    name: "count",
+    description: "Cases to export, 1-50 (default 10)",
+    minValue: 1,
+    maxValue: 50,
+  },
 } satisfies Record<string, CommandOption>;
 
 function opts(...names: (keyof typeof OPTIONS)[]): CommandOption[] {
@@ -117,6 +134,47 @@ function requireChannel(ctx: CommandContext): string {
 
 function isAction(value: string | undefined): value is ModAction {
   return value !== undefined && (ACTIONS as readonly string[]).includes(value);
+}
+
+function exportFormat(ctx: CommandContext): "json" | "csv" | undefined {
+  const value = optionText(ctx, "format");
+  if (value === undefined) return undefined;
+  if (value !== "json" && value !== "csv") {
+    throw new UserError("Choose `format`: json or csv.");
+  }
+  return value;
+}
+
+async function replyExport(
+  ctx: CommandContext,
+  result: CaseExportResult,
+  label: string,
+): Promise<void> {
+  await ctx.interaction.reply({
+    ephemeral: true,
+    content: `${label} · ${result.cases} case(s) · ${result.events} event(s) · checksum \`${result.checksum.slice(0, 16)}…\``,
+    files: [
+      {
+        name: result.fileName,
+        content: result.content,
+        description: "Moderation case export. Contains member ids and case history; keep it private.",
+      },
+    ],
+    embeds: [
+      {
+        title: label,
+        description:
+          "The attachment is the case record and its append-only events. Verify the checksum before relying on a copy.",
+        color: 0x5865f2,
+        fields: [
+          { name: "Cases", value: String(result.cases), inline: true },
+          { name: "Events", value: String(result.events), inline: true },
+          { name: "Checksum", value: `\`${result.checksum}\``, inline: false },
+        ],
+        footer: { text: "Case data identifies members. Treat the file as private." },
+      },
+    ],
+  });
 }
 
 function appealComponents(
@@ -213,9 +271,9 @@ export const mod = defineCommand({
     { name: "lock", description: "Lock a channel so members cannot post.", options: opts("channel", "reason", "dry_run") },
     { name: "unlock", description: "Unlock a channel again.", options: opts("channel", "reason", "dry_run") },
     { name: "slowmode", description: "Set channel slowmode in seconds.", options: opts("channel", "duration", "reason", "dry_run") },
-    { name: "case", description: "Show one case by number.", options: opts("case") },
+    { name: "case", description: "Show one case by number, or export it.", options: opts("case", "format") },
     { name: "note", description: "Append a moderator note to a case.", options: opts("case", "reason") },
-    { name: "history", description: "List recent cases, optionally for one member.", options: opts("user") },
+    { name: "history", description: "List or export recent cases, optionally for one member.", options: opts("user", "count", "format") },
     { name: "links", description: "Review recent link-filter findings." },
     { name: "filters", description: "Review link, profanity and zalgo findings." },
     { name: "review", description: "Show the review queue or close one case.", options: opts("case") },
@@ -264,6 +322,17 @@ export const mod = defineCommand({
     if (action === "case") {
       const number = optionInteger(ctx, "case");
       if (!number) throw new UserError("Provide a case number.");
+      const format = exportFormat(ctx);
+      if (format) {
+        const exported = await new CaseExportService(ports.cases, ctx.now).one(
+          guildId,
+          number,
+          format,
+        );
+        if (!exported) throw new UserError(`Case #${number} does not exist.`);
+        await replyExport(ctx, exported, `Case #${number} export`);
+        return;
+      }
       const record = await ports.cases.get(guildId, number);
       if (!record) throw new UserError(`Case #${number} does not exist.`);
       await ctx.interaction.reply({
@@ -276,6 +345,21 @@ export const mod = defineCommand({
 
     if (action === "history") {
       const target = optionText(ctx, "user");
+      const format = exportFormat(ctx);
+      if (format) {
+        const limit = optionInteger(ctx, "count") ?? 10;
+        const exported = await new CaseExportService(ports.cases, ctx.now).recent(
+          guildId,
+          { targetId: target, limit },
+          format,
+        );
+        await replyExport(
+          ctx,
+          exported,
+          target ? `Cases for <@${target}>` : "Recent cases",
+        );
+        return;
+      }
       const records = await ports.cases.list(guildId, { targetId: target, limit: 10 });
       await ctx.interaction.reply({
         ephemeral: true,
@@ -510,7 +594,7 @@ export const mod = defineCommand({
     await replyResult(ctx, record, result);
   },
   notes:
-    "One hub command for manual moderation. Every enforced action creates a case before the external call, so a failed ban still leaves a reviewable record. `links` and `filters` read the newest local content-filter findings without widening the command budget.",
+    "One hub command for manual moderation. Every enforced action creates a case before the external call, so a failed ban still leaves a reviewable record. `links` and `filters` read the newest local content-filter findings without widening the command budget. `case format:json|csv` and `history format:json|csv` export the same rows as a private attachment with a content checksum, so a case can leave the bot without a new root or subcommand.",
 });
 
 function describeAction(ctx: CommandContext, action: ModAction): string {

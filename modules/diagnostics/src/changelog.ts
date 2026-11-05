@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-72",
+    date: "2026-11-05",
+    summary:
+      "P7.5 case export: `/mod case` and `/mod history` accept `format:json|csv` and attach the case with its events and a content checksum, without a new root, subcommand or table.",
+    journal: "memory/journal/2026-11-05-pass-72.md",
+  },
+  {
     pass: "pass-71",
     date: "2026-11-05",
     summary:

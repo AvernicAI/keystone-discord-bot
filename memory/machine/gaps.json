@@ -23,13 +23,13 @@
       "domain": "moderation",
       "phase": "P7.5",
       "priority": 2,
-      "status": "open",
+      "status": "covered",
       "size": "S",
       "featureIds": ["moderation.case-export"],
       "competitors": ["dyno", "carl-bot"],
       "claimIds": ["R-022", "R-023"],
-      "nextStep": "Add `/mod case export` in JSON and CSV over the existing case and event rows, with a checksum and no new table.",
-      "note": "No surveyed generalist documents a complete case export. This is the cheapest visible proof of the exit guarantee."
+      "nextStep": "Live-prove one real download through the Discord adapter and read the attachment back; the service and command paths are tested.",
+      "note": "Shipped in pass 72: `/mod case` and `/mod history` accept `format:json|csv` and attach the existing case and event rows with a content checksum. No surveyed generalist documents a complete case export."
     },
     {
       "id": "gap.event-panels",

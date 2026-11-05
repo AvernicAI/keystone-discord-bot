@@ -250,6 +250,94 @@ describe("moderation module", () => {
     );
   });
 
+  it("exports one case as a JSON attachment through /mod case", async () => {
+    const { ctx, cases } = buildContext({ action: "case", case: 1, format: "json" });
+    await cases.open({
+      guildId: "guild-1",
+      actorId: "mod-1",
+      targetId: "target-1",
+      action: "warn",
+      reason: "spam",
+      rule: "manual",
+      state: "open",
+    });
+
+    await mod.execute(ctx);
+
+    const file = ctx.interaction.lastReply?.files?.[0];
+    expect(file?.name).toBe("keystone-case-1.json");
+    const parsed = JSON.parse(file!.content) as {
+      checksum: string;
+      cases: { caseNumber: number; events: { type: string }[] }[];
+    };
+    expect(parsed.cases[0]?.caseNumber).toBe(1);
+    expect(parsed.cases[0]?.events.map((event) => event.type)).toEqual(["created"]);
+    expect(parsed.checksum).toMatch(/^[a-f0-9]{64}$/);
+    expect(ctx.interaction.lastReply?.embeds?.[0]?.fields?.at(-1)?.value).toContain(
+      parsed.checksum,
+    );
+    // Export is read-only; it must not open a second case.
+    expect(await cases.list("guild-1")).toHaveLength(1);
+  });
+
+  it("exports a member's recent cases as CSV and honours the count", async () => {
+    const { ctx, cases } = buildContext({
+      action: "history",
+      user: "target-1",
+      format: "csv",
+      count: 2,
+    });
+    for (const action of ["warn", "timeout", "kick"] as const) {
+      await cases.open({
+        guildId: "guild-1",
+        actorId: "mod-1",
+        targetId: "target-1",
+        action,
+        reason: `${action} reason`,
+        rule: "manual",
+        state: "open",
+      });
+    }
+    await cases.open({
+      guildId: "guild-1",
+      actorId: "mod-1",
+      targetId: "target-2",
+      action: "warn",
+      reason: "other member",
+      rule: "manual",
+      state: "open",
+    });
+
+    await mod.execute(ctx);
+
+    const file = ctx.interaction.lastReply?.files?.[0];
+    expect(file?.name).toMatch(/^keystone-cases-\d{4}-\d{2}-\d{2}\.csv$/);
+    const rows = file!.content.split("\r\n").filter(Boolean);
+    expect(rows).toHaveLength(3);
+    expect(rows[0]?.startsWith("case,action,state")).toBe(true);
+    // Newest first, scoped to target-1 and capped at two.
+    expect(rows[1]?.startsWith("3,kick")).toBe(true);
+    expect(rows[2]?.startsWith("2,timeout")).toBe(true);
+  });
+
+  it("keeps the embed path when no export format is asked for", async () => {
+    const { ctx, cases } = buildContext({ action: "history" });
+    await cases.open({
+      guildId: "guild-1",
+      actorId: "mod-1",
+      targetId: "target-1",
+      action: "warn",
+      reason: "spam",
+      rule: "manual",
+      state: "open",
+    });
+
+    await mod.execute(ctx);
+
+    expect(ctx.interaction.lastReply?.files).toBeUndefined();
+    expect(ctx.interaction.lastReply?.embeds?.[0]?.title).toBe("Recent cases");
+  });
+
   it("records a temporary ban's expiry and schedules exactly one release", async () => {
     const queue = new RecordingJobQueue();
     const { ctx, cases } = buildContext(
