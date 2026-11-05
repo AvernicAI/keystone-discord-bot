@@ -21,9 +21,16 @@ async function readJson(relative) {
 
 const STATUS = {
   "shipped-in-repo": "✅ in repo",
+  partial: "🟡 partial",
   open: "◐ open",
   planned: "⏳ planned",
   "non-goal": "— non-goal",
+};
+
+const LIVE = {
+  probe: "live: probe check",
+  manual: "live: manual run",
+  none: "live unverified",
 };
 
 function cell(value) {
@@ -33,13 +40,15 @@ function cell(value) {
 function featureRows(domain) {
   return domain.features.map((feature) => {
     const status = STATUS[feature.status] ?? feature.status;
-    const live = feature.status === "shipped-in-repo" && feature.liveVerified === false
-      ? "live unverified"
-      : feature.liveVerified === true
-        ? "live verified"
-        : "";
+    const live = LIVE[feature.liveScope] ?? "";
     const evidence = (feature.evidence ?? []).map((entry) => `\`${entry}\``).join(", ");
-    const detail = [feature.openReason, evidence, live].filter(Boolean).join(" · ");
+    const parts = feature.status === "partial"
+      ? [
+          `shipped: ${(feature.shippedParts ?? []).join("; ")}`,
+          `open: ${(feature.openParts ?? []).join("; ")}`,
+        ]
+      : [feature.openReason];
+    const detail = [...parts, evidence, live].filter(Boolean).join(" · ");
     return `| ${cell(feature.name)} | ${cell(feature.phase)} | ${cell(status)} | ${cell(detail || feature.note)} |`;
   });
 }
@@ -57,6 +66,10 @@ export async function renderAll() {
   const total = features.domains.reduce((sum, domain) => sum + domain.features.length, 0);
   const shipped = features.domains.reduce(
     (sum, domain) => sum + domain.features.filter((feature) => feature.status === "shipped-in-repo").length,
+    0,
+  );
+  const partial = features.domains.reduce(
+    (sum, domain) => sum + domain.features.filter((feature) => feature.status === "partial").length,
     0,
   );
   const open = features.domains.reduce(
@@ -77,16 +90,20 @@ export async function renderAll() {
     "> The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.",
     "",
     `**${total} features** across ${features.domains.length} domains: **${shipped} in repo**, ` +
-      `**${open} open**, **${planned} planned**. Live behaviour is marked separately; a green`,
-    "box means the code and its tests exist, not that a live guild has run it.",
+      `**${partial} partial**, **${open} open**, **${planned} planned**. Live behaviour is marked `,
+    "separately; a box means the code and its tests exist, not that a live guild has run it.",
+    "",
+    "`partial` means the foundation ships with evidence and a named visible capability is",
+    "still missing. `live: probe check` names a passing check in `live.json`; `live: manual run`",
+    "names the written record in `liveRecord`; no row claims a gateway click it did not get.",
     "",
     "## Domains",
     "",
-    "| Domain | Features | In repo | Open | Planned |",
-    "| --- | ---: | ---: | ---: | ---: |",
+    "| Domain | Features | In repo | Partial | Open | Planned |",
+    "| --- | ---: | ---: | ---: | ---: | ---: |",
     ...features.domains.map((domain) => {
       const count = (status) => domain.features.filter((feature) => feature.status === status).length;
-      return `| ${cell(domain.name)} | ${domain.features.length} | ${count("shipped-in-repo")} | ${count("open")} | ${count("planned")} |`;
+      return `| ${cell(domain.name)} | ${domain.features.length} | ${count("shipped-in-repo")} | ${count("partial")} | ${count("open")} | ${count("planned")} |`;
     }),
     "",
     ...features.domains.flatMap((domain) => [
@@ -102,7 +119,8 @@ export async function renderAll() {
       "1. Edit [`features.json`](../../machine/features.json), not this file.",
       "2. Run `pnpm memory:render`.",
       "3. Run `pnpm memory:check`.",
-      "4. A `shipped-in-repo` row needs an `evidence` path; a `verified` row needs a live proof.",
+      "4. A `shipped-in-repo` or `partial` row needs an `evidence` path; `partial` also names `shippedParts` and `openParts`.",
+      "5. `liveVerified: true` needs `liveScope: probe` with a `liveEvidence` check, or `liveScope: manual` with a `liveRecord` path.",
     "",
   ].join("\n");
 

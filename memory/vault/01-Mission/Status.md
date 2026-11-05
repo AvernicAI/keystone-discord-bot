@@ -2,6 +2,18 @@
 
 ## Now
 
+**Pass 69 made the truth vocabulary real** (2026-11-05): `partial` is now a
+status with required `shippedParts`, `openParts`, evidence and a reason, and
+four rows moved from `open` because each ships a real foundation with one named
+capability missing. `liveScope` is required on every row: **26 probe**, **22
+manual** and **86 unverified**, so all 48 live claims name either a passing
+check in `live.json` or a written record under `memory/`. The gate now rejects
+`open` + `liveVerified` in either direction. The form modal was corrected to
+shipped since pass 58, and feeds to RSS shipping on the community tick with only
+the YouTube/Twitch/Kick adapters open. No product behaviour changed; tests
+remain **631 / 92 files**, the last live probe is **28/28**, and memory is
+**4,832 / 4,832**. See [pass 69](../../journal/2026-11-05-pass-69.md).
+
 **Pass 68 turned the market into a register** (2026-11-05): `competitors.json`
 records 18 bots — 6 generalists, 9 specialists and 3 AI-native — with one
 source, one expiring claim and the exact free/paid boundary each. `gaps.json`
@@ -459,9 +471,12 @@ refuses deletion while any submission exists, and transitions only a `submitted`
 row with a conditional update; a second reviewer gets "already accepted/denied"
 and nothing is written. `/form panel` refuses a non-open form, posts in the
 invoking channel and records it; `/form export` attaches a `keystone.forms` JSON
-file with a SHA-256 checksum. **Modal input is not shipped**: `submit` takes the
-validated `answers` option and the panel prints the syntax, so there is no button
-that opens nothing. Live in `#ai-chat` with one memory-mode process: `create`
+file with a SHA-256 checksum. **Modal input ships since pass 58**: `/form panel`
+posts a Components V2 panel whose signed Apply button opens a modal built from
+the form's fields, and a form over five questions keeps the validated `answers`
+option instead. A live gateway click and modal submit are adapter/probe-proven,
+not claimed as a human client run. Live in `#ai-chat` with one memory-mode
+process: `create`
 wrote a draft, `edit` opened it, `panel` posted, `submit` wrote
 `31778bdb-6180-4671-afab-03d4f880a626`, `review` read **1 pending**, a decision
 `accepted` with a note transitioned it, a second `review` read **0 pending**,
@@ -1251,8 +1266,8 @@ P7 parity work continues alongside the P6 exit items. Auto-responders, audit
 logging, the content filters, guild analytics, in-bot configuration,
 `/export`, the `/music` saved queue, forms, events, modmail, temporary
 moderation, panic mode and goodbye are done; the next open rows are real music
-playback (a voice/Lavalink client), forms modal input, scheduled event
-reminders/ICS, modmail DM relay and the planned Components V2 UI/i18n work.
+playback (a voice/Lavalink client), scheduled event reminders/ICS, modmail DM
+relay, role persistence and case export.
 `automod.false-positive-report` is still the smallest useful moderation
 follow-up. P6 remains the active phase
 for the dashboard. The auth gate, settings writes, schema-generated widgets and

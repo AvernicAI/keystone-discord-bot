@@ -19,7 +19,9 @@ const vaultDir = path.join(memoryDir, "vault");
 const projectPath = path.join(memoryDir, "machine/project.json");
 
 const PHASES = ["P0", "P1", "P2", "P3", "P4", "P4.5", "P5", "P6", "P7", "P7.5", "P8", "P9", "P10", "none"];
-const FEATURE_STATUSES = ["shipped-in-repo", "open", "planned", "non-goal"];
+const FEATURE_STATUSES = ["shipped-in-repo", "partial", "open", "planned", "non-goal"];
+/** How a live row was proven. `probe` needs a named check; `manual` needs a written record. */
+const LIVE_SCOPES = ["probe", "manual", "none"];
 const CONFIDENCE = ["high", "medium", "low"];
 const BOT_KINDS = ["generalist", "specialist", "ai-native"];
 const GAP_STATUSES = ["open", "partial", "covered"];
@@ -108,6 +110,34 @@ async function checkFeatures() {
       check(`${label} status is known`, FEATURE_STATUSES.includes(feature.status), `${label} has unknown status ${feature.status}`);
       check(`${label} has a source`, typeof feature.source === "string" && existsSync(path.join(root, feature.source)), `${label} source is missing: ${feature.source}`);
       check(`${label} liveVerified is boolean`, typeof feature.liveVerified === "boolean", `${label} must set liveVerified true or false`);
+      check(
+        `${label} liveScope is known`,
+        LIVE_SCOPES.includes(feature.liveScope),
+        `${label} has unknown liveScope ${feature.liveScope ?? "<none>"}`,
+      );
+      if (feature.liveVerified === true) {
+        check(
+          `${label} liveScope is probe or manual`,
+          feature.liveScope === "probe" || feature.liveScope === "manual",
+          `${label} is liveVerified but its liveScope is ${feature.liveScope ?? "<none>"}`,
+        );
+        if (feature.liveScope === "probe") {
+          check(
+            `${label} probe scope names a check`,
+            Array.isArray(feature.liveEvidence) && feature.liveEvidence.length > 0,
+            `${label} is probe-verified but names no liveEvidence check`,
+          );
+        }
+        if (feature.liveScope === "manual") {
+          check(
+            `${label} manual scope names a record`,
+            typeof feature.liveRecord === "string" &&
+              feature.liveRecord.startsWith("memory/") &&
+              existsSync(path.join(root, feature.liveRecord)),
+            `${label} is manually live-verified but liveRecord is missing or not under memory/: ${feature.liveRecord ?? "<none>"}`,
+          );
+        }
+      }
 
       if (feature.liveEvidence !== undefined) {
         check(
@@ -135,14 +165,32 @@ async function checkFeatures() {
         }
       }
 
-      if (feature.status === "shipped-in-repo") {
-        check(`${label} has evidence`, Array.isArray(feature.evidence) && feature.evidence.length > 0, `${label} is shipped but has no evidence path`);
+      if (feature.status === "shipped-in-repo" || feature.status === "partial") {
+        check(`${label} has evidence`, Array.isArray(feature.evidence) && feature.evidence.length > 0, `${label} is ${feature.status} but has no evidence path`);
         for (const evidence of feature.evidence ?? []) {
           check(`${label} evidence exists`, existsSync(path.join(root, evidence)), `${label} evidence does not exist: ${evidence}`);
         }
       }
+      if (feature.status === "partial") {
+        check(
+          `${label} names its shipped parts`,
+          Array.isArray(feature.shippedParts) && feature.shippedParts.length > 0,
+          `${label} is partial but has no shippedParts`,
+        );
+        check(
+          `${label} names its open parts`,
+          Array.isArray(feature.openParts) && feature.openParts.length > 0,
+          `${label} is partial but has no openParts`,
+        );
+        check(`${label} explains what is open`, typeof feature.openReason === "string" && feature.openReason.trim().length > 0, `${label} is partial but has no openReason`);
+      }
       if (feature.status === "open") {
         check(`${label} explains what is open`, typeof feature.openReason === "string" && feature.openReason.trim().length > 0, `${label} is open but has no openReason`);
+        check(
+          `${label} open row is not live-verified`,
+          feature.liveVerified === false,
+          `${label} is open but liveVerified: use partial with shippedParts/openParts instead`,
+        );
       }
       if (feature.status === "non-goal") {
         check(`${label} uses phase none`, feature.phase === "none", `${label} is a non-goal but its phase is ${feature.phase}`);

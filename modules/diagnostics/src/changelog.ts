@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-69",
+    date: "2026-11-05",
+    summary:
+      "Truth pass: the feature matrix separates partial work from absent work, and every live claim now names either a probe check or a written record. No command, reply or interaction changed.",
+    journal: "memory/journal/2026-11-05-pass-69.md",
+  },
+  {
     pass: "pass-68",
     date: "2026-11-05",
     summary:

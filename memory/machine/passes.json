@@ -938,6 +938,22 @@
         "claims": "35/35",
         "build": "not run (docs/research only)"
       }
+    },
+    {
+      "id": "pass-69",
+      "date": "2026-11-05",
+      "phase": "P7.5",
+      "summary": "The feature matrix stopped using one word for three states and the live flag became auditable. `status: partial` arrived with required `shippedParts`, `openParts`, `openReason` and evidence paths; four rows moved from open (social feeds, web dashboard, event reminders, ICS export) because each ships a real foundation with one named capability missing. `liveScope` is now required on every row: `probe` names a passing `live.json` check that lists the row, `manual` names a written record under memory/, `none` means unverified. All 48 live rows now name evidence (26 probe, 22 manual, 86 none); the 25 bare flags are gone, and three rows were connected to the probe check that already covered them. The gate rejects open+liveVerified in either direction. Stale claims fixed: the form modal has shipped since pass 58, so the forms manifest comment, forms Spec non-goal, project Status and Parity-Matrix were corrected; the Status Next list lost the modal. The plan's feed assumption was corrected from the code: RSS polling and GUID dedupe already run on the 60-second community tick, so only the YouTube/Twitch/Kick adapters are missing. No command, reply, interaction or test changed; 631/92 and probe 28/28 stand.",
+      "journal": "journal/2026-11-05-pass-69.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "631",
+        "budget": "20/100 roots · 141 subcommands · 4 context menus",
+        "live": "28/28 (not rerun)",
+        "memory": "4832/4832",
+        "claims": "35/35",
+        "build": "not run (memory schema only)"
+      }
     }
   ]
 }

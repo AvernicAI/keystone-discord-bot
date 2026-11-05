@@ -203,7 +203,7 @@ rule.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Auto-responder | 💰 | ✅ | ✅ | ❌ | ❔ | P7 | Exact/contains/regex triggers, one reply, per-trigger cooldown; `/tools`; shipped pass 25 |
 | Guild analytics | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/analytics` with overview, members, messages, commands, tickets and export; read-only aggregates over audit, cases, invites, tickets and command usage; shipped pass 29; competitor claims unverified |
-| Application forms | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/form create \| edit \| delete \| list \| panel \| submit \| review \| export`; real forms and submissions, one pending per member, an accept/deny review queue and a checksummed JSON export; shipped and live-proven pass 40. Modal input and forms in the guild bundle are open; competitor presence unverified |
+| Application forms | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/form create \| edit \| delete \| list \| panel \| submit \| review \| export`; real forms and submissions, one pending per member, an accept/deny review queue and a checksummed JSON export; shipped and live-proven pass 40. Modal input ships since pass 58; forms in the guild bundle remain open; competitor presence unverified |
 | Guild events | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/event create \| edit \| delete \| list \| rsvp \| remind \| export`; a draft/open/closed lifecycle, one RSVP row per member, capacity counted from `going` rows in the store transaction, manual reminder bookkeeping and a checksummed JSON export; shipped and live-proven pass 41. Buttons, scheduled reminders, per-member timezones and ICS export are open; competitor presence unverified |
 | Private modmail | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/modmail setup \| open \| reply \| close \| transcript \| stats`; owner-or-staff visibility, one active thread per member, open → claimed → closed, side-aware unread, a queue with thread ids and a transcript archived once by a conditional update; shipped and live-proven pass 42. DM/thread relay, attachments and search are open; competitor presence unverified |
 
@@ -216,7 +216,7 @@ rule.
 | Security | 9 | 7 | 0 | 9 | Anti-nuke, anti-raid, quarantine, join gate and shared cases; panic mode ships pass 46 |
 | Leveling | 7 | 6 | 0 | 7 | XP, rewards, rank, leaderboard, multiplier and archived seasonal reset; MEE6 import is P5 |
 | Economy | 6 | 5 | 0 | 6 | Daily, shop, transfers, gambling and the audit ledger; P4 added the lock/idempotency hardening, not a new row |
-| Community | 11 | 10 | 0 | 11 | Welcome, delayed autorole, button/select roles, per-channel starboard, birthdays, suggestions, giveaways, temp voice, stat, polls; goodbye ships pass 46; social feeds open |
+| Community | 11 | 10 | 0 | 11 | Welcome, delayed autorole, button/select roles, per-channel starboard, birthdays, suggestions, giveaways, temp voice, stat, polls; goodbye ships pass 46; RSS feeds ship, YouTube/Twitch/Kick adapters open |
 | Tickets | 7 | 5 | 2 | 7 | Knowledge base and AI deflection; portable RAG, pgvector ANN open |
 | Content | 7 | 6 | 0 | 6 | Embed, tags, schedules, reminders, feeds and sticky messages; translation non-goal |
 | Music | 4 | 0 | 0 | 2 | BYO only |

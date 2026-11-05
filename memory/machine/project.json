@@ -5,9 +5,9 @@
   "mission": "vault/01-Mission/Mission.md",
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-05",
-  "phase": "P7",
-  "lastPass": "journal/2026-11-05-pass-68.md",
-  "nextAction": "Pass 68 mapped 18 competitors into `competitors.json` and turned the market into an 18-row `gaps.json` register, with R-021..R-038 sourced and expiring. Pass 69 makes `partial` and `liveScope` real, correcting the form-modal and feed rows. Pass 70 records the Discord MCP proof surface. Then the first product wave closes P7.5: role persistence, case export, event buttons/reminders/ICS and forms in the bundle.",
+  "phase": "P7.5",
+  "lastPass": "journal/2026-11-05-pass-69.md",
+  "nextAction": "Pass 69 made `partial` and `liveScope` real: 4 rows moved from open to partial and all 48 live rows now name either a probe check or a written record. Pass 70 records the Discord MCP proof surface. Then the first product wave closes P7.5: role persistence, case export, event buttons/scheduled reminders/ICS and forms in the bundle.",
   "live": {
     "report": "machine/live.json",
     "id": "live-2026-11-03"

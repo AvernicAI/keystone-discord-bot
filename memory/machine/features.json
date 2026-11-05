@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-03",
+  "updatedAt": "2026-11-05",
   "source": "memory/vault/01-Mission/Parity-Matrix.md",
   "domains": [
     {
@@ -24,7 +24,8 @@
           "evidence": [
             "modules/moderation/src/mod.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "moderation.timeout",
@@ -43,7 +44,8 @@
           "evidence": [
             "modules/moderation/src/mod.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "moderation.warn-history",
@@ -62,7 +64,8 @@
           "evidence": [
             "modules/moderation/src/mod.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "moderation.bulk-purge",
@@ -81,7 +84,8 @@
           "evidence": [
             "modules/moderation/src/mod.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "moderation.slowmode-lockdown",
@@ -100,7 +104,8 @@
           "evidence": [
             "modules/moderation/src/mod.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "moderation.temp-ban-temp-role",
@@ -123,7 +128,8 @@
             "apps/bot/src/timers.test.ts",
             "scripts/live-probe.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "moderation.case-lookup",
@@ -142,7 +148,8 @@
           "evidence": [
             "modules/moderation/src/mod.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "moderation.evidence-card",
@@ -161,7 +168,8 @@
           "evidence": [
             "modules/moderation/src/mod.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "moderation.dry-run-default",
@@ -180,7 +188,8 @@
           "evidence": [
             "modules/moderation/src/mod.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "moderation.appeal-from-the-dm",
@@ -201,7 +210,11 @@
             "packages/db/src/cases.test.ts",
             "scripts/live-probe.ts"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "probe",
+          "liveEvidence": [
+            "web-moderation-interactions"
+          ]
         },
         {
           "id": "moderation.case-export",
@@ -221,7 +234,8 @@
             "modules/moderation/src/mod.test.ts"
           ],
           "openReason": "Export commands are part of the P5/P7 data-ownership work.",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "moderation.message-report",
@@ -240,7 +254,8 @@
           "evidence": [
             "modules/moderation/src/context.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "moderation.case-history",
@@ -259,7 +274,8 @@
           "evidence": [
             "modules/moderation/src/context.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -284,7 +300,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "automod.invite-links",
@@ -303,7 +320,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "automod.link-phishing-filter",
@@ -324,7 +342,9 @@
             "modules/moderation/src/mod.test.ts",
             "apps/bot/src/moderation-events.test.ts"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "automod.profanity-zalgo",
@@ -344,7 +364,9 @@
             "modules/moderation/src/security.test.ts",
             "modules/moderation/src/mod.test.ts"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "automod.duplicate-crosspost",
@@ -363,7 +385,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "automod.native-automod-sync",
@@ -382,7 +405,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "automod.ai-classification",
@@ -401,7 +425,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "automod.per-rule-punishment",
@@ -420,7 +445,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "automod.rule-test-mode",
@@ -439,7 +465,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "automod.false-positive-report",
@@ -458,7 +485,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -483,7 +511,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "security.anti-nuke-webhook-bot-add",
@@ -502,7 +531,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "security.anti-raid-join-burst",
@@ -521,7 +551,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "security.quarantine-role",
@@ -540,7 +571,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "security.join-gate-verification",
@@ -564,7 +596,8 @@
             "packages/db/src/member-store.test.ts",
             "scripts/live-probe.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "security.panic-mode",
@@ -587,7 +620,8 @@
             "apps/bot/src/moderation-actions.ts",
             "apps/bot/src/moderation-actions.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "security.heat-scoring",
@@ -606,7 +640,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "security.backup-restore",
@@ -622,10 +657,11 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "Full bundle restore, pre-import backup and 24-hour rollback; messages are not included. Live 2026-11-02 on Postgres: a checksum-verified import and its rollback.",
-          "liveVerified": true,
           "evidence": [
             "packages/db/src/portability.test.ts"
           ],
+          "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "portability-import-verify",
             "portability-rollback"
@@ -648,7 +684,8 @@
           "evidence": [
             "modules/moderation/src/security.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -673,7 +710,8 @@
           "evidence": [
             "modules/community/src/community.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "leveling.role-rewards",
@@ -692,7 +730,8 @@
           "evidence": [
             "modules/community/src/community.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "leveling.rank-card",
@@ -711,7 +750,8 @@
           "evidence": [
             "modules/community/src/community.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "leveling.leaderboard",
@@ -730,7 +770,8 @@
           "evidence": [
             "modules/community/src/community.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "leveling.xp-multipliers",
@@ -749,7 +790,8 @@
           "evidence": [
             "modules/community/src/community.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "leveling.import-from-mee6",
@@ -765,10 +807,11 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "Saved leaderboard JSON only; no live pull and no scraping.",
-          "liveVerified": false,
           "evidence": [
             "packages/importer/src/importer.test.ts"
-          ]
+          ],
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "leveling.seasonal-reset",
@@ -787,7 +830,8 @@
           "evidence": [
             "modules/community/src/community.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -812,7 +856,8 @@
           "evidence": [
             "modules/community/src/economy.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "economy.shop-inventory",
@@ -831,7 +876,8 @@
           "evidence": [
             "modules/community/src/economy.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "economy.transfers",
@@ -850,7 +896,8 @@
           "evidence": [
             "modules/community/src/economy.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "economy.gambling",
@@ -869,7 +916,8 @@
           "evidence": [
             "modules/community/src/economy.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "economy.audit-ledger",
@@ -888,7 +936,8 @@
           "evidence": [
             "modules/community/src/economy.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "economy.global-economy",
@@ -904,7 +953,8 @@
           "status": "non-goal",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "Non-goal: server context matters",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -935,6 +985,7 @@
             "scripts/live-probe.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-community-panels"
           ]
@@ -956,7 +1007,8 @@
           "evidence": [
             "modules/community/src/extras.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "community.reaction-roles",
@@ -977,6 +1029,7 @@
             "apps/bot/src/components.test.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-community-interactions"
           ]
@@ -998,7 +1051,8 @@
           "evidence": [
             "modules/community/src/extras.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "community.birthdays",
@@ -1017,7 +1071,8 @@
           "evidence": [
             "modules/community/src/extras.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "community.suggestions",
@@ -1038,6 +1093,7 @@
             "apps/bot/src/components.test.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-community-interactions"
           ]
@@ -1061,6 +1117,7 @@
             "apps/bot/src/components.test.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-community-interactions"
           ]
@@ -1084,6 +1141,7 @@
             "apps/bot/src/components.test.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-community-interactions"
           ]
@@ -1105,7 +1163,8 @@
           "evidence": [
             "modules/community/src/extras.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "community.stat-channels",
@@ -1124,7 +1183,8 @@
           "evidence": [
             "modules/community/src/extras.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "community.social-feeds",
@@ -1137,14 +1197,24 @@
             "wick-security": "❌"
           },
           "phase": "P7",
-          "status": "open",
+          "status": "partial",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "YouTube, Twitch, RSS",
           "evidence": [
-            "modules/community/src/extras.test.ts"
+            "modules/community/src/extras.test.ts",
+            "apps/bot/src/community-events.ts"
           ],
-          "openReason": "RSS ships; YouTube/Twitch-specific feeds are named as open in the P3 status.",
-          "liveVerified": false
+          "shippedParts": [
+            "RSS/Atom polling with GUID dedupe, posted on the 60-second community tick"
+          ],
+          "openParts": [
+            "YouTube upload notifications",
+            "Twitch live notifications",
+            "Kick live notifications"
+          ],
+          "openReason": "RSS/Atom feeds ship, poll on the community tick and dedupe by GUID. YouTube, Twitch and Kick need a source adapter each; none is built.",
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "community.rank-card",
@@ -1169,6 +1239,7 @@
             "scripts/live-probe.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-community-panels"
           ]
@@ -1203,6 +1274,7 @@
             "scripts/live-probe.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-community-panels"
           ]
@@ -1224,7 +1296,8 @@
           "evidence": [
             "modules/community/src/commands.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "tickets.claiming",
@@ -1243,7 +1316,8 @@
           "evidence": [
             "modules/community/src/commands.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "tickets.transcripts",
@@ -1262,7 +1336,8 @@
           "evidence": [
             "modules/community/src/commands.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "tickets.knowledge-base",
@@ -1279,7 +1354,8 @@
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "`/ai docs-add` + exact-index RAG; pgvector ANN open",
           "openReason": "Exact-index RAG ships; the pgvector ANN 1Mx1536 gate is open.",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "tickets.ai-deflection",
@@ -1298,7 +1374,8 @@
           "evidence": [
             "modules/community/src/commands.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "tickets.sla-analytics",
@@ -1317,7 +1394,8 @@
           "evidence": [
             "modules/community/src/commands.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -1342,7 +1420,8 @@
           "evidence": [
             "modules/community/src/extras.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "content.custom-commands-tags",
@@ -1361,7 +1440,8 @@
           "evidence": [
             "modules/community/src/extras.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "content.scheduled-messages",
@@ -1382,7 +1462,8 @@
             "apps/bot/src/timers.test.ts",
             "scripts/live-probe.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "content.reminders",
@@ -1403,7 +1484,8 @@
             "apps/bot/src/timers.test.ts",
             "scripts/live-probe.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "content.sticky-messages",
@@ -1422,7 +1504,8 @@
           "evidence": [
             "modules/community/src/extras.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "content.rss-feeds",
@@ -1441,7 +1524,8 @@
           "evidence": [
             "modules/community/src/extras.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "content.translation",
@@ -1457,7 +1541,8 @@
           "status": "non-goal",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "Non-goal: unreliable, costly",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -1480,7 +1565,8 @@
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "Saved queue ships; play/skip/stop refuse with the exact missing backend (no voice or Lavalink client, no LAVALINK_URL).",
           "openReason": "Streaming audio needs a Discord voice client or a BYO Lavalink endpoint; neither is installed or configured, and pass 32 was not authorized to add one. The refusal is live-proven; playback itself is not shipped.",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "music.queue-controls",
@@ -1500,7 +1586,9 @@
             "modules/music/src/music.test.ts",
             "packages/db/src/music-store.test.ts"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "music.bundled-source",
@@ -1516,7 +1604,8 @@
           "status": "non-goal",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "Non-goal: legal risk",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "music.lyrics-autoplay",
@@ -1532,7 +1621,8 @@
           "status": "non-goal",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "Non-goal",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -1558,7 +1648,9 @@
             "modules/ai/src/ai.test.ts",
             "apps/bot/src/ai-events.test.ts"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "ai.server-rag",
@@ -1575,7 +1667,8 @@
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "Portable exact index; pgvector ANN open",
           "openReason": "Portable exact index ships; pgvector ANN remains open.",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "ai.mod-explanations",
@@ -1594,7 +1687,8 @@
           "evidence": [
             "modules/ai/src/ai.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "ai.message-explain",
@@ -1613,7 +1707,8 @@
           "evidence": [
             "modules/ai/src/context.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "ai.thread-summaries",
@@ -1632,7 +1727,8 @@
           "evidence": [
             "modules/ai/src/ai.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "ai.cost-caps",
@@ -1651,7 +1747,8 @@
           "evidence": [
             "modules/ai/src/ai.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "ai.zero-retention",
@@ -1670,7 +1767,8 @@
           "evidence": [
             "modules/ai/src/ai.test.ts"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -1698,7 +1796,9 @@
             "packages/db/src/logging-store.test.ts",
             "memory/vault/04-Modules/logging/Status.md"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "operations.subcommand-surface",
@@ -1721,7 +1821,9 @@
             "apps/bot/src/interaction-harness.test.ts",
             "modules/diagnostics/src/diagnostics.test.ts"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "operations.in-bot-config",
@@ -1743,6 +1845,7 @@
             "packages/kernel/src/config.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "postgres-settings-restart"
           ]
@@ -1758,11 +1861,27 @@
             "wick-security": "✅"
           },
           "phase": "P6",
-          "status": "open",
+          "status": "partial",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "Auth, schema-generated settings widgets, the audit trail, the fleet view, built-in and saved templates, config export/import/drift and read-only analytics aggregates are in repo; a live Discord OAuth round trip is pending",
+          "evidence": [
+            "apps/web/src/web.test.ts",
+            "apps/web/src/settings-form.test.ts",
+            "scripts/live-probe.ts"
+          ],
+          "shippedParts": [
+            "OAuth2/PKCE login and opaque Postgres sessions",
+            "schema-generated settings widgets and audited writes",
+            "fleet view, built-in and saved templates",
+            "config export/import/drift and analytics aggregates",
+            "scoped API tokens, signed webhooks and idempotent writes"
+          ],
+          "openParts": [
+            "a live Discord OAuth round trip (the probe uses a fake exchange)"
+          ],
+          "openReason": "Every dashboard surface is built and probe-proven over real local HTTP; only a live Discord OAuth round trip is missing.",
           "liveVerified": false,
-          "openReason": "Login, sessions, guild reads, schema forms, audited writes, the fleet view, templates, config portability and analytics are built; a live Discord OAuth round trip is not."
+          "liveScope": "none"
         },
         {
           "id": "operations.dashboard-auth-foundation",
@@ -1783,7 +1902,8 @@
             "packages/db/src/web-store.test.ts",
             "memory/vault/03-Architecture/Dashboard.md"
           ],
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "operations.dashboard-session-hardening",
@@ -1809,6 +1929,7 @@
             "memory/vault/03-Architecture/Dashboard.md"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-session-idle-refresh",
             "web-session-hardening"
@@ -1834,6 +1955,7 @@
             "memory/vault/03-Architecture/Dashboard.md"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-schema-widgets"
           ]
@@ -1860,6 +1982,7 @@
             "scripts/live-probe.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-schema-widgets"
           ]
@@ -1886,6 +2009,7 @@
             "apps/web/src/web.test.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-schema-widgets"
           ]
@@ -1915,6 +2039,7 @@
             "scripts/live-probe.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-analytics-aggregates"
           ]
@@ -1941,6 +2066,7 @@
             "memory/vault/03-Architecture/Dashboard.md"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-fleet-templates"
           ]
@@ -1972,6 +2098,7 @@
             "scripts/live-probe.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-fleet-templates",
             "web-saved-templates"
@@ -2004,6 +2131,7 @@
             "scripts/live-probe.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-config-export-import-drift"
           ]
@@ -2037,6 +2165,7 @@
             "scripts/live-probe.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-api-tokens"
           ]
@@ -2068,7 +2197,12 @@
             "packages/db/src/idempotency.test.ts",
             "scripts/live-probe.ts"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "probe",
+          "liveEvidence": [
+            "web-webhooks",
+            "web-idempotency-key"
+          ]
         },
         {
           "id": "operations.i18n",
@@ -2100,6 +2234,7 @@
             "scripts/live-probe.ts"
           ],
           "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "web-component-panels"
           ]
@@ -2118,7 +2253,8 @@
           "status": "planned",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
           "note": "Public incidents",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -2135,13 +2271,15 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
           "note": "Versioned JSON bundle with canonical SHA-256 checksum, counts and include/omit manifest. Live 2026-11-01: `/export guild` posted a 12.8 KB bundle that downloaded and parsed with 49 settings, 1 case, 1 case event, 1 ledger row and 1 community record.",
-          "liveVerified": true,
           "evidence": [
             "packages/importer/src/importer.test.ts",
             "packages/db/src/portability.test.ts",
             "modules/setup/src/export.test.ts",
             "apps/bot/src/export-port.test.ts"
-          ]
+          ],
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "portability.in-discord-export",
@@ -2151,13 +2289,15 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
           "note": "`/export guild | user | import | delete | drift | rollback` in the setup module. Guild and user exports are JSON file attachments; import reads a Discord attachment and defaults to a dry run; delete needs the exact guild id; drift reads live channels, categories, roles and AutoMod names from the gateway cache. One `ExportPort`; SQL uses the existing `PortabilityService`, memory mode reads the live stores and refuses destructive actions by name.",
-          "liveVerified": true,
           "evidence": [
             "modules/setup/src/export.test.ts",
             "apps/bot/src/export-port.test.ts",
             "apps/bot/src/export-discord.test.ts",
             "packages/kernel/src/export.ts"
-          ]
+          ],
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "portability.restore-and-config-hash",
@@ -2167,10 +2307,11 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
           "note": "Transactional replace, rebased guild id and a post-import checksum; 5,000-level round trip tested. Live 2026-11-02: a real bundle imported into Postgres and the post-import checksum verified.",
-          "liveVerified": true,
           "evidence": [
             "packages/db/src/portability.test.ts"
           ],
+          "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "portability-import-verify"
           ]
@@ -2183,10 +2324,11 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
           "note": "Dry run reports setting-level added/changed/removed and record counts without writing. Live 2026-11-02: the preview reported one added setting and wrote no row.",
-          "liveVerified": true,
           "evidence": [
             "packages/importer/src/importer.test.ts"
           ],
+          "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "portability-dry-run"
           ]
@@ -2199,10 +2341,11 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
           "note": "Applied imports restore their pre-import backup inside 24 hours. `/export rollback import_id:` exposes it in Discord; the SQL adapter ran on Postgres in pass 44, while memory mode still refuses it by name.",
-          "liveVerified": true,
           "evidence": [
             "packages/db/src/portability.test.ts"
           ],
+          "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "portability-rollback"
           ]
@@ -2215,10 +2358,11 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
           "note": "Guild deletion removes backups and retains counts plus a content hash only. `/export delete confirm:<guild-id>` exposes it to an admin; live 2026-11-02 on Postgres kept a receipt with one setting and removed the guild row.",
-          "liveVerified": true,
           "evidence": [
             "packages/db/src/portability.test.ts"
           ],
+          "liveVerified": true,
+          "liveScope": "probe",
           "liveEvidence": [
             "portability-deletion-receipt"
           ]
@@ -2231,10 +2375,11 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
           "note": "MEE6 players[] parser; admins upload a saved file, never a scrape.",
-          "liveVerified": false,
           "evidence": [
             "packages/importer/src/importer.test.ts"
-          ]
+          ],
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "portability.generic-json-csv-import",
@@ -2244,10 +2389,11 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
           "note": "Generic JSON/CSV levels with replace, keep-higher and add-on-top modes.",
-          "liveVerified": false,
           "evidence": [
             "packages/importer/src/importer.test.ts"
-          ]
+          ],
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "portability.probot-json-transcript-import",
@@ -2257,10 +2403,11 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
           "note": "JSON transcript is normalized to a text archive, not message rows.",
-          "liveVerified": false,
           "evidence": [
             "packages/importer/src/importer.test.ts"
-          ]
+          ],
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "portability.ticket-tool-html-archive",
@@ -2270,10 +2417,11 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
           "note": "HTML is stripped to readable text and stored as a ticket_transcript community record.",
-          "liveVerified": false,
           "evidence": [
             "packages/importer/src/importer.test.ts"
-          ]
+          ],
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "portability.drift-detection",
@@ -2283,12 +2431,14 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
           "note": "Read-only report over settings ids. `/export drift` reads live channels, categories, roles and AutoMod names from the gateway cache; the CLI still accepts a saved JSON fact file. Live 2026-11-01: a stale `logging.channelId` produced 1 missing, and restoring the real channel produced 0 missing.",
-          "liveVerified": true,
           "evidence": [
             "packages/db/src/portability.test.ts",
             "apps/bot/src/export-discord.test.ts",
             "modules/setup/src/export.test.ts"
-          ]
+          ],
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "portability.guided-migration-guides",
@@ -2298,10 +2448,11 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Import-Formats.md",
           "note": "MEE6, Lurkr/Polaris/Arcane/XP Bot, ProBot, Ticket Tool, Dyno, Carl-bot and Wick.",
-          "liveVerified": false,
           "evidence": [
             "memory/vault/06-Operations/Migration-Guides.md"
-          ]
+          ],
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -2322,13 +2473,14 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
           "note": "Cached invite uses diffed after each join only when a baseline exists; a cold cache records no inviter and seeds the cache. A gateway-independent tracker owns the per-guild join queue; the join row is unique on (guild, member, joined_at).",
-          "liveVerified": false,
           "evidence": [
             "modules/invites/src/invites.test.ts",
             "apps/bot/src/invite-tracker.test.ts",
             "apps/bot/src/invite-events.test.ts",
             "packages/db/src/invite-store.test.ts"
-          ]
+          ],
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "invites.fake-invite-detection",
@@ -2342,10 +2494,11 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
           "note": "Advisory account-age and no-avatar flags, recorded on the join and optionally posted to one log channel; never a punishment.",
-          "liveVerified": false,
           "evidence": [
             "modules/invites/src/invites.test.ts"
-          ]
+          ],
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "invites.invite-leaderboard",
@@ -2359,11 +2512,12 @@
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
           "note": "Joins, leaves and retained per inviter, aggregated in SQL and exposed by /invites.",
-          "liveVerified": false,
           "evidence": [
             "modules/invites/src/commands.test.ts",
             "packages/db/src/invite-store.test.ts"
-          ]
+          ],
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -2387,7 +2541,11 @@
             "packages/db/src/form-store.test.ts",
             "memory/journal/2026-11-01-pass-40.md"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "probe",
+          "liveEvidence": [
+            "web-component-panels"
+          ]
         },
         {
           "id": "forms.review-queue",
@@ -2401,7 +2559,9 @@
             "modules/forms/src/forms.test.ts",
             "packages/db/src/form-store.test.ts"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "forms.submission-export",
@@ -2415,7 +2575,9 @@
             "modules/forms/src/forms.test.ts",
             "memory/vault/04-Modules/forms/Status.md"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         }
       ]
     },
@@ -2437,7 +2599,9 @@
             "packages/db/src/event-store.test.ts",
             "memory/journal/2026-11-01-pass-41.md"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "events.rsvp-buttons",
@@ -2447,40 +2611,58 @@
           "status": "open",
           "source": "memory/vault/02-Research/Competitive-2026.md",
           "note": "Command RSVP is shipped: `/event rsvp event:<key> rsvp:going|not_going`, one row per member, capacity counted from `event_rsvps`. Interactive going/maybe/no buttons are not built yet; the signed component layer exists (pass 58).",
-          "openReason": "The component layer now exists (pass 58), but the event buttons and their state transitions are not built; shipping an inert button would still be a dead end.",
           "evidence": [
             "modules/events/src/events.test.ts"
           ],
-          "liveVerified": false
+          "openReason": "The component layer now exists (pass 58), but the event buttons and their state transitions are not built; shipping an inert button would still be a dead end.",
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "events.reminders",
           "name": "Reminders",
           "competitors": {},
           "phase": "P7",
-          "status": "open",
+          "status": "partial",
           "source": "memory/vault/02-Research/Competitive-2026.md",
           "note": "Manual reminders are shipped and live-proven: `/event remind` posts a reminder for an open event and records `reminded_at`, `reminded_by` and `reminder_count`. Scheduled delivery and per-member timezones are not built; there is no scheduler job for events yet.",
-          "openReason": "Scheduled delivery needs a recurring queue job, a per-event wake-up and a delivery port; manual `remind` is real, and the scheduler is named rather than faked.",
           "evidence": [
-            "modules/events/src/events.test.ts",
-            "packages/db/src/event-store.test.ts"
+            "modules/events/src/events.test.ts"
           ],
-          "liveVerified": true
+          "shippedParts": [
+            "manual `/event remind` recording reminded_at, reminded_by and reminder_count"
+          ],
+          "openParts": [
+            "scheduled delivery",
+            "per-member timezones"
+          ],
+          "openReason": "Manual reminders are live-proven. Scheduled delivery needs a recurring queue job, a per-event wake-up and a delivery port; none is built.",
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "events.ics-export",
           "name": "ICS export",
           "competitors": {},
           "phase": "P7",
-          "status": "open",
+          "status": "partial",
           "source": "memory/vault/02-Research/Competitive-2026.md",
           "note": "JSON export is shipped: `/event export` attaches `keystone.events` with events, RSVPs, counts and a SHA-256 checksum. An ICS calendar file is not built; the JSON is the portable format for now.",
-          "openReason": "ICS needs a calendar serializer and a real calendar consumer; the checksummed JSON is the portable format the other modules already export.",
           "evidence": [
             "modules/events/src/events.test.ts"
           ],
-          "liveVerified": true
+          "shippedParts": [
+            "checksummed `keystone.events` JSON export with events, RSVPs and counts"
+          ],
+          "openParts": [
+            "ICS serialization",
+            "a real calendar consumer"
+          ],
+          "openReason": "JSON export is live-proven. ICS needs a calendar serializer and a real consumer; the checksummed JSON is the portable format for now.",
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         }
       ]
     },
@@ -2501,7 +2683,9 @@
             "modules/modmail/src/modmail.test.ts",
             "memory/journal/2026-11-01-pass-42.md"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "modmail.private-threads",
@@ -2516,7 +2700,9 @@
             "packages/db/src/modmail-store.test.ts",
             "memory/journal/2026-11-01-pass-42.md"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "modmail.replies",
@@ -2530,7 +2716,9 @@
             "modules/modmail/src/modmail.test.ts",
             "packages/db/src/modmail-store.test.ts"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "modmail.transcripts",
@@ -2545,7 +2733,9 @@
             "packages/db/src/modmail-store.test.ts",
             "memory/journal/2026-11-01-pass-42.md"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "modmail.queue-stats",
@@ -2560,7 +2750,9 @@
             "packages/db/src/modmail-store.test.ts",
             "memory/journal/2026-11-01-pass-42.md"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "modmail.gateway-delivery",
@@ -2570,11 +2762,12 @@
           "status": "open",
           "source": "memory/vault/01-Mission/Master-Plan.md",
           "note": "The command surface is an inbox, not a live relay: replies are read with `/modmail transcript`, not delivered into a Discord DM or a private thread. That is deliberate this pass; a delivery port and the gateway message handler are not built.",
-          "openReason": "A real DM/thread relay needs a delivery port and a gateway message handler; borrowing another module's DM adapter is the coupling pass 39 removed, and an unverified relay is worse than a readable inbox.",
           "evidence": [
             "modules/modmail/src/modmail.test.ts"
           ],
-          "liveVerified": false
+          "openReason": "A real DM/thread relay needs a delivery port and a gateway message handler; borrowing another module's DM adapter is the coupling pass 39 removed, and an unverified relay is worse than a readable inbox.",
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -2591,7 +2784,8 @@
           "status": "planned",
           "source": "memory/vault/01-Mission/Master-Plan.md",
           "note": "Reapply roles on rejoin; requires GuildMembers.",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "parity-extra.auto-responder",
@@ -2613,7 +2807,9 @@
             "apps/bot/src/community-events.test.ts",
             "packages/db/src/community.test.ts"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "parity-extra.message-and-member-analytics",
@@ -2628,7 +2824,9 @@
             "modules/analytics/src/memory.ts",
             "memory/vault/04-Modules/analytics/Status.md"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "parity-extra.command-usage-analytics",
@@ -2644,7 +2842,9 @@
             "packages/db/src/analytics-store.test.ts",
             "memory/vault/04-Modules/analytics/Status.md"
           ],
-          "liveVerified": true
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/01-Mission/Status.md"
         },
         {
           "id": "parity-extra.captcha-verification",
@@ -2654,7 +2854,8 @@
           "status": "planned",
           "source": "memory/vault/01-Mission/Master-Plan.md",
           "note": "Post-v1.0 provider integration.",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "parity-extra.google-calendar-sync",
@@ -2664,7 +2865,8 @@
           "status": "planned",
           "source": "memory/vault/01-Mission/Master-Plan.md",
           "note": "Post-v1.0 two-way sync.",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         },
         {
           "id": "parity-extra.activity",
@@ -2674,7 +2876,8 @@
           "status": "planned",
           "source": "memory/vault/01-Mission/Master-Plan.md",
           "note": "Time-boxed eligibility spike; not promised for v1.0.",
-          "liveVerified": false
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     }

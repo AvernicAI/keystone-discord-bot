@@ -124,8 +124,9 @@ store returns a typed `duplicate-key` result instead of leaking a Postgres error
 
 ## Non-goals
 
-- Modal input. It needs the UI layer; the validated `answers` option is the
-  shipped input path.
+- Modal editing of an existing form. The modal is an input path for a published
+  panel; forms are created and edited with slash commands so validation runs
+  before anything is posted.
 - Editing a form key. It is the stable reference in panels and exports; create a
   new form instead.
 - Deleting review history. Close the form and export it.
