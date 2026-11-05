@@ -2,6 +2,20 @@
 
 ## Now
 
+Pass 76 turned `/mod history user:@member` into one **member timeline** instead
+of a case list. A pure read model joins cases and their append-only events,
+tickets, levels, the economy ledger, invite joins, form submissions, event
+RSVPs, modmail threads and the member row, sorts newest first and renders the
+last 12 rows plus an older-row count in one Components V2 container. Every row
+names its source table. A store that is not wired or throws is reported as
+`not-wired` or `failed` in the footer, never as “no activity”; a store that is
+wired and empty is the only source that reads as empty. No root, subcommand,
+table or migration was added, and `format:json|csv` still takes the export path
+before the panel. Logging and AI labels are explicitly not joined because neither
+has a member index. A real Discord invocation and a live cross-store read are
+**not claimed**: this session's MCP was write-preview-only. See
+[pass 76](../../../journal/2026-11-05-pass-76.md).
+
 Pass 72 added portable case export without a new command. `/mod case
 case:<n> format:json|csv` attaches one case with its append-only events, and
 `/mod history user:<id> count:<1-50> format:json|csv` attaches the recent range.
@@ -72,8 +86,8 @@ P2 core shipped in pass 05 (2026-11-01).
 ## Verified
 
 ```
-pnpm test                                  # 682 tests / 97 files
-pnpm vitest run modules/moderation         # 70 tests (including 4 export, 7 temporary-expiry and 5 panic tests)
+pnpm test                                  # 693 tests / 100 files
+pnpm vitest run modules/moderation         # 81 tests (including 11 member-timeline, 4 export, 7 temporary-expiry and 5 panic tests)
 pnpm test -- packages/db/src/cases.test.ts # 4 PGlite case-store tests, including listEvents and atomic expiry claims
 pnpm test -- packages/db/src/panic.test.ts # PGlite panic snapshot scope and clear
 pnpm test -- packages/db/src/member-store.test.ts # PGlite member row + verification upsert
@@ -98,6 +112,20 @@ P2 exit evidence:
   another member out; the CSV quotes a comma/quote/newline reason; and the JSON
   and CSV of one case carry the same SHA-256 checksum. Without `format`, the
   reply is still the embed with no attachment.
+- The member timeline reads each store through its existing port and names the
+  source of every row: `cases **Case #7**`, `economy_ledger **Economy +25**`,
+  `form_submissions **Form accepted**`, and so on. A reason containing
+  `@everyone` or `<123>` is neutralised. The panel caps at 12 rows, reports the
+  older count, and a missing or throwing store appears under `Not wired` or
+  `Failed` instead of being omitted. `/mod history` without `user` is still the
+  recent-case embed.
+- Live surface, read-only: the MCP saw one guild, 7 channels and 3 members.
+  Two stale bot process trees were stopped and replaced with one fresh boot; it
+  detected the `mod` description drift, cleared once, re-registered 24 commands,
+  and a second
+  `pnpm commands:doctor` is clean: **AllinOne** (`1549086192794992710`), 20 roots,
+  141 subcommands, 2 user and 2 message menus. The MCP's write mode is `preview`,
+  so no `!mod history` message was posted and no gateway invocation is claimed.
 - `/appeal open` only accepts the target's own case and appends an `appealed`
   event. `/appeal status` keeps reporting that event after `CaseService.review`
   changes the case state, and refuses a case that is not the caller's.

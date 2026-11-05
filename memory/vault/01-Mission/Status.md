@@ -2,6 +2,20 @@
 
 ## Now
 
+**Pass 76 made member history one screen** (2026-11-05): `/mod history
+user:@member` now renders a Components V2 timeline instead of a case list. A
+pure read model joins the cases and their append-only events with tickets,
+levels, the economy ledger, invite joins, form submissions, event RSVPs, modmail
+threads and the member row, sorts newest first, and caps the display at 12 rows
+with an explicit older-row count. Every row names its source table; a store that
+is not wired or throws is listed under `Not wired` or `Failed` instead of being
+shown as no activity. There is no new table, migration, root or subcommand, and
+`format:json|csv` still exports the checksummed case rows before the panel
+branch. Tests are **693 / 100 files** (5 service, 4 panel and 2 command cases);
+the budget is unchanged at 20/100 roots, 141 subcommands, 161 actions and 4
+context menus. A real Discord invocation is not claimed: this session's MCP was
+in write-preview mode. See [pass 76](../../journal/2026-11-05-pass-76.md).
+
 **Pass 75 rebuilt the front door** (2026-11-05): in a server, `/help` is now a
 Components V2 hub instead of a flat command embed. It reads only state the bot
 already owns — module on/off from settings, open tickets, open cases for a
@@ -928,7 +942,7 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 682 tests / 97 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · live 28/28 · memory current
+pnpm check        exit 0 · typecheck 0 · 693 tests / 100 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · live 28/28 · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 20 roots / 138 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · /modmail open → reply → 2-message archive → duplicate close refused → stats 1/0/2 · /event create → open → rsvp 1/2 → reminder → decline → 1.2 KB export parsed with the same row · /form create → open → panel → submit → 1 pending → accepted → 1.5 KB export parsed with the same answers and decision · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)
