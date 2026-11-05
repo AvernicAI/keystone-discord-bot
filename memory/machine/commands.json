@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-02",
+  "updatedAt": "2026-11-05",
   "source": "packages/kernel ModuleRegistry catalog()",
   "roots": 20,
   "subcommands": 141,
@@ -291,9 +291,10 @@
         },
         {
           "name": "case",
-          "description": "Show one case by number.",
+          "description": "Show one case by number, or export it.",
           "options": [
-            "case"
+            "case",
+            "format"
           ]
         },
         {
@@ -306,9 +307,11 @@
         },
         {
           "name": "history",
-          "description": "List recent cases, optionally for one member.",
+          "description": "List or export recent cases, optionally for one member.",
           "options": [
-            "user"
+            "user",
+            "count",
+            "format"
           ]
         },
         {
@@ -636,13 +639,14 @@
         },
         {
           "name": "roles",
-          "description": "Post a reaction-role or select-role panel.",
+          "description": "Post a role panel, or turn role persistence on or off.",
           "options": [
             "channel",
             "value",
             "role",
             "name",
-            "limit"
+            "limit",
+            "persist"
           ]
         },
         {

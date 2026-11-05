@@ -88,6 +88,14 @@ describe("community commands", () => {
     });
   });
 
+  it("turns role persistence on with an optional cap", async () => {
+    const { ctx } = context({ action: "roles", persist: "on", limit: 12 }, ["ManageGuild"]);
+    await tools.execute(ctx);
+    expect(await ctx.settings.get("guild-a")).toMatchObject({
+      roles: { persist: true, persistMax: 12 },
+    });
+  });
+
   it("queues reminders and scheduled messages on the timer queue", async () => {
     const timers = new RecordingJobQueue();
     const reminder = context({ action: "reminder", value: "drink water", duration: 10 });

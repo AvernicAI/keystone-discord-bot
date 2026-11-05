@@ -10,6 +10,8 @@
 - [[01-Mission/Status|Project status]] — P4 evidence, proven vs live-service gaps
 
 ## 02 Research
+- [[Competitor-Index]] — the 18-bot ledger, generated from sourced rows
+- [[Gap-Register]] — the prioritised build order those bots imply
 - [[Platform-Limits]] — the Discord constraints that shaped the architecture
 - [[Pain-Points]] — what admins actually complain about, prioritised
 - [[OSS-Prior-Art]] — what to copy, what to avoid, with receipts

@@ -114,11 +114,11 @@ const commandCopyDe: Record<string, () => string> = {
   "command.mod.slowmode.description": () =>
     `Setzt den Slowmode eines Kanals in Sekunden.`,
   "command.mod.case.description": () =>
-    `Zeigt einen Fall nach Nummer.`,
+    `Zeigt einen Fall nach Nummer oder exportiert ihn.`,
   "command.mod.note.description": () =>
     `Hängt eine Moderationsnotiz an einen Fall an.`,
   "command.mod.history.description": () =>
-    `Listet die letzten Fälle auf, optional für ein Mitglied.`,
+    `Listet oder exportiert die letzten Fälle, optional für ein Mitglied.`,
   "command.mod.links.description": () =>
     `Prüft die letzten Funde des Linkfilters.`,
   "command.mod.filters.description": () =>
@@ -143,6 +143,10 @@ const commandCopyDe: Record<string, () => string> = {
     `Anzahl für Purge, 1–100 (Standard 10)`,
   "command.mod.option.case.description": () =>
     `Fallnummer für case, note oder review`,
+  "command.mod.option.format.description": () =>
+    `Hängt die Fälle als JSON- oder CSV-Datei an`,
+  "command.mod.option.count.description": () =>
+    `Anzahl der Fälle für den Export, 1–50 (Standard 10)`,
   "command.appeal.description": () =>
     `Legt Einspruch gegen einen Fall gegen dich ein oder prüft den Status eines Einspruchs.`,
   "command.appeal.open.description": () =>
@@ -256,7 +260,11 @@ const commandCopyDe: Record<string, () => string> = {
   "command.tools.goodbye.description": () =>
     `Richtet die Abschiedsnachricht für austretende Mitglieder ein.`,
   "command.tools.roles.description": () =>
-    `Veröffentlicht ein Reaktionsrollen- oder Auswahlrollen-Panel.`,
+    `Veröffentlicht ein Rollen-Panel oder schaltet die Rollenwiederherstellung ein und aus.`,
+  "command.tools.option.persist.description": () =>
+    `Schaltet die Rollenwiederherstellung beim Wiedereintritt ein oder aus.`,
+  "command.tools.roles.option.persist.description": () =>
+    `Schaltet die Rollenwiederherstellung beim Wiedereintritt ein oder aus.`,
   "command.tools.starboard.description": () =>
     `Richtet Starboard-Kanal und Schwellenwert ein.`,
   "command.tools.starboard-override.description": () =>

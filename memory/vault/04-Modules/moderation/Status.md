@@ -2,6 +2,16 @@
 
 ## Now
 
+Pass 72 added portable case export without a new command. `/mod case
+case:<n> format:json|csv` attaches one case with its append-only events, and
+`/mod history user:<id> count:<1-50> format:json|csv` attaches the recent range.
+JSON nests every event; CSV is one row per case with an escaped history cell. A
+SHA-256 checksum over the normalized case/event content is written into the file
+and shown in the reply, so the two formats agree for the same data. The export
+reads `CaseStore` through a narrow reader interface and writes nothing; without
+`format`, the old embeds are unchanged. A real Discord attachment upload and
+download is adapter-tested only — the MCP cannot fetch a file.
+
 P2 core shipped in pass 05 (2026-11-01).
 
 - Cases, case events and atomic per-guild numbering are wired to Postgres.
@@ -62,8 +72,8 @@ P2 core shipped in pass 05 (2026-11-01).
 ## Verified
 
 ```
-pnpm test                                  # 631 tests / 92 files
-pnpm vitest run modules/moderation         # 60 tests (including 7 temporary-expiry and 5 panic tests)
+pnpm test                                  # 644 tests / 94 files
+pnpm vitest run modules/moderation         # 70 tests (including 4 export, 7 temporary-expiry and 5 panic tests)
 pnpm test -- packages/db/src/cases.test.ts # 4 PGlite case-store tests, including listEvents and atomic expiry claims
 pnpm test -- packages/db/src/panic.test.ts # PGlite panic snapshot scope and clear
 pnpm test -- packages/db/src/member-store.test.ts # PGlite member row + verification upsert
@@ -82,6 +92,12 @@ P2 exit evidence:
 - `/mod` creates a case before a ban and asserts the reason and appeal custom id.
   Its default dry-run creates no case and calls no action. A missing reason
   throws. A caller without `ModerateMembers` is blocked by dispatch.
+- Case export is read-only: `/mod case format:json` attaches the created case
+  and its `created` event without opening a second case; `/mod history
+  format:csv count:2 user:` attaches header plus the two newest rows and leaves
+  another member out; the CSV quotes a comma/quote/newline reason; and the JSON
+  and CSV of one case carry the same SHA-256 checksum. Without `format`, the
+  reply is still the embed with no attachment.
 - `/appeal open` only accepts the target's own case and appends an `appealed`
   event. `/appeal status` keeps reporting that event after `CaseService.review`
   changes the case state, and refuses a case that is not the caller's.
@@ -231,6 +247,7 @@ P7 appeal-hub evidence (pass 35):
 | Bot authors ignored outside the marker | Yes, adapter test | Production has no marker option at all |
 | Temporary ban / temp role expiry | Yes: SQL case, atomic claim, timer service and in-process queue tests; live service check | A live `/mod ban duration` and a real unban/role removal in staging |
 | Panic lock / restore | Service and command state transitions tested; the snapshot is live-probed through Postgres | A live `!mod panic state:on/off` with real channel overwrites in staging |
+| Case export attachment | Yes, service and command tests: JSON/CSV content, escaped CSV, checksum agreement, range filter and the read-only path | Download one real attachment in a staging guild |
 | Join-gate timeout expiry | Not wired | Reuse the same timer with a member expiry; see known limitations |
 
 No document claims a live Discord run for the unproven rows.

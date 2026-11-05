@@ -23,6 +23,55 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-72",
+    date: "2026-11-05",
+    summary:
+      "P7.5 case export: `/mod case` and `/mod history` accept `format:json|csv` and attach the case with its events and a content checksum, without a new root, subcommand or table.",
+    journal: "memory/journal/2026-11-05-pass-72.md",
+  },
+  {
+    pass: "pass-71",
+    date: "2026-11-05",
+    summary:
+      "P7.5 role persistence: `/tools roles persist:on` remembers a member's roles when they leave and restores them once when they rejoin, capped and with Discord as the final authority.",
+    journal: "memory/journal/2026-11-05-pass-71.md",
+  },
+  {
+    pass: "pass-70",
+    date: "2026-11-05",
+    summary:
+      "Documentation pass: the Discord MCP proof surface (189 tools) is recorded with the interaction, join, DM, voice and file-upload limits it cannot cross. No command, reply or interaction changed.",
+    journal: "memory/journal/2026-11-05-pass-70.md",
+  },
+  {
+    pass: "pass-69",
+    date: "2026-11-05",
+    summary:
+      "Truth pass: the feature matrix separates partial work from absent work, and every live claim now names either a probe check or a written record. No command, reply or interaction changed.",
+    journal: "memory/journal/2026-11-05-pass-69.md",
+  },
+  {
+    pass: "pass-68",
+    date: "2026-11-05",
+    summary:
+      "Research pass: 18 competitors and an 18-row build-gap register are now machine truth, generated into the vault and cross-checked by the memory gate. No command, reply or interaction changed.",
+    journal: "memory/journal/2026-11-05-pass-68.md",
+  },
+  {
+    pass: "pass-67",
+    date: "2026-11-05",
+    summary:
+      "Documentation pass: the README and AGENTS became a 244/148-line front door, with the pass history and live evidence linked instead of duplicated. No command, reply or interaction changed.",
+    journal: "memory/journal/2026-11-05-pass-67.md",
+  },
+  {
+    pass: "pass-66",
+    date: "2026-11-03",
+    summary:
+      "Planning pass: a full memory audit and the proposed Roadmap v3. The audit fixes stale current-tense claims and the CRLF gate trap; no command, reply or interaction changed.",
+    journal: "memory/journal/2026-11-03-pass-66.md",
+  },
+  {
     pass: "pass-65",
     date: "2026-11-03",
     summary:

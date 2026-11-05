@@ -5,10 +5,10 @@ import { formDefaultSettings, formSettingsSchema } from "./settings";
 /**
  * Application forms.
  *
- * One root, eight subcommands. The module owns the store and the transitions;
- * the gateway is not involved because a panel is an ordinary channel message
- * and a submission is a slash subcommand. Modal input is a later UI-layer
- * concern, not a reason to pretend a form was submitted.
+ * One root, eight subcommands. The module owns the store and the transitions.
+ * A panel is an ordinary channel message whose signed Apply button opens a
+ * modal for forms of five fields or fewer; the slash subcommand remains the
+ * path for longer forms and scripting. Both call the same `FormService.submit`.
  */
 export const formsModule = defineModule({
   id: "forms",

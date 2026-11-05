@@ -143,6 +143,17 @@ DM code to disable. The adapter subscribes to `GuildMemberRemove` beside
 `GuildMemberAdd`; the service does the work. If goodbye later grows a V2 panel,
 that should be the same builder welcome uses, not a second presentation path.
 
+## Role persistence is data on leave, action on join
+
+The leave path still must not grant a role. Role persistence respects that rule
+by doing nothing to Discord while the member is gone: it stores their role ids
+in one `role_snapshot` record, before the goodbye send, and only on
+`GuildMemberAdd` does it call `addRole`. If the goodbye channel is broken, the
+snapshot is already durable; if Discord refuses a managed or above-bot role, the
+refusal is counted and the snapshot is consumed rather than retried on every
+join. That is the same division as case-before-action: persist the intent first,
+then let the external call succeed or fail against a record that survives it.
+
 ## A “card” without an image
 
 The plan called this menu **Rank card**, because that is what MEE6 ships. A real

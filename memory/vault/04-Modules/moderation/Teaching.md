@@ -42,6 +42,16 @@ The third is **event sourcing**. `case_events` is append-only. A reversal is a
 new event and a state transition, never an edit to the original reason. That is
 what makes an appeal defensible later.
 
+A fourth is **the record must be portable**. `/mod case format:json` and
+`/mod history format:csv` read the same `CaseStore` rows through a narrow
+`Pick<CaseStore, "get" | "list" | "listEvents">`, so the export cannot write or
+create a case. Both formats hash the normalized case/event payload with SHA-256
+and write the checksum into the file. The export time is outside the hash, so
+the same content exported twice keeps the same digest. JSON is the reviewer
+format because it nests every event; CSV is one row per case with an escaped
+history cell, because that is what a spreadsheet can open. No export table: the
+case file is already the record.
+
 ## Temporary actions are a claim, not a countdown
 
 A temporary ban has two facts that can disagree: the Discord ban and the case

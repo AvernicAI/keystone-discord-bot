@@ -11,8 +11,8 @@ only working code; it is code a stranger can read, test, extend and learn from.
 3. `memory/machine/features.json` — the honest status of every parity row.
 4. `memory/machine/passes.json` — what the last passes actually did.
 5. `memory/vault/00-Index/Home.md` — the human map of the vault.
-6. For a specific feature: `memory/vault/04-Modules/<id>/Spec.md`,
-   `Status.md`, `Teaching.md`.
+6. For a feature: `memory/vault/04-Modules/<id>/Spec.md`, `Status.md`,
+   `Teaching.md`.
 7. For the current phase: `memory/vault/01-Mission/Roadmap.md` and
    `memory/vault/01-Mission/Status.md`.
 
@@ -30,18 +30,17 @@ The newest journal entry is the best short history of the current work. Read its
 - **No secrets in the repo or the vault.** Never print, commit or paste a Discord
   token, provider key or `.env` value. `.env.example` is the only committed
   environment shape.
-- **Nothing that costs money.** Never add a paid GitHub plan/feature (Actions
-  minutes beyond the free tier, Copilot, Codespaces, Packages, private-repo
-  seats, Advanced Security) or any other paid service, hosting, database, CI,
-  storage, email, monitoring or AI provider. Use public GitHub, Discord, local
-  Postgres/Redis/Ollama, PGlite and in-memory adapters. A free tier is acceptable
-  only while it covers the documented use; never add a card or billing account.
+- **Nothing that costs money.** Never add a paid GitHub plan/feature or any paid
+  service, hosting, database, CI, storage, email, monitoring or AI provider. Use
+  public GitHub, Discord, local Postgres/Redis/Ollama, PGlite and in-memory
+  adapters. A free tier is acceptable only while it covers the documented use;
+  never add a card or billing account.
 - **The kernel stays inward.** Modules may import `@keystone/kernel`. The kernel
   must not import discord.js, Drizzle, BullMQ, Redis or a module. Discord
   interactions and side effects belong in `apps/bot` adapters or a port
   implementation.
-- **The command budget is a gate.** 20 global roots are used; the limit is
-  100. Run `pnpm budget` before adding a root. Prefer a real subcommand under an
+- **The command budget is a gate.** 20 global roots are used; the limit is 100.
+  Run `pnpm budget` before adding a root. Prefer a real subcommand under an
   existing root; a subcommand costs no global slot.
 - **Tests are token-free.** No test may require a live guild, a database server,
   a network call or a provider key. Use `packages/testing`, structural fakes and
@@ -54,11 +53,10 @@ The newest journal entry is the best short history of the current work. Read its
 ## Layout
 
 ```text
-apps/bot              gateway, discord.js adapter, per-module component routes,
-                      composition root, dispatch, development `!` bridge
+apps/bot              gateway, discord.js adapter, component routes, composition root
 apps/worker           BullMQ consumer with idempotent handlers
 apps/web              optional dashboard/API: OAuth sessions, guild authz, reads
-packages/kernel       registry, guards, settings, dispatch, budget, component router, ports
+packages/kernel       registry, guards, settings, dispatch, budget, ports
 packages/ui           typed Components V2 layouts, modals and the 40/4,000 budget
 packages/module-catalog  the one module list shared by bot and web
 packages/db           Drizzle schema, migrations, Postgres repositories
@@ -76,8 +74,8 @@ scripts/              budget, audits, portability, command sync/catalog/doctor
 ```
 
 Adding a module: create `modules/<id>` like `modules/diagnostics`, export a
-`defineModule` manifest, add it to `packages/module-catalog/src/index.ts`, then run the checks
-below. There is no central command switch to edit.
+`defineModule` manifest, add it to `packages/module-catalog/src/index.ts`, then
+run the checks. There is no central command switch to edit.
 
 ## Commands you will use
 
@@ -86,369 +84,65 @@ pnpm typecheck          # tsc --noEmit, no secrets
 pnpm test               # the full token-free suite
 pnpm budget             # command-root ledger; must stay below 100
 pnpm audit:claims       # documented counts, paths and pointers vs the code
-pnpm check              # the full gate: typecheck, tests, budget, claims, audits, memory
+pnpm check              # typecheck, tests, budget, claims, audits, memory
 pnpm memory:render      # regenerate vault pages from machine truth
 pnpm memory:check       # validate machine files, generated pages and wikilinks
-pnpm web:start           # dashboard/API at http://localhost:3000
+pnpm web:start          # dashboard/API at http://localhost:3000
 pnpm commands:sync      # atomic command replace
 pnpm commands:resync    # explicit clear -> register -> fetch verification
 pnpm commands:catalog   # regenerate machine + vault command catalog
 pnpm commands:doctor    # read-only registry vs live registration shape
 pnpm portability ...    # export/restore/rollback CLI
+pnpm probe:live         # local Postgres/Redis/queue/web/interaction checks
 ```
 
-`pnpm check` must pass without `DISCORD_TOKEN`, a database or the network. If it
-does not, that is a bug in the change, not a reason to skip the check.
+`pnpm check` must pass without `DISCORD_TOKEN`, a database or the network.
 
 ## Live testing
 
-Slash commands are the product surface. A Discord MCP or other bot cannot invoke
-them, so development has one message bridge:
+Slash commands are the product surface. In development, `DEV_GUILD_ID` enables a
+message bridge that runs the real registry, guards, cooldowns and reply adapter:
 
-- `DEV_GUILD_ID` must name the test guild and `NODE_ENV` must not be production.
-- `!ping`, `!help commands`, `!mod history`, `!ai status`, `!rank leaderboard`
-  run the real registry, guards, cooldowns and reply adapter.
+- `!ping`, `!help commands`, `!mod history`, `!ai status`, `!rank leaderboard`.
 - It is never registered in production and does not answer in other guilds.
 - Bot-authored mention chat is allowed only in that same guild.
 
-See `memory/vault/03-Architecture/Live-Testing.md`. A human client is still
-required to prove `InteractionCreate`, ephemeral replies and select menus.
+The `discord-mcp` server in this workspace exposes **189 tools** (2026-11-05): it
+can prove real REST delivery, read-back state, permission shape, command
+registration, scheduled events, threads, webhooks and rich V2 messages. It
+**cannot** invoke a slash command, click a button, submit a modal, make a human
+join, receive a DM or upload a file. Do not claim those without a human client or
+a real interaction tool. The proof classes and their limits are in
+[Live-Testing](memory/vault/03-Architecture/Live-Testing.md).
 
 Discord allows **two global bulk overwrites per ten minutes**. At boot the bot
 fetches the server command set and only clears + re-registers when the name or
-option tree drifts; otherwise it does nothing. `pnpm commands:doctor` is the
-read-only shape check, and `pnpm commands:resync` is the deliberate first-time or
-payload-change cycle. Do not clear on every boot: a clear followed by a
+option tree drifts. Do not clear on every boot: a clear followed by a
 rate-limited register leaves the app with no commands.
 
-## Current state (2026-11-03)
+## Pass protocol
 
-- P0–P5 complete in-repo. P6 auth and settings-write foundation is in repo:
-  OAuth2/PKCE, opaque Postgres sessions, per-guild BigInt authz, dashboard/API
-  reads, schema-generated settings widgets, audited settings writes with CSRF,
-  and a fleet view with three built-in config templates that preview a
-  schema-validated diff and apply only the previewed plan. The carrier is the
-  framework-free `apps/web` HTML app; a future Next.js shell is not built and is
-  not required for this slice. Saved templates, analytics aggregates, session
-  hardening and hashed guild-scoped API tokens (per-route scopes, per-token
-  limits, audited issue/revoke, a generated OpenAPI document), signed webhook
-  delivery with retries and receipts, `Idempotency-Key` replay, an idle session
-  timeout and a sealed rotating refresh-token path are in repo; the live Discord
-  OAuth round trip remains open.
-- P7 invite tracking is in repo as the sixth module: `/invites` leaderboard,
-  stats and who-invited-whom, backed by `invite_joins` and advisory fake-join
-  flags. A cold cache records an unknown inviter; the adapter test covers it.
-  The gateway state (cache, per-guild join queue) lives in
-  `apps/bot/src/invite-tracker.ts`; `invite-events.ts` is only translation.
-- P7 content filters are in repo: a link filter (local host blocklist plus
-  punycode) and a profanity/zalgo filter (operator-owned words on Unicode word
-  edges plus a combining-mark threshold), both in `alert` or `delete` mode.
-  `/mod links` and `/mod filters` are the review queues; no new root. The live
-  proof used the dev-only `keystone-test:` marker in `DEV_GUILD_ID`; production
-  ignores bot authors. The link and profanity delete branches were proven live
-  with temporary `dryRun: false` seeds; the committed seed stays `alert`.
-- P7 auto-responder is in repo: exact, contains and regex triggers stored in
-  `community_records`, one reply per message, per-trigger cooldown, configured
-  through `/tools` subcommands `responder`, `responders` and `responder-remove`.
-- P7 audit logging is in repo as the seventh module: `/logging setup | channel |
-  events | status | retention | export | disable` writes message delete/edit,
-  member join/leave and moderation cases to an append-only `logging_events`
-  ledger before best-effort delivery. Message and moderation events are
-  live-proven; member events are adapter-tested only.
-- P7 command tree is in repo: every existing hub uses real Discord subcommands
-  (20 roots, 141 subcommands, 161 actions); `/help` reads the live registry; the
-  catalog is generated by `pnpm commands:catalog`; boot sync and
-  `pnpm commands:doctor` compare the full option shape, not only names.
-- P7 `/setup` is a hub: `status`, `module`, `verify`, `import` (preview only) and
-  `reset`. It reuses `HealthProbe`, `ConfigPort`, `ExportPort` and the module
-  schemas; reset clears one module's settings record, never cases or rows.
-  Live at pass 34: 9 modules / 2 disabled, music enabled then reset to its
-  default, and `verify` read a live catalog; the module count later reached 12
-  with `/form`, `/event` and `/modmail`.
-- P7 appeals are a real hub in repo and live-proven: `/appeal open | status`.
-  `open` appends the existing `appealed` event; `status` reads `case_events`
-  through `CaseStore.listEvents`, so an appeal is still reported after a
-  moderator changes the case state. `status` is member-scoped and refuses another
-  member's case by name. Live: `#1 · warn · appealed · 1 appeal` became
-  `#1 · warn · reviewed · 1 appeal` after `!mod review`.
-- P7 `/verify` is a real hub in repo and live-proven for its checks. An
-  enforced join-gate hold now writes a quarantined `members` row through the
-  security coordinator; `start` requires that row, checks DM-ability and sends
-  the existing verification button; `status` reads the row, not gateway roles.
-  The button writes `verified_at` only after the quarantine action succeeds and
-  only from a quarantined row. Live: no record, `!verify start` refused with
-  `No quarantine is recorded`, and no row was written. The MCP account is a bot
-  and cannot make a member join, receive a DM or click the button, so the join
-  and completion paths are covered by command, security and PGlite tests, not
-  claimed live. The saved plan table is complete at 59 of 59 names. The button
-  id parsing and member-facing actor/policy checks live in
-  `apps/bot/src/moderation-buttons.ts` (pass 38), not in the composition root.
-  The DM itself now goes through `ModerationActions.directMessage` (pass 39), so
-  moderation no longer borrows the community port.
-- P7 context menus are in repo and registered: `Report message` (message),
-  `Case history` (user), `Rank card` (user) and `Explain with AI` (message).
-  They reuse the case, level and AI services, consume Discord's separate 15 + 15
-  menu budget, and are checked by `pnpm budget` and `commands:doctor`. The MCP
-  cannot right-click, so invocation is covered by adapter/command tests only.
-- P7 in-bot configuration is in repo and live-proven: `/config list | get | set |
-  export` reads and writes every registered module's per-guild settings through
-  `SettingsService` and the owning Zod schema. One root, four subcommands, no
-  second settings store. Live: `moderation.automod.links` alert → delete →
-  alert, read back; `bogus` rejected without a write.
-- P7 in-Discord portability is in repo and live-proven for export and drift:
-  `/export guild | user | import | delete | drift | rollback` in the setup
-  module. Guild and user exports are JSON file attachments; import defaults to
-  a dry run and reads a CDN-only attachment through a 25 MB reader; delete
-  requires the exact guild id; drift reads the gateway cache. One `ExportPort`
-  has a SQL adapter over the existing `PortabilityService` and a memory adapter
-  over the live stores. Live: a 12.8 KB guild bundle parsed with 49 settings /
-  1 case / 1 case event / 1 ledger row / 1 record and the printed checksum, a
-  2 KB member bundle, drift 1 missing → 0 missing, and explicit refusals for a
-  wrong-id delete and memory-mode rollback. Import/delete/rollback are SQL-only;
-  memory mode names `DATABASE_URL` instead of pretending.
-- P7 forms are in repo and live-proven: `/form create | edit | delete | list |
-  panel | submit | review | export` is the tenth module. `forms` and
-  `form_submissions` (migration 0011) own the data; `(guild_id, key)` is unique
-  and a partial unique index allows one pending submission per member per form.
-  `FormService` validates fields and answers, gates draft/open/closed, refuses
-  delete while history exists and transitions only a `submitted` row. Live:
-  create → open → panel → submit → 1 pending → accepted with a note → a 1.5 KB
-  export that downloaded and parsed with the same answers and decision. Modal
-  input is not shipped and is not claimed; `/form submit` takes the validated
-  `answers` option.
-- P7 events are in repo and live-proven: `/event create | edit | delete | list |
-  rsvp | remind | export` is the eleventh module. `events` and `event_rsvps`
-  (migration 0012) own the data; `(event_id, user_id)` is unique and capacity is
-  counted from `going` rows inside the store transaction. `EventService` owns
-  the draft/open/closed lifecycle, capacity and reminder bookkeeping; `rsvp`
-  takes the member id from the interaction and has no user option. Live: create
-  → open → 1/2 going → reminder 1 → decline 0/2 → going 1/2 → a 1.2 KB export
-  that downloaded and parsed with the same row and a matching checksum; delete
-  refused while the RSVP exists. Buttons, scheduled reminders and ICS are not
-  shipped and are not claimed.
-- P7 modmail is in repo and live-proven for its command surface: `/modmail setup |
-  open | reply | close | transcript | stats` is the twelfth and last plan root.
-  `modmail_threads` and `modmail_messages` (migration 0013) own the data; a
-  partial unique index allows one active thread per member. A thread is visible
-  only to its owner or staff, and a foreign thread returns the same refusal as a
-  missing one. The first staff reply claims it; close archives the transcript
-  and checksum in one conditional update, so a duplicate close writes nothing.
-  Live: open → reply → 2-message archive → duplicate close refused → archived
-  read → stats 1/0/2 → disabled open refused. The MCP bot owns its own thread,
-  so the staff-side claim and a second member are covered by tests, not claimed
-  live; DM/thread relay is not shipped and is not claimed.
-- P7 synthetic slash harness is in repo: `apps/bot/src/interaction-harness.test.ts`
-  feeds a nested `/mod ban` payload through the real `asInteractionLike` adapter,
-  registry and dispatch; it is not a gateway `InteractionCreate` and does not
-  replace a human slash check.
-- The rest of P7 (translating the remaining module copy and redesigning
-  moderation's `appeal`/`verify` ids so a DM can carry both the guild and the
-  member inside the signed payload) is open; the Components V2 layer, i18n, the
-  rank/ticket/greeting panels and the signed role/select/giveaway/suggestion/
-  poll panels are shipped (passes 58-61), and analytics, in-bot config,
-  `/export`, `/music`, forms, events, modmail,
-  temporary moderation, scheduled delivery, panic mode, goodbye, the `/setup`,
-  `/appeal` and `/verify` hubs and the context menus are shipped.
-- Pass 43 is a truth pass: `pnpm audit:claims` checks documented root,
-  subcommand, action, module and test counts, module paths, the `/help
-  changelog` pointer and Components V2 claims against the code. `memory:check`
-  checks the module layout, the Status `Now` pass pointer and the lesson map.
-- P7 guild analytics is in repo as the eighth module: `/analytics overview |
-  members | messages | commands | tickets | export` reads the audit ledger,
-  cases, invite joins, tickets and the append-only `command_usage` table. Every
-  view prints its source row counts; there is no analytics table. Live: two
-  stored audit rows matched two logged events, and one MCP edit plus one delete
-  produced exactly one edited / one deleted.
-- Pass 61 moved the last community component ids onto the signed router. The
-  role, role-select, giveaway, suggestion and poll panels are minted with the
-  same signer the router verifies and handled by `apps/bot/src/components.ts`;
-  the legacy listener was deleted from `community-events.ts`. Role panels get a
-  one-year TTL, the other three 30 days. The live probe adds
-  `web-community-interactions`: every panel was pressed through the real
-  adapter into a stored row, and expired, forged and cross-guild ids were
-  refused before a write. Moderation's appeal/verify ids were the one unsigned
-  handler until pass 64.
-- Pass 62 closed P7's command-copy gap: every registered root, subcommand and
-  option gained a hand-written German description, and `/ping`, `/about`,
-  `/help`, `/rank`, `/ticket` and the rank card reply through the same typed
-  catalog. The copy still English is named in the journal: community's
-  operator configuration replies, the other ten modules' replies, kernel guard
-  copy, service-owned economy reasons and operator-owned greeting text.
-- Pass 64 moved moderation's `appeal`/`verify` ids onto the signed router, so
-  every component id in the tree is signed and expires. The verify id packs the
-  guild and member into a `<guild>_<user>` payload that fits the signer's
-  40-character budget, and the router exposes it as the id's guild: a DM click
-  is guild-bound and a click in another server is refused. The legacy parser and
-  listener branch are deleted, so an old id is unhandled. The live probe adds
-  `web-moderation-interactions`, proving the appeal row, the DM verify row, and
-  the expired/forged/cross-guild/unauthorized refusals on Postgres.
-- Pass 65 contained the component seams without changing behaviour. Form routes
-  live in `apps/bot/src/form-interactions.ts` and community routes in
-  `apps/bot/src/community-interactions.ts`, beside `moderation-buttons.ts`;
-  `apps/bot/src/components.ts` is dependency wiring plus the one gateway
-  listener. `PanelSigner`/`requirePanelSigner` live in the kernel, and the probe
-  uses one `probeComponent()` fake. The check count stayed 28/28 and the test
-  count 631/92.
-- Pass 63 corrected that copy against the audit: option descriptions are keyed
-  per declaration (`command.<root>.<sub>.option.<name>` wins over the shared
-  root key), so two subcommands can describe the same option differently;
-  English command text lives only in the command definition, and the German
-  copy lives only in `packages/i18n/src/de.ts`. The coverage test derives the
-  expected keys from the registry and classifies every command file in the
-  tree as translated or deliberately English-only with a reason, so a new
-  command cannot quietly ship English-only.
-- 12 modules, 20 global command roots, 141 subcommands, 4 context menus, 631
-  tests in 92 files.
-- Pass 45 added the first P7 timer slice: temporary bans/roles write
-  `expires_at` and schedule one delayed `moderation.expire` job; reminders and
-  scheduled messages use the same bot-side `content.deliver` timer. The live
-  probe proves the SQL/queue/service paths (a real case expired, a real
-  reminder/scheduled record delivered once); the Discord actions were recording
-  ports, not gateway calls, so those rows stay live unverified for Discord.
-- Pass 46 finished the lifecycle block: `/mod panic state:status|on|off`
-  snapshots each changed `@everyone` SendMessages overwrite, persists the
-  snapshot before replying and restores only those channels; failed restores
-  stay in the row for a retry. It requires `Administrator` and has no timer.
-  `/tools goodbye` writes the same community settings, and
-  `WelcomeService.handleLeave` sends text with no role/DM branch. The live
-  probe is 13/13, adding the panic snapshot's Postgres round-trip; the Discord
-  lockdown calls and `GuildMemberRemove` are adapter-tested only.
-- Pass 47 completed the teaching phase: all 14 lessons are written against the
-  current code and `memory/machine/lessons.json` records each lesson's paths,
-  proof commands and taught counts. `pnpm memory:check` verifies the package
-  scripts and files exist, the required sections and Curriculum links are
-  present, and every taught count matches the machine files. No product
-  behaviour changed; the Docker quickstart now matches the production web guard.
-- Pass 48 made the prose answer to the machine: `memory/machine/claims.json`
-  names the governed documents, and `pnpm memory:check` checks current-tense
-  counts against `commands.json`, the vitest report and the pass ledger. A
-  historical sentence must name its pass; a current one must match. A capability
-  with no code evidence (the Next.js shell) must be marked planned. The drift named by the completion plan is corrected, and the root
-  CONTRIBUTING/GOVERNANCE/SECURITY/CODE_OF_CONDUCT files plus issue/PR templates
-  were added. No product behaviour changed.
-- Pass 49 built the P6 schema-widget slice. `apps/web/src/settings-form.ts`
-  derives checkboxes, bounded number inputs, selects, textareas, one-per-line
-  arrays and a validated JSON fallback from each module's own Zod schema; the
-  parser turns named fields back into the patch `SettingsService.update`
-  validates. The `AuditStore` port and its Drizzle adapter append one
-  `audit_events` row per accepted settings update/reset with actor, surface and
-  dotted-path diff; `/config` and `/setup` pass the command actor, and the
-  settings page shows the newest rows. The secret-key filter no longer hides
-  `maxOutputTokens`, and optional clears no longer persist as NULL. The live
-  probe is 14/14: `web-schema-widgets` drove real local HTTP
-  login/session/CSRF and the schema form on Postgres, saved a value, saw the
-  audit row, then rejected `5000` at `400` without a second row. The OAuth
-  exchange used a fake port; live Discord OAuth remains open.
-- Pass 50 added the P6 fleet slice. `/dashboard/fleet` lists the guilds the
-  signed-in user can manage with their enabled modules; three built-in templates
-  (alert-first moderation, strict moderation, quiet optional modules) preview a
-  per-guild diff by deep-merging the patch, parsing with the module's own schema
-  and diffing with the audit helper. Apply is bound to a SHA-256 fingerprint of
-  the displayed plan, re-authorizes every selected guild, refuses a missing or
-  stale preview, and calls `SettingsService.update` per changed module so each
-  write appends one dashboard audit row. There is no template table or second
-  schema. The live probe is 15/15: `web-fleet-templates` previewed and applied
-  across two Postgres-backed guilds with a real session and CSRF, refused a
-  wrong fingerprint at `409`, and saw one audit row per guild. JSON fleet
-  endpoints are not built; saved templates arrived in pass 52.
-- Pass 51 built the P6 config export/import/drift slice. `GET
-  /dashboard/guilds/:id/config/export` downloads a checksummed settings bundle
-  (kind/version, one entry per module, SHA-256, credential-shaped keys omitted).
-  Import verifies the module set, checksum and each module's own Zod schema,
-  previews the exact per-setting diff and writes nothing; apply is bound to a
-  SHA-256 fingerprint, refuses an edited checksum at `400` and a stale preview at
-  `409`, and calls `SettingsService.update` per changed module so each write
-  appends one dashboard audit row. Migration 0015 adds `config_baselines`; the
-  applied bundle becomes the baseline and the drift page compares baseline to
-  live, names an absent baseline and reports an unreadable stored row. Live probe
-  is 16/16: `web-config-export-import-drift` exported a 12-module file, uploaded
-  it as multipart, previewed without writing, refused `400`/`409`, applied one
-  audited AI write with a stored baseline, saw no drift then exactly one changed
-  value after an out-of-band update. OAuth exchange used a fake port.
-- Pass 52 finished the P6 template capability. A guild's effective settings can
-  be saved as a named template, listed, renamed or refreshed, deleted, and
-  applied to selected guilds. `config_templates` (migration 0016) sits behind one
-  `SavedTemplateStore` port with in-memory and Drizzle adapters. Save validates
-  every module with its own Zod schema; apply re-validates the stored row, so an
-  invalidated template is reported and refused at `400`, never applied. A valid
-  template reuses the built-in plan, SHA-256 fingerprint, re-authorization and
-  `SettingsService.update` loop, with one dashboard audit row per module;
-  create/update/delete append `template.*` rows. No marketplace, second settings
-  store or second write path. The carrier is still the framework-free
-  `apps/web` app. Pass 52's live probe was 17/17: `web-saved-templates` saved, listed,
-  previewed two guilds without writing, refused tampered/stale previews at
-  `409`, applied one audited write per guild, refused an invalidated row at
-  `400`, and audited delete. OAuth exchange used a fake port.
-- Pass 53 added the P6 analytics read. `/dashboard/guilds/:id/analytics` and
-  `GET /api/v1/guilds/:id/analytics` reuse the existing `AnalyticsStore` over
-  `logging_events`, `cases`, `invite_joins`, `tickets` and `command_usage`;
-  there is no analytics table, new writer or second aggregation path. The
-  window is bounded to 1–90 days, the page prints each source table's row
-  count, and a window with no retained rows says so instead of showing a
-  confident zero. Migration 0017 adds only the four missing guild/time read
-  indexes. Live probe is 18/18: `web-analytics-aggregates` seeded real Postgres
-  rows and matched every API/page aggregate, named an empty guild, and refused
-  `days=91`/`abc` at `400`; OAuth exchange used a fake port.
-- Pass 54 hardened the P6 session path. The opaque Postgres session cookie is
-  re-keyed every 15 minutes on a safe `GET`, so the previous value is refused
-  immediately; logout asks the OAuth port to revoke the Discord access token
-  before deleting the row, and the local session still dies when Discord is
-  unavailable. Fixed windows cap the auth, dashboard, write and API route
-  classes with `429` + `Retry-After`; `/healthz` is exempt. `WEB_OWNER_IDS`
-  gates `/dashboard/instance` and its sign-out-every-session action, which a
-  guild admin cannot reach. Live probe is 19/19: `web-session-hardening`
-  proved the owner gate, session revocation, all four limited classes and the
-  rotation replay over real local HTTP and Postgres. The probe's OAuth exchange
-  is fake, so live Discord token revocation and live login are not claimed.
-- Live: AI Team#5758 connected; 20 roots and 2 user / 2 message
-  menus registered at that run; one bot
-  process (two trees were double-posting and were stopped); Qwen3:8b replied in
-  `#ai-chat`; `!ping`, `!about`, `!help commands`, `!help browse`,
-  `!help search query=ban`, `!ai status`, `!mod history`, `!mod links`,
-  `!mod filters`, `!rank leaderboard`, `!invites leaderboard`, `!invites who`,
-  `!logging status`, `!logging events`, `!logging retention`,
-  `!logging export`, `!analytics overview`, `!analytics commands`,
-  `!analytics messages`, `!config list`,  `!config get`, `!config set`,
-  `!export guild`, `!export user`, `!export drift`, a wrong-id `!export delete`
-  refusal and a memory-mode `!export rollback` refusal ran through the real
-  pipeline. `!appeal open`, `!appeal status` and `!appeal status case=<n>` ran
-  against a real warning case; after `!mod review` the status still reported the
-  appended appeal, and another member's case was refused. `!verify status`,
-  `!verify start` (an explicit DM refusal) and a second `!verify status` ran
-  through the same bridge. `!form create`, `!form edit`, `!form panel`,
-  `!form submit`, `!form review` and `!form export` ran create → open → panel →
-  pending → accepted → a 1.5 KB file; the downloaded file matched the rows.
-  `!event create`, `!event edit`, `!event rsvp`, `!event list`, `!event remind`,
-  `!event export` and an `!event delete` refusal ran draft → open → 1/2 going →
-  reminder 1 → decline → going → a 1.2 KB file; the downloaded file matched the
-  RSVP row and checksum.
-  `!export guild`
-  uploaded a 12.8 KB JSON bundle and `!export user`
-  a 2 KB member bundle; the guild file was downloaded and parsed with the same
-  verifier. `/config export` and `!export import` are covered by tests, not the
-  live bridge. Marked messages created link, delete, profanity
-  and zalgo cases; `!mod filters` listed them, `!mod review` closed one, and
-  `example.com` was not flagged. A seeded `hello keystone` auto-responder replied
-  to a marked MCP message; a second message inside 60 seconds got no reply, and
-  a third after the window did. The web process booted in memory mode and
-  answered real HTTP requests; the write path was exercised over real local HTTP
-  with a fake OAuth port. Live Discord OAuth is open.
-- Environment: Docker Desktop **29.9.2** runs the repo's compose Postgres
-  **16.15** and Redis; all 20 migrations are applied, and `pnpm probe:live`
-  passed 28/28 SQL/Redis/queue/service/web/interaction checks on 2026-11-03 UTC.
-  `.env` points at
-  localhost. The machine evidence is `memory/machine/live.json`; run
-  `pnpm probe:live` after touching a SQL, Redis, queue or web path. Memory mode
-  is still a supported fallback, not the configured one. Local Ollama is up; a
-  cold first `!ai chat` timed out at 30s and a warm retry succeeded.
-- Open: human slash run, a live member join for invite attribution and audit
-  logging, a human author through the content filters, live zalgo `delete`
-  mode, forms modal input and forms in the guild export bundle, live
-  role/select/voice paths, a live Discord timer delivery and a live panic
-  lockdown (the SQL/service halves are live-proven), a real member leave,
-  pgvector ANN benchmark, MEE6 live fetch, live Discord OAuth, live refresh and
-  live token revocation, and the rest of P7.
+1. Read `AGENTS.md`, the newest journal, the relevant feature rows and the gap
+   register.
+2. Build one vertical slice behind the module contract. Prefer a subcommand; no
+   new root without `pnpm budget`.
+3. Write token-free tests first. Record live proof as `probe`, `mcp` or
+   `gateway`; never blur them.
+4. Update memory: spec/status/teaching, `features.json`, `project.json`
+   (`lastPass`, `tests`), `passes.json`, a journal with "tried and rejected," and
+   the changelog when user-visible.
+5. Run `pnpm memory:render && pnpm check`; fix the cause, never weaken a check.
+6. Commit only this pass's files, push, and verify the remote tree.
+7. Report what is proven, what is only tested, and what needs a human client.
 
-When you finish a pass, update `memory/machine/project.json` (`lastPass`,
-`tests`), append to `memory/machine/passes.json`, write the journal, update the
-module status, then run `pnpm memory:render && pnpm check`.
+## Current state (2026-11-05)
+
+- 12 modules, 20 global command roots, 141 subcommands, 4 context menus, 644 tests in 94 files.
+- **644 tests across 94 files**, all token-free.
+- **Docker Desktop 29.9.2** runs the compose Postgres 16.15 and Redis;
+  `pnpm probe:live` is 28/28.
+- 20/100 global roots are used.
+
+Do not add a second current-state ledger here. The authoritative phase, module,
+feature and pass state is `memory/machine/project.json`,
+`memory/machine/features.json` and `memory/vault/01-Mission/Status.md`.

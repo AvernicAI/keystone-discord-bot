@@ -12,7 +12,7 @@ reason, evidence and an appeal path. The default is dry-run.
 
 | Command | Options | Guards | Behaviour |
 | --- | --- | --- | --- |
-| `/mod` | subcommands `ban`, `temp-role`, `panic`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `links`, `filters`, `review`; each declares only the options it needs (`user`, `role`, `reason`, `case`, `duration`, `limit`, `channel`, `state`, `dry_run`) | guild-only, `ModerateMembers`; `panic on/off` also requires `Administrator` | Executes one manual action or reads the case/review queue. `ban` accepts an optional `duration` and `temp-role` requires `user`, `role` and `duration`; both write `expires_at` after the action succeeds. `panic` snapshots and restores `@everyone` SendMessages. `links` lists link findings, `filters` lists link/profanity/zalgo findings, and `review` closes the loop. Every enforced action opens a case before the external call. |
+| `/mod` | subcommands `ban`, `temp-role`, `panic`, `kick`, `timeout`, `warn`, `purge`, `lock`, `unlock`, `slowmode`, `case`, `note`, `history`, `links`, `filters`, `review`; each declares only the options it needs (`user`, `role`, `reason`, `case`, `duration`, `limit`, `channel`, `state`, `dry_run`, `format`, `count`) | guild-only, `ModerateMembers`; `panic on/off` also requires `Administrator` | Executes one manual action or reads the case/review queue. `ban` accepts an optional `duration` and `temp-role` requires `user`, `role` and `duration`; both write `expires_at` after the action succeeds. `panic` snapshots and restores `@everyone` SendMessages. `links` lists link findings, `filters` lists link/profanity/zalgo findings, and `review` closes the loop. Every enforced action opens a case before the external call. `case format:json\|csv` and `history count:<1-50> format:json\|csv` attach the same rows instead of an embed. |
 | `/appeal` | subcommands `open` (`case` required, `message`) and `status` (optional `case`) | guild-only, 5 s cooldown | `open` appends an `appealed` event to the caller's own case; never edits history or reverses automatically. `status` reads the append-only appeal events and the current case state, and refuses a case that is not the caller's. |
 | `/verify` | subcommands `start` and `status` | guild-only, 5 s cooldown | `start` requires a persisted quarantine, then checks the join gate, its own state and DM-ability before sending the existing verification button through `ModerationActions.directMessage`; no community port is involved. `status` reads the persisted `members` row. Neither subcommand marks a member verified directly, and a member with no record is refused by name. |
 
@@ -123,6 +123,16 @@ source of truth.
   truncated to 500 characters; a profanity finding keeps only the matched word;
   a zalgo finding keeps only the mark count. No general message archive is
   created.
+
+## Case export
+
+`/mod case` and `/mod history` take an optional `format`. With `json`, one case
+and its append-only events (or up to 50 recent cases) leave as a private
+attachment; with `csv`, one row per case carries the escaped event history. A
+SHA-256 checksum over the normalized case/event content is written into the
+file and shown in the reply, so the JSON and CSV of the same data agree. The
+export reads through `CaseStore` and writes nothing: there is no export table,
+job or cache. Without `format`, both commands keep their embeds.
 
 ## Join gate and verification
 

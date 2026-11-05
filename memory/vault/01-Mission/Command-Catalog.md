@@ -111,9 +111,9 @@ Moderate members, inspect cases and review the queue.
 | `/mod lock` | Lock a channel so members cannot post. | `channel`, `reason`, `dry_run` |
 | `/mod unlock` | Unlock a channel again. | `channel`, `reason`, `dry_run` |
 | `/mod slowmode` | Set channel slowmode in seconds. | `channel`, `duration`, `reason`, `dry_run` |
-| `/mod case` | Show one case by number. | `case` |
+| `/mod case` | Show one case by number, or export it. | `case`, `format` |
 | `/mod note` | Append a moderator note to a case. | `case`, `reason` |
-| `/mod history` | List recent cases, optionally for one member. | `user` |
+| `/mod history` | List or export recent cases, optionally for one member. | `user`, `count`, `format` |
 | `/mod links` | Review recent link-filter findings. | — |
 | `/mod filters` | Review link, profanity and zalgo findings. | — |
 | `/mod review` | Show the review queue or close one case. | `case` |
@@ -188,7 +188,7 @@ Community utilities: birthdays, suggestions, content, roles, giveaways, feeds an
 | `/tools stat` | Create a member, online or booster stat channel. | `channel`, `value` |
 | `/tools welcome` | Configure the welcome message and autorole. | `value`, `channel`, `role`, `limit` |
 | `/tools goodbye` | Configure the goodbye message for departing members. | `value`, `channel` |
-| `/tools roles` | Post a reaction-role or select-role panel. | `channel`, `value`, `role`, `name`, `limit` |
+| `/tools roles` | Post a role panel, or turn role persistence on or off. | `channel`, `value`, `role`, `name`, `limit`, `persist` |
 | `/tools starboard` | Configure the starboard channel and threshold. | `channel`, `limit` |
 | `/tools starboard-override` | Set a per-channel starboard threshold or turn it off. | `channel`, `target`, `value`, `limit` |
 | `/tools voice` | Configure the temporary voice hub. | `channel`, `value` |

@@ -46,6 +46,11 @@ export {
   type SuggestionStatus,
 } from "./extras";
 export {
+  RolePersistenceService,
+  type RoleRestoreResult,
+  type RoleSnapshot,
+} from "./role-persistence";
+export {
   ContentService,
   parseRss,
   type EmbedInput,

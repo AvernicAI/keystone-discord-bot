@@ -96,8 +96,8 @@ would duplicate the hub and spend a command for no user benefit.
 | `/tools` | embeds, giveaways, reminders, feeds | `/tools embed edit` |
 | `/help` | discovery, generated from the registry | `/help moderation` |
 
-Seventeen roots today for a bot with dozens of implemented actions. The remaining
-83 slots are held for Activities and features that genuinely need their own name;
+Twenty roots today for a bot with dozens of implemented actions. The remaining
+80 slots are held for Activities and features that genuinely need their own name;
 context menus do not consume them. `/help`, `/setup`, `/logging`, `/analytics`,
 `/config`, `/export` and `/music` are roots. `/config` landed in pass 30 with four
 subcommands and no new settings store; `/export` landed in pass 31 with six

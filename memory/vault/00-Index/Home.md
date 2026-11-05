@@ -15,14 +15,15 @@ https://github.com/RNGBubba/keystone-discord-bot
 | --- | --- |
 | Understand why this exists | [[Mission]] · [[North-Star]] |
 | Know what we refuse to do | [[Non-Negotiables]] |
-| See the order of work | [[Roadmap]] |
+| See the order of work | [[Roadmap]] · [[Roadmap-v3]] |
+| Audit the memory and read the proposed plan | [[Memory-Audit-2026-11-03]] |
 | See the whole mission | [[Master-Plan]] · [[Parity-Matrix]] |
 | Check what is actually proven | [[01-Mission/Status\|Project status]] |
 | Understand the code | [[System-Overview]] · [[Module-Contract]] · [[Live-Testing]] |
 | Understand the 100-command wall | [[Command-Budget]] · [[Command-Catalog]] |
 | Add a feature | [[04-Modules/diagnostics/Spec\|Diagnostics spec]] then copy the folder |
 | Know what is actually shipped | [[Feature-Status]] · [[Pass-Ledger]] |
-| Know what competitors do | [[02-Research/Competitors/MEE6\|MEE6]] · [[Dyno]] · [[Carl-bot]] · [[Competitive-2026]] |
+| Know what competitors do | [[Competitor-Index]] · [[Gap-Register]] · [[Competitive-2026]] |
 | Know the platform limits | [[Platform-Limits]] · [[Platform-2026]] |
 | Know what can be imported | [[Import-Formats]] · [[Migration-Guides]] |
 | Export, restore or delete a guild | [[Portability]] · [[Portability-Runbook]] |
@@ -273,6 +274,6 @@ Machine truth lives in `memory/machine/project.json` and the generated
 
 ## Open questions
 
-[[Open-Questions]] — the licence (AGPL-3.0 recommended), hosted-tier posture and
-Activities eligibility. P4.5 and P5 are not blocked by them; the licence blocks
-external contributions and P9 launch.
+[[Open-Questions]] — the licence is settled (AGPL-3.0-or-later); the hosted-tier
+posture and Activities eligibility remain open. P4.5 and P5 are not blocked
+by them.

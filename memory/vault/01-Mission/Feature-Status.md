@@ -5,30 +5,34 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**134 features** across 17 domains: **114 in repo**, **10 open**, **6 planned**. Live behaviour is marked separately; a green
-box means the code and its tests exist, not that a live guild has run it.
+**134 features** across 17 domains: **116 in repo**, **4 partial**, **5 open**, **5 planned**. Live behaviour is marked 
+separately; a box means the code and its tests exist, not that a live guild has run it.
+
+`partial` means the foundation ships with evidence and a named visible capability is
+still missing. `live: probe check` names a passing check in `live.json`; `live: manual run`
+names the written record in `liveRecord`; no row claims a gateway click it did not get.
 
 ## Domains
 
-| Domain | Features | In repo | Open | Planned |
-| --- | ---: | ---: | ---: | ---: |
-| Moderation | 13 | 12 | 1 | 0 |
-| Automod | 10 | 9 | 0 | 1 |
-| Security | 9 | 9 | 0 | 0 |
-| Leveling | 7 | 7 | 0 | 0 |
-| Economy | 6 | 5 | 0 | 0 |
-| Community | 12 | 11 | 1 | 0 |
-| Tickets | 7 | 6 | 1 | 0 |
-| Content | 7 | 6 | 0 | 0 |
-| Music | 4 | 1 | 1 | 0 |
-| AI | 7 | 6 | 1 | 0 |
-| Operations | 17 | 15 | 1 | 1 |
-| Portability | 12 | 12 | 0 | 0 |
-| Invites | 3 | 3 | 0 | 0 |
-| Forms and applications | 3 | 3 | 0 | 0 |
-| Events and RSVP | 4 | 1 | 3 | 0 |
-| Private modmail | 6 | 5 | 1 | 0 |
-| Community parity extras | 7 | 3 | 0 | 4 |
+| Domain | Features | In repo | Partial | Open | Planned |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Moderation | 13 | 13 | 0 | 0 | 0 |
+| Automod | 10 | 9 | 0 | 0 | 1 |
+| Security | 9 | 9 | 0 | 0 | 0 |
+| Leveling | 7 | 7 | 0 | 0 | 0 |
+| Economy | 6 | 5 | 0 | 0 | 0 |
+| Community | 12 | 11 | 1 | 0 | 0 |
+| Tickets | 7 | 6 | 0 | 1 | 0 |
+| Content | 7 | 6 | 0 | 0 | 0 |
+| Music | 4 | 1 | 0 | 1 | 0 |
+| AI | 7 | 6 | 0 | 1 | 0 |
+| Operations | 17 | 15 | 1 | 0 | 1 |
+| Portability | 12 | 12 | 0 | 0 | 0 |
+| Invites | 3 | 3 | 0 | 0 | 0 |
+| Forms and applications | 3 | 3 | 0 | 0 | 0 |
+| Events and RSVP | 4 | 1 | 2 | 1 | 0 |
+| Private modmail | 6 | 5 | 0 | 1 | 0 |
+| Community parity extras | 7 | 4 | 0 | 0 | 3 |
 
 ## Moderation
 
@@ -43,8 +47,8 @@ box means the code and its tests exist, not that a live guild has run it.
 | Case lookup | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
 | Evidence card | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
 | Dry-run default | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts` · live unverified |
-| Appeal from the DM | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts`, `packages/db/src/cases.test.ts`, `scripts/live-probe.ts` · live verified |
-| Case export | P7 | ◐ open | Export commands are part of the P5/P7 data-ownership work. · `modules/moderation/src/mod.test.ts` |
+| Appeal from the DM | P2 | ✅ in repo | `modules/moderation/src/mod.test.ts`, `packages/db/src/cases.test.ts`, `scripts/live-probe.ts` · live: probe check |
+| Case export | P7.5 | ✅ in repo | `modules/moderation/src/case-export.ts`, `modules/moderation/src/case-export.test.ts`, `modules/moderation/src/commands/mod.ts`, `modules/moderation/src/mod.test.ts` · live unverified |
 | Report message menu | P7 | ✅ in repo | `modules/moderation/src/context.test.ts` · live unverified |
 | Case history menu | P7 | ✅ in repo | `modules/moderation/src/context.test.ts` · live unverified |
 
@@ -54,14 +58,14 @@ box means the code and its tests exist, not that a live guild has run it.
 | --- | --- | --- | --- |
 | Spam / caps / mentions | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 | Invite links | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
-| Link / phishing filter | P7 | ✅ in repo | `modules/moderation/src/security.test.ts`, `modules/moderation/src/mod.test.ts`, `apps/bot/src/moderation-events.test.ts` · live verified |
-| Profanity / zalgo | P7 | ✅ in repo | `modules/moderation/src/security.test.ts`, `modules/moderation/src/mod.test.ts` · live verified |
+| Link / phishing filter | P7 | ✅ in repo | `modules/moderation/src/security.test.ts`, `modules/moderation/src/mod.test.ts`, `apps/bot/src/moderation-events.test.ts` · live: manual run |
+| Profanity / zalgo | P7 | ✅ in repo | `modules/moderation/src/security.test.ts`, `modules/moderation/src/mod.test.ts` · live: manual run |
 | Duplicate / crosspost | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 | Native AutoMod sync | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 | AI classification | P4 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 | Per-rule punishment | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 | Rule test mode | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
-| False-positive report | P7 | ⏳ planned | `modules/moderation/src/security.test.ts` |
+| False-positive report | P7 | ⏳ planned | `modules/moderation/src/security.test.ts` · live unverified |
 
 ## Security
 
@@ -74,7 +78,7 @@ box means the code and its tests exist, not that a live guild has run it.
 | Join gate / verification | P2 | ✅ in repo | `apps/bot/src/moderation-buttons.test.ts`, `modules/moderation/src/security.test.ts`, `modules/moderation/src/verification.test.ts`, `modules/moderation/src/mod.test.ts`, `packages/db/src/member-store.test.ts`, `scripts/live-probe.ts` · live unverified |
 | Panic mode | P7 | ✅ in repo | `modules/moderation/src/panic.test.ts`, `modules/moderation/src/mod.test.ts`, `packages/db/src/panic.test.ts`, `apps/bot/src/moderation-actions.ts`, `apps/bot/src/moderation-actions.test.ts` · live unverified |
 | Heat scoring | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
-| Backup / restore | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live verified |
+| Backup / restore | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live: probe check |
 | Shared case file with mod | P2 | ✅ in repo | `modules/moderation/src/security.test.ts` · live unverified |
 
 ## Leveling
@@ -98,34 +102,34 @@ box means the code and its tests exist, not that a live guild has run it.
 | Transfers | P4 | ✅ in repo | `modules/community/src/economy.test.ts` · live unverified |
 | Gambling | P4 | ✅ in repo | `modules/community/src/economy.test.ts` · live unverified |
 | Audit ledger | P4 | ✅ in repo | `modules/community/src/economy.test.ts` · live unverified |
-| Global economy | none | — non-goal | Non-goal: server context matters |
+| Global economy | none | — non-goal | live unverified |
 
 ## Community
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Welcome / goodbye | P7 | ✅ in repo | `modules/community/src/panels.ts`, `modules/community/src/engagement.ts`, `modules/community/src/community.test.ts`, `modules/community/src/commands.test.ts`, `apps/bot/src/community-events.test.ts`, `scripts/live-probe.ts` · live verified |
+| Welcome / goodbye | P7 | ✅ in repo | `modules/community/src/panels.ts`, `modules/community/src/engagement.ts`, `modules/community/src/community.test.ts`, `modules/community/src/commands.test.ts`, `apps/bot/src/community-events.test.ts`, `scripts/live-probe.ts` · live: probe check |
 | Autorole | P3 | ✅ in repo | `modules/community/src/extras.test.ts` · live unverified |
-| Reaction roles | P3 | ✅ in repo | `modules/community/src/extras.test.ts`, `apps/bot/src/components.test.ts` · live verified |
+| Reaction roles | P3 | ✅ in repo | `modules/community/src/extras.test.ts`, `apps/bot/src/components.test.ts` · live: probe check |
 | Starboard | P3 | ✅ in repo | `modules/community/src/extras.test.ts` · live unverified |
 | Birthdays | P3 | ✅ in repo | `modules/community/src/extras.test.ts` · live unverified |
-| Suggestions | P3 | ✅ in repo | `modules/community/src/extras.test.ts`, `apps/bot/src/components.test.ts` · live verified |
-| Polls | P3 | ✅ in repo | `modules/community/src/extras.test.ts`, `apps/bot/src/components.test.ts` · live verified |
-| Giveaways | P3 | ✅ in repo | `modules/community/src/extras.test.ts`, `apps/bot/src/components.test.ts` · live verified |
+| Suggestions | P3 | ✅ in repo | `modules/community/src/extras.test.ts`, `apps/bot/src/components.test.ts` · live: probe check |
+| Polls | P3 | ✅ in repo | `modules/community/src/extras.test.ts`, `apps/bot/src/components.test.ts` · live: probe check |
+| Giveaways | P3 | ✅ in repo | `modules/community/src/extras.test.ts`, `apps/bot/src/components.test.ts` · live: probe check |
 | Temp voice | P3 | ✅ in repo | `modules/community/src/extras.test.ts` · live unverified |
 | Stat channels | P3 | ✅ in repo | `modules/community/src/extras.test.ts` · live unverified |
-| Social feeds | P7 | ◐ open | RSS ships; YouTube/Twitch-specific feeds are named as open in the P3 status. · `modules/community/src/extras.test.ts` |
-| Rank card menu | P7 | ✅ in repo | `modules/community/src/panels.ts`, `modules/community/src/commands/rank-card.ts`, `modules/community/src/commands/rank.ts`, `modules/community/src/context.test.ts`, `apps/bot/src/adapt.test.ts`, `scripts/live-probe.ts` · live verified |
+| Social feeds | P7 | 🟡 partial | shipped: RSS/Atom polling with GUID dedupe, posted on the 60-second community tick · open: YouTube upload notifications; Twitch live notifications; Kick live notifications · `modules/community/src/extras.test.ts`, `apps/bot/src/community-events.ts` · live unverified |
+| Rank card menu | P7 | ✅ in repo | `modules/community/src/panels.ts`, `modules/community/src/commands/rank-card.ts`, `modules/community/src/commands/rank.ts`, `modules/community/src/context.test.ts`, `apps/bot/src/adapt.test.ts`, `scripts/live-probe.ts` · live: probe check |
 
 ## Tickets
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Panels | P3 | ✅ in repo | `modules/community/src/panels.ts`, `modules/community/src/tickets.ts`, `modules/community/src/commands/ticket.ts`, `apps/bot/src/community-interactions.ts`, `apps/bot/src/components.test.ts`, `apps/bot/src/community-events.test.ts`, `scripts/live-probe.ts` · live verified |
+| Panels | P3 | ✅ in repo | `modules/community/src/panels.ts`, `modules/community/src/tickets.ts`, `modules/community/src/commands/ticket.ts`, `apps/bot/src/community-interactions.ts`, `apps/bot/src/components.test.ts`, `apps/bot/src/community-events.test.ts`, `scripts/live-probe.ts` · live: probe check |
 | Thread-based tickets | P3 | ✅ in repo | `modules/community/src/commands.test.ts` · live unverified |
 | Claiming | P3 | ✅ in repo | `modules/community/src/commands.test.ts` · live unverified |
 | Transcripts | P3 | ✅ in repo | `modules/community/src/commands.test.ts` · live unverified |
-| Knowledge base | P4 | ◐ open | Exact-index RAG ships; the pgvector ANN 1Mx1536 gate is open. |
+| Knowledge base | P4 | ◐ open | Exact-index RAG ships; the pgvector ANN 1Mx1536 gate is open. · live unverified |
 | AI deflection | P4 | ✅ in repo | `modules/community/src/commands.test.ts` · live unverified |
 | SLA analytics | P3 | ✅ in repo | `modules/community/src/commands.test.ts` · live unverified |
 
@@ -139,23 +143,23 @@ box means the code and its tests exist, not that a live guild has run it.
 | Reminders | P3 | ✅ in repo | `modules/community/src/community.test.ts`, `apps/bot/src/timers.test.ts`, `scripts/live-probe.ts` · live unverified |
 | Sticky messages | P3 | ✅ in repo | `modules/community/src/extras.test.ts` · live unverified |
 | RSS / feeds | P3 | ✅ in repo | `modules/community/src/extras.test.ts` · live unverified |
-| Translation | none | — non-goal | Non-goal: unreliable, costly |
+| Translation | none | — non-goal | live unverified |
 
 ## Music
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Playback | P8 | ◐ open | Streaming audio needs a Discord voice client or a BYO Lavalink endpoint; neither is installed or configured, and pass 32 was not authorized to add one. The refusal is live-proven; playback itself is not shipped. |
-| Queue / controls | P8 | ✅ in repo | `modules/music/src/music.test.ts`, `packages/db/src/music-store.test.ts` · live verified |
-| Bundled source | none | — non-goal | Non-goal: legal risk |
-| Lyrics / autoplay | none | — non-goal | Non-goal |
+| Playback | P8 | ◐ open | Streaming audio needs a Discord voice client or a BYO Lavalink endpoint; neither is installed or configured, and pass 32 was not authorized to add one. The refusal is live-proven; playback itself is not shipped. · live unverified |
+| Queue / controls | P8 | ✅ in repo | `modules/music/src/music.test.ts`, `packages/db/src/music-store.test.ts` · live: manual run |
+| Bundled source | none | — non-goal | live unverified |
+| Lyrics / autoplay | none | — non-goal | live unverified |
 
 ## AI
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Persona chat | P4 | ✅ in repo | `modules/ai/src/ai.test.ts`, `apps/bot/src/ai-events.test.ts` · live verified |
-| Server RAG | P4 | ◐ open | Portable exact index ships; pgvector ANN remains open. |
+| Persona chat | P4 | ✅ in repo | `modules/ai/src/ai.test.ts`, `apps/bot/src/ai-events.test.ts` · live: manual run |
+| Server RAG | P4 | ◐ open | Portable exact index ships; pgvector ANN remains open. · live unverified |
 | Mod explanations | P4 | ✅ in repo | `modules/ai/src/ai.test.ts` · live unverified |
 | Explain with AI menu | P7 | ✅ in repo | `modules/ai/src/context.test.ts` · live unverified |
 | Thread summaries | P4 | ✅ in repo | `modules/ai/src/ai.test.ts` · live unverified |
@@ -166,39 +170,39 @@ box means the code and its tests exist, not that a live guild has run it.
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Audit logging | P7 | ✅ in repo | `modules/logging/src/logging.test.ts`, `apps/bot/src/logging-events.test.ts`, `packages/db/src/logging-store.test.ts`, `memory/vault/04-Modules/logging/Status.md` · live verified |
-| Real subcommand surface | P7 | ✅ in repo | `packages/kernel/src/registry.test.ts`, `apps/bot/src/adapt.test.ts`, `apps/bot/src/command-sync.test.ts`, `apps/bot/src/interaction-harness.test.ts`, `modules/diagnostics/src/diagnostics.test.ts` · live verified |
-| In-bot configuration | P7 | ✅ in repo | `modules/setup/src/config.test.ts`, `modules/setup/src/commands/config.ts`, `packages/kernel/src/config.ts` · live verified |
-| Web dashboard | P6 | ◐ open | Login, sessions, guild reads, schema forms, audited writes, the fleet view, templates, config portability and analytics are built; a live Discord OAuth round trip is not. |
+| Audit logging | P7 | ✅ in repo | `modules/logging/src/logging.test.ts`, `apps/bot/src/logging-events.test.ts`, `packages/db/src/logging-store.test.ts`, `memory/vault/04-Modules/logging/Status.md` · live: manual run |
+| Real subcommand surface | P7 | ✅ in repo | `packages/kernel/src/registry.test.ts`, `apps/bot/src/adapt.test.ts`, `apps/bot/src/command-sync.test.ts`, `apps/bot/src/interaction-harness.test.ts`, `modules/diagnostics/src/diagnostics.test.ts` · live: manual run |
+| In-bot configuration | P7 | ✅ in repo | `modules/setup/src/config.test.ts`, `modules/setup/src/commands/config.ts`, `packages/kernel/src/config.ts` · live: probe check |
+| Web dashboard | P6 | 🟡 partial | shipped: OAuth2/PKCE login and opaque Postgres sessions; schema-generated settings widgets and audited writes; fleet view, built-in and saved templates; config export/import/drift and analytics aggregates; scoped API tokens, signed webhooks and idempotent writes · open: a live Discord OAuth round trip (the probe uses a fake exchange) · `apps/web/src/web.test.ts`, `apps/web/src/settings-form.test.ts`, `scripts/live-probe.ts` · live unverified |
 | Dashboard auth foundation | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `packages/db/src/web-store.test.ts`, `memory/vault/03-Architecture/Dashboard.md` · live unverified |
-| Dashboard session hardening | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `apps/web/src/auth.ts`, `apps/web/src/oauth.ts`, `apps/web/src/rate-limit.ts`, `packages/db/src/web-store.test.ts`, `packages/db/src/migrations/0020-session-refresh.ts`, `memory/vault/03-Architecture/Dashboard.md` · live verified |
-| Dashboard settings writes | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `apps/web/src/overview.ts`, `memory/vault/03-Architecture/Dashboard.md` · live verified |
-| Schema-driven settings widgets | P6 | ✅ in repo | `apps/web/src/settings-form.ts`, `apps/web/src/settings-form.test.ts`, `apps/web/src/web.test.ts`, `apps/web/src/render.ts`, `scripts/live-probe.ts` · live verified |
-| Settings audit trail | P6 | ✅ in repo | `packages/kernel/src/audit.ts`, `packages/kernel/src/settings.ts`, `packages/db/src/audit-store.ts`, `packages/db/src/audit-store.test.ts`, `apps/web/src/web.test.ts` · live verified |
-| Dashboard analytics aggregates | P6 | ✅ in repo | `packages/kernel/src/analytics.ts`, `packages/db/src/analytics-store.ts`, `packages/db/src/migrations/0017-analytics-indexes.ts`, `apps/web/src/overview.ts`, `apps/web/src/render.ts`, `apps/web/src/analytics.test.ts`, `apps/web/src/web.test.ts`, `scripts/live-probe.ts` · live verified |
-| Multi-server fleet | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `apps/web/src/overview.ts`, `apps/web/src/authorization.ts`, `apps/web/src/render.ts`, `memory/vault/03-Architecture/Dashboard.md` · live verified |
-| Config templates | P6 | ✅ in repo | `apps/web/src/templates.ts`, `apps/web/src/templates.test.ts`, `apps/web/src/saved-templates.test.ts`, `apps/web/src/web.test.ts`, `apps/web/src/render.ts`, `packages/kernel/src/saved-templates.ts`, `packages/db/src/config-template-store.ts`, `packages/db/src/config-template-store.test.ts`, `packages/db/src/migrations/0016-config-templates.ts`, `scripts/live-probe.ts` · live verified |
-| Config export, import and drift | P6 | ✅ in repo | `apps/web/src/config-bundle.ts`, `apps/web/src/config-bundle.test.ts`, `apps/web/src/overview.ts`, `apps/web/src/routes/dashboard.ts`, `apps/web/src/render.ts`, `packages/kernel/src/baselines.ts`, `packages/db/src/config-baseline-store.ts`, `packages/db/src/config-baseline-store.test.ts`, `apps/web/src/web.test.ts`, `scripts/live-probe.ts` · live verified |
-| Scoped API tokens | P6 | ✅ in repo | `packages/kernel/src/api-tokens.ts`, `packages/db/src/api-token-store.ts`, `packages/db/src/migrations/0018-api-tokens.ts`, `packages/db/src/web-store.test.ts`, `apps/web/src/api-tokens.ts`, `apps/web/src/api-tokens.test.ts`, `apps/web/src/openapi.ts`, `apps/web/src/openapi.test.ts`, `apps/web/src/authorization.ts`, `apps/web/src/routes/tokens.ts`, `apps/web/src/web.test.ts`, `scripts/live-probe.ts` · live verified |
-| Public API / webhooks | P6 | ✅ in repo | `packages/kernel/src/webhooks.ts`, `packages/db/src/webhook-store.ts`, `packages/db/src/migrations/0019-webhooks.ts`, `apps/web/src/webhooks.ts`, `apps/web/src/routes/webhooks.ts`, `apps/web/src/idempotency.ts`, `apps/web/src/routes/api.ts`, `apps/web/src/webhooks.test.ts`, `packages/db/src/webhook-store.test.ts`, `packages/db/src/idempotency.test.ts`, `scripts/live-probe.ts` · live verified |
-| i18n | P7 | ✅ in repo | `packages/i18n/src/messages.ts`, `packages/i18n/src/index.ts`, `packages/i18n/src/de.ts`, `packages/i18n/src/i18n.test.ts`, `modules/setup/src/settings.ts`, `modules/setup/src/settings.test.ts`, `modules/forms/src/panel.ts`, `modules/forms/src/commands/form.ts`, `apps/bot/src/form-interactions.ts`, `apps/bot/src/adapt.ts`, `apps/bot/src/adapt.test.ts`, `apps/web/src/settings-form.test.ts`, `scripts/live-probe.ts` · live verified |
-| Status page | P9 | ⏳ planned | Public incidents |
+| Dashboard session hardening | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `apps/web/src/auth.ts`, `apps/web/src/oauth.ts`, `apps/web/src/rate-limit.ts`, `packages/db/src/web-store.test.ts`, `packages/db/src/migrations/0020-session-refresh.ts`, `memory/vault/03-Architecture/Dashboard.md` · live: probe check |
+| Dashboard settings writes | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `apps/web/src/overview.ts`, `memory/vault/03-Architecture/Dashboard.md` · live: probe check |
+| Schema-driven settings widgets | P6 | ✅ in repo | `apps/web/src/settings-form.ts`, `apps/web/src/settings-form.test.ts`, `apps/web/src/web.test.ts`, `apps/web/src/render.ts`, `scripts/live-probe.ts` · live: probe check |
+| Settings audit trail | P6 | ✅ in repo | `packages/kernel/src/audit.ts`, `packages/kernel/src/settings.ts`, `packages/db/src/audit-store.ts`, `packages/db/src/audit-store.test.ts`, `apps/web/src/web.test.ts` · live: probe check |
+| Dashboard analytics aggregates | P6 | ✅ in repo | `packages/kernel/src/analytics.ts`, `packages/db/src/analytics-store.ts`, `packages/db/src/migrations/0017-analytics-indexes.ts`, `apps/web/src/overview.ts`, `apps/web/src/render.ts`, `apps/web/src/analytics.test.ts`, `apps/web/src/web.test.ts`, `scripts/live-probe.ts` · live: probe check |
+| Multi-server fleet | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `apps/web/src/overview.ts`, `apps/web/src/authorization.ts`, `apps/web/src/render.ts`, `memory/vault/03-Architecture/Dashboard.md` · live: probe check |
+| Config templates | P6 | ✅ in repo | `apps/web/src/templates.ts`, `apps/web/src/templates.test.ts`, `apps/web/src/saved-templates.test.ts`, `apps/web/src/web.test.ts`, `apps/web/src/render.ts`, `packages/kernel/src/saved-templates.ts`, `packages/db/src/config-template-store.ts`, `packages/db/src/config-template-store.test.ts`, `packages/db/src/migrations/0016-config-templates.ts`, `scripts/live-probe.ts` · live: probe check |
+| Config export, import and drift | P6 | ✅ in repo | `apps/web/src/config-bundle.ts`, `apps/web/src/config-bundle.test.ts`, `apps/web/src/overview.ts`, `apps/web/src/routes/dashboard.ts`, `apps/web/src/render.ts`, `packages/kernel/src/baselines.ts`, `packages/db/src/config-baseline-store.ts`, `packages/db/src/config-baseline-store.test.ts`, `apps/web/src/web.test.ts`, `scripts/live-probe.ts` · live: probe check |
+| Scoped API tokens | P6 | ✅ in repo | `packages/kernel/src/api-tokens.ts`, `packages/db/src/api-token-store.ts`, `packages/db/src/migrations/0018-api-tokens.ts`, `packages/db/src/web-store.test.ts`, `apps/web/src/api-tokens.ts`, `apps/web/src/api-tokens.test.ts`, `apps/web/src/openapi.ts`, `apps/web/src/openapi.test.ts`, `apps/web/src/authorization.ts`, `apps/web/src/routes/tokens.ts`, `apps/web/src/web.test.ts`, `scripts/live-probe.ts` · live: probe check |
+| Public API / webhooks | P6 | ✅ in repo | `packages/kernel/src/webhooks.ts`, `packages/db/src/webhook-store.ts`, `packages/db/src/migrations/0019-webhooks.ts`, `apps/web/src/webhooks.ts`, `apps/web/src/routes/webhooks.ts`, `apps/web/src/idempotency.ts`, `apps/web/src/routes/api.ts`, `apps/web/src/webhooks.test.ts`, `packages/db/src/webhook-store.test.ts`, `packages/db/src/idempotency.test.ts`, `scripts/live-probe.ts` · live: probe check |
+| i18n | P7 | ✅ in repo | `packages/i18n/src/messages.ts`, `packages/i18n/src/index.ts`, `packages/i18n/src/de.ts`, `packages/i18n/src/i18n.test.ts`, `modules/setup/src/settings.ts`, `modules/setup/src/settings.test.ts`, `modules/forms/src/panel.ts`, `modules/forms/src/commands/form.ts`, `apps/bot/src/form-interactions.ts`, `apps/bot/src/adapt.ts`, `apps/bot/src/adapt.test.ts`, `apps/web/src/settings-form.test.ts`, `scripts/live-probe.ts` · live: probe check |
+| Status page | P9 | ⏳ planned | live unverified |
 
 ## Portability
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Full export bundle | P5 | ✅ in repo | `packages/importer/src/importer.test.ts`, `packages/db/src/portability.test.ts`, `modules/setup/src/export.test.ts`, `apps/bot/src/export-port.test.ts` · live verified |
-| In-Discord export surface | P7 | ✅ in repo | `modules/setup/src/export.test.ts`, `apps/bot/src/export-port.test.ts`, `apps/bot/src/export-discord.test.ts`, `packages/kernel/src/export.ts` · live verified |
-| Restore and config hash | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live verified |
-| Dry-run import diff | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live verified |
-| Rollback window | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live verified |
-| Deletion receipt | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live verified |
+| Full export bundle | P5 | ✅ in repo | `packages/importer/src/importer.test.ts`, `packages/db/src/portability.test.ts`, `modules/setup/src/export.test.ts`, `apps/bot/src/export-port.test.ts` · live: manual run |
+| In-Discord export surface | P7 | ✅ in repo | `modules/setup/src/export.test.ts`, `apps/bot/src/export-port.test.ts`, `apps/bot/src/export-discord.test.ts`, `packages/kernel/src/export.ts` · live: manual run |
+| Restore and config hash | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live: probe check |
+| Dry-run import diff | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live: probe check |
+| Rollback window | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live: probe check |
+| Deletion receipt | P5 | ✅ in repo | `packages/db/src/portability.test.ts` · live: probe check |
 | MEE6 level import | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
 | Generic JSON/CSV import | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
 | ProBot JSON transcript import | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
 | Ticket Tool HTML archive | P5 | ✅ in repo | `packages/importer/src/importer.test.ts` · live unverified |
-| Drift detection | P5 | ✅ in repo | `packages/db/src/portability.test.ts`, `apps/bot/src/export-discord.test.ts`, `modules/setup/src/export.test.ts` · live verified |
+| Drift detection | P5 | ✅ in repo | `packages/db/src/portability.test.ts`, `apps/bot/src/export-discord.test.ts`, `modules/setup/src/export.test.ts` · live: manual run |
 | Guided migration guides | P5 | ✅ in repo | `memory/vault/06-Operations/Migration-Guides.md` · live unverified |
 
 ## Invites
@@ -213,45 +217,46 @@ box means the code and its tests exist, not that a live guild has run it.
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Application forms | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `modules/forms/src/panel.ts`, `apps/bot/src/form-interactions.ts`, `packages/db/src/form-store.test.ts`, `memory/journal/2026-11-01-pass-40.md` · live verified |
-| Review queue | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `packages/db/src/form-store.test.ts` · live verified |
-| Submission export | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `memory/vault/04-Modules/forms/Status.md` · live verified |
+| Application forms | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `modules/forms/src/panel.ts`, `apps/bot/src/form-interactions.ts`, `packages/db/src/form-store.test.ts`, `memory/journal/2026-11-01-pass-40.md` · live: probe check |
+| Review queue | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `packages/db/src/form-store.test.ts` · live: manual run |
+| Submission export | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `memory/vault/04-Modules/forms/Status.md` · live: manual run |
 
 ## Events and RSVP
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Event creation | P7 | ✅ in repo | `modules/events/src/events.test.ts`, `packages/db/src/event-store.test.ts`, `memory/journal/2026-11-01-pass-41.md` · live verified |
-| RSVP buttons | P7 | ◐ open | The component layer now exists (pass 58), but the event buttons and their state transitions are not built; shipping an inert button would still be a dead end. · `modules/events/src/events.test.ts` |
-| Reminders | P7 | ◐ open | Scheduled delivery needs a recurring queue job, a per-event wake-up and a delivery port; manual `remind` is real, and the scheduler is named rather than faked. · `modules/events/src/events.test.ts`, `packages/db/src/event-store.test.ts` · live verified |
-| ICS export | P7 | ◐ open | ICS needs a calendar serializer and a real calendar consumer; the checksummed JSON is the portable format the other modules already export. · `modules/events/src/events.test.ts` · live verified |
+| Event creation | P7 | ✅ in repo | `modules/events/src/events.test.ts`, `packages/db/src/event-store.test.ts`, `memory/journal/2026-11-01-pass-41.md` · live: manual run |
+| RSVP buttons | P7 | ◐ open | The component layer now exists (pass 58), but the event buttons and their state transitions are not built; shipping an inert button would still be a dead end. · `modules/events/src/events.test.ts` · live unverified |
+| Reminders | P7 | 🟡 partial | shipped: manual `/event remind` recording reminded_at, reminded_by and reminder_count · open: scheduled delivery; per-member timezones · `modules/events/src/events.test.ts` · live: manual run |
+| ICS export | P7 | 🟡 partial | shipped: checksummed `keystone.events` JSON export with events, RSVPs and counts · open: ICS serialization; a real calendar consumer · `modules/events/src/events.test.ts` · live: manual run |
 
 ## Private modmail
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Modmail setup | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `memory/journal/2026-11-01-pass-42.md` · live verified |
-| Private threads | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `packages/db/src/modmail-store.test.ts`, `memory/journal/2026-11-01-pass-42.md` · live verified |
-| Two-sided replies and unread counters | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `packages/db/src/modmail-store.test.ts` · live verified |
-| Archived transcripts | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `packages/db/src/modmail-store.test.ts`, `memory/journal/2026-11-01-pass-42.md` · live verified |
-| Queue stats | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `packages/db/src/modmail-store.test.ts`, `memory/journal/2026-11-01-pass-42.md` · live verified |
-| DM and thread relay | P7 | ◐ open | A real DM/thread relay needs a delivery port and a gateway message handler; borrowing another module's DM adapter is the coupling pass 39 removed, and an unverified relay is worse than a readable inbox. · `modules/modmail/src/modmail.test.ts` |
+| Modmail setup | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `memory/journal/2026-11-01-pass-42.md` · live: manual run |
+| Private threads | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `packages/db/src/modmail-store.test.ts`, `memory/journal/2026-11-01-pass-42.md` · live: manual run |
+| Two-sided replies and unread counters | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `packages/db/src/modmail-store.test.ts` · live: manual run |
+| Archived transcripts | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `packages/db/src/modmail-store.test.ts`, `memory/journal/2026-11-01-pass-42.md` · live: manual run |
+| Queue stats | P7 | ✅ in repo | `modules/modmail/src/modmail.test.ts`, `packages/db/src/modmail-store.test.ts`, `memory/journal/2026-11-01-pass-42.md` · live: manual run |
+| DM and thread relay | P7 | ◐ open | A real DM/thread relay needs a delivery port and a gateway message handler; borrowing another module's DM adapter is the coupling pass 39 removed, and an unverified relay is worse than a readable inbox. · `modules/modmail/src/modmail.test.ts` · live unverified |
 
 ## Community parity extras
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Role persistence | P7 | ⏳ planned | Reapply roles on rejoin; requires GuildMembers. |
-| Auto-responder | P7 | ✅ in repo | `modules/community/src/responder.test.ts`, `modules/community/src/commands.test.ts`, `apps/bot/src/community-events.test.ts`, `packages/db/src/community.test.ts` · live verified |
-| Message and member analytics | P7 | ✅ in repo | `modules/analytics/src/analytics.test.ts`, `modules/analytics/src/memory.ts`, `memory/vault/04-Modules/analytics/Status.md` · live verified |
-| Command usage analytics | P7 | ✅ in repo | `packages/kernel/src/dispatch.ts`, `packages/db/src/command-usage-store.ts`, `packages/db/src/analytics-store.test.ts`, `memory/vault/04-Modules/analytics/Status.md` · live verified |
-| Captcha verification | P10 | ⏳ planned | Post-v1.0 provider integration. |
-| Google Calendar sync | P10 | ⏳ planned | Post-v1.0 two-way sync. |
-| Activity | P8 | ⏳ planned | Time-boxed eligibility spike; not promised for v1.0. |
+| Role persistence | P7.5 | ✅ in repo | `modules/community/src/role-persistence.ts`, `modules/community/src/role-persistence.test.ts`, `modules/community/src/settings.ts`, `modules/community/src/commands/tools.ts`, `apps/bot/src/community-events.ts`, `apps/bot/src/community-events.test.ts` · live unverified |
+| Auto-responder | P7 | ✅ in repo | `modules/community/src/responder.test.ts`, `modules/community/src/commands.test.ts`, `apps/bot/src/community-events.test.ts`, `packages/db/src/community.test.ts` · live: manual run |
+| Message and member analytics | P7 | ✅ in repo | `modules/analytics/src/analytics.test.ts`, `modules/analytics/src/memory.ts`, `memory/vault/04-Modules/analytics/Status.md` · live: manual run |
+| Command usage analytics | P7 | ✅ in repo | `packages/kernel/src/dispatch.ts`, `packages/db/src/command-usage-store.ts`, `packages/db/src/analytics-store.test.ts`, `memory/vault/04-Modules/analytics/Status.md` · live: manual run |
+| Captcha verification | P10 | ⏳ planned | live unverified |
+| Google Calendar sync | P10 | ⏳ planned | live unverified |
+| Activity | P8 | ⏳ planned | live unverified |
 
 ## How to change this page
 
 1. Edit [`features.json`](../../machine/features.json), not this file.
 2. Run `pnpm memory:render`.
 3. Run `pnpm memory:check`.
-4. A `shipped-in-repo` row needs an `evidence` path; a `verified` row needs a live proof.
+4. A `shipped-in-repo` or `partial` row needs an `evidence` path; `partial` also names `shippedParts` and `openParts`.
+5. `liveVerified: true` needs `liveScope: probe` with a `liveEvidence` check, or `liveScope: manual` with a `liveRecord` path.

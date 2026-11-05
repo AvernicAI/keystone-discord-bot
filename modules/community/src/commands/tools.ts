@@ -34,6 +34,12 @@ const OPTIONS = {
     description: "Auto-responder match mode",
     choices: ["exact", "contains", "regex"].map((value) => ({ name: value, value })),
   },
+  persist: {
+    type: "string",
+    name: "persist",
+    description: "Turn role persistence on or off",
+    choices: ["on", "off"].map((value) => ({ name: value, value })),
+  },
 } satisfies Record<string, CommandOption>;
 
 function opts(...names: (keyof typeof OPTIONS)[]): CommandOption[] {
@@ -56,7 +62,7 @@ export const tools = defineCommand({
     { name: "stat", description: "Create a member, online or booster stat channel.", options: opts("channel", "value") },
     { name: "welcome", description: "Configure the welcome message and autorole.", options: opts("value", "channel", "role", "limit") },
     { name: "goodbye", description: "Configure the goodbye message for departing members.", options: opts("value", "channel") },
-    { name: "roles", description: "Post a reaction-role or select-role panel.", options: opts("channel", "value", "role", "name", "limit") },
+    { name: "roles", description: "Post a role panel, or turn role persistence on or off.", options: opts("channel", "value", "role", "name", "limit", "persist") },
     { name: "starboard", description: "Configure the starboard channel and threshold.", options: opts("channel", "limit") },
     { name: "starboard-override", description: "Set a per-channel starboard threshold or turn it off.", options: opts("channel", "target", "value", "limit") },
     { name: "voice", description: "Configure the temporary voice hub.", options: opts("channel", "value") },
@@ -268,6 +274,23 @@ export const tools = defineCommand({
 
     if (selected === "roles") {
       requirePermission(ctx, "ManageGuild");
+      const persist = text(ctx, "persist");
+      if (persist) {
+        if (persist !== "on" && persist !== "off") throw new UserError("Say `on` or `off`.");
+        const persistMax = integer(ctx, "limit") ?? settings.roles.persistMax;
+        await ctx.settings.update(guildId, {
+          roles: { ...settings.roles, persist: persist === "on", persistMax },
+        });
+        await ctx.interaction.reply({
+          content:
+            persist === "on"
+              ? `Role persistence enabled for up to ${persistMax} roles. A snapshot is taken when a member leaves and applied once when they rejoin.`
+              : "Role persistence disabled. Existing snapshots are ignored and the next leave writes none.",
+          ephemeral: true,
+        });
+        return;
+      }
+
       const target = channelId(ctx, "channel");
       if (!target) throw new UserError("Choose a channel.");
       const raw = text(ctx, "value");

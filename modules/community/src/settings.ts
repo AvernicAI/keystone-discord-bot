@@ -151,6 +151,14 @@ export const communitySettingsSchema = z.object({
       cooldownSeconds: z.number().int().min(0).max(3_600).default(10),
     })
     .default({}),
+  roles: z
+    .object({
+      /** Reapply the roles a member held when they left. Off by default. */
+      persist: z.boolean().default(false),
+      /** Hard cap on stored and restored roles; Discord's own limit is higher. */
+      persistMax: z.number().int().min(1).max(50).default(20),
+    })
+    .default({}),
 });
 
 export type CommunitySettings = z.infer<typeof communitySettingsSchema>;
