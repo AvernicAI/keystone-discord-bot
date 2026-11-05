@@ -88,6 +88,7 @@ import {
   t,
 } from "@keystone/i18n";
 import { createComponentRouter } from "../apps/bot/src/components";
+import { HELP_PANEL_TTL_MS, registerHelpRoutes } from "../apps/bot/src/help-interactions";
 import { asComponentInteraction, buildCommandJson, toV2Components } from "../apps/bot/src/adapt";
 import { createCooldownStore } from "../packages/cache/src/index";
 import { BullJobQueue, createBullWorker } from "../packages/queue/src/index";
@@ -2585,6 +2586,15 @@ async function main(): Promise<void> {
         store: {} as never,
         settings: { get: async () => ({}), update: async () => ({}) },
       },
+      catalog: [],
+      health: {
+        async probe() {
+          return {
+            database: { configured: false, reachable: false, migrated: false },
+            cache: { configured: false, reachable: false, detail: "memory" },
+          };
+        },
+      },
       logger: createSilentLogger(),
       now: () => now,
     });
@@ -2912,6 +2922,15 @@ async function main(): Promise<void> {
       events: {
         store: {} as never,
         settings: { get: async () => ({}), update: async () => ({}) },
+      },
+      catalog: [],
+      health: {
+        async probe() {
+          return {
+            database: { configured: false, reachable: false, migrated: false },
+            cache: { configured: false, reachable: false, detail: "memory" },
+          };
+        },
       },
       config: settings,
       logger: createSilentLogger(),
@@ -3269,6 +3288,15 @@ async function main(): Promise<void> {
         store: {} as never,
         settings: { get: async () => ({}), update: async () => ({}) },
       },
+      catalog: [],
+      health: {
+        async probe() {
+          return {
+            database: { configured: false, reachable: false, migrated: false },
+            cache: { configured: false, reachable: false, detail: "memory" },
+          };
+        },
+      },
       logger: createSilentLogger(),
       now: () => now,
     });
@@ -3547,6 +3575,7 @@ async function main(): Promise<void> {
           };
         },
       },
+      componentSigner: createComponentSigner("live-probe-help-secret"),
       now: () => clock,
     };
 
@@ -3601,12 +3630,57 @@ async function main(): Promise<void> {
 
     const help = slash("help", { subcommand: "browse" });
     await dispatchCommand(deps, help.interaction);
-    const helpEmbed = help.replies[0]?.embeds?.[0] as unknown as
-      | { title?: string; description?: string }
-      | undefined;
+    const helpJson = JSON.stringify(help.replies[0]?.v2);
     assert(
-      helpEmbed?.title === "Keystone-Befehle" && String(helpEmbed?.description).includes("Befehle"),
-      "the /help browse card did not render in German",
+      help.replies[0]?.embeds === undefined &&
+        helpJson.includes("## Keystone") &&
+        helpJson.includes("Dieser Server") &&
+        helpJson.includes("Wähle ein Modul"),
+      "the /help browse hub did not render as a German V2 panel",
+    );
+
+    // The picker route runs in the same process against the same Postgres
+    // settings/community rows, so the command and the button cannot disagree.
+    const helpSigner = createComponentSigner("live-probe-help-secret");
+    const helpRouter = new ComponentRouter();
+    registerHelpRoutes(helpRouter, {
+      signer: helpSigner,
+      catalog: registry.catalog(),
+      health: deps.health,
+      config: settings,
+      community: communityPort,
+      now: () => clock,
+    });
+    const helpUpdates: ReplyInput[] = [];
+    const pick = {
+      id: "probe-help-pick",
+      kind: "select" as const,
+      customId: helpSigner.sign(
+        { namespace: "help", action: "browse", ttlMs: HELP_PANEL_TTL_MS },
+        clock,
+      ),
+      guildId: GUILD,
+      channelId: "live-probe-channel",
+      userId: "live-probe-member",
+      permissions: ["ModerateMembers"],
+      values: ["community"],
+      async reply(input: ReplyInput) {
+        helpUpdates.push(input);
+        return undefined;
+      },
+      async update(input: ReplyInput) {
+        helpUpdates.push(input);
+        return undefined;
+      },
+    } as unknown as ComponentInteractionLike;
+    assert(
+      (await helpRouter.dispatch(pick, helpSigner, clock)) === true,
+      "the /help module route did not claim its signed id",
+    );
+    const pickedJson = JSON.stringify(helpUpdates[0]?.v2);
+    assert(
+      pickedJson.includes("## Community") && pickedJson.includes("**/rank**"),
+      "the /help module page did not render the picked module",
     );
 
     // The other translated reply surfaces, through the same dispatcher.
@@ -3697,7 +3771,7 @@ async function main(): Promise<void> {
       id: "command-copy-localization",
       status: "pass",
       detail:
-        `real dispatcher on Postgres with setup.locale=de: all ${described} root, subcommand and option description nodes of the ${chatInput.length} chat-input roots carried German from the catalog and none reused its English text; /ping, /about and /help browse replied in German, /rank leaderboard rendered the stored level row as "XP-Rangliste", the Rank card user menu rendered its German rank line, /ticket stats rendered its German title and average-close line, and the same command without ManageGuild was refused in German; a key no catalog defines returned the fallback sentence and a partial catalog fell back to English; resetting the setting restored the English reply. The dispatcher was driven with a plain InteractionLike, not a gateway InteractionCreate`,
+        `real dispatcher on Postgres with setup.locale=de: all ${described} root, subcommand and option description nodes of the ${chatInput.length} chat-input roots carried German from the catalog and none reused its English text; /ping, /about and the /help V2 hub replied in German, the signed help picker re-read the same Postgres facts and rendered the Community page, /rank leaderboard rendered the stored level row as "XP-Rangliste", the Rank card user menu rendered its German rank line, /ticket stats rendered its German title and average-close line, and the same command without ManageGuild was refused in German; a key no catalog defines returned the fallback sentence and a partial catalog fell back to English; resetting the setting restored the English reply. The dispatcher was driven with a plain InteractionLike, not a gateway InteractionCreate`,
       features: ["operations.i18n"],
     });
   }

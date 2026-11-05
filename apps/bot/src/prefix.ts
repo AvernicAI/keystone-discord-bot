@@ -1,10 +1,4 @@
-import {
-  AttachmentBuilder,
-  Events,
-  type Client,
-  type Message,
-  type TextBasedChannel,
-} from "discord.js";
+import { Events, type Client, type Message, type TextBasedChannel } from "discord.js";
 import {
   UserError,
   dispatchCommand,
@@ -15,7 +9,7 @@ import {
   type Logger,
   type ReplyInput,
 } from "@keystone/kernel";
-import { toComponents } from "./adapt";
+import { toReplyOptions } from "./adapt";
 
 /**
  * Development-only prefix commands.
@@ -305,23 +299,18 @@ function sendable(channel: Message["channel"]): TextBasedChannel & {
 }
 
 function toMessageBody(input: ReplyInput): Record<string, unknown> {
-  const { components, files, ephemeral: _ephemeral, ...rest } = input;
-  return {
-    ...rest,
-    content: input.content?.slice(0, MAX_CONTENT),
-    components: components ? toComponents(components) : undefined,
-    // The development bridge cannot receive ephemeral replies. A file is still
-    // useful there: the MCP can read its message text and a human can download
-    // the attachment.
-    files: files?.map(
-      (file) =>
-        new AttachmentBuilder(Buffer.from(file.content, "utf8"), {
-          name: file.name,
-          description: file.description,
-        }),
-    ),
-    allowedMentions: { parse: [] },
-  };
+  // Reuse the interaction adapter instead of a second renderer. That is what
+  // makes a V2 reply arrive at Discord as V2 here too: the bridge keeps the
+  // flag and typed components, so the MCP can inspect the real panel. The
+  // development bridge cannot receive ephemeral replies; sending one is the
+  // only difference from a slash reply.
+  const body = toReplyOptions(input) as unknown as Record<string, unknown>;
+  delete body.ephemeral;
+  if (typeof body.content === "string") {
+    body.content = body.content.slice(0, MAX_CONTENT);
+  }
+  body.allowedMentions = { parse: [] };
+  return body;
 }
 
 /**
@@ -371,7 +360,11 @@ function asPrefixInteraction(
     },
     editReply: async (input) => {
       if (!last) return send(input);
-      const edited = await last.edit(toMessageBody(input) as never);
+      const body = toMessageBody(input);
+      // The message already carries the V2 marker; repeating it on an edit is
+      // unnecessary and Discord rejects some flag changes.
+      if (input.v2) delete body.flags;
+      const edited = await last.edit(body as never);
       return edited;
     },
     followUp: (input) => send(input),

@@ -6,11 +6,11 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-05",
   "phase": "P7.5",
-  "lastPass": "journal/2026-11-05-pass-74.md",
-  "nextAction": "The P7.5 wave is built: role persistence, case export, the event surface and forms in the guild bundle. Run the whole-branch gate, then deliver the wave as a PR with per-pass commits preserved.",
+  "lastPass": "journal/2026-11-05-pass-75.md",
+  "nextAction": "Deliver the help hub with the branch gate green; a human button press is the remaining proof. Then open the approved support-depth wave.",
   "live": {
     "report": "machine/live.json",
-    "id": "live-2026-11-03"
+    "id": "live-2026-11-05"
   },
   "metrics": {
     "commands": 20,
@@ -19,7 +19,7 @@
     "contextMenus": 4,
     "commandLimit": 100,
     "modules": 12,
-    "tests": 659
+    "tests": 682
   },
   "modules": [
     {

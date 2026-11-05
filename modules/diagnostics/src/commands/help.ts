@@ -1,12 +1,20 @@
 import {
   UserError,
   defineCommand,
+  requirePanelSigner,
   type CommandCatalogEntry,
   type CommandContext,
   type EmbedField,
 } from "@keystone/kernel";
 import { DEFAULT_LOCALE, guildLocale, lookupMessage, t } from "@keystone/i18n";
 import { CHANGELOG, VERSION } from "../changelog";
+import { loadHelpFacts } from "../help/facts";
+import {
+  HELP_PANEL_TTL_MS,
+  helpHomePanel,
+  helpModulePanel,
+  type HelpPanelActions,
+} from "../help/panel";
 
 function catalog(ctx: CommandContext, locale: string): readonly CommandCatalogEntry[] {
   if (ctx.catalog.length === 0) {
@@ -48,6 +56,23 @@ function describe(locale: string, key: string, fallback: string): string {
 /** `pass-62` is a machine id; a user reads "Pass 62". */
 function displayPass(pass: string): string {
   return pass.replace(/^pass-/, "Pass ");
+}
+
+/**
+ * The hub's controls are signed once per rendered page. The route mints a new
+ * set on every update, so an old page expires fifteen minutes after its last
+ * render rather than pinning one id forever.
+ */
+function signedActions(ctx: CommandContext): HelpPanelActions {
+  const signer = requirePanelSigner(ctx.componentSigner);
+  const sign = (action: string): string =>
+    signer.sign({ namespace: "help", action, ttlMs: HELP_PANEL_TTL_MS });
+  return {
+    browse: sign("browse"),
+    home: sign("home"),
+    privacy: sign("privacy"),
+    changelog: sign("changelog"),
+  };
 }
 
 function searchLines(
@@ -128,27 +153,57 @@ export const help = defineCommand({
         });
         return;
       }
-      const contextMenus = ctx.catalog.some(
-        (entry) => (entry.type ?? "chat-input") !== "chat-input",
-      );
-      const fields = [...moduleGroups(visible)].map(([moduleId, roots]) => ({
-        name: moduleId,
-        value: roots.map((entry) => `\`/${entry.name}\``).join(" · ").slice(0, 1_024),
-        inline: true,
-      }));
-      const subcommands = visible.reduce((sum, entry) => sum + entry.subcommands.length, 0);
+
+      // A DM has no server state to show and no guild to bind a component id
+      // to, so it keeps the flat card the command has always returned.
+      if (!ctx.guildId) {
+        const contextMenus = ctx.catalog.some(
+          (entry) => (entry.type ?? "chat-input") !== "chat-input",
+        );
+        const fields = [...moduleGroups(visible)].map(([moduleId, roots]) => ({
+          name: moduleId,
+          value: roots.map((entry) => `\`/${entry.name}\``).join(" · ").slice(0, 1_024),
+          inline: true,
+        }));
+        const subcommands = visible.reduce((sum, entry) => sum + entry.subcommands.length, 0);
+        await ctx.interaction.reply({
+          ephemeral: true,
+          embeds: [
+            {
+              title: t(locale, "help.browse.title"),
+              description:
+                t(locale, "help.browse.description", visible.length, subcommands) +
+                (contextMenus ? t(locale, "help.browse.contextHint") : ""),
+              color: 0x5865f2,
+              fields,
+            },
+          ],
+        });
+        return;
+      }
+
+      const actions = signedActions(ctx);
+      const facts = await loadHelpFacts({
+        guildId: ctx.guildId,
+        permissions: ctx.interaction.permissions,
+        catalog: ctx.catalog,
+        config: ctx.config,
+        health: ctx.health,
+        moderation: ctx.moderation,
+        community: ctx.community,
+      });
+      if (moduleFilter) {
+        const module = facts.modules.find((candidate) => candidate.id === moduleFilter);
+        if (!module) throw new UserError(t(locale, "help.noModule", moduleFilter));
+        await ctx.interaction.reply({
+          ephemeral: true,
+          v2: helpModulePanel(module, visible, actions, locale),
+        });
+        return;
+      }
       await ctx.interaction.reply({
         ephemeral: true,
-        embeds: [
-          {
-            title: t(locale, "help.browse.title"),
-            description:
-              t(locale, "help.browse.description", visible.length, subcommands) +
-              (contextMenus ? t(locale, "help.browse.contextHint") : ""),
-            color: 0x5865f2,
-            fields,
-          },
-        ],
+        v2: helpHomePanel(facts, actions, locale),
       });
       return;
     }

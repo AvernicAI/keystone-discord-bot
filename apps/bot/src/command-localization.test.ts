@@ -129,6 +129,23 @@ describe("command description keys", () => {
     }
   });
 
+  it("keeps every localized description inside Discord's 100-character limit", () => {
+    // A description that is fine in English can overflow once translated. The
+    // failure only appears at register time, after the diff has already cleared
+    // the old command set, so it is caught here instead.
+    const tooLong: string[] = [];
+    const walk = (node: JsonNode, path: string): void => {
+      for (const [locale, text] of Object.entries(node.description_localizations ?? {})) {
+        if (text.length > 100) tooLong.push(`${path} ${locale}=${text.length}`);
+      }
+      for (const option of node.options ?? []) walk(option, `${path} ${option.name}`);
+    };
+    for (const command of chatInput) {
+      walk(buildCommandJson(command) as unknown as JsonNode, `/${command.name}`);
+    }
+    expect(tooLong).toEqual([]);
+  });
+
   it("puts the right German on each subcommand's option node", () => {
     // The three options whose siblings describe them differently: the very
     // case a shared key could not express.

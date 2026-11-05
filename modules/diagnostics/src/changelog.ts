@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-75",
+    date: "2026-11-05",
+    summary:
+      "P7.5 front door: in a server, `/help` is a Components V2 hub with the modules that are on, the open ticket and case counts the caller may see, database and cache state, the live registry totals, and signed module, Overview, privacy and changelog controls. A DM keeps the flat command card.",
+    journal: "memory/journal/2026-11-05-pass-75.md",
+  },
+  {
     pass: "pass-74",
     date: "2026-11-05",
     summary:

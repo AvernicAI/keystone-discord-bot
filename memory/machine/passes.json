@@ -1034,6 +1034,22 @@
         "claims": "35/35",
         "build": "not run (no build step changed)"
       }
+    },
+    {
+      "id": "pass-75",
+      "date": "2026-11-05",
+      "phase": "P7.5",
+      "summary": "`/help` is a server-aware Components V2 hub instead of a flat command embed. In a guild it loads live facts — module on/off, open tickets, open cases only with ModerateMembers, database/cache health and registry totals — from ports the bot already owns, renders them through four pure panel builders, and routes the module picker and the Overview, privacy and changelog buttons through signed, 15-minute, guild-bound ids registered beside the other component routes. A DM has no guild to bind, so it keeps the flat card. The development bridge now sends through the interaction adapter, so a V2 panel survives `!help` with `flags: IsComponentsV2` instead of being flattened; an edit omits the repeated flag. No root, subcommand, table or migration was added. The live boot also exposed a latent registration defect: four German command descriptions were over Discord's 100-character limit, so the drift-triggered clear left the guild with no commands until they were shortened and a length guard was added. Tests: 682 in 97 files (12 panel, 5 route, 4 command and 1 localization-length case); the live probe is 28/28 and now drives the V2 hub and its signed picker on Postgres. Budget stays 20/100 roots, 141 subcommands, 161 actions and 4 context menus. A human button press is not claimed.",
+      "journal": "journal/2026-11-05-pass-75.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "682",
+        "budget": "20/100 roots · 141 subcommands · 161 actions · 4 context menus",
+        "live": "28/28 (command-copy-localization drives the V2 hub and signed picker)",
+        "memory": "current",
+        "claims": "35/35",
+        "build": "not run (no build step changed)"
+      }
     }
   ]
 }

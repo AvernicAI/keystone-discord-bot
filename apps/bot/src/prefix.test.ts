@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
 import { z } from "zod";
-import { Events, type Client, type Message } from "discord.js";
+import { Events, MessageFlags, type Client, type Message } from "discord.js";
 import {
   InMemorySettingsRepository,
   ModuleRegistry,
@@ -160,6 +160,65 @@ describe("prefix bridge", () => {
       content: "action=say name=hello world amount=2",
       allowedMentions: { parse: [] },
     });
+  });
+
+  it("preserves a Components V2 reply instead of flattening it", async () => {
+    const panel = defineCommand({
+      name: "panel",
+      description: "A V2 reply used by the prefix bridge test.",
+      async execute(ctx: CommandContext) {
+        await ctx.interaction.reply({
+          v2: [
+            {
+              type: "container",
+              accentColor: 0x5865f2,
+              components: [{ type: "text-display", content: "V2 bridge panel" }],
+            },
+          ],
+        });
+      },
+    });
+    const client = Object.assign(new EventEmitter(), {
+      user: { id: BOT },
+    }) as unknown as Client;
+    const registry = new ModuleRegistry().register({
+      id: "test",
+      name: "Test",
+      description: "Test module",
+      version: "0.1.0",
+      settingsSchema: z.object({}),
+      defaultSettings: {},
+      commands: [panel],
+    });
+    const settings = new SettingsService(new InMemorySettingsRepository(), registry);
+    registerPrefixCommands(
+      client,
+      {
+        registry,
+        settings,
+        logger: createSilentLogger(),
+        cooldowns: { hit: async () => ({ allowed: true, retryAfterMs: 0 }) },
+        queue: { enqueue: async () => "job", close: async () => undefined },
+        health: {
+          probe: async () => ({
+            database: { configured: false, reachable: false, migrated: false },
+            cache: { configured: false, reachable: false },
+          }),
+        },
+      },
+      { guildId: GUILD },
+    );
+
+    const { message, send } = fakeMessage("!panel");
+    (client as unknown as EventEmitter).emit(Events.MessageCreate, message);
+
+    await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+    const body = send.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(body.flags).toBe(MessageFlags.IsComponentsV2);
+    expect(body.content).toBeUndefined();
+    expect(body.v2).toBeUndefined();
+    expect(body.ephemeral).toBeUndefined();
+    expect(JSON.stringify(body.components)).toContain("V2 bridge panel");
   });
 
   it("ignores the prefix in another guild", async () => {

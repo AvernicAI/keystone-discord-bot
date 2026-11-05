@@ -239,6 +239,8 @@ async function main(): Promise<void> {
       settings: runtime.settings.forModule("events"),
     },
     config: runtime.settings,
+    catalog: registry.catalog(),
+    health: runtime.health,
     logger: logger.child("components"),
   });
 
