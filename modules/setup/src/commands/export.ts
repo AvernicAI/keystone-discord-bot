@@ -79,6 +79,8 @@ const COUNT_LABELS: Record<string, string> = {
   cases: "cases",
   caseEvents: "case events",
   tickets: "tickets",
+  forms: "forms",
+  formSubmissions: "submissions",
   levels: "levels",
   xpEvents: "XP events",
   economyLedger: "ledger rows",

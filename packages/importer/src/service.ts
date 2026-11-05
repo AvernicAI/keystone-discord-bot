@@ -54,7 +54,7 @@ export class PortabilityService {
 
   async exportGuild(guildId: string): Promise<ExportBundle> {
     const snapshot = await this.store.snapshot(guildId);
-    return createBundle(snapshot, { generator: "keystone portability v1", now: new Date(this.now()).toISOString() });
+    return createBundle(snapshot, { generator: "keystone portability v2", now: new Date(this.now()).toISOString() });
   }
 
   async preview(bundle: ExportBundle, destinationGuildId: string): Promise<SnapshotDiff> {
@@ -77,7 +77,7 @@ export class PortabilityService {
     const warnings = [...diff.warnings];
     if (options.mode === "merge") {
       warnings.push(
-        "Merge imports settings and levels only; cases, tickets, ledger history and audit events stay as they are.",
+        "Merge imports settings and levels only; cases, tickets, forms, ledger history and audit events stay as they are.",
       );
     }
 

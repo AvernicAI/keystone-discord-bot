@@ -25,6 +25,10 @@ import {
   communitySettingsSchema,
 } from "@keystone/module-community";
 import {
+  InMemoryEventStore,
+  eventDefaultSettings,
+} from "@keystone/module-events";
+import {
   RecordingCommunityActions,
   firstRow,
 } from "@keystone/module-community/testing";
@@ -101,6 +105,11 @@ async function fixture(fieldSpec = "why:Why join, tz:Timezone") {
     get: async () => communitySettingsSchema.parse({}),
     update: async () => communitySettingsSchema.parse({}),
   };
+  const eventStore = new InMemoryEventStore();
+  const eventSettings = {
+    get: async () => ({ ...eventDefaultSettings }),
+    update: async () => ({ ...eventDefaultSettings }),
+  };
   const deps: ComponentRuntimeDeps = {
     signer,
     forms: store,
@@ -111,13 +120,24 @@ async function fixture(fieldSpec = "why:Why join, tz:Timezone") {
       actions: communityActions,
       settings: communitySettings,
     },
+    events: { store: eventStore, settings: eventSettings },
     logger: createSilentLogger(),
     now: () => NOW,
   };
   const router = createComponentRouter(deps);
   const signed = (action: string, payload: string, ttlMs = 15 * 60_000): string =>
     signer.sign({ namespace: "form", action, payload, ttlMs }, NOW);
-  return { store, service, form, router, signer, signed, communityStore, communityActions };
+  return {
+    store,
+    service,
+    form,
+    router,
+    signer,
+    signed,
+    communityStore,
+    communityActions,
+    eventStore,
+  };
 }
 
 describe("form panel components", () => {
@@ -440,5 +460,102 @@ describe("community interaction routes", () => {
       poll.id,
     );
     expect(pollRow?.data.votes["1"]).toEqual(["member-4"]);
+  });
+});
+
+describe("event RSVP buttons", () => {
+  async function eventFixture() {
+    const base = await fixture();
+    const created = await base.eventStore.createEvent({
+      guildId: GUILD,
+      key: "launch-night",
+      name: "Launch night",
+      description: "Ship it",
+      state: "open",
+      startsAt: new Date(NOW + 60 * 60_000).toISOString(),
+      location: "voice stage",
+      capacity: 1,
+      createdBy: "mod-1",
+    });
+    if (!created.ok) throw new Error("event fixture missing");
+    const button = (
+      action: "going" | "not_going",
+      userId = "member-1",
+      guildId = GUILD,
+      ttlMs = 15 * 60_000,
+    ) =>
+      new FakeComponent({
+        customId: base.signer.sign(
+          { namespace: "event", action, payload: created.event.id, ttlMs },
+          NOW,
+        ),
+        userId,
+        guildId,
+      });
+    return { ...base, event: created.event, button };
+  }
+
+  it("records a signed RSVP, refuses a full seat, then frees it on a decline", async () => {
+    const { router, signer, eventStore, event, button } = await eventFixture();
+
+    const going = button("going");
+    expect(await router.dispatch(going, signer, NOW)).toBe(true);
+    expect(going.replies[0]?.content).toMatch(/1\/1 going/);
+    expect((await eventStore.getRsvp(GUILD, event.id, "member-1"))?.state).toBe("going");
+
+    const full = button("going", "member-2");
+    await router.dispatch(full, signer, NOW);
+    expect(full.replies[0]?.content).toMatch(/is full \(1 going\)/);
+    expect(await eventStore.countRsvps(GUILD, event.id)).toBe(1);
+
+    const decline = button("not_going", "member-1");
+    await router.dispatch(decline, signer, NOW);
+    expect(decline.replies[0]?.content).toMatch(/0\/1 going/);
+    expect((await eventStore.getRsvp(GUILD, event.id, "member-1"))?.state).toBe("not_going");
+
+    const retry = button("going", "member-2");
+    await router.dispatch(retry, signer, NOW);
+    expect(retry.replies[0]?.content).toMatch(/1\/1 going/);
+    expect(await eventStore.countRsvps(GUILD, event.id, "going")).toBe(1);
+  });
+
+  it("refuses an expired or cross-guild id and ignores a legacy id without writing", async () => {
+    const { router, signer, eventStore, event } = await eventFixture();
+
+    const expired = new FakeComponent({
+      customId: signer.sign(
+        { namespace: "event", action: "going", payload: event.id, ttlMs: 1_000 },
+        NOW,
+      ),
+    });
+    await router.dispatch(expired, signer, NOW + 1_000);
+    expect(expired.replies[0]?.content).toMatch(/expired/);
+
+    const copied = new FakeComponent({
+      customId: signer.sign(
+        { namespace: "event", action: "going", payload: event.id, ttlMs: 900_000 },
+        NOW,
+      ),
+      guildId: "other-guild",
+    });
+    await router.dispatch(copied, signer, NOW);
+    // The signed payload is an event id, not a guild; the store lookup is
+    // guild-scoped, so a copied id in another guild finds nothing rather than
+    // reaching the original event.
+    expect(copied.replies[0]?.content).toMatch(/was not found/);
+
+    const legacy = new FakeComponent({ customId: `keystone:event:going:${event.id}` });
+    expect(await router.dispatch(legacy, signer, NOW)).toBe(false);
+    expect(await eventStore.countRsvps(GUILD, event.id)).toBe(0);
+  });
+
+  it("refuses a button on a closed event and writes no row", async () => {
+    const { router, signer, eventStore, event, button } = await eventFixture();
+    await eventStore.updateEvent(GUILD, event.id, { state: "closed" });
+
+    const going = button("going");
+    await router.dispatch(going, signer, NOW);
+    expect(going.replies[0]?.content).toMatch(/is closed and is not accepting RSVPs/);
+    expect(await eventStore.countRsvps(GUILD, event.id)).toBe(0);
   });
 });

@@ -6,28 +6,29 @@
 > The register is ordered by priority, not by domain. A row names the competitor that
 > proves demand, the feature rows it would change and the smallest next step.
 
-**18 gaps**: 5 open, 11 partial. `partial` means the foundation ships and one visible capability is missing.
+**19 gaps**: 5 open, 11 partial. `partial` means the foundation ships and one visible capability is missing.
 
 | # | Gap | Domain | Phase | Status | Size | Targets | Feature rows | Next step |
 | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Restore roles after a member leaves | community | P7.5 | ✅ covered | M | carl-bot | `parity-extra.role-persistence` | Live-prove one real leave and rejoin with role persistence on; the adapter path is tested. |
 | 2 | Portable case export | moderation | P7.5 | ✅ covered | S | dyno, carl-bot | `moderation.case-export` | Live-prove one real download through the Discord adapter and read the attachment back; the service and command paths are tested. |
-| 3 | Event buttons, reminders and ICS | events | P7.5 | ◑ partial | M | apollo | `events.rsvp-buttons`, `events.reminders`, `events.ics-export` | Mint a signed RSVP button per event, schedule reminders through the existing timer, and export the same RSVP rows as ICS. |
-| 4 | Searchable ticket knowledge base | tickets | P8 | ◐ open | L | ticket-tool, helper-gg, wallu | `tickets.knowledge-base` | Store guild-scoped articles, retrieve exact matches first, and answer only with a citation; no match hands off with no model call. |
-| 5 | Captcha and alt-account signals | security | P8 | ◐ open | M | wick, double-counter | `parity-extra.captcha-verification` | Add a local challenge behind the existing join gate and an optional provider port; add local account-age, avatar and invite heuristics with no IP by default. |
-| 6 | Structure snapshot and restore | security | P8 | ◑ partial | L | wick | `security.backup-restore` | Export roles, channels, categories and permission overwrites as a diffable bundle, then restore into a clean guild with a dry-run first. |
-| 7 | One member timeline | moderation | P8 | ◐ open | L | mee6, dyno, carl-bot | — | Build one read model that joins cases, tickets, invites, XP, economy, forms, events, modmail and logs by guild and member; every row names its source table. |
-| 8 | Voice XP | leveling | P8 | ◑ partial | M | arcane, lurkr | `leveling.xp-and-levels` | Award XP from voice-state minutes with an anti-idle check, a minimum channel size and a per-member cap; reuse the XP projection. |
-| 9 | Generated rank card image | leveling | P8 | ◑ partial | M | mee6, arcane | `leveling.rank-card` | Render a local PNG with the member name, level, rank and progress bar; keep the V2 panel as the fallback and never call a hosted image service. |
-| 10 | Welcome image card | community | P8 | ◑ partial | M | probot | `community.welcome-goodbye` | Render a local welcome PNG with the avatar, name and member count, behind a setting; keep the V2 text as the default and the fallback. |
-| 11 | YouTube, Twitch and Kick feeds | community | P8 | ◑ partial | L | carl-bot | `community.social-feeds` | Add source adapters behind one feed port, keep GUID dedupe, add per-source backoff and a delivery scheduler that survives restart. |
-| 12 | Real music playback | music | P9 | ◑ partial | L | jockie | `music.playback` | Add a Lavalink v4 adapter behind a playback port, including DAVE negotiation and a clear refusal when the operator has no node. |
-| 13 | Ticket ratings and SLA view | tickets | P8 | ◑ partial | S | ticket-tool, helper-gg | `tickets.sla-analytics` | Ask for one rating when a ticket closes, store it on the ticket, and print first-response and resolution times from the existing events. |
-| 14 | Canned staff replies | tickets | P8 | ◐ open | S | ticket-tool | `tickets.panels` | Store guild-scoped snippets with a short key, offer autocomplete to staff, and audit each use without storing message content. |
-| 15 | Search archived transcripts | tickets | P8 | ◑ partial | M | ticket-tool, helper-gg | `tickets.transcripts` | Index the archived transcript rows with a bounded full-text query, respect retention, and return links rather than dumping content. |
-| 16 | Statroles from member activity | community | P8 | ◑ partial | M | statbot | `community.stat-channels` | Grant or remove a role from a bounded activity condition on a scheduled reconciliation, with a dry run and an audit row. |
-| 17 | Jobs, custom income and item actions | economy | P8 | ◑ partial | M | unbelievaboat | `economy.shop-inventory` | Add cooldown-based jobs and custom income commands that write the existing ledger, plus item actions with an explicit idempotency key. |
-| 18 | AI setup planner with approval | operations | P8 | ◐ open | M | peakbot, yourbot | — | Ask a provider for a schema-validated settings patch, preview the exact diff with the audit helper, bind apply to its fingerprint, and refuse a stale plan. |
+| 3 | Event buttons, reminders and ICS | events | P7.5 | ◑ partial | M | apollo | `events.rsvp-buttons`, `events.reminders`, `events.ics-export` | Live-prove one signed button press and one downloaded `.ics` in a real calendar; the router path and the serializer are adapter-tested only. |
+| 4 | Forms travel in the guild bundle | forms | P7.5 | ✅ covered | S | dyno, carl-bot | `forms.bundle-round-trip` | Live-prove one export and restore on Postgres with a real form file; the PGlite round trip reads the rows back through the forms adapter. |
+| 5 | Searchable ticket knowledge base | tickets | P8 | ◐ open | L | ticket-tool, helper-gg, wallu | `tickets.knowledge-base` | Store guild-scoped articles, retrieve exact matches first, and answer only with a citation; no match hands off with no model call. |
+| 6 | Captcha and alt-account signals | security | P8 | ◐ open | M | wick, double-counter | `parity-extra.captcha-verification` | Add a local challenge behind the existing join gate and an optional provider port; add local account-age, avatar and invite heuristics with no IP by default. |
+| 7 | Structure snapshot and restore | security | P8 | ◑ partial | L | wick | `security.backup-restore` | Export roles, channels, categories and permission overwrites as a diffable bundle, then restore into a clean guild with a dry-run first. |
+| 8 | One member timeline | moderation | P8 | ◐ open | L | mee6, dyno, carl-bot | — | Build one read model that joins cases, tickets, invites, XP, economy, forms, events, modmail and logs by guild and member; every row names its source table. |
+| 9 | Voice XP | leveling | P8 | ◑ partial | M | arcane, lurkr | `leveling.xp-and-levels` | Award XP from voice-state minutes with an anti-idle check, a minimum channel size and a per-member cap; reuse the XP projection. |
+| 10 | Generated rank card image | leveling | P8 | ◑ partial | M | mee6, arcane | `leveling.rank-card` | Render a local PNG with the member name, level, rank and progress bar; keep the V2 panel as the fallback and never call a hosted image service. |
+| 11 | Welcome image card | community | P8 | ◑ partial | M | probot | `community.welcome-goodbye` | Render a local welcome PNG with the avatar, name and member count, behind a setting; keep the V2 text as the default and the fallback. |
+| 12 | YouTube, Twitch and Kick feeds | community | P8 | ◑ partial | L | carl-bot | `community.social-feeds` | Add source adapters behind one feed port, keep GUID dedupe, add per-source backoff and a delivery scheduler that survives restart. |
+| 13 | Real music playback | music | P9 | ◑ partial | L | jockie | `music.playback` | Add a Lavalink v4 adapter behind a playback port, including DAVE negotiation and a clear refusal when the operator has no node. |
+| 14 | Ticket ratings and SLA view | tickets | P8 | ◑ partial | S | ticket-tool, helper-gg | `tickets.sla-analytics` | Ask for one rating when a ticket closes, store it on the ticket, and print first-response and resolution times from the existing events. |
+| 15 | Canned staff replies | tickets | P8 | ◐ open | S | ticket-tool | `tickets.panels` | Store guild-scoped snippets with a short key, offer autocomplete to staff, and audit each use without storing message content. |
+| 16 | Search archived transcripts | tickets | P8 | ◑ partial | M | ticket-tool, helper-gg | `tickets.transcripts` | Index the archived transcript rows with a bounded full-text query, respect retention, and return links rather than dumping content. |
+| 17 | Statroles from member activity | community | P8 | ◑ partial | M | statbot | `community.stat-channels` | Grant or remove a role from a bounded activity condition on a scheduled reconciliation, with a dry run and an audit row. |
+| 18 | Jobs, custom income and item actions | economy | P8 | ◑ partial | M | unbelievaboat | `economy.shop-inventory` | Add cooldown-based jobs and custom income commands that write the existing ledger, plus item actions with an explicit idempotency key. |
+| 19 | AI setup planner with approval | operations | P8 | ◐ open | M | peakbot, yourbot | — | Ask a provider for a schema-validated settings patch, preview the exact diff with the audit helper, bind apply to its fingerprint, and refuse a stale plan. |
 
 ## Why a gap is on this list
 

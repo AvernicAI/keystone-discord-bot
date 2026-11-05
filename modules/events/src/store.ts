@@ -1,16 +1,17 @@
 import { randomUUID } from "node:crypto";
-import type {
-  EventCreateResult,
-  EventDefinition,
-  EventPatch,
-  EventRsvp,
-  EventRsvpFilter,
-  EventRsvpResult,
-  EventState,
-  EventStore,
-  NewEvent,
-  NewEventRsvp,
-  RsvpState,
+import {
+  SCHEDULED_REMINDER_ACTOR,
+  type EventCreateResult,
+  type EventDefinition,
+  type EventPatch,
+  type EventRsvp,
+  type EventRsvpFilter,
+  type EventRsvpResult,
+  type EventState,
+  type EventStore,
+  type NewEvent,
+  type NewEventRsvp,
+  type RsvpState,
 } from "@keystone/kernel";
 
 const nowIso = (): string => new Date().toISOString();
@@ -212,13 +213,54 @@ export class InMemoryEventStore implements EventStore {
   ): Promise<EventDefinition | undefined> {
     const current = this.#events.get(eventId);
     if (!current || current.guildId !== guildId) return undefined;
-    const updated: EventDefinition = {
+    return this.#set(eventId, {
       ...current,
       remindedAt: at.toISOString(),
       remindedBy,
       reminderCount: current.reminderCount + 1,
-      updatedAt: nowIso(),
-    };
+    });
+  }
+
+  async attachPanel(
+    guildId: string,
+    eventId: string,
+    channelId: string,
+  ): Promise<EventDefinition | undefined> {
+    const current = this.#events.get(eventId);
+    if (!current || current.guildId !== guildId) return undefined;
+    return this.#set(eventId, { ...current, panelChannelId: channelId });
+  }
+
+  async claimReminder(
+    guildId: string,
+    eventId: string,
+    at: Date,
+  ): Promise<EventDefinition | undefined> {
+    const current = this.#events.get(eventId);
+    if (!current || current.guildId !== guildId) return undefined;
+    if (current.state !== "open" || current.remindedAt) return undefined;
+    return this.#set(eventId, {
+      ...current,
+      remindedAt: at.toISOString(),
+      remindedBy: SCHEDULED_REMINDER_ACTOR,
+      reminderCount: current.reminderCount + 1,
+    });
+  }
+
+  async releaseReminder(guildId: string, eventId: string): Promise<void> {
+    const current = this.#events.get(eventId);
+    if (!current || current.guildId !== guildId) return;
+    if (current.remindedBy !== SCHEDULED_REMINDER_ACTOR) return;
+    this.#set(eventId, {
+      ...current,
+      remindedAt: undefined,
+      remindedBy: undefined,
+      reminderCount: Math.max(0, current.reminderCount - 1),
+    });
+  }
+
+  #set(eventId: string, event: EventDefinition): EventDefinition {
+    const updated = { ...event, updatedAt: nowIso() };
     this.#events.set(eventId, updated);
     return updated;
   }

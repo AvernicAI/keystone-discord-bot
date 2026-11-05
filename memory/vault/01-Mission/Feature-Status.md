@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**134 features** across 17 domains: **116 in repo**, **4 partial**, **5 open**, **5 planned**. Live behaviour is marked 
+**135 features** across 17 domains: **119 in repo**, **3 partial**, **4 open**, **5 planned**. Live behaviour is marked 
 separately; a box means the code and its tests exist, not that a live guild has run it.
 
 `partial` means the foundation ships with evidence and a named visible capability is
@@ -29,8 +29,8 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 | Operations | 17 | 15 | 1 | 0 | 1 |
 | Portability | 12 | 12 | 0 | 0 | 0 |
 | Invites | 3 | 3 | 0 | 0 | 0 |
-| Forms and applications | 3 | 3 | 0 | 0 | 0 |
-| Events and RSVP | 4 | 1 | 2 | 1 | 0 |
+| Forms and applications | 4 | 4 | 0 | 0 | 0 |
+| Events and RSVP | 4 | 3 | 1 | 0 | 0 |
 | Private modmail | 6 | 5 | 0 | 1 | 0 |
 | Community parity extras | 7 | 4 | 0 | 0 | 3 |
 
@@ -220,15 +220,16 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 | Application forms | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `modules/forms/src/panel.ts`, `apps/bot/src/form-interactions.ts`, `packages/db/src/form-store.test.ts`, `memory/journal/2026-11-01-pass-40.md` · live: probe check |
 | Review queue | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `packages/db/src/form-store.test.ts` · live: manual run |
 | Submission export | P7 | ✅ in repo | `modules/forms/src/forms.test.ts`, `memory/vault/04-Modules/forms/Status.md` · live: manual run |
+| Forms in the guild bundle | P7.5 | ✅ in repo | `apps/bot/src/export-port.test.ts`, `packages/importer/src/importer.test.ts`, `packages/importer/src/types.ts`, `packages/db/src/portability-store.ts`, `memory/journal/2026-11-05-pass-74.md` · live unverified |
 
 ## Events and RSVP
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
 | Event creation | P7 | ✅ in repo | `modules/events/src/events.test.ts`, `packages/db/src/event-store.test.ts`, `memory/journal/2026-11-01-pass-41.md` · live: manual run |
-| RSVP buttons | P7 | ◐ open | The component layer now exists (pass 58), but the event buttons and their state transitions are not built; shipping an inert button would still be a dead end. · `modules/events/src/events.test.ts` · live unverified |
-| Reminders | P7 | 🟡 partial | shipped: manual `/event remind` recording reminded_at, reminded_by and reminder_count · open: scheduled delivery; per-member timezones · `modules/events/src/events.test.ts` · live: manual run |
-| ICS export | P7 | 🟡 partial | shipped: checksummed `keystone.events` JSON export with events, RSVPs and counts · open: ICS serialization; a real calendar consumer · `modules/events/src/events.test.ts` · live: manual run |
+| RSVP buttons | P7 | ✅ in repo | `modules/events/src/events.test.ts`, `modules/events/src/panel.ts`, `apps/bot/src/components.test.ts` · live unverified |
+| Reminders | P7 | 🟡 partial | shipped: manual `/event remind` recording reminded_at, reminded_by and reminder_count; one automatic reminder from the existing community tick, claimed atomically and released on a failed send · open: per-member timezones; repeat or per-event reminder schedules · `modules/events/src/events.test.ts`, `modules/events/src/reminders.ts`, `apps/bot/src/event-reminders.test.ts`, `memory/journal/2026-11-05-pass-73.md` · live: manual run |
+| ICS export | P7 | ✅ in repo | `modules/events/src/events.test.ts`, `modules/events/src/ics.ts` · live unverified |
 
 ## Private modmail
 

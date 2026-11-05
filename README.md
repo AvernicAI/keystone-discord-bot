@@ -11,7 +11,7 @@ tickets, economy and AI all stand on.
 > feature in an afternoon.
 
 **Current facts:** **20/100 roots** · **141 real subcommands** · **161 actions** ·
-**4 context menus** · **12 modules** · **644 tests across 94 files**. The full
+**4 context menus** · **12 modules** · **659 tests across 95 files**. The full
 gate is token-free.
 
 This repo is both the product and the course: every module has a spec, tests, a
@@ -179,7 +179,7 @@ open; the read/write path is proven over real local HTTP and Postgres. See
 
 ## Proof
 
-- `pnpm check` covers **644 tests across 94 files**, 35/35 claim checks and
+- `pnpm check` covers **659 tests across 95 files**, 35/35 claim checks and
   4,886 memory checks without a token, database or network.
 - `pnpm probe:live` is **28/28** on the local stack: SQL, Redis, the queue,
   settings survival, temporary expiry, scheduled delivery, portability, web and

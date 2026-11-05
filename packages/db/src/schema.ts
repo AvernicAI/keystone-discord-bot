@@ -453,6 +453,8 @@ export const events = pgTable(
     endsAt: timestamp("ends_at", { withTimezone: true }),
     location: text("location").notNull().default(""),
     capacity: integer("capacity"),
+    /** Channel where the signed RSVP panel was posted; null means none. */
+    panelChannelId: text("panel_channel_id"),
     createdBy: text("created_by").notNull(),
     remindedAt: timestamp("reminded_at", { withTimezone: true }),
     remindedBy: text("reminded_by"),

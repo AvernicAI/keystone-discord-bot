@@ -7,7 +7,14 @@ import { z } from "zod";
  * the size cap and the CLI are the honest trade for v1.
  */
 export const EXPORT_FORMAT = "keystone.export" as const;
-export const EXPORT_VERSION = 1 as const;
+
+/**
+ * v2 adds forms and their submissions. The version moves with the snapshot
+ * shape, not with a feature: a v1 bundle has no forms arrays, and letting it
+ * through a v2 reader would silently claim "no forms" for a file that never
+ * had the field. The refusal names the version it can read.
+ */
+export const EXPORT_VERSION = 2 as const;
 export const MAX_BUNDLE_BYTES = 25 * 1024 * 1024;
 export const ROLLBACK_WINDOW_MS = 24 * 60 * 60 * 1000;
 
@@ -80,6 +87,46 @@ export const TicketRowSchema = z.object({
   updatedAt: dateString,
 });
 export type TicketRow = z.infer<typeof TicketRowSchema>;
+
+export const FormFieldRowSchema = z.object({
+  key: id,
+  label: z.string(),
+  required: z.boolean(),
+  maxLength: z.number().int().positive(),
+});
+export type FormFieldRow = z.infer<typeof FormFieldRowSchema>;
+
+/**
+ * A form's definition travels with its responses; the id is preserved because
+ * `form_submissions.form_id` is a real foreign key. Restoring forms and then
+ * submissions in that order is what keeps a review queue attached to its form.
+ */
+export const FormRowSchema = z.object({
+  id,
+  key: id,
+  name: z.string(),
+  description: z.string(),
+  fields: z.array(FormFieldRowSchema),
+  state: z.string(),
+  panelChannelId: id.nullable(),
+  createdBy: id,
+  createdAt: dateString,
+  updatedAt: dateString,
+});
+export type FormRow = z.infer<typeof FormRowSchema>;
+
+export const FormSubmissionRowSchema = z.object({
+  id,
+  formId: id,
+  userId: id,
+  answers: z.record(z.string(), z.string()),
+  state: z.string(),
+  reviewedBy: id.nullable(),
+  decisionNote: z.string().nullable(),
+  createdAt: dateString,
+  updatedAt: dateString,
+});
+export type FormSubmissionRow = z.infer<typeof FormSubmissionRowSchema>;
 
 export const LevelRowSchema = z.object({
   userId: id,
@@ -156,6 +203,8 @@ export const GuildSnapshotSchema = z.object({
   cases: z.array(CaseRowSchema),
   caseEvents: z.array(CaseEventRowSchema),
   tickets: z.array(TicketRowSchema),
+  forms: z.array(FormRowSchema),
+  formSubmissions: z.array(FormSubmissionRowSchema),
   levels: z.array(LevelRowSchema),
   xpEvents: z.array(XpEventRowSchema),
   economyLedger: z.array(LedgerRowSchema),
@@ -173,6 +222,8 @@ export const SNAPSHOT_KEYS = [
   "cases",
   "caseEvents",
   "tickets",
+  "forms",
+  "formSubmissions",
   "levels",
   "xpEvents",
   "economyLedger",
@@ -185,6 +236,7 @@ export const SNAPSHOT_KEYS = [
 export type SnapshotKey = (typeof SNAPSHOT_KEYS)[number];
 export type SnapshotCounts = Record<SnapshotKey, number> & {
   casesUnique: number;
+  formsUnique: number;
   levelsUnique: number;
 };
 
@@ -196,6 +248,8 @@ export function emptySnapshot(guildId: string, now = new Date().toISOString()): 
     cases: [],
     caseEvents: [],
     tickets: [],
+    forms: [],
+    formSubmissions: [],
     levels: [],
     xpEvents: [],
     economyLedger: [],
@@ -219,6 +273,7 @@ export function snapshotCounts(snapshot: GuildSnapshot): SnapshotCounts {
   return {
     ...base,
     casesUnique: new Set(snapshot.cases.map((row) => row.caseNumber)).size,
+    formsUnique: new Set(snapshot.forms.map((row) => row.key)).size,
     levelsUnique: new Set(snapshot.levels.map((row) => row.userId)).size,
   };
 }
@@ -228,6 +283,7 @@ export const INCLUDED = [
   "module settings",
   "moderation cases and their append-only events",
   "ticket metadata",
+  "forms, their fields and every submitted answer with its review decision",
   "XP projections and the events that produced them",
   "economy ledger entries",
   "audit events",

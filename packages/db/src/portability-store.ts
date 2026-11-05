@@ -24,6 +24,8 @@ import {
   configBaselines,
   configTemplates,
   economyLedger,
+  formSubmissions,
+  forms,
   guilds,
   imports,
   levels,
@@ -58,6 +60,8 @@ export class DrizzlePortabilityStore implements PortabilityStore {
       memberRows,
       caseRows,
       ticketRows,
+      formRows,
+      submissionRows,
       levelRows,
       xpRows,
       ledgerRows,
@@ -94,6 +98,35 @@ export class DrizzlePortabilityStore implements PortabilityStore {
         .from(cases)
         .where(eq(cases.guildId, guildId)),
       this.db.select().from(tickets).where(eq(tickets.guildId, guildId)),
+      this.db
+        .select({
+          id: forms.id,
+          key: forms.key,
+          name: forms.name,
+          description: forms.description,
+          fields: sql<string | null>`${forms.fields}::text`,
+          state: forms.state,
+          panelChannelId: forms.panelChannelId,
+          createdBy: forms.createdBy,
+          createdAt: forms.createdAt,
+          updatedAt: forms.updatedAt,
+        })
+        .from(forms)
+        .where(eq(forms.guildId, guildId)),
+      this.db
+        .select({
+          id: formSubmissions.id,
+          formId: formSubmissions.formId,
+          userId: formSubmissions.userId,
+          answers: sql<string | null>`${formSubmissions.answers}::text`,
+          state: formSubmissions.state,
+          reviewedBy: formSubmissions.reviewedBy,
+          decisionNote: formSubmissions.decisionNote,
+          createdAt: formSubmissions.createdAt,
+          updatedAt: formSubmissions.updatedAt,
+        })
+        .from(formSubmissions)
+        .where(eq(formSubmissions.guildId, guildId)),
       this.db.select().from(levels).where(eq(levels.guildId, guildId)),
       this.db.select().from(xpEvents).where(eq(xpEvents.guildId, guildId)),
       this.db.select().from(economyLedger).where(eq(economyLedger.guildId, guildId)),
@@ -214,6 +247,33 @@ export class DrizzlePortabilityStore implements PortabilityStore {
           updatedAt: row.updatedAt.toISOString(),
         }))
         .sort((a, b) => `${a.createdAt}:${a.id}`.localeCompare(`${b.createdAt}:${b.id}`)),
+      forms: formRows
+        .map((row) => ({
+          id: row.id,
+          key: row.key,
+          name: row.name,
+          description: row.description,
+          fields: readJson(row.fields) as GuildSnapshot["forms"][number]["fields"],
+          state: row.state,
+          panelChannelId: row.panelChannelId,
+          createdBy: row.createdBy,
+          createdAt: row.createdAt.toISOString(),
+          updatedAt: row.updatedAt.toISOString(),
+        }))
+        .sort((a, b) => a.key.localeCompare(b.key)),
+      formSubmissions: submissionRows
+        .map((row) => ({
+          id: row.id,
+          formId: row.formId,
+          userId: row.userId,
+          answers: readJson(row.answers) as Record<string, string>,
+          state: row.state,
+          reviewedBy: row.reviewedBy,
+          decisionNote: row.decisionNote,
+          createdAt: row.createdAt.toISOString(),
+          updatedAt: row.updatedAt.toISOString(),
+        }))
+        .sort((a, b) => `${a.createdAt}:${a.id}`.localeCompare(`${b.createdAt}:${b.id}`)),
       levels: levelRows
         .map((row) => ({
           userId: row.userId,
@@ -297,6 +357,10 @@ export class DrizzlePortabilityStore implements PortabilityStore {
       );
       await tx.delete(cases).where(eq(cases.guildId, guildId));
       await tx.delete(tickets).where(eq(tickets.guildId, guildId));
+      // Submissions first: the form id is a real foreign key, and a restore
+      // must not depend on cascade timing to empty the review queue.
+      await tx.delete(formSubmissions).where(eq(formSubmissions.guildId, guildId));
+      await tx.delete(forms).where(eq(forms.guildId, guildId));
       await tx.delete(levels).where(eq(levels.guildId, guildId));
       await tx.delete(xpEvents).where(eq(xpEvents.guildId, guildId));
       await tx.delete(economyLedger).where(eq(economyLedger.guildId, guildId));
@@ -391,6 +455,39 @@ export class DrizzlePortabilityStore implements PortabilityStore {
           subject: row.subject,
           slaDueAt: row.slaDueAt ? new Date(row.slaDueAt) : null,
           closedAt: row.closedAt ? new Date(row.closedAt) : null,
+          createdAt: new Date(row.createdAt),
+          updatedAt: new Date(row.updatedAt),
+        }))),
+      );
+
+      // Definitions before answers: the submission's form_id points at the id
+      // this insert preserves, not at a newly minted one.
+      await this.insertChunked(snapshot.forms, (chunk) =>
+        tx.insert(forms).values(chunk.map((row) => ({
+          id: row.id,
+          guildId,
+          key: row.key,
+          name: row.name,
+          description: row.description,
+          fields: row.fields,
+          state: row.state,
+          panelChannelId: row.panelChannelId,
+          createdBy: row.createdBy,
+          createdAt: new Date(row.createdAt),
+          updatedAt: new Date(row.updatedAt),
+        }))),
+      );
+
+      await this.insertChunked(snapshot.formSubmissions, (chunk) =>
+        tx.insert(formSubmissions).values(chunk.map((row) => ({
+          id: row.id,
+          guildId,
+          formId: row.formId,
+          userId: row.userId,
+          answers: row.answers,
+          state: row.state,
+          reviewedBy: row.reviewedBy,
+          decisionNote: row.decisionNote,
           createdAt: new Date(row.createdAt),
           updatedAt: new Date(row.updatedAt),
         }))),
@@ -635,6 +732,10 @@ export class DrizzlePortabilityStore implements PortabilityStore {
       );
       await tx.delete(cases).where(eq(cases.guildId, guildId));
       await tx.delete(tickets).where(eq(tickets.guildId, guildId));
+      // Submissions first: the form id is a real foreign key, and a restore
+      // must not depend on cascade timing to empty the review queue.
+      await tx.delete(formSubmissions).where(eq(formSubmissions.guildId, guildId));
+      await tx.delete(forms).where(eq(forms.guildId, guildId));
       await tx.delete(levels).where(eq(levels.guildId, guildId));
       await tx.delete(xpEvents).where(eq(xpEvents.guildId, guildId));
       await tx.delete(economyLedger).where(eq(economyLedger.guildId, guildId));

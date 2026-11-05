@@ -1,5 +1,6 @@
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import type { PgDatabase } from "drizzle-orm/pg-core";
+import { SCHEDULED_REMINDER_ACTOR } from "@keystone/kernel";
 import type {
   EventCreateResult,
   EventDefinition,
@@ -33,6 +34,7 @@ function toEvent(row: EventRow): EventDefinition {
     endsAt: row.endsAt?.toISOString(),
     location: row.location,
     capacity: row.capacity ?? undefined,
+    panelChannelId: row.panelChannelId ?? undefined,
     createdBy: row.createdBy,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -285,5 +287,69 @@ export class DrizzleEventStore implements EventStore {
       .where(and(eq(events.guildId, guildId), eq(events.id, eventId)))
       .returning();
     return row ? toEvent(row) : undefined;
+  }
+
+  async attachPanel(
+    guildId: string,
+    eventId: string,
+    channelId: string,
+  ): Promise<EventDefinition | undefined> {
+    if (!UUID.test(eventId)) return undefined;
+    const [row] = await this.db
+      .update(events)
+      .set({ panelChannelId: channelId, updatedAt: new Date() })
+      .where(and(eq(events.guildId, guildId), eq(events.id, eventId)))
+      .returning();
+    return row ? toEvent(row) : undefined;
+  }
+
+  /**
+   * The conditional where clause is the idempotency proof: only a row that is
+   * still open and has never been reminded can be claimed. Two overlapping
+   * ticks race on this one statement; exactly one gets a row back.
+   */
+  async claimReminder(
+    guildId: string,
+    eventId: string,
+    at: Date,
+  ): Promise<EventDefinition | undefined> {
+    if (!UUID.test(eventId)) return undefined;
+    const [row] = await this.db
+      .update(events)
+      .set({
+        remindedAt: at,
+        remindedBy: SCHEDULED_REMINDER_ACTOR,
+        reminderCount: sql`${events.reminderCount} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(events.guildId, guildId),
+          eq(events.id, eventId),
+          eq(events.state, "open"),
+          isNull(events.remindedAt),
+        ),
+      )
+      .returning();
+    return row ? toEvent(row) : undefined;
+  }
+
+  async releaseReminder(guildId: string, eventId: string): Promise<void> {
+    if (!UUID.test(eventId)) return;
+    await this.db
+      .update(events)
+      .set({
+        remindedAt: null,
+        remindedBy: null,
+        reminderCount: sql`greatest(${events.reminderCount} - 1, 0)`,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(events.guildId, guildId),
+          eq(events.id, eventId),
+          eq(events.remindedBy, SCHEDULED_REMINDER_ACTOR),
+        ),
+      );
   }
 }

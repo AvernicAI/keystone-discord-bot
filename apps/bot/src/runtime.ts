@@ -323,7 +323,8 @@ export async function createRuntime(
     if (
       !(caseStore instanceof InMemoryCaseStore) ||
       !(communityStore instanceof InMemoryCommunityStore) ||
-      !(aiStore instanceof InMemoryAiStore)
+      !(aiStore instanceof InMemoryAiStore) ||
+      !(formStore instanceof InMemoryFormStore)
     ) {
       throw new Error("Memory export requires the in-memory stores; the composition root is inconsistent.");
     }
@@ -332,6 +333,7 @@ export async function createRuntime(
       cases: caseStore,
       community: communityStore,
       ai: aiStore,
+      forms: formStore,
     });
   }
 

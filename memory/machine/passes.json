@@ -1002,6 +1002,38 @@
         "claims": "35/35",
         "build": "not run (no build step changed)"
       }
+    },
+    {
+      "id": "pass-73",
+      "date": "2026-11-05",
+      "phase": "P7.5",
+      "summary": "Event RSVP buttons, one automatic reminder and an ICS export ship on the existing event surface. `/event edit state:open` posts a panel whose Going and Not going buttons are signed, expiring ids routed through the component router; both call the same `EventService.rsvp` as the command, so capacity, ownership and the open-state gate are decided once. Opening and `/event remind` record the panel channel on the event row (migration 0021), which is how the existing 60-second community tick finds its audience: one reminder per open event inside `reminderLeadMinutes`, claimed by a conditional update, released when the post fails, with no second scheduler. `/event export` adds an `.ics` serialized from the exact JSON payload (one VEVENT per event, one ATTENDEE per RSVP, RFC 5545 escaping and 75-octet folding). Tests: 656 in 95 files (2 ICS cases, 3 reminder-tick cases, 3 router cases, 1 new PGlite case and the command panel path); budget stays 20/100 roots and 141 subcommands with no new root or subcommand. A real button press, a real calendar application and a live automatic reminder are not claimed.",
+      "journal": "journal/2026-11-05-pass-73.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "656",
+        "budget": "20/100 roots · 141 subcommands · 161 actions · 4 context menus",
+        "live": "28/28 (not rerun)",
+        "memory": "current",
+        "claims": "35/35",
+        "build": "not run (no build step changed)"
+      }
+    },
+    {
+      "id": "pass-74",
+      "date": "2026-11-05",
+      "phase": "P7.5",
+      "summary": "Forms travel in the guild bundle instead of only in `/form export`. `GuildSnapshot` v2 gains `forms` and `formSubmissions`; the manifest counts both plus `formsUnique`, and the existing SHA-256 checksum and count checks cover the rows, so an edited answer is refused like any other field. Restore inserts a form before its answers and preserves ids, keeping `form_submissions.form_id` valid; the in-memory export port reads the same rows through export-only `allForms`/`allSubmissions` accessors. A version 1 bundle is refused with the readable version named instead of being read as a guild with no forms, and merge mode still leaves forms alone with an updated warning. Tests: 659 in 95 files (the SQL round trip read back through `createFormStore`, the v1 refusal and the checksum-edit case); budget stays 20/100 roots and 141 subcommands with no new root, subcommand, table or migration. A live Postgres restore is not claimed.",
+      "journal": "journal/2026-11-05-pass-74.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "659",
+        "budget": "20/100 roots · 141 subcommands · 161 actions · 4 context menus",
+        "live": "28/28 (not rerun)",
+        "memory": "current",
+        "claims": "35/35",
+        "build": "not run (no build step changed)"
+      }
     }
   ]
 }

@@ -2580,6 +2580,24 @@
           "liveVerified": true,
           "liveScope": "manual",
           "liveRecord": "memory/vault/01-Mission/Status.md"
+        },
+        {
+          "id": "forms.bundle-round-trip",
+          "name": "Forms in the guild bundle",
+          "competitors": {},
+          "phase": "P7.5",
+          "status": "shipped-in-repo",
+          "source": "memory/vault/02-Research/Competitive-2026.md",
+          "note": "Pass 74 makes a form definition and every response travel in the `/export guild` bundle instead of only in `/form export`. `GuildSnapshot` v2 gains `forms` and `formSubmissions`; the manifest counts both plus `formsUnique`, and the existing SHA-256 checksum covers the rows, so an edited answer fails the same check as any other field. Restore inserts definitions before answers and preserves ids, so `form_submissions.form_id` still points at its form. A v1 bundle is refused by version rather than read as a guild with no forms, and merge mode still leaves forms alone and says so in its warning. The SQL round trip reads the restored rows back through `createFormStore`, not only through the portability snapshot that wrote them. Not live-proven on Postgres or Discord; PGlite and the in-memory port carry the tests.",
+          "evidence": [
+            "apps/bot/src/export-port.test.ts",
+            "packages/importer/src/importer.test.ts",
+            "packages/importer/src/types.ts",
+            "packages/db/src/portability-store.ts",
+            "memory/journal/2026-11-05-pass-74.md"
+          ],
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },
@@ -2595,7 +2613,7 @@
           "phase": "P7",
           "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "`/event create | edit | delete | list | export` writes `events` with a draft/open/closed lifecycle, a start and optional end, a location and an optional capacity. Live 2026-11-01: a draft was created, opened, edited, listed with 1/2 going, and exported as 1.2 KB of JSON.",
+          "note": "`/event create | edit | delete | list | export` writes `events` with a draft/open/closed lifecycle, a start and optional end, a location and an optional capacity. Opening an event posts a public RSVP panel and records its channel on the event row; `/event export` attaches the checksummed JSON and the ICS serialization of the same rows. Live 2026-11-01: a draft was created, opened, edited, listed with 1/2 going, and exported as 1.2 KB of JSON.",
           "evidence": [
             "modules/events/src/events.test.ts",
             "packages/db/src/event-store.test.ts",
@@ -2610,13 +2628,14 @@
           "name": "RSVP buttons",
           "competitors": {},
           "phase": "P7",
-          "status": "open",
+          "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "Command RSVP is shipped: `/event rsvp event:<key> rsvp:going|not_going`, one row per member, capacity counted from `event_rsvps`. Interactive going/maybe/no buttons are not built yet; the signed component layer exists (pass 58).",
+          "note": "`/event edit state:open` posts one panel with signed Going and Not going buttons. The id carries the event id and expires with the event, and both routes call the same `EventService.rsvp` as `/event rsvp`, so capacity, ownership and the open-state gate are decided once. Tested through the signed component router with a fake interaction; a real click is not claimed.",
           "evidence": [
-            "modules/events/src/events.test.ts"
+            "modules/events/src/events.test.ts",
+            "modules/events/src/panel.ts",
+            "apps/bot/src/components.test.ts"
           ],
-          "openReason": "The component layer now exists (pass 58), but the event buttons and their state transitions are not built; shipping an inert button would still be a dead end.",
           "liveVerified": false,
           "liveScope": "none"
         },
@@ -2627,18 +2646,22 @@
           "phase": "P7",
           "status": "partial",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "Manual reminders are shipped and live-proven: `/event remind` posts a reminder for an open event and records `reminded_at`, `reminded_by` and `reminder_count`. Scheduled delivery and per-member timezones are not built; there is no scheduler job for events yet.",
+          "note": "`/event remind` posts a manual reminder and records `reminded_at`, `reminded_by` and `reminder_count` (live-proven 2026-11-01). One automatic reminder is sent by the existing 60-second community tick when an open event starts inside `reminderLeadMinutes` (5-10080, default 60); it needs a recorded panel channel, claims the event with one conditional update so two ticks cannot both post, and releases the claim when the send fails. Per-member timezones and repeat reminders are not built.",
           "evidence": [
-            "modules/events/src/events.test.ts"
+            "modules/events/src/events.test.ts",
+            "modules/events/src/reminders.ts",
+            "apps/bot/src/event-reminders.test.ts",
+            "memory/journal/2026-11-05-pass-73.md"
           ],
           "shippedParts": [
-            "manual `/event remind` recording reminded_at, reminded_by and reminder_count"
+            "manual `/event remind` recording reminded_at, reminded_by and reminder_count",
+            "one automatic reminder from the existing community tick, claimed atomically and released on a failed send"
           ],
           "openParts": [
-            "scheduled delivery",
-            "per-member timezones"
+            "per-member timezones",
+            "repeat or per-event reminder schedules"
           ],
-          "openReason": "Manual reminders are live-proven. Scheduled delivery needs a recurring queue job, a per-event wake-up and a delivery port; none is built.",
+          "openReason": "The single automatic reminder ships on the existing tick. Per-member timezones and more than one reminder would need a per-event schedule and a member locale, neither of which is stored.",
           "liveVerified": true,
           "liveScope": "manual",
           "liveRecord": "memory/vault/01-Mission/Status.md"
@@ -2648,23 +2671,15 @@
           "name": "ICS export",
           "competitors": {},
           "phase": "P7",
-          "status": "partial",
+          "status": "shipped-in-repo",
           "source": "memory/vault/02-Research/Competitive-2026.md",
-          "note": "JSON export is shipped: `/event export` attaches `keystone.events` with events, RSVPs, counts and a SHA-256 checksum. An ICS calendar file is not built; the JSON is the portable format for now.",
+          "note": "`/event export` attaches the live-proven checksummed `keystone.events` JSON plus an `.ics` built from that exact payload, so the calendar cannot disagree with the JSON about events or answers. One VEVENT per event with an ATTENDEE per RSVP row, reserved characters escaped and long lines folded at 75 octets. Serializer-tested; no real calendar application has opened the file.",
           "evidence": [
-            "modules/events/src/events.test.ts"
+            "modules/events/src/events.test.ts",
+            "modules/events/src/ics.ts"
           ],
-          "shippedParts": [
-            "checksummed `keystone.events` JSON export with events, RSVPs and counts"
-          ],
-          "openParts": [
-            "ICS serialization",
-            "a real calendar consumer"
-          ],
-          "openReason": "JSON export is live-proven. ICS needs a calendar serializer and a real consumer; the checksummed JSON is the portable format for now.",
-          "liveVerified": true,
-          "liveScope": "manual",
-          "liveRecord": "memory/vault/01-Mission/Status.md"
+          "liveVerified": false,
+          "liveScope": "none"
         }
       ]
     },

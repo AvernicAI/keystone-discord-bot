@@ -50,6 +50,27 @@ export class InMemoryFormStore implements FormStore {
     return { ok: true, form };
   }
 
+  /**
+   * Export-only read: every form in one guild, uncapped.
+   *
+   * `listForms` is capped because it answers a command; a portability snapshot
+   * must not silently drop the forms past that cap. This is a read accessor on
+   * the in-memory adapter, not a new method on the form port: SQL snapshots
+   * read the tables directly.
+   */
+  allForms(guildId: string): FormDefinition[] {
+    return [...this.#forms.values()]
+      .filter((form) => form.guildId === guildId)
+      .sort((a, b) => a.key.localeCompare(b.key));
+  }
+
+  /** Export-only read: every submission in one guild, uncapped. */
+  allSubmissions(guildId: string): FormSubmission[] {
+    return [...this.#submissions.values()]
+      .filter((submission) => submission.guildId === guildId)
+      .sort((a, b) => `${a.createdAt}:${a.id}`.localeCompare(`${b.createdAt}:${b.id}`));
+  }
+
   async getForm(guildId: string, reference: string): Promise<FormDefinition | undefined> {
     const forms = [...this.#forms.values()].filter((form) => form.guildId === guildId);
     return forms.find((form) => form.key === reference) ?? forms.find((form) => form.id === reference);

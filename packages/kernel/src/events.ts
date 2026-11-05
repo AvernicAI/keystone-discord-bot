@@ -10,6 +10,14 @@
 export type EventState = "draft" | "open" | "closed";
 export type RsvpState = "going" | "not_going";
 
+/**
+ * `reminded_by` for the reminder the 60-second tick sends.
+ *
+ * A sentinel rather than a member id: no member pressed anything, and the
+ * command renders it as prose instead of a mention that would point at nobody.
+ */
+export const SCHEDULED_REMINDER_ACTOR = "system";
+
 export interface EventDefinition {
   readonly id: string;
   readonly guildId: string;
@@ -25,10 +33,16 @@ export interface EventDefinition {
   readonly location: string;
   /** Undefined means unlimited; any number is a hard cap on `going` rows. */
   readonly capacity?: number;
+  /**
+   * Channel where the interactive panel was posted. The tick has no interaction
+   * to reply to, so this row is how a reminder finds its audience.
+   */
+  readonly panelChannelId?: string;
   readonly createdBy: string;
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly remindedAt?: string;
+  /** A member id, or `SCHEDULED_REMINDER_ACTOR` for the tick. */
   readonly remindedBy?: string;
   readonly reminderCount: number;
 }
@@ -129,4 +143,21 @@ export interface EventStore {
     remindedBy: string,
     at: Date,
   ): Promise<EventDefinition | undefined>;
+  /**
+   * Record the channel an interactive panel was posted to. A reminder fired by
+   * the tick has no interaction to reply to, so the announcement's channel is
+   * part of the event row rather than hidden in a second store.
+   */
+  attachPanel(
+    guildId: string,
+    eventId: string,
+    channelId: string,
+  ): Promise<EventDefinition | undefined>;
+  /**
+   * Atomically claim the one automatic reminder. `undefined` means another tick
+   * already claimed it, the event is no longer open, or it does not exist.
+   */
+  claimReminder(guildId: string, eventId: string, at: Date): Promise<EventDefinition | undefined>;
+  /** Release a claim whose delivery failed, so the next tick can retry. */
+  releaseReminder(guildId: string, eventId: string): Promise<void>;
 }

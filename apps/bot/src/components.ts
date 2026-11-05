@@ -6,6 +6,7 @@ import {
   type ComponentInteractionLike,
   type ComponentSigner,
   type ConfigPort,
+  type EventStore,
   type FormStore,
   type Logger,
   type ModerationPort,
@@ -14,6 +15,7 @@ import {
 import { DEFAULT_LOCALE, guildLocale, t } from "@keystone/i18n";
 import { asComponentInteraction } from "./adapt";
 import { registerCommunityRoutes } from "./community-interactions";
+import { registerEventRoutes } from "./event-interactions";
 import { registerFormRoutes } from "./form-interactions";
 import { registerModerationRoutes } from "./moderation-buttons";
 
@@ -30,6 +32,11 @@ export interface ComponentRuntimeDeps {
   readonly community: {
     readonly store: CommunityStore;
     readonly actions: CommunityActions;
+    readonly settings: ModuleSettings;
+  };
+  /** Event RSVP buttons call the same service `/event rsvp` uses. */
+  readonly events: {
+    readonly store: EventStore;
     readonly settings: ModuleSettings;
   };
   /** Reads the setup module's per-guild locale; absent means English. */
@@ -59,6 +66,10 @@ export function createComponentRouter(deps: ComponentRuntimeDeps): ComponentRout
     settings: deps.community.settings,
     signer: deps.signer,
     now: deps.now,
+  });
+  registerEventRoutes(router, {
+    store: deps.events.store,
+    settings: deps.events.settings,
   });
   // The verify id carries its guild inside the signed payload, because a DM has
   // none; the route itself lives beside moderation's button handlers.

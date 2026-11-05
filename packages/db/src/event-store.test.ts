@@ -158,4 +158,40 @@ describe("SQL event store", () => {
     );
     expect(rows[0]?.count).toBe("0");
   });
+
+  it("stores the panel channel and claims one automatic reminder idempotently", async () => {
+    const setup = await store();
+    harness = setup.harness;
+    const created = await createEvent(setup.store);
+
+    const attached = await setup.store.attachPanel("guild-a", created.id, "chan-9");
+    expect(attached?.panelChannelId).toBe("chan-9");
+    const [raw] = await harness.runner.query<{ panel_channel_id: string }>(
+      `select panel_channel_id from events where id = '${created.id}'`,
+    );
+    expect(raw?.panel_channel_id).toBe("chan-9");
+
+    const at = new Date("2026-11-05T17:00:00.000Z");
+    const first = await setup.store.claimReminder("guild-a", created.id, at);
+    expect(first).toMatchObject({
+      remindedBy: "system",
+      reminderCount: 1,
+      remindedAt: at.toISOString(),
+    });
+    // The conditional update is the idempotency guard: the second claim is a
+    // no-op even though the read above would still have looked due.
+    expect(await setup.store.claimReminder("guild-a", created.id, at)).toBeUndefined();
+
+    await setup.store.releaseReminder("guild-a", created.id);
+    const released = await setup.store.getEvent("guild-a", created.id);
+    expect(released).toMatchObject({ reminderCount: 0 });
+    expect(released?.remindedAt).toBeUndefined();
+    expect((await setup.store.claimReminder("guild-a", created.id, at))?.reminderCount).toBe(1);
+
+    const closed = await createEvent(setup.store, { key: "closed-event" });
+    await setup.store.updateEvent("guild-a", closed.id, { state: "closed" });
+    expect(
+      await setup.store.claimReminder("guild-a", closed.id, at),
+    ).toBeUndefined();
+  });
 });

@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import {
+  SCHEDULED_REMINDER_ACTOR,
   UserError,
   cooldown,
   defineCommand,
@@ -10,6 +11,8 @@ import {
   type EventSummary,
 } from "@keystone/kernel";
 import { EventService, type EventExport } from "../events";
+import { buildEventCalendar } from "../ics";
+import { buildEventPanel, capacityLine } from "../panel";
 import { eventSettingsSchema } from "../settings";
 
 const OPTIONS = {
@@ -109,12 +112,6 @@ function clip(value: string, max = 1_024): string {
 
 const seconds = (iso: string): number => Math.floor(Date.parse(iso) / 1_000);
 
-function capacityLine(event: EventDefinition, going: number): string {
-  return event.capacity === undefined
-    ? `${going} going · no cap`
-    : `${going}/${event.capacity} going`;
-}
-
 function eventLine(entry: EventSummary): string {
   return [
     `\`${entry.event.key}\` · **${entry.event.name}** · ${entry.event.state}`,
@@ -138,7 +135,11 @@ function eventFields(event: EventDefinition, going: number) {
       ? [
           {
             name: "Reminders",
-            value: `${event.reminderCount} · last <t:${seconds(event.remindedAt)}:R> by <@${event.remindedBy}>`,
+            value: `${event.reminderCount} · last <t:${seconds(event.remindedAt)}:R> by ${
+              event.remindedBy === SCHEDULED_REMINDER_ACTOR
+                ? "the scheduler"
+                : `<@${event.remindedBy}>`
+            }`,
             inline: false,
           },
         ]
@@ -152,7 +153,8 @@ function exportFile(payload: EventExport, checksum: string): { content: string }
 
 export const event = defineCommand({
   name: "event",
-  description: "Create guild events, take RSVPs, post reminders and export attendance.",
+  description:
+    "Create guild events, take RSVPs with buttons, post reminders and export JSON or ICS.",
   subcommands: [
     {
       name: "create",
@@ -182,7 +184,7 @@ export const event = defineCommand({
     },
     {
       name: "export",
-      description: "Download events and RSVPs as a checksummed JSON file.",
+      description: "Download events and RSVPs as checksummed JSON plus an ICS calendar.",
       options: [OPTIONS.event],
     },
   ],
@@ -263,6 +265,29 @@ export const event = defineCommand({
 
       const updated = await svc.edit(guildId, reference, patch);
       const going = await events.countRsvps(guildId, updated.id, "going");
+
+      // Opening is the announcement: a public panel with signed going and
+      // not-going buttons in the channel where the manager ran the command.
+      // Recording that channel is what lets the 60-second tick remind later;
+      // there is no interaction to reply to then.
+      if (updated.state === "open" && before.state !== "open") {
+        const channelId = ctx.interaction.channelId;
+        if (channelId) await events.attachPanel(guildId, updated.id, channelId);
+        const notGoing = await events.countRsvps(guildId, updated.id, "not_going");
+        const panel = buildEventPanel(
+          updated,
+          { going, notGoing },
+          ctx.componentSigner,
+          ctx.now(),
+          { heading: "Event open" },
+        );
+        await ctx.interaction.reply({
+          ...panel.reply,
+          content: `Event \`${updated.key}\` is open · <t:${seconds(updated.startsAt)}:F> · ${capacityLine(updated, going)}. Press a button to answer; one RSVP per member.`,
+        });
+        return;
+      }
+
       await ctx.interaction.reply({
         content: `Event \`${updated.key}\` updated · state ${updated.state} · <t:${seconds(updated.startsAt)}:F> · ${capacityLine(updated, going)}.`,
         ephemeral: true,
@@ -334,19 +359,22 @@ export const event = defineCommand({
       const reference = text(ctx, "event");
       if (!reference) throw new UserError("Choose an event with the `event` option.");
       const reminded = await svc.remind(guildId, ctx.userId, reference);
+      const channelId = ctx.interaction.channelId;
+      if (channelId) await events.attachPanel(guildId, reminded.event.id, channelId);
+      const notGoing = await events.countRsvps(guildId, reminded.event.id, "not_going");
+      const panel = buildEventPanel(
+        reminded.event,
+        { going: reminded.going, notGoing },
+        ctx.componentSigner,
+        ctx.now(),
+        {
+          heading: `Reminder ${reminded.event.reminderCount}`,
+          footer: `Reminder sent by the event manager. ${reminded.going} going so far.`,
+        },
+      );
       await ctx.interaction.reply({
+        ...panel.reply,
         content: `Reminder ${reminded.event.reminderCount} for \`${reminded.event.key}\` · <t:${seconds(reminded.event.startsAt)}:R> · ${reminded.going} going.`,
-        embeds: [
-          {
-            title: `Reminder: ${reminded.event.name}`,
-            description:
-              reminded.event.description ||
-              `**${reminded.event.name}** starts <t:${seconds(reminded.event.startsAt)}:R>. Use \`/event rsvp event:${reminded.event.key} rsvp:going\` to join.`,
-            color: 0xfee75c,
-            fields: eventFields(reminded.event, reminded.going),
-            footer: { text: `Reminder sent by the event manager. ${reminded.going} going so far.` },
-          },
-        ],
       });
       return;
     }
@@ -359,28 +387,40 @@ export const event = defineCommand({
         .update(JSON.stringify(payload))
         .digest("hex");
       const file = exportFile(payload, checksum);
-      const name = reference
-        ? `keystone.events.${guildId}.${payload.events[0]?.key ?? "event"}.json`
+      const slug = reference ? (payload.events[0]?.key ?? "event") : undefined;
+      const name = slug
+        ? `keystone.events.${guildId}.${slug}.json`
         : `keystone.events.${guildId}.json`;
+      const calendar = buildEventCalendar(payload);
+      const calendarName = slug
+        ? `keystone.events.${guildId}.${slug}.ics`
+        : `keystone.events.${guildId}.ics`;
       await ctx.interaction.reply({
         ephemeral: true,
-        content: `Event export · ${payload.counts.events} event${payload.counts.events === 1 ? "" : "s"} · ${payload.counts.rsvps} RSVP${payload.counts.rsvps === 1 ? "" : "s"} · ${file.content.length} bytes · checksum \`${checksum.slice(0, 16)}…\``,
+        content: `Event export · ${payload.counts.events} event${payload.counts.events === 1 ? "" : "s"} · ${payload.counts.rsvps} RSVP${payload.counts.rsvps === 1 ? "" : "s"} · JSON ${file.content.length} bytes · ICS ${calendar.length} bytes · checksum \`${checksum.slice(0, 16)}…\``,
         files: [
           {
             name,
             content: file.content,
             description: "Keystone events export. Contains member ids; keep it private.",
           },
+          {
+            name: calendarName,
+            content: calendar,
+            description:
+              "RFC 5545 calendar with one ATTENDEE per RSVP row in this export. Contains member ids.",
+          },
         ],
         embeds: [
           {
             title: "Events export",
             description:
-              "The attached JSON is the same rows `/event list` and `/event rsvp` read, plus the RSVP membership. The checksum is SHA-256 over the payload.",
+              "The attached JSON is the same rows `/event list` and `/event rsvp` read, plus the RSVP membership. The `.ics` is that same payload serialized as an RFC 5545 calendar; it reads no rows of its own. The checksum is SHA-256 over the JSON payload.",
             color: 0x5865f2,
             fields: [
               { name: "Checksum", value: `\`${checksum}\``, inline: false },
               { name: "Format", value: `\`${payload.format}\` version ${payload.version}`, inline: false },
+              { name: "Calendar", value: `\`${calendarName}\``, inline: false },
             ],
             footer: { text: "Contains member ids. Treat it as private." },
           },
@@ -403,5 +443,5 @@ export const event = defineCommand({
     ],
   },
   notes:
-    "RSVPs are owned by the invoking member: there is no user option, so no command can write another member's row. Capacity is counted from event_rsvps inside the store, so two members cannot both take the last seat. `remind` records who sent it and when; it does not schedule future delivery.",
+    "RSVPs are owned by the invoking member: there is no user option, so no command can write another member's row. Capacity is counted from event_rsvps inside the store, so two members cannot both take the last seat. Opening an event posts a public panel whose signed Going and Not going buttons call the same rsvp service; its channel is recorded so the 60-second community tick can send one reminder before the start. `export` serializes the same rows as JSON and RFC 5545 ICS.",
 });
