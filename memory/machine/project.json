@@ -6,8 +6,8 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-03",
   "phase": "P7",
-  "lastPass": "journal/2026-11-03-pass-65.md",
-  "nextAction": "Every component id now goes through the signed, expiring router, including moderation's appeal and DM verify. P7's remaining reply copy is named in passes 62 and 63: community's operator configuration replies and the other ten modules' command replies are still English, service-owned economy reasons keep their own sentences, and kernel guard copy has no locale; parity role persistence is also open. A live gateway click, right-click, modal submit or member join still needs a human Discord client. P8 playback needs a Lavalink node; P9/P10 need outside input.",
+  "lastPass": "journal/2026-11-03-pass-66.md",
+  "nextAction": "Pass 66 audited /memory and proposed Roadmap v3 in vault/01-Mission/Roadmap-v3.md; no product behaviour changed. The next product pass is P7.5 truth and live closure: the remaining reply copy, parity role persistence, case export, event buttons/reminders/ICS, forms modal, and human gateway proofs. A live gateway click, right-click, modal submit or member join still needs a human Discord client. P8 support depth and P9 playback need outside decisions: feed APIs, a KB eval and a Lavalink node.",
   "live": {
     "report": "machine/live.json",
     "id": "live-2026-11-03"
@@ -370,6 +370,12 @@
       "title": "Real Discord subcommands, one owning module per root",
       "status": "accepted",
       "path": "vault/03-Architecture/ADR/ADR-0018-real-subcommands.md"
+    },
+    {
+      "id": "ADR-0019",
+      "title": "A bot-side timer queue for work that needs Discord",
+      "status": "accepted",
+      "path": "vault/03-Architecture/ADR/ADR-0019-bot-side-timer-queue.md"
     }
   ],
   "openQuestions": [

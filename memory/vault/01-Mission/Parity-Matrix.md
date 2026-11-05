@@ -65,7 +65,7 @@ checked. See [[Master-Plan]] for the research program.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | XP and levels | 💰 | 💰 | 💰 | ❌ | ❌ | P3 | Free, always |
 | Role rewards | 3 free, then 💰 | 💰 | 💰 | ❌ | ❌ | P3 | Per-level, stackable |
-| Rank card | ✅ | 💰 | 💰 | ❌ | ❌ | P3 | Embed today; the V2 layer exists (pass 58), the card is not migrated yet |
+| Rank card | ✅ | 💰 | 💰 | ❌ | ❌ | P3 | Components V2 card ships (pass 60); one builder serves `/rank view` and the Rank card menu |
 | Leaderboard | ✅ | 💰 | 💰 | ❌ | ❌ | P3 | Paginated, cached |
 | XP multipliers | 💰 | 💰 | 💰 | ❌ | ❌ | P3 | Role/channel/event |
 | Import from MEE6 | ❌ | ❌ | ❌ | ❌ | ❌ | P5 | **Our edge** |
@@ -86,7 +86,7 @@ checked. See [[Master-Plan]] for the research program.
 
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Welcome / goodbye | ✅ | ✅ | ✅ | ❌ | ❔ | P3 | Text welcome and goodbye ship; a V2 panel is planned |
+| Welcome / goodbye | ✅ | ✅ | ✅ | ❌ | ❔ | P3 | Text and the V2 greeting panel ship (pass 60); operator text is not translated |
 | Autorole | ✅ | ✅ | ✅ | ❌ | ❔ | P3 | With join delay |
 | Reaction roles | 💰 (40) | ❌ | ✅ (250) | ❌ | ❔ | P3 | Buttons and selects too |
 | Starboard | ✅ | ✅ | ✅ | ❌ | ❌ | P3 | Per-channel thresholds |
@@ -102,7 +102,7 @@ checked. See [[Master-Plan]] for the research program.
 
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Panels | ❌ | ✅ (1) | ❔ | ✅ | ❌ | P3 | Thread/embed panels; the form panel is V2 with a modal (pass 58), the rest are not migrated |
+| Panels | ❌ | ✅ (1) | ❔ | ✅ | ❌ | P3 | Form, ticket and community panels are Components V2 with signed ids (passes 58–61; routes contained in pass 65) |
 | Thread-based tickets | ❌ | 💰 | ❔ | ✅ | ❌ | P3 | Avoids the 50-channel cap |
 | Claiming | ❌ | 💰 | ❔ | ✅ | ❌ | P3 | With SLA clock |
 | Transcripts | ❌ | 💰 | ❔ | ✅ (30 d free) | ❌ | P3 | Never auto-expire |
@@ -211,12 +211,12 @@ rule.
 
 | Domain | Rows | P3 | P4 adds | Ours by P8 | Note |
 | --- | --- | --- | --- | --- | --- |
-| Moderation | 11 | 8 | 0 | 11 | Case model is the spine; temp-ban/role expiry and case export open |
+| Moderation | 11 | 8 | 0 | 11 | Case model is the spine; temporary expiry ships pass 45; case export open |
 | Automod | 10 | 5 | 0 | 10 | Invite, mentions, duplicates, links, profanity/zalgo, native-plan and test mode; false-positive report open |
-| Security | 9 | 7 | 0 | 9 | Anti-nuke, anti-raid, quarantine, join gate and shared cases; panic mode open |
+| Security | 9 | 7 | 0 | 9 | Anti-nuke, anti-raid, quarantine, join gate and shared cases; panic mode ships pass 46 |
 | Leveling | 7 | 6 | 0 | 7 | XP, rewards, rank, leaderboard, multiplier and archived seasonal reset; MEE6 import is P5 |
 | Economy | 6 | 5 | 0 | 6 | Daily, shop, transfers, gambling and the audit ledger; P4 added the lock/idempotency hardening, not a new row |
-| Community | 11 | 10 | 0 | 11 | Welcome, delayed autorole, button/select roles, per-channel starboard, birthdays, suggestions, giveaways, temp voice, stat, feeds, polls; goodbye messages open |
+| Community | 11 | 10 | 0 | 11 | Welcome, delayed autorole, button/select roles, per-channel starboard, birthdays, suggestions, giveaways, temp voice, stat, polls; goodbye ships pass 46; social feeds open |
 | Tickets | 7 | 5 | 2 | 7 | Knowledge base and AI deflection; portable RAG, pgvector ANN open |
 | Content | 7 | 6 | 0 | 6 | Embed, tags, schedules, reminders, feeds and sticky messages; translation non-goal |
 | Music | 4 | 0 | 0 | 2 | BYO only |

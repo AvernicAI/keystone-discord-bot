@@ -241,9 +241,10 @@ rate-limited register leaves the app with no commands.
   feeds a nested `/mod ban` payload through the real `asInteractionLike` adapter,
   registry and dispatch; it is not a gateway `InteractionCreate` and does not
   replace a human slash check.
-- The rest of P7 (translating the remaining module copy and redesigning
-  moderation's `appeal`/`verify` ids so a DM can carry both the guild and the
-  member inside the signed payload) is open; the Components V2 layer, i18n, the
+- The remaining P7 work is the copy pass for community's operator configuration
+  replies and the other ten modules' command replies, plus parity role
+  persistence; pass 64 already moved moderation's `appeal`/`verify` ids onto the
+  signed router. The Components V2 layer, i18n, the
   rank/ticket/greeting panels and the signed role/select/giveaway/suggestion/
   poll panels are shipped (passes 58-61), and analytics, in-bot config,
   `/export`, `/music`, forms, events, modmail,

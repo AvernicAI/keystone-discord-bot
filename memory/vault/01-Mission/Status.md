@@ -2,6 +2,13 @@
 
 ## Now
 
+**Pass 66 audited the memory and proposed Roadmap v3** (2026-11-03): no product
+behaviour changed. The audit records the initial 3,712/3,715 gate as a CRLF
+artifact, fixes the P0 drift and proposes a `partial`/`liveScope` vocabulary;
+the plan proposes six phases from P7.5 to P12. Tests remain **631 / 92 files**
+and the last live probe is **28/28**. See
+[pass 66](../../journal/2026-11-03-pass-66.md).
+
 **Pass 65 contained the component seams** (2026-11-03): each module's component
 routes now sit beside its adapter — `form-interactions.ts` and
 `community-interactions.ts`, next to `moderation-buttons.ts` — and

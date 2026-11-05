@@ -286,7 +286,7 @@ first because every later module writes to the same settings table.
 - Permission precheck before every destructive API call.
 - 403 circuit breaker: stop on a spike long before 10,000 invalid requests/10 min.
 - Idempotency key on every job that sends a message or moves currency.
-- A Components V2 budgeter (planned; no `packages/ui` yet) throws above 40 slots in development.
+- A `packages/ui` Components V2 budgeter (shipped pass 58) throws above 40 slots in development.
 - p95 interaction ack < 1 s; handler < 250 ms excluding IO.
 - Per-guild AI cap, enforced server-side, never in the prompt.
 - No test may require a token, a live guild or the network.

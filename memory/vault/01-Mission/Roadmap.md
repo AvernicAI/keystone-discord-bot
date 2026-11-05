@@ -3,6 +3,10 @@
 > This is the phase index for the approved **Roadmap v2** ([[ADR-0013-roadmap-v2-portability-first]]).
 > For the reasoning and the specialist team read [[Master-Plan]]; for the
 > feature-level truth read the generated [[Feature-Status]].
+>
+> **Proposed successor:** [[Roadmap-v3]] reorders P8–P10 into P7.5–P12 and adds
+> the competitive completion plan. This page remains the active phase index until
+> that plan is accepted.
 
 Each phase ends with **a demo, a doc, a memory update and a written critique**.
 A phase is not done because the code exists.
@@ -254,8 +258,9 @@ stats`: private owner-or-staff threads over two owned tables, a first-staff-repl
 claim, side-aware unread counters and a transcript archived once by a conditional
 update, with DM/thread relay deferred and named. The ledger is now **20 roots /
 141 subcommands / 161 actions / 4 context menus** after pass 46; the Master-Plan records 72
-planned names across 14 built roots. Every recorded plan name is registered. The
-rest of this phase is open.
+planned names across 14 built roots. Every recorded plan name is registered.The remaining P7 work is the copy pass for the ten modules' replies, parity role
+persistence, and the live gateway proof; [[Roadmap-v3]] records the proposed
+order for the rest of the program.
 
 - `packages/ui` (shipped in pass 58; community panels migrated in pass 60):
   Components V2 budgeter (40 components, ~4,000 text), typed layout primitives,

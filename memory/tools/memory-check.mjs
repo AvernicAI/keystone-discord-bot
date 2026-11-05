@@ -316,7 +316,14 @@ async function checkGenerated() {
     check(`generated page ${relative} exists`, existsSync(file), `${relative} is missing; run pnpm memory:render`);
     if (existsSync(file)) {
       const actual = await readText(file);
-      check(`generated page ${relative} is current`, actual === content, `${relative} is stale; run pnpm memory:render`);
+      // A Windows checkout may hold CRLF while the renderer writes LF. Compare
+      // normalised text so the gate tests content, not the working tree's
+      // line-ending policy.
+      check(
+        `generated page ${relative} is current`,
+        actual.replace(/\r\n/g, "\n") === content.replace(/\r\n/g, "\n"),
+        `${relative} is stale; run pnpm memory:render`,
+      );
     }
   }
 

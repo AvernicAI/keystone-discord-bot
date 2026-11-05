@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-03T09:10:00.000Z",
+  "updatedAt": "2026-11-03",
   "passes": [
     {
       "id": "pass-01",
@@ -890,6 +890,21 @@
         "live": "28/28",
         "memory": "current",
         "build": "pass"
+      }
+    },
+    {
+      "id": "pass-66",
+      "date": "2026-11-03",
+      "phase": "P7",
+      "summary": "Memory audit and proposed Roadmap v3 (Own the record). Added the audit page and the competitive plan; fixed the P0 drift (CRLF-safe generated-page check, README migration/probe counts, ADR-0019 index, stale AGENTS clause), corrected the parity tally and rank-card/welcome/ticket notes, Master-Plan V2 sentence, Command-Budget root count, Home licence blocker and Roadmap P7 sentence, and linked both pages. No product behaviour changed; tests remain 631/92, probe 28/28.",
+      "journal": "journal/2026-11-03-pass-66.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "631",
+        "budget": "20/100 roots · 141 subcommands · 4 context menus",
+        "live": "28/28 (not rerun)",
+        "memory": "current",
+        "build": "not run (docs/tooling only)"
       }
     }
   ]

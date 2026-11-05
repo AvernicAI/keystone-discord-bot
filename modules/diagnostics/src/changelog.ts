@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-66",
+    date: "2026-11-03",
+    summary:
+      "Planning pass: a full memory audit and the proposed Roadmap v3. The audit fixes stale current-tense claims and the CRLF gate trap; no command, reply or interaction changed.",
+    journal: "memory/journal/2026-11-03-pass-66.md",
+  },
+  {
     pass: "pass-65",
     date: "2026-11-03",
     summary:
