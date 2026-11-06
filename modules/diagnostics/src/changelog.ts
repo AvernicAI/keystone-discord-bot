@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-83",
+    date: "2026-11-06",
+    summary:
+      "Music plays: one Lavalink 4.2.2 node from compose owns voice and DAVE behind the existing playback port, the durable row is now the play queue (its head is the current track), and `/music` gains pause, resume, volume, loop, shuffle and jump over the same queue. One signed Components V2 card shows progress, the next tracks and a jump select; the dashboard starts and controls the same session through Redis and says `Last known state, not live` instead of showing a dead player. A restart resumes the queue from its head at 0:00, and the page says so.",
+    journal: "memory/journal/2026-11-06-pass-83.md",
+  },
+  {
     pass: "pass-78",
     date: "2026-11-05",
     summary:

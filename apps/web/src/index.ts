@@ -5,7 +5,7 @@ import { createWebRuntime } from "./runtime";
 
 async function main(): Promise<void> {
   const env = loadEnv();
-  const runtime = createWebRuntime(env);
+  const runtime = await createWebRuntime(env);
   const server = createServer(runtime.handler);
 
   await new Promise<void>((resolve, reject) => {

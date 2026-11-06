@@ -32,6 +32,7 @@ import {
   createConfigBaselineStore,
   createDashboardStore,
   createIdempotencyStore,
+  createMusicStore,
   createSavedTemplateStore,
   createPostgresDatabase,
   createSessionStore,
@@ -40,6 +41,7 @@ import {
   type PostgresHandle,
 } from "@keystone/db";
 import { modules } from "@keystone/module-catalog";
+import { createMusicControlBus, type MusicControlHandle } from "@keystone/cache";
 import { GuildAccessService } from "./access";
 import { ApiTokenService } from "./api-tokens";
 import { AuthService } from "./auth";
@@ -83,7 +85,7 @@ function unavailableOAuth(): DiscordOAuth {
   };
 }
 
-export function createWebRuntime(env: Env): WebRuntime {
+export async function createWebRuntime(env: Env): Promise<WebRuntime> {
   const logger = createLogger("keystone-web", env.LOG_LEVEL);
   const registry = new ModuleRegistry().registerAll(modules);
 
@@ -193,9 +195,20 @@ export function createWebRuntime(env: Env): WebRuntime {
     analyticsStore,
     webhooks,
   );
+  const musicStore = database ? createMusicStore(database) : undefined;
   const directory: DirectoryPort | undefined = env.DISCORD_TOKEN
     ? new DiscordDirectoryClient({ token: env.DISCORD_TOKEN })
     : undefined;
+  let musicControl: MusicControlHandle | undefined;
+  if (env.REDIS_URL) {
+    musicControl = await createMusicControlBus({
+      redisUrl: env.REDIS_URL,
+      logger: logger.child("music-control"),
+    });
+    if (musicControl) logger.info("music dashboard control: redis");
+  } else {
+    logger.warn("REDIS_URL is not set — the music dashboard stays read-only.");
+  }
   const drainer = startWebhookDrainer(webhooks, logger);
   const handler = createWebHandler({
     auth,
@@ -210,6 +223,8 @@ export function createWebRuntime(env: Env): WebRuntime {
     webhooks,
     idempotency: idempotencyStore,
     ...(directory ? { directory } : {}),
+    ...(musicControl ? { music: musicControl.bus } : {}),
+    ...(musicStore ? { musicStore } : {}),
   });
 
   return {
@@ -223,6 +238,7 @@ export function createWebRuntime(env: Env): WebRuntime {
     ephemeralSessionKey,
     async close() {
       drainer.stop();
+      await musicControl?.close();
       await database?.close();
     },
   };

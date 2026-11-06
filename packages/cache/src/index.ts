@@ -1,5 +1,11 @@
 import { Redis } from "ioredis";
 import { InMemoryCooldownStore } from "@keystone/kernel";
+export {
+  InMemoryMusicControlBus,
+  RedisMusicControlBus,
+  createMusicControlBus,
+  type MusicControlHandle,
+} from "./music-bus";
 import type { CooldownResult, CooldownStore, Logger } from "@keystone/kernel";
 
 /**

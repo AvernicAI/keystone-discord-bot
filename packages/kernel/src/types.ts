@@ -202,6 +202,10 @@ export interface InteractionLike {
   readonly subcommandGroup?: string;
   /** Permission names the invoking member holds, e.g. `["ManageGuild"]`. */
   readonly permissions: readonly string[];
+  /** The caller's current voice channel, when the adapter can see one. */
+  readonly voiceChannelId?: string | null;
+  /** Role snowflakes the caller holds; used by the music DJ gate. */
+  readonly roleIds?: readonly string[];
   readonly replied: boolean;
   readonly deferred: boolean;
   reply(input: ReplyInput): Promise<unknown>;

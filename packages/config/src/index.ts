@@ -48,6 +48,15 @@ export const envSchema = z.object({
    */
   AI_DISABLE_THINKING: booleanFlag.default(false),
   /**
+   * Lavalink 4 owns the voice socket and DAVE. URL is `host:port` (an http(s)
+   * prefix is stripped); both URL and password are required to enable audio.
+   * Music is still off per guild until the module is enabled.
+   */
+  LAVALINK_URL: optionalString,
+  LAVALINK_PASSWORD: optionalString,
+  LAVALINK_NAME: z.string().min(1).max(40).default("main"),
+  LAVALINK_SECURE: booleanFlag.default(false),
+  /**
    * Development-only test guild. It seeds AI chat in the in-memory settings
    * store and enables `!` prefix commands plus bot-authored mention chat for
    * this guild only. Ignored in production.

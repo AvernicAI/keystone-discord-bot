@@ -179,7 +179,7 @@
       "paidTier": "Patreon boosts unlock filters at 2 boosts, 24/7 and an extra bot at 5; collections rise to 200.",
       "strongest": "Multi-instance playback and source breadth.",
       "weakness": "Single-purpose, source/legal risk, and 24/7 is paywalled.",
-      "gapNote": "Keystone has a durable queue and controls but no Lavalink playback.",
+      "gapNote": "Keystone now plays through one Lavalink node over the same durable queue, with a card and a dashboard remote; it has no bundled source, no filters and no multi-node failover.",
       "gapIds": ["gap.music-playback"],
       "claimId": "R-032",
       "confidence": "high"

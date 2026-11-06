@@ -1,120 +1,166 @@
 # Music — spec
 
-A saved queue that is real data, and a playback seam that refuses until a real
-player exists. `/music` never shows a queue that pretends to be audio.
+One durable queue that is also the play queue, one Lavalink node behind a kernel
+port, one signed card, and a dashboard that sends controls instead of owning a
+player.
 
 ## Purpose
 
 Every all-in-one bot that once shipped music either removed it (MEE6, 2023) or
-never had it (Dyno, Carl). Streaming is the feature users ask for and the one
-most likely to be faked with a queue view and a "now playing" line.
+never had it (Dyno, Carl). Music is the feature users ask for and the one most
+easily faked with a queue view and a "now playing" line. Keystone's rule is the
+one analytics follows: a figure is traceable or it is not printed. A track in the
+queue is a row; "playing" is printed only when the node reports a player.
 
-Keystone splits the two capabilities:
+The second rule is that nothing here may cost money. The node is the operator's
+own container, the audio is a direct http(s) URL the operator supplies, and no
+scraper, hosted resolver or paid host is bundled.
 
-- **Saved queue** — durable rows, inspectable, editable. This ships.
-- **Playback** — a `MusicPlayback` port. This build installs one adapter and it
-  is explicitly unavailable, because the repository has no Discord voice client
-  and no Lavalink client, and no `LAVALINK_URL` is configured.
+## The shape
 
-The rule is the same one analytics follows: every figure and every claim must be
-traceable. A track in the queue is a row; "playing" is only printed when a
-playback adapter returns `ok: true`.
+```text
+Discord card ──button/select──▶ music-interactions ─┐
+/music … ──────command───────▶ MusicService ────────┼──▶ MusicPlayback (port)
+Dashboard ──Redis request───▶ music-control ────────┘        │
+        ▲                                                     ▼
+        └──── published state ◀── reporter ◀── QueueMusicPlayback ──▶ VoiceNode
+                                                                      │
+                                                              ShoukakuNode
+                                                                      │
+                                                                 Lavalink 4.2.2
+```
 
-## Commands
+`VoiceNode` is the only seam that knows about audio transport:
+`join`, `resolve`, `leave`, `status`. `ShoukakuNode` implements it with Shoukaku
+and discord.js. `QueueMusicPlayback` implements the kernel `MusicPlayback` port
+on top of `VoiceNode` and `MusicStore`. The kernel imports neither Shoukaku nor
+discord.js; the web app never imports either at all.
 
-One root, eight subcommands. Guards: guild-only, two-second cooldown. `remove`
-and `clear` also require `ManageGuild`, because they mutate shared state.
+## The durable queue is the play queue
 
-| Command | Behaviour | Shipping status |
-| --- | --- | --- |
-| `/music status` | Module state, queue count, playback availability and the exact blocker. Works while disabled. | Real |
-| `/music queue` | Lists the saved queue (first ten) and says nothing is playing. | Real |
-| `/music add` | Validates an http(s) URL, derives a label, appends a track. | Real |
-| `/music remove` | Removes one track by 1-based position. | Real |
-| `/music clear` | Removes every saved track. | Real |
-| `/music play` | Calls the playback port. | Refuses: no backend |
-| `/music skip` | Calls the playback port. | Refuses: no backend |
-| `/music stop` | Calls the playback port. | Refuses: no backend |
+No new table and no migration: `community_records` with kind `music_queue`, key
+`default`.
 
-The refusal is not a generic error: it names the missing pieces (Discord voice
-client, Lavalink client, `LAVALINK_URL`) and the same text appears in
-`/music status`.
+```text
+(guild_id, kind = 'music_queue', key = 'default')
+data = { tracks: [{ id, title, uri, requestedBy, addedAt,
+                    durationMs?, artist?, artworkUrl?, isStream?, source?, identifier? }] }
+```
+
+- `tracks[0]` is the current track and is removed when it ends or is skipped.
+- `add` appends. `play` with `next:true` inserts at position 2.
+- `loop:track` replays the head without touching the row; `loop:queue` rotates
+  the head to the end; `shuffle` keeps the head and shuffles the rest.
+- `jump n` replaces the row with `tracks[n-1..]` before starting it, so the
+  skipped tracks cannot come back after a restart.
+- `remove 1` is a skip; `remove n` is a plain delete; `clear` deletes the row and
+  stops the player; `stop` also leaves voice.
+- `encoded` stays in memory by design. Persisting a Lavalink-encoded track would
+  multiply a 100-track row by roughly 20× for no correctness gain; the head is
+  re-resolved on resume, at the documented cost of starting at `0:00`.
+- `DrizzleMusicStore` takes a `SELECT ... FOR UPDATE` lock on the guild row, so
+  the cap holds under concurrent adds; the in-memory store serialises per guild
+  with a promise chain.
+
+## The card
+
+`modules/music/src/panel.ts` is a pure renderer for a Components V2 panel:
+
+- accent per state (playing, paused, idle, unavailable);
+- the title linked to its URI, the artist, `Playing · 0:34 / 5:44 · 80% volume ·
+  loop off · 2 in queue`;
+- up to five "up next" rows, then a count;
+- one select with at most 25 options (`Jump to a queued track`);
+- five buttons (`toggle`, `skip`, `shuffle`, `loop`, `stop`) and a volume row;
+- a footer that says the read time and "the head is the current track".
+
+The publisher (`apps/bot/src/music/panel.ts`) edits the same message, one
+edit per 1.5 s, serialised so two state changes cannot race. A `30046` (unknown
+message) posts a fresh card and stores the new id. The custom ids are the
+repository's signed `k1:` ids with a 15-minute window, registered in
+`apps/bot/src/music-interactions.ts`.
+
+## The dashboard remote
+
+`/dashboard/guilds/:id/music` is a remote, not a second player.
+
+- It renders bot-published state plus a heartbeat. `reportedAt` older than 20 s
+  means **Last known state, not live**: controls are disabled and `↻ Resume saved
+  queue` is offered.
+- It reads the durable row directly for the queue table, because the row is the
+  queue even when no session exists.
+- Every control is one POST to `/music/control`, CSRF-checked, guild-authorized,
+  written as one `music.control` audit row, and forwarded over Redis. The bot
+  answers with a message the browser shows; the bot also publishes state *before*
+  it replies so the redirect does not render the pre-click snapshot.
+- No browser ever holds a Discord token; channel pickers come from the web
+  process's own directory read.
 
 ## Settings
 
 | Key | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `enabled` | boolean | `false` | Music is opt-in; every queue and playback command except `status` refuses when false |
-| `maxTracks` | integer 1–100 | `25` | Cap enforced inside the store, not only in the command |
+| `enabled` | boolean | `false` | Every command except `status` refuses while false |
+| `maxTracks` | integer 1–500 | `100` | Cap enforced inside the store |
+| `defaultVolume` | integer 0–200 | `80` | Applied when a player is created |
+| `idleLeaveSeconds` | integer 10–600 | `45` | Leave voice after the queue empties |
+| `djOnly` | boolean | `false` | When on, playback and queue controls need the DJ role |
+| `djRoleIds` | string | `""` | Comma/space-separated role ids; parsed once, invalid entries dropped |
 
-Settings use the module's Zod schema through the shared `SettingsService`, so
-`/config get module=music` and `/config set` work without a music-specific path.
+## Commands
 
-## Storage
+14 subcommands, guild-only, two-second cooldown. `clear` always
+requires `ManageGuild`. Playback and queue controls (`pause`, `resume`, `skip`,
+`stop`, `volume`, `loop`, `shuffle`, `jump`, `remove`) pass the DJ gate, which
+allows everyone while `music.djOnly` is off and otherwise requires
+`Administrator`, `ManageGuild` or one of `music.djRoleIds`.
 
-The queue reuses `community_records`; no migration is added.
+| Command | Behaviour |
+| --- | --- |
+| `/music status` | Module state, queue count, node name/version/ping and the exact blocker when unavailable. Works while disabled. |
+| `/music play query` | Resolves and appends; starts the head when idle. `next:true` inserts at 2. |
+| `/music add query` | Resolves and appends without starting. |
+| `/music queue` | The saved queue, head marked current. |
+| `/music remove position` | Removes one track; position 1 advances. |
+| `/music clear` | Stops and empties, stays in voice. |
+| `/music skip` | Advances past the head. |
+| `/music stop` | Stops, empties and leaves voice. |
+| `/music pause` / `resume` | Pauses, or continues from the same second. |
+| `/music volume value` | 0–200, clamped. |
+| `/music loop mode` | `off`, `track`, `queue`. |
+| `/music shuffle` | Keeps the head, shuffles the rest. |
+| `/music jump position` | Truncates to that position and plays it. |
 
-```text
-(guild_id, kind = 'music_queue', key = 'default')
-data = { tracks: [{ id, title, uri, requestedBy, addedAt }] }
-```
+## Manifest and intents
 
-- `DrizzleMusicStore` runs every mutation in a transaction and takes a
-  `SELECT ... FOR UPDATE` lock on the guild row, so concurrent adds cannot both
-  consume the last slot.
-- `InMemoryMusicStore` serializes mutations per guild with a promise chain and
-  enforces the same cap.
-- An empty queue deletes the row rather than storing an empty list.
-
-There is intentionally no duration, artist, artwork or play-count field. Those
-would have to come from a playback backend; inventing them is the failure this
-pass is written to avoid.
-
-## The playback seam
-
-`packages/kernel/src/music.ts` defines `MusicPlayback` with `status`, `play`,
-`skip` and `stop`. `UnavailableMusicPlayback` returns:
-
-```text
-available: false, backend: "none",
-missing: ["Discord voice client", "Lavalink client", "LAVALINK_URL"]
-```
-
-A future Lavalink adapter implements the same interface and changes no command.
-The manifest does not request `GuildVoiceStates` today, because a build that
-cannot join a channel should not ask for the intent.
+The manifest requests `Guilds` and `GuildVoiceStates`. The voice intent is used:
+the bot joins and leaves channels. No message-content intent is requested.
 
 ## Where the code lives
 
-- `packages/kernel/src/music.ts` — track/queue types, `MusicStore`,
-  `MusicPlayback`, `MusicPort` and the stable `community_records` identity.
-- `modules/music/src/music.ts` — `MusicService`: settings, URL validation,
-  disabled policy and propagation of refusals.
-- `modules/music/src/store.ts` — in-memory queue with a per-guild lock.
-- `modules/music/src/playback.ts` — the one, explicit unavailable adapter.
-- `modules/music/src/commands/music.ts` — guards, rendering and dispatch.
+- `packages/kernel/src/music.ts` — types, `MusicStore`, `MusicPlayback`,
+  `MusicControlBus` request/state shapes, the `community_records` identity.
+- `apps/bot/src/music/voice.ts` — `VoiceNode`, `VoicePlayer`, `VoiceTrack`.
+- `apps/bot/src/music/shoukaku-node.ts` — the Shoukaku adapter and its options.
+- `apps/bot/src/music/playback.ts` — `QueueMusicPlayback`, the state machine.
+- `apps/bot/src/music/panel.ts` — the card publisher.
+- `apps/bot/src/music-interactions.ts` — button and select routes.
+- `apps/bot/src/music-control.ts` — dashboard handler, publisher, heartbeat.
+- `packages/cache/src/music-bus.ts` — Redis request/reply and state keys.
 - `packages/db/src/music-store.ts` — SQL queue over `community_records`.
+- `modules/music/src/*` — service, validation, panel renderer, command.
+- `apps/web/src/render.ts`, `routes/dashboard.ts` — the dashboard page.
 
 ## Non-goals
 
-- Bundled or scraped audio sources (legal risk, marked non-goal in the matrix).
-- Lyrics, autoplay, recommendations or a "now playing" bar without a player.
-- Buttons and select menus in this pass. The command surface carries the state;
-  components are a later UI pass.
-- A second queue table. `community_records` already has the right identity.
-
-## Limits respected
-
-- One new global root; the ledger was `18/100` at this pass (now `20/100`) and eight subcommands cost no
-  extra slot.
-- No new dependency, no paid service, no new intent.
-- The SQL adapter uses the existing guild row for locking; no advisory-lock
-  extension is required.
+- Bundled or scraped sources, YouTube or Spotify plugins (licence and terms).
+- Lyrics, autoplay, recommendations, karaoke, filters.
+- A second queue table or a second player in the web process.
+- Frame-accurate progress in the browser; the position is the node's last report.
 
 ## Verified by
 
-`modules/music/src/music.test.ts` (14 tests: registry shape, URL validation,
-disabled refusal, cap, remove/clear permissions, playback refusals),
-`packages/db/src/music-store.test.ts` (3 PGlite tests including a raw
-`community_records` query and a concurrent-add cap test) and the live transcript
-in [[04-Modules/music/Status|Status]].
+`apps/bot/src/music/playback.test.ts`, `modules/music/src/panel.test.ts`,
+`apps/bot/src/music-interactions.test.ts`, `apps/bot/src/music-control.test.ts`,
+`apps/web/src/music-page.test.ts`, `packages/db/src/music-store.test.ts`, and the
+live run recorded in [[04-Modules/music/Status|Status]].

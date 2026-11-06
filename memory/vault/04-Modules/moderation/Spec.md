@@ -265,5 +265,5 @@ permission **before** the Discord call.
   concurrent allocation.
 - `packages/db/src/member-store.test.ts` — PGlite proves one `members` row, the
   verification upsert, the preserved join time and the cleared quarantine flag.
-- `pnpm budget` — 20/100 roots with all shipped commands (141 subcommands) and
+- `pnpm budget` — 20/100 roots with all shipped commands (147 subcommands) and
   4 context menus on their own 15 + 15 budget.

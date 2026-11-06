@@ -54,6 +54,9 @@
 | R-044 | dashboard | ProBot's dashboard docs require Administrator permission to see a server: 'You need Administrator permission to see your server on the list.' | high | [source](https://docs.probot.io/docs/getting-started/dashboard) | 2026-11-05 | 2027-04-30 |
 | R-045 | dashboard | Wick's dashboard overview gives a list of issues to fix, and its setup wizard accepts a channel mention, name or id rather than requiring a raw snowflake. | high | [source](https://docs.wickbot.com/faq) | 2026-11-05 | 2027-01-31 |
 | R-046 | dashboard | Statbot never deletes data but free users can view at most 30 days back (14 days by default), and tracking begins at invite time rather than retroactively. | high | [source](https://docs.statbot.net/docs/faq/general/delete-data) | 2026-11-05 | 2027-01-31 |
+| R-047 | platform | Lavalink 4.2.0 added support for Discord DAVE, and the official client table marks Shoukaku as DAVE-capable, so a Lavalink v4 node owns the voice encryption handshake instead of the bot library. | high | [source](https://lavalink.dev/clients) | 2026-11-06 | 2027-05-06 |
+| R-048 | platform | Discord enforces end-to-end encryption (DAVE) for DMs, group DMs, server voice channels and Go Live from 2026-03-01, so a music bot that owns the voice socket itself must implement DAVE. | high | [source](https://discord.com/blog/bringing-dave-to-all-discord-platforms) | 2026-11-06 | 2027-05-06 |
+| R-049 | platform | The Lavalink v4 REST API resolves tracks through `/v4/loadtracks` and reports node totals through `/v4/stats`, whose `players` and `playingPlayers` counters are what a headless run can use to distinguish a connected node from one actually sending audio. | high | [source](https://lavalink.dev/api/rest) | 2026-11-06 | 2027-05-06 |
 
 ## Rules
 

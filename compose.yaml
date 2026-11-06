@@ -27,6 +27,19 @@ services:
       timeout: 3s
       retries: 10
 
+  # Lavalink 4.2 owns voice (including DAVE) and direct http(s) audio. It is a
+  # separate process from the bot, so a node crash cannot take the gateway down.
+  # The bundled config enables the http source only; no scraper is installed.
+  lavalink:
+    image: ghcr.io/lavalink-devs/lavalink:4.2.2
+    environment:
+      LAVALINK_PASSWORD: ${LAVALINK_PASSWORD:-keystone-lavalink}
+    volumes:
+      - ./lavalink/application.yml:/opt/Lavalink/application.yml:ro
+    ports:
+      - "2333:2333"
+    restart: unless-stopped
+
   # Migrations run once, explicitly, before anything that reads the schema.
   migrate:
     build: .
@@ -46,11 +59,15 @@ services:
     environment:
       DATABASE_URL: postgres://keystone:keystone@postgres:5432/keystone
       REDIS_URL: redis://redis:6379
+      LAVALINK_URL: lavalink:2333
+      LAVALINK_PASSWORD: ${LAVALINK_PASSWORD:-keystone-lavalink}
     depends_on:
       migrate:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
+      lavalink:
+        condition: service_started
     restart: unless-stopped
 
   worker:
@@ -76,6 +93,9 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgres://keystone:keystone@postgres:5432/keystone
+      # The bus must reach the same Redis the bot uses; the .env default is
+      # localhost, which inside this container is the web process itself.
+      REDIS_URL: redis://redis:6379
       WEB_PORT: "3000"
       WEB_ORIGIN: http://localhost:3000
     ports:
@@ -83,6 +103,8 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

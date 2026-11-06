@@ -2,132 +2,170 @@
 
 ## Now
 
-P8 music is in repo and live-proven through the development bridge. It is the
-ninth module and the last named root in the approved v1.0 plan.
+Music plays. One Lavalink 4.2.2 node owns the Discord voice socket and DAVE; the
+bot owns one durable queue and one signed card; the dashboard starts and controls
+the same player. There is no second player, no second queue and no bundled
+scraper.
 
-- `/music` is registered with `play`, `queue`, `add`, `remove`, `clear`, `skip`,
-  `stop` and `status`. The command ledger is now **20 roots / 141 subcommands /
-  161 actions** (it was 18 / 125 / 143 when `/music` shipped).
-- The saved queue is **real and durable in SQL mode**: one
-  `community_records` row per guild under kind `music_queue`, key `default`.
-  The SQL adapter locks the guild row, so the cap holds under concurrent adds.
-- **Playback is not shipped.** `UnavailableMusicPlayback` returns
-  `available: false` with the exact missing pieces; `play`, `skip` and `stop`
-  refuse rather than pretending. `/music status` prints the same reason.
-- Music is **disabled by default**. `status` still works while disabled; every
-  other subcommand refuses with the enabling command. `remove` and `clear`
-  require `ManageGuild`.
-- The manifest requests only `Guilds`; no voice intent is asked for while no
-  voice client exists.
+- **One engine behind the port.** `QueueMusicPlayback`
+  (`apps/bot/src/music/playback.ts`) implements the kernel `MusicPlayback` port.
+  `ShoukakuNode` (`apps/bot/src/music/shoukaku-node.ts`) is the only file that
+  imports Shoukaku or discord.js; `packages/kernel/src/music.ts` still imports
+  neither.
+- **The durable queue is the play queue.** `community_records`, kind
+  `music_queue`, key `default`, holds the ordered tracks. `tracks[0]` is the
+  current track and leaves the row only when it ends or is skipped. No table and
+  no migration were added.
+- **One signed card.** `modules/music/src/panel.ts` renders a Components V2
+  panel: accent by state, progress, artist and length, up to five "up next" rows,
+  a jump select over 25 tracks, five buttons and a volume row. The publisher
+  edits one message, serialises edits and throttles them to one per 1.5 s; a
+  Discord `30046` posts a fresh card.
+- **The dashboard is a remote.** `apps/web/src/render.ts` renders only
+  bot-published state, a 20-second heartbeat and the durable row; every control
+  is one POST through Redis (`packages/cache/src/music-bus.ts`) to the bot, and
+  each accepted control appends one `music.control` audit row. A report older
+  than 20 s is labelled **Last known state, not live** and its controls are
+  disabled.
+- **14 subcommands.** `/music` has `play`, `add`, `queue`, `remove`, `clear`,
+  `skip`, `stop`, `pause`, `resume`, `volume`, `loop`, `shuffle`, `jump` and
+  `status`. The registry ledger is **20 roots / 147 subcommands / 167 actions /
+  4 context menus**; the music root itself costs no extra slot.
+- **Optional, and honest about it.** Music is disabled per guild by default. A
+  build with no `LAVALINK_URL` refuses every play with the exact missing
+  configuration and keeps the saved queue working.
+
+```bash
+docker compose up -d lavalink     # the bundled node, 4.2.2
+pnpm start                        # bot
+pnpm web:start                    # dashboard on WEB_PORT
+```
+
+`.env.example` ships the four `LAVALINK_*` defaults uncommented because the
+documented quickstart starts that node. Delete them to run save-only; the
+refusal names the fix.
+
+## How the queue behaves
+
+| Action | Durable row | Player |
+| --- | --- | --- |
+| `play query` with an idle session | appends, then the head starts | joins voice, plays `tracks[0]` |
+| `play query` while a session is live | appends at the end | keeps playing; card shows the new position |
+| `add` | appends | unchanged |
+| `play` with `next:true` | inserts at position 2 | unchanged |
+| `skip` | drops the head | starts the new head |
+| `pause` / `resume` | unchanged | pauses, then continues from the same second |
+| `loop:track` | unchanged | an ended track replays; an explicit `skip` still advances |
+| `loop:queue` | head rotates to the end | an ended track starts the new head |
+| `shuffle` | head kept, the rest shuffled | unchanged |
+| `jump n` | keeps `tracks[n-1..]` | starts the new head |
+| `remove 1` | same as `skip` | advances |
+| `remove n` | drops position `n` | unchanged |
+| `clear` | row deleted | player stopped, stays in voice |
+| `stop` | row deleted | player destroyed, leaves voice |
+| bot restart | row survives | nothing plays; `↻ Resume saved queue` starts from the head at `0:00` |
+
+A restart resumes the **queue**, not the position. Lavalink's session resume
+covers a short node or gateway disconnect, not a new bot process; the page says
+so instead of pretending the old second survived.
 
 ## Verified
 
 ```text
-pnpm vitest run modules/music packages/db/src/music-store.test.ts
-  ✓ modules/music/src/music.test.ts (14 tests)
-  ✓ packages/db/src/music-store.test.ts (3 tests)
+pnpm typecheck                         pass
+pnpm test                              828 tests / 112 files
+pnpm budget                            20/100 roots · 147 subcommands · 167 actions
+pnpm audit:claims                      35/35
+pnpm audit:visuals                     360 checks · 27 surfaces
+pnpm memory:check                      pass
 ```
 
-- The registry test proves one root with eight subcommands and a clean budget
-  audit.
-- URL validation rejects a non-URL, non-http(s) schemes, embedded credentials
-  and oversized input; the label falls back from `title` to the decoded file
-  name to the host.
-- The cap is enforced by the store; a full queue refuses with the current size
-  and the way to raise it.
-- Disabled music refuses `add`/`queue`/`play` but still answers `status`.
-- Playback refusals carry the adapter's reason through `MusicService`; they are
-  not swallowed into a success.
-- PGlite: two tracks round-trip through a raw `community_records` query
-  (`guild_id`, `kind = music_queue`, `key = default`, two array entries), remove
-  and clear delete the row, five concurrent adds against a cap of three add
-  exactly three, and guild A never sees guild B.
+Token-free tests that pin this behaviour:
 
-The SQL cross-check is the raw query in `music-store.test.ts`, not the adapter's
-own `list()`: it reads `community_records` directly and asserts one row with the
-expected identity and two tracks.
+- `apps/bot/src/music/playback.test.ts` — head semantics, append, loop track and
+  queue, shuffle with the head kept, jump truncation, remove 1 as skip, stop and
+  clear, three-failure parking, idle leave.
+- `modules/music/src/panel.test.ts` — the card's 40/4,000 budget, the five button
+  labels, the jump select and the "progress is not a timer" footer.
+- `apps/bot/src/music-interactions.test.ts` — the signed custom-id routes and the
+  guild/DJ checks.
+- `apps/bot/src/music-control.test.ts` — the dashboard handler, the disabled
+  refusal, value validation, and `Queued at position N.` for an append.
+- `apps/web/src/music-page.test.ts` — CSRF on every control, no HTML injection,
+  the unpause control, the stale page with no `now` pill.
+- `packages/db/src/music-store.test.ts` — PGlite: one raw `community_records` row,
+  the cap under five concurrent adds, guild isolation.
 
-Live evidence (2026-11-01, AI Team#5758, **one** bot process, pass-32 memory
-mode). The `.env` probe first: `DATABASE_URL` and `REDIS_URL` were set but both
-ports answered `ECONNREFUSED`, so the pass-32 live window was memory mode and
-the SQL adapter was PGlite-only.
+## Live run, 2026-11-06
+
+Guild `1450130465146142785`, bot AI Team#5758, node `main` at 17–24 ms, track
+`https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3` (Songs 2–5 for
+the queue order). Every control was driven from the dashboard in a real browser;
+the Discord side was read back over REST.
 
 ```text
-!music status
-→ Music is disabled · saved queue 0/25 · playback UNAVAILABLE (backend none).
-  Playback is unavailable in this build: it has no Discord voice client or
-  Lavalink client, and no LAVALINK_URL is configured. Tracks can be saved, but
-  nothing can be played.
-  Queue record: 0 saved track(s) under kind `music_queue`, key `default`
-  (table `community_records` in SQL mode; process memory otherwise).
-  Enable it with `/config set module=music key=enabled value=true`.
-
-!config set module=music key=enabled value=true
-→ Set `music.enabled` to `true`.
-
-!music add query=https://example.com/tone.mp3 title=Test_tone
-→ Saved **Test_tone** at position 1/25. Nothing is playing: playback is
-  unavailable in this build.
-
-!music add query=https://example.com/second.ogg
-→ Saved **second.ogg** at position 2/25. Nothing is playing: playback is
-  unavailable in this build.
-
-!music queue
-→ Saved queue · 2/25 · nothing is playing
-  1. **Test_tone** — https://example.com/tone.mp3 — <@1493685079468146808>
-  2. **second.ogg** — https://example.com/second.ogg — <@1493685079468146808>
-  These rows are saved only; no audio is played in this build.
-
-!music play query=https://example.com/tone.mp3
-→ Nothing was played or saved. Playback is unavailable in this build: it has no
-  Discord voice client or Lavalink client, and no LAVALINK_URL is configured.
-
-!music remove position=1
-→ Removed **Test_tone**. 1 saved track(s) remain; nothing is playing.
-
-!music queue
-→ Saved queue · 1/25 · nothing is playing
-  1. **second.ogg** — https://example.com/second.ogg — <@1493685079468146808>
-
-!music skip
-→ Nothing was skipped. Playback is unavailable in this build: ...
-
-!config set module=music key=enabled value=false
-→ Set `music.enabled` to `false`.
-
-!music add query=https://example.com/blocked.mp3
-→ Music is disabled in this server. Enable it with
-  `/config set module=music key=enabled value=true`.
+Lavalink /v4/loadtracks   loadType=track · sourceName=http · length=372715
+                          title="Unknown title"   ← the http source has no tag reader
+Dashboard Play            "Started playback."
+                          queue row 1 = SoundHelix Song 1
+                          /v4/stats players:1 playingPlayers:1
+                          card 0:14 / 6:12 · artist SoundHelix · Node main 24ms
+Pause                     "Paused." · pill paused · control ▶ Resume
+                          /v4/stats playingPlayers:0
+Resume (unpause)          "Resumed." · pill playing · position 0:06  ← continued
+Bot restart               "Last known state, not live." · controls disabled
+                          "↻ Resume saved queue"
+Resume saved queue        "Resumed the queue." · Song 1 at 0:00 from the head
+Play Song 3               "Queued at position 3." · row Song 1 | Song 2 | Song 3
+Skip                      row Song 2 | Song 3 · Song 2 playing · Song 1 gone
+Loop track → Skip         published loop:"track" · row Song 3  ← skip still advanced
+Shuffle (3 tracks)        row Song 3 | Song 5 | Song 4  ← head kept, rest swapped
+Remove position 2         "Removed SoundHelix Song 5." · row Song 3 | Song 4
+Stop                      "Stopped and disconnected." · row count 0
+                          /v4/stats players:0 · published state:"idle"
 ```
 
-The counts are traceable: two adds produced **2/25**, one remove produced
-**1/25**, and the disabled `add` wrote nothing. The MCP author had
-`ManageGuild`, so `remove` ran; `clear` was covered by the command test, not the
-live bridge. `play` and `skip` refused because no playback adapter exists; that
-is the shipped behaviour, not a missing test.
+The filename fallback is why the card says **SoundHelix Song 1** and not the
+node's `Unknown title`: a bare mp3 carries no tags, and a card that repeats
+"Unknown title" for every track is worse than the file name.
+
+Discord read-back of channel `1450130466089730213`: the newest card is a
+Components V2 message (`type 17` container with an accent colour), five buttons
+whose signed ids carry `music:toggle`, `music:skip`, `music:shuffle`,
+`music:loop` and `music:stop`, a volume row, and a signed `music:jump` select
+whose options listed `2. SoundHelix Song 4`. The newest card reads
+`edited: true`, which proves at least one in-place edit succeeded during the run
+(not a per-step message id history), and the paused card in the same channel
+reads `Paused · 0:29 / 6:12 · 80% volume · loop off`.
+
+### What the proof does and does not cover
+
+- **Exercised for real**: Lavalink 4.2.2 over HTTP, the Postgres queue, the Redis
+  bus, browser POSTs with CSRF, and Discord REST read-back of the card.
+- **Unit-tested only**: loop-track replay at the end of a track, `LOAD_FAILED`
+  parking after three advances, the `30046` re-post, and DAVE negotiation.
+- **Not proven**: anything audible. No human joined the channel; `playingPlayers:
+  1` proves the node encoded and sent frames, not that a person heard them. No
+  slash command and no Discord button was invoked in this run: the MCP server can
+  read rich messages but cannot click, and it could not send messages.
+- **Known limit**: a bot restart re-resolves the head, so playback resumes at
+  `0:00`. The card and this page say that plainly.
 
 ## Known limitations
 
-- **Audio is not played.** A voice/Lavalink client and a configured endpoint are
-  the named next dependency; until then the queue is a planning surface. The
-  journal says this plainly rather than listing music as working.
-- The pass-32 live window was memory mode because local Postgres/Redis were
-  closed; pass 44 has since opened them. The SQL queue is PGlite-proven, not
-  live-proven through Discord.
-- No buttons or select menus; only text commands.
-- `queue` shows the first ten tracks. A larger queue is truncated with a count.
-- The MCP reader does not render ephemeral state; replies were captured as
-  text, which is what `/music` sends.
-- A human slash run is still unobserved.
+- No source plugin: direct http(s) audio only. YouTube and Spotify stay out for
+  licence and terms reasons; `music.bundled-source` is a non-goal.
+- One node. `moveOnDisconnect` is configured but an unfilled second node cannot
+  move anywhere.
+- The dashboard needs `REDIS_URL` on both processes and
+  `DISCORD_TOKEN` on the web process for the channel pickers; without them it is
+  read-only and says which one is missing.
+- Progress is the node's last report, refreshed by the 5 s publisher, not a
+  browser timer.
 
 ## Next
 
-- Add a Lavalink adapter behind `MusicPlayback` when an operator provides
-  `LAVALINK_URL`; do not change the command surface.
-- Add queue buttons (remove/clear) after the UI pass has a shared component
-  pattern.
-- Prune or archive very large saved queues only when an operator asks; the cap
-  is the current control.
-- Run the same bridge transcript against SQL mode once Postgres is up, and
-  confirm the same queue from a fresh `community_records` row.
+- A human listener confirms audible output, and a real client clicks one card
+  button; those two proofs promote `gap.music-playback` from partial to covered.
+- A second Lavalink service in compose to exercise `moveOnDisconnect`.
+- A `/music seek` subcommand only if the card can show the result honestly.

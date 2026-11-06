@@ -257,7 +257,7 @@ and named. Pass 42 added `/modmail setup | open | reply | close | transcript |
 stats`: private owner-or-staff threads over two owned tables, a first-staff-reply
 claim, side-aware unread counters and a transcript archived once by a conditional
 update, with DM/thread relay deferred and named. The ledger is now **20 roots /
-141 subcommands / 161 actions / 4 context menus** after pass 46; the Master-Plan records 72
+147 subcommands / 167 actions / 4 context menus** after pass 46; the Master-Plan records 72
 planned names across 14 built roots. Every recorded plan name is registered.The remaining P7 work is the copy pass for the ten modules' replies, parity role
 persistence, and the live gateway proof; [[Roadmap-v3]] records the proposed
 order for the rest of the program.
@@ -279,9 +279,11 @@ order for the rest of the program.
   durable reminder/scheduled delivery on the bot-side timer queue; pass 46 added
   panic mode and goodbye messages. Event buttons, event scheduled reminders,
   per-timezone ICS and a real modmail relay remain open.
-- `/export`, `/config`, `/help` and the `/music` saved queue shipped; BYO
-  Lavalink playback is the open half of `/music`; command-budget audit remains a
-  gate, now covering the separate context-menu budgets.
+- `/export`, `/config`, `/help` and `/music` shipped, including BYO Lavalink
+  playback in pass 83; the open half of `/music` is now proof and breadth — an
+  audible listener, a clicked Discord button, a second node and a wider source
+  set. Command-budget audit remains a gate, now covering the separate
+  context-menu budgets.
 - Split `modules/community` into domain folders, then extract a module only if the
   "add a feature in an afternoon" test still fails.
 - `packages/i18n` (shipped in pass 59): typed keys whose argument lists come from
@@ -305,11 +307,14 @@ its gate, keep the exact index and mark the ANN row open.
 
 **Goal:** complete the union without legal risk.
 
-- The saved queue and its controls shipped in pass 32; `/music` is disabled by
-  default and every playback command refuses until a client exists.
-- Lavalink v4 through a thin adapter; BYO node; DJ role; no bundled streamer.
-  The queue adapter is already behind `MusicStore`; playback implements the
-  existing `MusicPlayback` port.
+- The saved queue shipped in pass 32 and playback in pass 83: `/music` is
+  disabled by default, a BYO Lavalink 4.2.2 node owns voice and DAVE behind the
+  existing `MusicPlayback` port, the durable row is the play queue, one signed
+  V2 card tracks state, and the dashboard is a remote. Without a node every
+  play refuses with the exact fix and the saved queue still works.
+- Still open for this phase: an audible-listener proof, a real Discord button
+  click, a second node for `moveOnDisconnect`, and a source set wider than
+  direct http(s). No bundled streamer, no paid host.
 - Activity spike behind a flag; verify Portal eligibility; drop if ineligible.
 
 **Exit demo:** an operator enables their own Lavalink and the controls work; the

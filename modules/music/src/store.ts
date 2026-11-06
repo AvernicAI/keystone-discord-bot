@@ -3,7 +3,9 @@ import {
   type MusicQueue,
   type MusicQueueAddResult,
   type MusicQueueClearResult,
+  type MusicQueueInsertResult,
   type MusicQueueRemoveResult,
+  type MusicQueueShiftResult,
   type MusicStore,
   type MusicTrack,
 } from "@keystone/kernel";
@@ -11,10 +13,10 @@ import {
 const nowIso = (): string => new Date().toISOString();
 
 /**
- * In-memory saved queue. It is a real store for the supported local mode, not a
+ * In-memory play queue. It is a real store for the supported local mode, not a
  * mock: entries survive for the process lifetime, the cap is enforced, and
  * mutations are serialized per guild so two concurrent adds cannot both claim
- * the last slot.
+ * the last slot. The head is the current track.
  */
 export class InMemoryMusicStore implements MusicStore {
   readonly #queues = new Map<string, MusicQueue>();
@@ -40,6 +42,39 @@ export class InMemoryMusicStore implements MusicStore {
     });
   }
 
+  async insertAt(
+    guildId: string,
+    index: number,
+    track: MusicTrack,
+    maxTracks: number,
+  ): Promise<MusicQueueInsertResult> {
+    return this.#exclusive(guildId, () => {
+      const current = this.#queues.get(guildId) ?? emptyMusicQueue(guildId, nowIso());
+      if (current.tracks.length >= maxTracks) {
+        return { queue: this.#copy(current), added: false };
+      }
+      const tracks = [...current.tracks];
+      const at = Math.max(0, Math.min(Number.isInteger(index) ? index : tracks.length, tracks.length));
+      tracks.splice(at, 0, track);
+      const next = { ...current, tracks, updatedAt: nowIso() };
+      this.#queues.set(guildId, next);
+      return { queue: this.#copy(next), added: true };
+    });
+  }
+
+  async replace(guildId: string, tracks: readonly MusicTrack[]): Promise<MusicQueue> {
+    return this.#exclusive(guildId, () => {
+      const next: MusicQueue = {
+        guildId,
+        tracks: tracks.map((track) => ({ ...track })),
+        updatedAt: nowIso(),
+      };
+      if (next.tracks.length === 0) this.#queues.delete(guildId);
+      else this.#queues.set(guildId, next);
+      return this.#copy(next);
+    });
+  }
+
   async remove(guildId: string, position: number): Promise<MusicQueueRemoveResult> {
     return this.#exclusive(guildId, () => {
       const current = this.#queues.get(guildId) ?? emptyMusicQueue(guildId, nowIso());
@@ -55,6 +90,19 @@ export class InMemoryMusicStore implements MusicStore {
         queue: this.#copy({ ...current, tracks, updatedAt }),
         removed,
       };
+    });
+  }
+
+  async shift(guildId: string): Promise<MusicQueueShiftResult> {
+    return this.#exclusive(guildId, () => {
+      const current = this.#queues.get(guildId) ?? emptyMusicQueue(guildId, nowIso());
+      if (current.tracks.length === 0) return { queue: this.#copy(current) };
+      const tracks = [...current.tracks];
+      const removed = tracks.shift();
+      const updatedAt = nowIso();
+      if (tracks.length === 0) this.#queues.delete(guildId);
+      else this.#queues.set(guildId, { ...current, tracks, updatedAt });
+      return { queue: this.#copy({ ...current, tracks, updatedAt }), removed };
     });
   }
 

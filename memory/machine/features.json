@@ -1570,12 +1570,18 @@
             "wick-security": "❌"
           },
           "phase": "P8",
-          "status": "open",
+          "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "Saved queue ships; play/skip/stop refuse with the exact missing backend (no voice or Lavalink client, no LAVALINK_URL).",
-          "openReason": "Streaming audio needs a Discord voice client or a BYO Lavalink endpoint; neither is installed or configured, and pass 32 was not authorized to add one. The refusal is live-proven; playback itself is not shipped.",
-          "liveVerified": false,
-          "liveScope": "none"
+          "note": "Lavalink 4.2.2 behind `MusicPlayback`: play/resume/pause/skip/stop/volume/loop/shuffle/jump/remove over the durable queue, one signed V2 card and a dashboard remote. Live 2026-11-06 through the dashboard with node `playingPlayers:1`; no human listener confirmed audible output.",
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/vault/04-Modules/music/Status.md",
+          "evidence": [
+            "apps/bot/src/music/playback.ts",
+            "apps/bot/src/music/shoukaku-node.ts",
+            "modules/music/src/panel.ts",
+            "apps/bot/src/music-control.ts"
+          ]
         },
         {
           "id": "music.queue-controls",
@@ -1590,10 +1596,12 @@
           "phase": "P8",
           "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "`/music queue | add | remove | clear | status` over a durable saved queue; no buttons yet. Live 2026-11-01 through the bridge.",
+          "note": "`/music` has 14 subcommands over the durable queue, the card has five buttons plus a jump select, and the dashboard drives the same player. Live 2026-11-06: append, skip, loop, shuffle, remove and stop each changed the real row.",
           "evidence": [
             "modules/music/src/music.test.ts",
-            "packages/db/src/music-store.test.ts"
+            "packages/db/src/music-store.test.ts",
+            "apps/bot/src/music-interactions.test.ts",
+            "apps/web/src/music-page.test.ts"
           ],
           "liveVerified": true,
           "liveScope": "manual",

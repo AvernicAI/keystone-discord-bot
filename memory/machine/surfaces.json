@@ -585,6 +585,47 @@
         "note": "Signed-in Chromium: /does-not-exist returned 404 with the Keystone eyebrow, title, message, back link and the signed-in account menu instead of a \"Sign in with Discord\" button; PUT /dashboard returned 405. A regression test now asserts both."
       },
       "next": "Name the likely cause and one safe next step per status code instead of one generic sentence."
+    },
+    {
+      "id": "music.player",
+      "module": "music",
+      "where": "/music play and the signed player card",
+      "file": "modules/music/src/panel.ts",
+      "component": "v2",
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "B",
+        "freshness": "B",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": null,
+      "next": "A real Discord render of the card and one button press, then grade the live surface; unit tests alone do not prove V2 delivery."
+    },
+    {
+      "id": "web.music",
+      "module": "web",
+      "where": "/dashboard/guilds/:id/music",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderMusic"
+      ],
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "B",
+        "freshness": "F",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": null,
+      "next": "Refresh the reported position while a track plays, and prove the start/control round trip in a signed-in browser."
     }
   ]
 }

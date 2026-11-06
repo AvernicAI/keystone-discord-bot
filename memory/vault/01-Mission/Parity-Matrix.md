@@ -126,8 +126,8 @@ checked. See [[Master-Plan]] for the research program.
 
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Playback | ❌ (removed 2023) | ❌ | ❌ | ❌ | ❌ | P8 | BYO Lavalink only; not installed, so `play`/`skip`/`stop` refuse and say why (pass 32) |
-| Queue / controls | ❌ | ❌ | ❌ | ❌ | ❌ | P8 | `/music` add/queue/remove/clear/status over a durable row; no buttons yet; live pass 32 |
+| Playback | ❌ (removed 2023) | ❌ | ❌ | ❌ | ❌ | P8 | BYO Lavalink 4.2.2 behind `MusicPlayback`; pass 83 live-proved frames with `playingPlayers:1`, no human listener yet |
+| Queue / controls | ❌ | ❌ | ❌ | ❌ | ❌ | P8 | 14 `/music` subcommands over the durable row, one signed V2 card with five buttons and a jump select, and a dashboard remote; pass 83 |
 | Bundled source | ❌ | ❌ | ❌ | ❌ | ❌ | — | Non-goal: legal risk |
 | Lyrics / autoplay | ❌ | ❌ | ❌ | ❌ | ❌ | — | Non-goal |
 
@@ -147,7 +147,7 @@ checked. See [[Master-Plan]] for the research program.
 | Feature | MEE6 | Dyno | Carl | Ticket Tool | Wick / Security | Phase | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Web dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | P6 | Server-rendered Node app; schema-generated widgets and settings audit shipped pass 49; fleet view and built-in templates shipped pass 50; config export/import/drift shipped pass 51; saved templates shipped pass 52; analytics aggregates shipped pass 53; session rotation, logout revocation, per-route limits and the owners[] console shipped pass 54; scoped tokens pass 55; signed webhooks and keyed replay pass 56; idle timeout and sealed refresh rotation pass 57; product shell, module catalog, readiness, activity and directory pass 78; live Discord OAuth login proven in a browser, live token refresh/revocation open |
-| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 20 roots / 141 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human); `/music` pass 32; `/setup` hub pass 34; `/appeal` hub pass 35; `/verify` hub pass 36; `/form` pass 40; `/event` pass 41; `/modmail` pass 42; pass 45 added `/mod temp-role`; pass 46 added `/mod panic` and `/tools goodbye`. The Master-Plan records 72 planned names across 14 built roots; all recorded names are registered, and the handoff's 18 / 160 still has 88 unrecorded names and no named 18th root |
+| Real subcommand surface | ✅ | ✅ | ✅ | ✅ | ✅ | P7 | 20 roots / 147 subcommands; `/help` generated; shipped pass 26; synthetic nested-slash harness pass 27 (gateway still human); `/music` pass 32; `/setup` hub pass 34; `/appeal` hub pass 35; `/verify` hub pass 36; `/form` pass 40; `/event` pass 41; `/modmail` pass 42; pass 45 added `/mod temp-role`; pass 46 added `/mod panic` and `/tools goodbye`. The Master-Plan records 72 planned names across 14 built roots; all recorded names are registered, and the handoff's 18 / 160 still has 88 unrecorded names and no named 18th root |
 | Context menus | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | 4 menus (Report message, Case history, Rank card, Explain with AI) registered live on the separate 15 + 15 budget; invocation is human-only because the MCP cannot right-click. Competitor presence not verified for every row |
 | In-bot configuration | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/config` (list, get, set, export) over every module's own schema; shipped pass 30; live-proven. Competitor in-Discord config not verified (all surveyed bots also ship a web dashboard) |
 | First-run setup hub | ❔ | ❔ | ❔ | ❔ | ❔ | P7 | `/setup status | module | verify | import | reset`; real settings/health/export seams, settings-only reset; live pass 34 |

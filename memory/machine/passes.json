@@ -1098,6 +1098,22 @@
         "claims": "pass",
         "build": "not run (no build step changed)"
       }
+    },
+    {
+      "id": "pass-83",
+      "date": "2026-11-06",
+      "phase": "P7.5",
+      "summary": "Pass 83 gives music a real player without a second source of truth. `QueueMusicPlayback` drives a Lavalink 4.2.2 node through a small `VoiceNode` seam; `ShoukakuNode` is the only file that imports Shoukaku or discord.js, and `packages/kernel/src/music.ts` still imports neither. The durable `community_records` row (kind `music_queue`) is the play queue: `tracks[0]` is the current track and leaves only when it ends or is skipped, so `add` appends, `skip` advances, `clear` empties, `stop` also leaves voice, `loop:track` replays the head, `loop:queue` rotates it, `shuffle` keeps the head and `jump` truncates to the chosen track. No table and no migration were added. The Discord side is one signed Components V2 card (accent by state, progress, artist, up to five queued rows, a 25-option jump select, five buttons and volume), edited in place behind a 1.5 s throttle, with a fresh post on Discord `30046`. The dashboard is a remote: it reads bot-published state plus a 20 s heartbeat and the durable row, writes each control through Redis (`music.control` audited), and marks a report older than 20 s as last-known with controls disabled. Live run (2026-11-06, guild 1450130465146142785, node main 17-24 ms, tracked through the dashboard in a real browser and Lavalink `/v4/stats` + Discord REST read-back): Play started SoundHelix Song 1 with `players:1, playingPlayers:1` and the node reporting `Unknown title` while the card showed `SoundHelix Song 1` from the filename fallback; Pause dropped `playingPlayers` to 0 and the page showed the paused pill; Resume continued at 0:06 instead of restarting; a bot restart showed `Last known state, not live.` and `Resume saved queue` replayed the durable head at 0:00; adding while playing said `Queued at position 3.`; Skip removed the head; Loop track plus Skip still advanced; Shuffle kept Song 3 at the head and swapped the two upcoming tracks; Remove position 2 shrunk the row; Stop deleted the row, left the node with 0 players and published `idle`. The card read back as a type-17 container with signed button ids, a jump select and `edited: true`. The playtest found four real defects and fixed each at its cause: the dashboard Resume on a paused player restarted the queue instead of unpausing (the control now carries `value=false`), every control rendered a page up to 5 s stale (the bot now publishes before replying), appending claimed \"Started playback.\" (now `Queued at position N.`), and a dead session head was labelled `now` (the pill now requires a live snapshot). `.env.example` now ships the four `LAVALINK_*` defaults uncommented so the documented quickstart can play. Not proven: audible output (no human listener joined; node stats prove frames were sent, not that anyone heard them), any Discord button or slash invocation (the MCP server can read rich messages but cannot click, and this run could not send messages), loop-track replay at end of track, DAVE on a real client, and multi-node failover. Research adds three sourced platform claims (Lavalink 4.2 DAVE + Shoukaku capability, Discord E2EE enforcement from 2026-03-01, the REST endpoints used to verify playback).",
+      "journal": "journal/2026-11-06-pass-83.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "828",
+        "budget": "20/100 roots · 147 subcommands · 167 actions · 4 context menus",
+        "live": "browser + Lavalink 4.2.2 + Discord read-back: play → playingPlayers 1; pause → 0; unpause continues at 0:06; bot restart → last-known → resume from head 0:00; append → queued at 3; skip removes head; loop track + skip advances; shuffle keeps head; remove 2; stop empties row + node + state idle; card type-17 with signed buttons edited in place",
+        "memory": "current",
+        "claims": "pass",
+        "build": "not run (no build step changed)"
+      }
     }
   ]
 }

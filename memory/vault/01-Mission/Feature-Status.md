@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**136 features** across 17 domains: **121 in repo**, **2 partial**, **4 open**, **5 planned**. Live behaviour is marked 
+**136 features** across 17 domains: **122 in repo**, **2 partial**, **3 open**, **5 planned**. Live behaviour is marked 
 separately; a box means the code and its tests exist, not that a live guild has run it.
 
 `partial` means the foundation ships with evidence and a named visible capability is
@@ -24,7 +24,7 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 | Community | 12 | 11 | 1 | 0 | 0 |
 | Tickets | 7 | 6 | 0 | 1 | 0 |
 | Content | 7 | 6 | 0 | 0 | 0 |
-| Music | 4 | 1 | 0 | 1 | 0 |
+| Music | 4 | 2 | 0 | 0 | 0 |
 | AI | 7 | 6 | 0 | 1 | 0 |
 | Operations | 18 | 17 | 0 | 0 | 1 |
 | Portability | 12 | 12 | 0 | 0 | 0 |
@@ -149,8 +149,8 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 
 | Feature | Phase | Status | Evidence / note |
 | --- | --- | --- | --- |
-| Playback | P8 | ◐ open | Streaming audio needs a Discord voice client or a BYO Lavalink endpoint; neither is installed or configured, and pass 32 was not authorized to add one. The refusal is live-proven; playback itself is not shipped. · live unverified |
-| Queue / controls | P8 | ✅ in repo | `modules/music/src/music.test.ts`, `packages/db/src/music-store.test.ts` · live: manual run |
+| Playback | P8 | ✅ in repo | `apps/bot/src/music/playback.ts`, `apps/bot/src/music/shoukaku-node.ts`, `modules/music/src/panel.ts`, `apps/bot/src/music-control.ts` · live: manual run |
+| Queue / controls | P8 | ✅ in repo | `modules/music/src/music.test.ts`, `packages/db/src/music-store.test.ts`, `apps/bot/src/music-interactions.test.ts`, `apps/web/src/music-page.test.ts` · live: manual run |
 | Bundled source | none | — non-goal | live unverified |
 | Lyrics / autoplay | none | — non-goal | live unverified |
 

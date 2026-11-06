@@ -21,7 +21,7 @@
 
 - **12 modules** registered: diagnostics, setup, moderation, community, AI,
   invites, logging, analytics, music, forms, events and modmail.
-- **20 global roots**, **141 subcommands**, **161 actions** and **4 context menus**
+- **20 global roots**, **147 subcommands**, **167 actions** and **4 context menus**
   in the live registry.
 - **134 parity rows**: 114 shipped in repo, 10 open, 6 planned and 4 explicit
   non-goals. **48 rows** carry a live-verification flag, but only 23 of those have
@@ -358,7 +358,7 @@ Twelve unmet needs, ranked by defensibility:
 | Community | 11/12 | 8 | Role panels, giveaways, suggestions, polls, temp voice | Social feeds, welcome images |
 | Tickets | 6/7 | 1 | Thread tickets, claims, transcripts, stats | Knowledge base, AI deflection proof, search |
 | Content | 6/6 | 0 | Embeds, tags, schedules, reminders, sticky, RSS | Feed depth, embed builder UX |
-| Music | 1/2 | 1 | Durable queue, explicit refusal | Playback (Lavalink v4, DAVE) |
+| Music | 2/2 | 2 | Lavalink 4.2 playback, durable queue, one signed card, dashboard remote | Audible proof, second node, source breadth |
 | AI | 6/7 | 1 | Provider abstraction, caps, zero retention, RAG | pgvector ANN, KB UX, eval harness |
 | Operations | 13/15 | 10 | OAuth/session hardening, tokens, webhooks, idempotency | Live OAuth, status page, dashboard UX |
 | Portability | 12/12 | 6 | Export/import/rollback/drift/receipts | NDJSON, structure snapshot, more importers |
@@ -910,7 +910,7 @@ that removes a bot but cannot be exported is not a P0.
 
 ### 7.1 Current ledger
 
-The registry holds **20 roots**, **141 subcommands**, **161 actions** and **4
+The registry holds **20 roots**, **147 subcommands**, **167 actions** and **4
 context menus**. The `/tools` payload is 7,485 of Discord's 8,000-character cap.
 That is the real constraint on the next feature: adding a large feed surface under
 `/tools` risks the payload, not the root count.

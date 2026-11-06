@@ -32,8 +32,8 @@ unbuilt.
   - `/event export` attaches the checksummed JSON plus an `.ics` serialized from
     that exact payload: one VEVENT per event, one ATTENDEE per RSVP row, escaped
     TEXT and lines folded at 75 octets.
-- No new root or subcommand; the budget stayed **20 roots / 141 subcommands /
-  161 actions / 4 context menus**.
+- No new root or subcommand; the budget stayed **20 roots / 147 subcommands /
+  167 actions / 4 context menus**.
 
 ## Verified
 
@@ -46,9 +46,9 @@ pnpm vitest run modules/events packages/db/src/event-store.test.ts \
   ✓ packages/db/src/event-store.test.ts (4 tests)
   Test Files 4 passed · Tests 36 passed
 
-pnpm test                          # 773 tests / 106 files
-pnpm budget                        # 20/100 roots · 141 subcommands · 161 actions · 4 context menus
-pnpm commands:doctor               # Registry 20 roots · 141 subcommands · 4 context menus
+pnpm test                          # 828 tests / 112 files
+pnpm budget                        # 20/100 roots · 147 subcommands · 167 actions · 4 context menus
+pnpm commands:doctor               # Registry 20 roots · 147 subcommands · 4 context menus
 ```
 
 Focused coverage:

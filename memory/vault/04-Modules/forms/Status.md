@@ -8,7 +8,7 @@ table reached 59 of 59. Pass 74 closed the last portability gap: a form and its
 answers now travel in the whole-server bundle, not only in `/form export`.
 
 - `/form create | edit | delete | list | panel | submit | review | export` is
-  registered. The ledger is **20 roots / 141 subcommands / 161 actions / 4
+  registered. The ledger is **20 roots / 147 subcommands / 167 actions / 4
   context menus**.
 - Forms and submissions are **real rows** in `forms` and `form_submissions`
   (migration `0011_forms`). `FormStore` has one in-memory and one Drizzle
@@ -60,9 +60,9 @@ pnpm vitest run modules/forms packages/db/src/form-store.test.ts
   ✓ modules/forms/src/forms.test.ts (12 tests)
   ✓ packages/db/src/form-store.test.ts (3 tests)
 pnpm test
-  773 tests / 106 files
+  828 tests / 112 files
 pnpm budget
-  20/100 roots · 141 subcommands · 161 actions · 4 context menus, OK
+  20/100 roots · 147 subcommands · 167 actions · 4 context menus, OK
 ```
 
 - Parsing: derived and explicit keys, empty/duplicate/oversized field lists,

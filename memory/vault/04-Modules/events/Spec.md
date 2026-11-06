@@ -85,7 +85,7 @@ cached counter would drift.
 ## Limits
 
 - One global command root. `pnpm budget` reports **20/100 roots · 141
-  subcommands · 161 actions · 4 context menus**.
+  subcommands · 167 actions · 4 context menus**.
 - No new dependency, no privileged intent, no paid service.
 - Event cap 25, RSVP cap 500 per event by default, both in module settings.
 
