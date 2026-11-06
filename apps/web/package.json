@@ -13,6 +13,7 @@
     "@keystone/importer": "workspace:*",
     "@keystone/kernel": "workspace:*",
     "@keystone/module-catalog": "workspace:*",
+    "@keystone/ui": "workspace:*",
     "dotenv": "^16.4.0",
     "zod": "^3.25.0"
   }

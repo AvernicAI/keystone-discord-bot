@@ -1082,6 +1082,22 @@
         "claims": "35/35",
         "build": "not run (no build step changed)"
       }
+    },
+    {
+      "id": "pass-78",
+      "date": "2026-11-05",
+      "phase": "P7.5",
+      "summary": "Pass 78 turns the dashboard into a product and closes the live OAuth loop. One shell and one palette (`apps/web/src/shell.ts`, `theme.ts` importing `ACCENTS` from `@keystone/ui`) replace sixteen page-specific layouts; the guild overview becomes a goal-grouped module catalog with an audited enable/disable toggle, four computed readiness facts with fix links, and honest counts; `/activity` renders the guild's audit rows and `/directory` reads channels and roles through a new read-only `DirectoryPort`. Analytics gains coverage language and a source-row table. Market research in `memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md` records eight sourced claims and corrects two plan assumptions: Ticket Tool uses channel pickers (not raw ids/Developer Mode), and Carl-bot issue #50 is about reaction roles with the 'nothing happens' save quote in a 2025 comment. `surfaces.json` now carries thirteen web rows and `audit:visuals.ts` fails when a page renderer has no row, so the browser half is graded by the same gate. The browser runs found and fixed ten real defects: unsized SVG icons rendered as huge black silhouettes, a Discord 429 from per-request guild reads turned a successful save redirect into a 500, six legacy pages emitted a `.panel` class the new stylesheet never defined, the guild chip stacked two inline spans on one line, analytics source labels collided with their bars, every settings page wrapped its fields in a root \"General\" fieldset, the toggle notice landed off-screen under the sticky topbar, and a signed-in 404 offered \"Sign in with Discord\". `GuildAccessService` now caches the OAuth guild list for 30 seconds per token hash, shares in-flight reads, never caches failures and still checks bot membership per guild. Tests: 773 in 106 files. Live browser (real Discord OAuth, Postgres): every dashboard route at 1280px and 390px; the audited toggle visible under the catalog anchor with its activity row; directory 7 channels / 2 categories / 3 roles; readiness 1 of 4 with fix links; analytics 7 days / 5 sources; 404 and 405 keep the account menu.",
+      "journal": "journal/2026-11-05-pass-78.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "773",
+        "budget": "20/100 roots · 141 subcommands · 161 actions · 4 context menus",
+        "live": "browser: real Discord OAuth → /dashboard; full route walk at 1280/390; audited toggle → visible banner → activity row; directory 7/2/3; readiness 1/4; analytics 7d / 5 sources; 404/405",
+        "memory": "current",
+        "claims": "pass",
+        "build": "not run (no build step changed)"
+      }
     }
   ]
 }

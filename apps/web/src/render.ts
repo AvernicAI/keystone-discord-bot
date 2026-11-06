@@ -16,77 +16,73 @@ import type {
 import type { ConfigDrift, ConfigPlan } from "./config-bundle";
 import type { DiscordGuild } from "./oauth";
 import { encodePathSegment } from "./http";
+import { clip, escapeHtml, timestamp } from "./html";
+import {
+  guildAvatar,
+  icon,
+  renderLegacyLayout,
+  renderShell,
+  type GuildSection,
+  type LayoutOptions,
+  type ShellGuild,
+} from "./shell";
+import { groupModules } from "./module-groups";
+import type { GuildDirectory, DirectoryChannel, DirectoryRole } from "./directory";
+import type { Readiness } from "./readiness";
 import { labelFor, type SettingsField, type SettingsFormModel, type SettingsGroup } from "./settings-form";
 import type { ConfigTemplate, TemplateGuildPlan, TemplatePlan } from "./templates";
 import type { RateLimitPolicies } from "./rate-limit";
 
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+/** Pages that still own their heading use the shell without a second h1. */
+function layout(
+  title: string,
+  body: string,
+  username?: string,
+  options: Omit<LayoutOptions, "title" | "username" | "head"> = {},
+): string {
+  return renderLegacyLayout(title, body, username, options);
 }
 
-function layout(title: string, body: string, username?: string): string {
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${escapeHtml(title)} · Keystone</title>
-<style>
-:root{color-scheme:dark;--bg:#0d1117;--panel:#161b22;--line:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#5865f2}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
-header{border-bottom:1px solid var(--line);padding:16px 24px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-main{max-width:960px;margin:0 auto;padding:32px 24px 64px}a{color:#8ea1ff;text-decoration:none}a:hover{text-decoration:underline}
-.brand{font-weight:700;letter-spacing:.02em;color:var(--text)}.muted{color:var(--muted)}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;margin:16px 0}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
-.stat b{display:block;font-size:24px}.stat span{color:var(--muted);font-size:13px}
-button{background:var(--accent);color:#fff;border:0;border-radius:7px;padding:8px 14px;font:inherit;cursor:pointer}
-pre,textarea{white-space:pre-wrap;word-break:break-word;background:#0b0f14;border:1px solid var(--line);border-radius:8px;padding:14px;overflow:auto;font-size:13px;color:var(--text);width:100%}
-textarea{font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}
-table{border-collapse:collapse;width:100%}td,th{text-align:left;padding:8px;border-bottom:1px solid var(--line)}
-p.error{color:#ffb4b4}
-fieldset{border:1px solid var(--line);border-radius:10px;margin:16px 0;padding:4px 16px 14px}legend{padding:0 6px;font-weight:600}
-.field{display:flex;flex-direction:column;gap:5px;margin:13px 0}.field.check{flex-direction:row;align-items:center;gap:9px;margin:10px 0}
-.field label,.field .label{font-weight:600}.field input[type=text],.field input[type=number],.field select{background:#0b0f14;border:1px solid var(--line);border-radius:7px;padding:8px 10px;color:var(--text);font:inherit;width:100%;max-width:520px}
-.field input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent)}.field textarea{max-width:100%}
-.field small{color:var(--muted);font-size:12px}.field p.error{margin:0;font-size:13px}
-.notice{border:1px solid #2ea043;background:#0f2417;color:#b7f7c4;border-radius:9px;padding:12px 14px;margin:14px 0}
-.form-error{border:1px solid #f85149;background:#2b1418;color:#ffd4d4;border-radius:9px;padding:12px 14px;margin:14px 0}
-</style>
-</head>
-<body>
-<header><a class="brand" href="/">Keystone</a><span class="muted">${username ? `signed in as ${escapeHtml(username)}` : "dashboard"}</span></header>
-<main>${body}</main>
-</body>
-</html>`;
-}
-
-function logoutForm(csrfToken: string): string {
-  return `<form method="post" action="/logout"><input type="hidden" name="csrf" value="${escapeHtml(csrfToken)}"><button type="submit">Sign out</button></form>`;
+function guildLayout(guild: ShellGuild, section: GuildSection, csrfToken: string) {
+  return { guild, section, csrfToken } as const;
 }
 
 export function renderLanding(username?: string, csrfToken?: string, owner = false): string {
-  if (!username) {
-    return layout(
-      "Welcome",
-      `<h1>Keystone dashboard</h1>
-       <p class="muted">Sign in with Discord to manage a server. The dashboard only shows servers you can already manage, and every read re-checks your Discord permissions.</p>
-       <p><a href="/login">Sign in with Discord</a></p>`,
-    );
-  }
-  return layout(
-    "Welcome",
-    `<h1>Keystone dashboard</h1>
-     <p>Signed in as <strong>${escapeHtml(username)}</strong>.</p>
-     <p><a href="/dashboard">Open your servers</a></p>
-     ${owner ? `<p><a href="/dashboard/instance">Instance owner console</a></p>` : ""}
-     ${csrfToken ? logoutForm(csrfToken) : ""}`,
-    username,
+  const cta = username
+    ? `<a class="btn primary" href="/dashboard">Open your servers</a>
+       <a class="btn ghost" href="/dashboard/fleet">Apply a template to a fleet</a>`
+    : `<a class="btn primary" href="/login">Sign in with Discord</a>
+       <span class="small muted">Manage Server is enough. No separate admin role.</span>`;
+  const feature = (iconName: "shield" | "activity" | "database", title: string, text: string) =>
+    `<div class="card tight feature">${icon(iconName)}<div><b>${escapeHtml(title)}</b><p class="small muted" style="margin:4px 0 0">${escapeHtml(text)}</p></div></div>`;
+  return renderShell(
+    {
+      title: "Keystone",
+      username,
+      csrfToken,
+      owner,
+      head: false,
+    },
+    `<section class="hero">
+      <div class="eyebrow">The all-in-one Discord bot that teaches while it runs</div>
+      <h1>One server.<br>Every job. Nothing hidden.</h1>
+      <p class="lede">Moderation, community, support and operations in one self-hosted bot. Manage Server is enough to open the dashboard, every accepted write is audited, and nothing is locked behind a paid tier.</p>
+      <div class="hero-actions">${cta}</div>
+      ${username ? `<p class="small muted" style="margin-top:16px">Signed in as <strong>${escapeHtml(username)}</strong>.</p>` : ""}
+    </section>
+    <div class="grid three" style="margin:34px 0 10px">
+      ${feature("shield", "Evidence, not vibes", "Every moderation action, settings change and delivery has an actor and a receipt you can read.")}
+      ${feature("activity", "A dashboard you can trust", "Schema-driven forms, a real audit trail, and counts that name the table they came from.")}
+      ${feature("database", "Yours to keep", "Checksummed config bundles, export and restore, no lock-in and no per-feature paywall.")}
+    </div>
+    <div class="card" style="margin-top:22px">
+      <div class="card-head"><div><h2>Start here</h2><p>${username ? "Pick a server, and its overview tells you what this install still needs." : "Sign in, pick a server, and the overview tells you what a fresh install still needs."}</p></div></div>
+      <div class="tool-grid">
+        <a class="tool" href="${username ? "/dashboard" : "/login"}"><b>${username ? "Your servers" : "Sign in"}</b><span>${username ? "Every server where you can manage settings." : "Discord OAuth; no bot token ever reaches the browser."}</span></a>
+        <a class="tool" href="/dashboard/fleet"><b>Fleet templates</b><span>Preview one config across several servers before anything is written.</span></a>
+        <a class="tool" href="/dashboard/instance"><b>Instance console</b><span>Deployment facts and sessions; owners only.</span></a>
+      </div>
+    </div>`,
   );
 }
 
@@ -95,81 +91,135 @@ export function renderGuildList(
   guilds: DiscordGuild[],
   csrfToken: string,
 ): string {
-  const rows = guilds
+  const cards = guilds
     .map(
-      (guild) =>
-        `<tr><td><a href="/dashboard/guilds/${encodePathSegment(guild.id)}">${escapeHtml(guild.name)}</a></td><td class="muted">${escapeHtml(guild.id)}</td></tr>`,
+      (guild) => `<a class="tool" href="/dashboard/guilds/${encodePathSegment(guild.id)}" style="display:flex;gap:12px;align-items:center">
+        ${guildAvatar(guild)}
+        <span style="min-width:0"><b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(guild.name)}</b>
+        <span><code>${escapeHtml(guild.id)}</code> · <span class="nowrap">${guild.owner ? "owner" : "manage server"}</span></span></span>
+      </a>`,
     )
     .join("");
-  return layout(
-    "Your servers",
-    `<h1>Your servers</h1>
-     <p class="muted">Only servers where you are owner or hold Administrator / Manage Server are listed. Keystone must also be in the server for its detail page to load.</p>
-     <p><a href="/dashboard/fleet">Open the fleet view and apply a template</a></p>
-     <div class="panel">
-       ${guilds.length === 0 ? "<p>No manageable servers yet.</p>" : `<table><thead><tr><th>Server</th><th>ID</th></tr></thead><tbody>${rows}</tbody></table>`}
-     </div>
-     ${logoutForm(csrfToken)}`,
-    username,
+  return renderShell(
+    {
+      title: "Your servers",
+      eyebrow: "Keystone",
+      lede: "Only servers where you own the server or hold Administrator / Manage Server are listed. The bot must also be in the server for its pages to load.",
+      username,
+      csrfToken,
+      head: true,
+      actions: `<a class="btn" href="/dashboard/fleet">Fleet view</a>`,
+    },
+    guilds.length === 0
+      ? `<div class="empty"><strong>No manageable servers yet.</strong>Sign in with an account that can manage a server where Keystone is installed, or invite the bot to one. The <a href="/dashboard/fleet">fleet view</a> uses the same list, so it stays empty until then.</div>`
+      : `<div class="tool-grid">${cards}</div>`,
   );
+}
+
+export interface OverviewOptions {
+  readonly readiness: Readiness;
+  readonly toggle?: { readonly moduleId: string; readonly state: "on" | "off" };
 }
 
 export function renderOverview(
   username: string,
   view: DashboardView,
   csrfToken: string,
+  options: OverviewOptions,
 ): string {
-  const stats = [
-    ["Cases", view.counts.cases],
-    ["Open tickets", view.counts.openTickets],
-    ["Level rows", view.counts.levels],
-    ["Imports", view.counts.imports],
-    ["Backups", view.counts.backups],
-  ]
+  const base = `/dashboard/guilds/${encodePathSegment(view.guild.id)}`;
+  const enabled = view.modules.filter((module) => module.enabled).length;
+  const toggledModule = options.toggle
+    ? view.modules.find((module) => module.id === options.toggle?.moduleId)
+    : undefined;
+  const notice = options.toggle
+    ? `<div class="notice">${escapeHtml(toggledModule?.name ?? options.toggle.moduleId)} is now ${options.toggle.state === "on" ? "enabled" : "disabled"}. The change is in the <a href="${base}/activity">activity ledger</a>.</div>`
+    : "";
+
+  const facts = [
+    `<span class="fact"><span class="dot ${enabled > 0 ? "ok" : "warn"}"></span><b>${enabled}/${view.modules.length}</b> modules on</span>`,
+    `<span class="fact"><b>${view.counts.cases}</b> Cases</span>`,
+    `<span class="fact"><b>${view.counts.openTickets}</b> open tickets</span>`,
+    `<span class="fact"><b>${view.counts.levels}</b> level rows</span>`,
+    `<span class="fact"><b>${view.counts.imports}</b> imports · <b>${view.counts.backups}</b> backups</span>`,
+  ].join("");
+
+  const readiness = options.readiness;
+  const readinessPill = readiness.ready
+    ? `<span class="pill ok">Ready</span>`
+    : `<span class="pill warn">${readiness.done} of ${readiness.total}</span>`;
+  const checklist = readiness.items
     .map(
-      ([label, value]) =>
-        `<div class="stat"><b>${value}</b><span>${escapeHtml(String(label))}</span></div>`,
+      (item) => `<div class="check-item">
+        <span class="check-mark${item.done ? " done" : ""}" aria-hidden="true">${item.done ? "✓" : "•"}</span>
+        <span class="body"><span class="label">${escapeHtml(item.label)}</span><div class="detail">${escapeHtml(item.detail)}</div></span>
+        ${item.done ? `<span class="pill ok">Done</span>` : `<a class="btn small" href="${escapeHtml(item.href)}">${escapeHtml(item.action)}</a>`}
+      </div>`,
     )
     .join("");
-  const modules = view.modules
-    .map(
-      (module) =>
-        `<div class="panel"><h3>${escapeHtml(module.name)} <span class="muted">· ${escapeHtml(module.version)} · ${module.enabled ? "enabled" : "disabled"}</span></h3>
-         <p class="muted">${escapeHtml(module.description)}</p>
-         <pre>${escapeHtml(JSON.stringify(module.settings, null, 2))}</pre>
-         <p><a href="/dashboard/guilds/${encodePathSegment(view.guild.id)}/settings/${encodePathSegment(module.id)}">Edit settings</a></p></div>`,
-    )
+
+  const groups = groupModules(view.modules)
+    .map((group) => {
+      const cards = group.modules
+        .map((module) => {
+          const dashboardModule = view.modules.find((entry) => entry.id === module.id);
+          const isEnabled = dashboardModule?.enabled ?? false;
+          const settingsHref = `${base}/settings/${encodePathSegment(module.id)}`;
+          return `<article class="module">
+            <div class="module-top"><h3>${escapeHtml(module.name)}</h3><span class="pill ${isEnabled ? "ok" : "off"}">${isEnabled ? "Enabled" : "Off"}</span></div>
+            <p>${escapeHtml(module.description)}</p>
+            <div class="module-foot">
+              <span class="tiny muted">${dashboardModule?.commandCount ?? 0} command${(dashboardModule?.commandCount ?? 0) === 1 ? "" : "s"} · v${escapeHtml(module.version)}</span>
+              <span style="display:flex;gap:6px">
+                <a class="btn small" href="${settingsHref}">Configure</a>
+                <form class="toggle-form" method="post" action="${base}/modules/${encodePathSegment(module.id)}/toggle">
+                  <input type="hidden" name="csrf" value="${escapeHtml(csrfToken)}">
+                  <input type="hidden" name="enabled" value="${isEnabled ? "0" : "1"}">
+                  <button class="btn small ${isEnabled ? "ghost" : "primary"}" type="submit" aria-label="${isEnabled ? "Disable" : "Enable"} ${escapeHtml(module.name)}">${isEnabled ? "Disable" : "Enable"}</button>
+                </form>
+              </span>
+            </div>
+          </article>`;
+        })
+        .join("");
+      return `<section aria-label="${escapeHtml(group.title)}">
+        <div class="section-title">${escapeHtml(group.title)} <span class="faint" style="text-transform:none;letter-spacing:0;font-weight:400">· ${escapeHtml(group.description)}</span></div>
+        <div class="module-grid">${cards}</div>
+      </section>`;
+    })
     .join("");
-  const latest = view.latestImport
-    ? `<p class="muted">Latest import: ${escapeHtml(view.latestImport.source)} · ${escapeHtml(view.latestImport.state)} · ${escapeHtml(view.latestImport.createdAt)}</p>`
-    : `<p class="muted">No import receipts yet.</p>`;
-  return layout(
-    view.guild.name,
-    `<p><a href="/dashboard">← All servers</a></p>
-     <h1>${escapeHtml(view.guild.name)}</h1>
-     <p class="muted">Guild ${escapeHtml(view.guild.id)} · P6 foundation · settings writes enabled</p>
-     <div class="grid">${stats}</div>
-     <div class="panel"><h2>Analytics</h2>
-       <p class="muted">See retained activity for this server: logged events, moderation cases, invite joins, command runs and tickets. Every figure names its source table; nothing here writes.</p>
-       <p><a href="/dashboard/guilds/${encodePathSegment(view.guild.id)}/analytics">Open analytics</a></p>
-     </div>
-     <div class="panel"><h2>API tokens</h2>
-       <p class="muted">Issue a guild-scoped <code>keystone_…</code> token for automation. The secret is shown once; only its hash is stored, and every route checks the token's guild and scopes.</p>
-       <p><a href="/dashboard/guilds/${encodePathSegment(view.guild.id)}/tokens">Manage API tokens</a></p>
-     </div>
-     <div class="panel"><h2>Webhooks</h2>
-       <p class="muted">Send signed <code>settings.updated</code> and token events to an HTTPS endpoint. Each delivery is queued, retried with backoff and shown as a receipt.</p>
-       <p><a href="/dashboard/guilds/${encodePathSegment(view.guild.id)}/webhooks">Manage webhooks</a></p>
-     </div>
-     <div class="panel"><h2>Portability</h2>${latest}</div>
-     <div class="panel"><h2>Config export, import and drift</h2>
-       <p class="muted">Download this server's effective module settings as a checksummed JSON file, import a file from another server behind a preview, or compare live settings with the last baseline.</p>
-       <p><a href="/dashboard/guilds/${encodePathSegment(view.guild.id)}/config/export">Download config bundle</a> · <a href="/dashboard/guilds/${encodePathSegment(view.guild.id)}/config/drift">Import a bundle and inspect drift</a></p>
-     </div>
-     ${modules}
-     <p class="muted">Settings are validated by each module's own schema. <a href="/dashboard/fleet">Preview a built-in template across servers</a>.</p>
-     ${logoutForm(csrfToken)}`,
-    username,
+
+  return renderShell(
+    {
+      title: view.guild.name,
+      eyebrow: "Server overview",
+      lede: `Guild ${view.guild.id} · ${view.guild.owner ? "you own this server" : "Manage Server access"} · settings writes are validated by each module and audited.`,
+      username,
+      csrfToken,
+      guild: view.guild,
+      section: "overview",
+      head: true,
+      actions: `<a class="btn primary" href="${base}/analytics">Analytics</a><a class="btn" href="${base}/activity">Activity</a>`,
+    },
+    `<div class="facts">${facts}</div>
+     <section class="card" aria-label="Setup checklist">
+       <div class="card-head"><div><h2>Get this server ready</h2><p>Four facts, read from the settings the bot actually uses. Nothing here is a score.</p></div>${readinessPill}</div>
+       <div class="progress" aria-hidden="true"><span style="width:${Math.round((readiness.done / readiness.total) * 100)}%"></span></div>
+       <div class="checklist">${checklist}</div>
+     </section>
+     <div class="section-title" id="modules">Module catalog <span class="faint" style="text-transform:none;letter-spacing:0;font-weight:400">· ${enabled} of ${view.modules.length} on</span></div>
+     ${notice}
+     ${groups}
+     <section class="card" style="margin-top:22px">
+       <div class="card-head"><div><h2>Data and automation</h2><p>Portable settings, audited integrations and a read-only directory.</p></div><a class="card-link" href="${base}/templates">Templates</a></div>
+       <div class="tool-grid">
+         <a class="tool" href="${base}/directory"><b>Channels &amp; roles</b><span>Find the ids settings expect, without Developer Mode.</span></a>
+         <a class="tool" href="${base}/config/drift"><b>Config &amp; drift</b><span>Export a bundle, preview an import, compare a baseline.</span></a>
+         <a class="tool" href="${base}/tokens"><b>API tokens</b><span>Guild-scoped automation with three explicit scopes.</span></a>
+         <a class="tool" href="${base}/webhooks"><b>Webhooks</b><span>Signed settings events with delivery receipts.</span></a>
+       </div>
+       <p class="small muted" style="margin:12px 0 0">${view.latestImport ? `Latest portability receipt: <code>${escapeHtml(view.latestImport.source)}</code> · ${escapeHtml(view.latestImport.state)} · ${escapeHtml(timestamp(view.latestImport.createdAt))}.` : "No portability receipt yet. Export a config bundle before a large change."} <a href="${base}/config/export">Export now</a>.</p>
+     </section>`,
   );
 }
 
@@ -181,25 +231,34 @@ export function renderAnalytics(
   csrfToken: string,
 ): string {
   const base = `/dashboard/guilds/${encodePathSegment(guild.id)}/analytics`;
-  const windowLinks = [7, 30, 90]
+  const windowNav = [7, 30, 90]
     .map(
       (value) =>
-        `<a href="${base}?days=${value}"${value === days ? ' aria-current="page"' : ""}>${value} days</a>`,
+        `<a class="btn small${value === days ? " primary" : ""}" href="${base}?days=${value}"${
+          value === days ? ' aria-current="page"' : ""
+        }>${value} days</a>`,
     )
-    .join(" · ");
+    .join("");
+  const chrome = {
+    title: "Analytics",
+    eyebrow: guild.name,
+    lede: "Read-only aggregates over rows Keystone already stores. Every figure names its source; nothing on this page writes.",
+    username,
+    csrfToken,
+    guild,
+    section: "analytics" as const,
+    head: true,
+    actions: windowNav,
+  };
 
   if (snapshot === null) {
-    return layout(
-      "Analytics",
-      `<p><a href="/dashboard/guilds/${encodePathSegment(guild.id)}">← Back to ${escapeHtml(guild.name)}</a></p>
-       <h1>Analytics</h1>
-       <p class="muted">Read-only aggregates over the rows Keystone already stores.</p>
-       <nav class="panel">Window: ${windowLinks}</nav>
-       <div class="panel"><h2>Not available in this process</h2>
-         <p class="muted">This dashboard is running without a shared analytics ledger adapter (memory mode). It will not show zeros as if they were measurements. Start the web process with <code>DATABASE_URL</code> to read the guild's retained rows.</p>
-       </div>
-       ${logoutForm(csrfToken)}`,
-      username,
+    return renderShell(
+      chrome,
+      `<div class="form-error"><strong>Not available in this process.</strong>
+        This dashboard has no shared analytics adapter (memory mode), so it will not show zeros as if they were measurements.
+        Start the web process with <code>DATABASE_URL</code> to read this server's retained rows.</div>
+       <div class="empty"><strong>Nothing is broken.</strong>The bot can still run in memory mode; only cross-process analytics is unavailable.
+       <a href="/dashboard/instance">Check the instance mode</a>.</div>`,
     );
   }
 
@@ -214,93 +273,103 @@ export function renderAnalytics(
       overview.activeCases +
       overview.openTickets >
     0;
-  const windowLabel = `${snapshot.window.days}d · ${escapeHtml(snapshot.window.since.slice(0, 10))} → ${escapeHtml(snapshot.window.until.slice(0, 10))}`;
+
+  const facts = [
+    `<span class="fact"><span class="dot brand"></span><b>${snapshot.window.days}d · ${escapeHtml(snapshot.window.since.slice(0, 10))} → ${escapeHtml(snapshot.window.until.slice(0, 10))}</b></span>`,
+    `<span class="fact">Generated <b>${escapeHtml(timestamp(snapshot.generatedAt))}</b></span>`,
+    `<span class="fact"><span class="dot ${overview.loggedEvents > 0 ? "ok" : "warn"}"></span><b>${overview.loggedEvents}</b> logged events</span>`,
+    `<span class="fact">Read <b>${escapeHtml(timestamp(new Date()))}</b></span>`,
+  ].join("");
 
   const stats = [
     ["Logged events", overview.loggedEvents],
-    ["Active cases (current)", overview.activeCases],
+    ["Active cases", overview.activeCases],
     ["Cases opened", overview.casesOpened],
     ["Invite joins", overview.inviteJoins],
     ["Retained invites", overview.retainedInvites],
     ["Command runs", overview.commandsRun],
-    ["Open tickets (current)", overview.openTickets],
+    ["Open tickets", overview.openTickets],
   ]
     .map(
       ([label, value]) =>
-        `<div class="stat"><b>${Number(value)}</b><span>${escapeHtml(String(label))}</span></div>`,
+        `<div class="stat"><span class="label">${escapeHtml(String(label))}</span><b>${Number(value)}</b></div>`,
     )
     .join("");
 
-  const sourceRows = snapshot.sources
+  const maxSource = Math.max(1, ...snapshot.sources.map((source) => source.rows));
+  const sourceBars = snapshot.sources
     .map(
-      (source) =>
-        `<tr><td><code>${escapeHtml(source.id)}</code></td><td>${escapeHtml(source.label)}</td><td>${source.rows}</td></tr>`,
+      (source) => `<div class="bar-row">
+        <span class="source"><b>${escapeHtml(source.label)}</b><code>${escapeHtml(source.id)}</code></span>
+        <span class="bar" aria-hidden="true"><span style="width:${
+          source.rows === 0 ? 0 : Math.max(2, Math.round((source.rows / maxSource) * 100))
+        }%"></span></span>
+        <span class="num">${source.rows}</span>
+      </div>`,
     )
     .join("");
 
   const topCommands = commands.top.length
-    ? `<table><thead><tr><th>Command</th><th>Runs</th><th>Ok</th><th>Blocked</th><th>Error</th><th>Avg latency</th></tr></thead><tbody>${commands.top
+    ? `<div class="table-wrap"><table><thead><tr><th>Command</th><th>Runs</th><th>Ok</th><th>Blocked</th><th>Error</th><th>Avg latency</th></tr></thead><tbody>${commands.top
         .map(
           (row) =>
             `<tr><td><code>/${escapeHtml(row.command)}${row.path ? ` ${escapeHtml(row.path)}` : ""}</code></td><td>${row.total}</td><td>${row.ok}</td><td>${row.blocked}</td><td>${row.error}</td><td>${row.averageLatencyMs === null ? "—" : `${row.averageLatencyMs}ms`}</td></tr>`,
         )
-        .join("")}</tbody></table>`
-    : `<p class="muted">No command runs recorded in this window.</p>`;
+        .join("")}</tbody></table></div>`
+    : `<div class="empty">No command runs recorded in this window. Command usage is written by dispatch; a quiet server is a valid answer.</div>`;
 
-  return layout(
-    "Analytics",
-    `<p><a href="/dashboard/guilds/${encodePathSegment(guild.id)}">← Back to ${escapeHtml(guild.name)}</a></p>
-     <h1>Analytics</h1>
-     <p class="muted">Guild ${escapeHtml(guild.id)} · read-only aggregate over retained rows · window ${windowLabel}</p>
-     <nav class="panel">Window: ${windowLinks}</nav>
-     ${
-       hasRows
-         ? ""
-         : `<div class="notice">No rows in this window. These are counts of records Keystone retained, not an estimate of all Discord activity.</div>`
-     }
-     <div class="panel"><h2>Summary</h2><div class="grid">${stats}</div>
-       <p class="muted">Open tickets and active cases are current state. Every other count is bounded by the window. These are counts of retained rows, not estimates: zero can mean the relevant logging event or module is off, not that nothing happened in Discord.</p>
+  const table = (rows: ReadonlyArray<readonly [string, string | number]>): string =>
+    `<div class="table-wrap"><table><tbody>${rows
+      .map(([label, value]) => `<tr><td>${escapeHtml(label)}</td><td>${escapeHtml(String(value))}</td></tr>`)
+      .join("")}</tbody></table></div>`;
+
+  return renderShell(
+    chrome,
+    `${facts}
+     ${hasRows ? "" : `<div class="empty"><strong>No rows in this window.</strong>Zero can mean the relevant logging event or module is off, not that nothing happened. This is not an estimate of all Discord activity. <a href="${base.replace(/\/analytics$/, "")}/settings/logging">Set a logging channel</a> or widen the window.</div>`}
+     <div class="grid">${stats}</div>
+     <section class="card" style="margin-top:16px">
+       <div class="card-head"><div><h2>Source rows</h2><p>Each bar is a query over one retained table; there is no analytics table or counter to reconcile.</p></div><span class="pill">${snapshot.sources.length} sources</span></div>
+       ${sourceBars}
+     </section>
+     <div class="grid two">
+       <section class="card">
+         <div class="card-head"><div><h2>Members and invites</h2><p>Joins and leaves are audit-log events; invite attribution needs the invites module.</p></div></div>
+         ${table([
+           ["Logged joins", members.loggedJoins],
+           ["Logged leaves", members.loggedLeaves],
+           ["Invite joins", members.inviteJoins],
+           ["Left since window start", members.leftSince],
+           ["Retained", members.retained],
+           ["Flagged joins", members.flagged],
+           ["Unique inviters", members.uniqueInviters],
+         ])}
+       </section>
+       <section class="card">
+         <div class="card-head"><div><h2>Messages</h2><p>Only events captured by audit logging; message content is never included.</p></div></div>
+         ${table([
+           ["Deleted", messages.deleted],
+           ["Edited", messages.edited],
+           ["Content-filter cases", messages.contentFilterCases],
+         ])}
+         <hr class="sep">
+         <h2 style="margin-bottom:8px">Tickets</h2>
+         ${table([
+           ["Open tickets (current)", tickets.open],
+           ["Claimed tickets (current)", tickets.claimed],
+           ["Closed tickets (current)", tickets.closed],
+           ["Opened in window", tickets.opened],
+           ["Closed in window", tickets.closedInWindow],
+           ["Average close", tickets.averageCloseMinutes === null ? "—" : `${tickets.averageCloseMinutes} min`],
+           ["SLA breached", tickets.slaBreached],
+         ])}
+       </section>
      </div>
-     <div class="panel"><h2>Source rows</h2>
-       <p class="muted">Each figure below is a query over one of these tables; there is no analytics table or counter to reconcile.</p>
-       <table><thead><tr><th>Table</th><th>Meaning</th><th>Rows</th></tr></thead><tbody>${sourceRows}</tbody></table>
-     </div>
-     <div class="panel"><h2>Members and invites</h2>
-       <table><tbody>
-         <tr><td>Logged joins</td><td>${members.loggedJoins}</td></tr>
-         <tr><td>Logged leaves</td><td>${members.loggedLeaves}</td></tr>
-         <tr><td>Invite joins</td><td>${members.inviteJoins}</td></tr>
-         <tr><td>Left since</td><td>${members.leftSince}</td></tr>
-         <tr><td>Retained</td><td>${members.retained}</td></tr>
-         <tr><td>Flagged joins</td><td>${members.flagged}</td></tr>
-         <tr><td>Unique inviters</td><td>${members.uniqueInviters}</td></tr>
-       </tbody></table>
-     </div>
-     <div class="panel"><h2>Messages</h2>
-       <table><tbody>
-         <tr><td>Deleted</td><td>${messages.deleted}</td></tr>
-         <tr><td>Edited</td><td>${messages.edited}</td></tr>
-         <tr><td>Content-filter cases</td><td>${messages.contentFilterCases}</td></tr>
-       </tbody></table>
-       <p class="muted">Counts events captured by audit logging, not every message sent. Message content is not included.</p>
-     </div>
-     <div class="panel"><h2>Commands</h2>
-       <p class="muted">${commands.total} runs · ${commands.ok} ok · ${commands.blocked} blocked · ${commands.error} error · average ${commands.averageLatencyMs === null ? "n/a" : `${commands.averageLatencyMs}ms`}</p>
+     <section class="card">
+       <div class="card-head"><div><h2>Commands</h2><p>${commands.total} runs · ${commands.ok} ok · ${commands.blocked} blocked · ${commands.error} error · average ${commands.averageLatencyMs === null ? "n/a" : `${commands.averageLatencyMs}ms`}</p></div></div>
        ${topCommands}
-     </div>
-     <div class="panel"><h2>Tickets</h2>
-       <table><tbody>
-         <tr><td>Open (current)</td><td>${tickets.open}</td></tr>
-         <tr><td>Claimed (current)</td><td>${tickets.claimed}</td></tr>
-         <tr><td>Closed (current)</td><td>${tickets.closed}</td></tr>
-         <tr><td>Opened in window</td><td>${tickets.opened}</td></tr>
-         <tr><td>Closed in window</td><td>${tickets.closedInWindow}</td></tr>
-         <tr><td>Average close</td><td>${tickets.averageCloseMinutes === null ? "—" : `${tickets.averageCloseMinutes} min`}</td></tr>
-         <tr><td>SLA breached</td><td>${tickets.slaBreached}</td></tr>
-       </tbody></table>
-     </div>
-     ${logoutForm(csrfToken)}`,
-    username,
+     </section>
+     <p class="small faint">Open tickets and active cases are current state. Every other count is bounded by the window and is a count of retained rows, not estimates of all Discord activity.</p>`,
   );
 }
 
@@ -386,8 +455,7 @@ export function renderFleet(
     `<p><a href="/dashboard">← All servers</a></p>
      <h1>Fleet</h1>
      <p class="muted">One settings action across the servers you can manage. Each selected server is re-authorized, and every write goes through the module's own schema and audit trail.</p>
-     ${noticeHtml}${failureHtml}${form}
-     ${logoutForm(csrfToken)}`,
+     ${noticeHtml}${failureHtml}${form}`,
     username,
   );
 }
@@ -477,8 +545,7 @@ export function renderTemplatePreview(
      <p class="muted">${escapeHtml(plan.template.description)}</p>
      <div class="notice">${escapeHtml(summary)}</div>
      ${issuePanel}${panels}
-     ${apply}
-     ${logoutForm(csrfToken)}`,
+     ${apply}`,
     username,
   );
 }
@@ -515,9 +582,9 @@ export function renderConfigPreview(
      <div class="panel">
        <p class="muted">Apply re-parses and re-validates this exact file, recomputes the plan and refuses it if the checksum, the schemas or this guild's settings changed after the preview. Each accepted module write appends one dashboard audit row, and the bundle becomes this guild's baseline for drift.</p>
        ${apply}
-     </div>
-     ${logoutForm(csrfToken)}`,
+     </div>`,
     username,
+    guildLayout(plan.guild, "config", csrfToken),
   );
 }
 
@@ -585,9 +652,9 @@ export function renderConfigDrift(
        </form>
      </div>
      ${baseline}
-     ${driftPanel}
-     ${logoutForm(csrfToken)}`,
+     ${driftPanel}`,
     username,
+    guildLayout(guild, "config", csrfToken),
   );
 }
 
@@ -647,9 +714,9 @@ export function renderSavedTemplates(
          <div class="field"><label for="template-description">Description</label><textarea id="template-description" name="description" rows="2" maxlength="280"></textarea></div>
          <p><button type="submit">Save template</button></p>
        </form>
-     </div>
-     ${logoutForm(csrfToken)}`,
+     </div>`,
     username,
+    guildLayout(guild, "templates", csrfToken),
   );
 }
 
@@ -724,9 +791,9 @@ export function renderSavedTemplateEditor(
          <input type="hidden" name="csrf" value="${escapeHtml(csrfToken)}">
          <p><button type="submit">Delete template</button></p>
        </form>
-     </div>
-     ${logoutForm(csrfToken)}`,
+     </div>`,
     username,
+    guildLayout(guild, "templates", csrfToken),
   );
 }
 
@@ -839,6 +906,9 @@ function renderGroup(
     .map((child) => renderGroup(child, submitted, rendered, errors))
     .join("");
   if (!fields && !groups) return "";
+  // The root group is the module itself, not a titled section. Rendering it
+  // as a fieldset drew one "General" box around every other group.
+  if (!group.path) return `${fields}${groups}`;
   return `<fieldset><legend>${escapeHtml(group.label)}</legend>${fields}${groups}</fieldset>`;
 }
 
@@ -901,31 +971,59 @@ export function renderSettingsEditor(
   csrfToken: string,
   options: SettingsRenderOptions = {},
 ): string {
-  const action = `/dashboard/guilds/${encodePathSegment(guild.id)}/settings/${encodePathSegment(module.id)}`;
+  const base = `/dashboard/guilds/${encodePathSegment(guild.id)}`;
+  const action = `${base}/settings/${encodePathSegment(module.id)}`;
   const notice = options.saved
     ? `<div class="notice">Settings saved. The change is in the audit trail below.</div>`
     : "";
   const formError = options.formError
     ? `<div class="form-error">${escapeHtml(options.formError)}</div>`
     : "";
-  return layout(
-    `${module.name} settings`,
-    `<p><a href="/dashboard/guilds/${encodePathSegment(guild.id)}">← Back to ${escapeHtml(guild.name)}</a></p>
-     <h1>${escapeHtml(module.name)} settings</h1>
-     <p class="muted">${escapeHtml(module.description)} · version ${escapeHtml(module.version)} · ${form.fields.length} fields · generated from this module's Zod schema</p>
-     ${notice}${formError}
-     <div class="panel">
-       <p class="muted">Every value is parsed by the same schema the bot uses. Invalid input is rejected before anything is stored.</p>
+  const lastChange = options.history?.[0];
+  const enabledPill = module.enabled
+    ? `<span class="pill ok">Enabled</span>`
+    : `<span class="pill off">Off</span>`;
+  const toggle = `<form method="post" action="${base}/modules/${encodePathSegment(module.id)}/toggle" style="margin:0">
+    <input type="hidden" name="csrf" value="${escapeHtml(csrfToken)}">
+    <input type="hidden" name="enabled" value="${module.enabled ? "0" : "1"}">
+    <button class="btn small" type="submit">${module.enabled ? "Disable module" : "Enable module"}</button>
+  </form>`;
+
+  return renderShell(
+    {
+      title: `${module.name} settings`,
+      eyebrow: guild.name,
+      lede: module.description,
+      username,
+      csrfToken,
+      guild,
+      section: "settings",
+      head: true,
+      actions: `<a class="btn small" href="${base}#modules">All modules</a>${toggle}`,
+    },
+    `${notice}${formError}
+     <div class="facts">
+       <span class="fact"><span class="dot ${module.enabled ? "ok" : "warn"}"></span>${enabledPill}</span>
+       <span class="fact">version <b>${escapeHtml(module.version)}</b></span>
+       <span class="fact"><b>${form.fields.length}</b> fields</span>
+       <span class="fact"><b>${module.commandCount}</b> command${module.commandCount === 1 ? "" : "s"}</span>
+       <span class="fact">Last change <b>${lastChange ? escapeHtml(timestamp(lastChange.createdAt)) : "none recorded"}</b></span>
+     </div>
+     <section class="card">
+       <div class="card-head">
+         <div><h2>Settings</h2><p>Generated from this module's Zod schema. Saving applies immediately and appends one audit row; there is no draft state to forget.</p></div>
+       </div>
        <form method="post" action="${action}">
          <input type="hidden" name="csrf" value="${escapeHtml(csrfToken)}">
          <input type="hidden" name="__rendered" value="${escapeHtml(form.rendered.join(","))}">
          ${form.groups.map((group) => renderGroup(group, options.submitted, options.rendered, options.fieldErrors)).join("")}
-         <p><button type="submit">Save settings</button></p>
+         <div class="form-actions">
+           <button class="btn primary" type="submit">Save settings</button>
+           <span class="hint">Invalid input is rejected by the same schema the bot uses, before anything is stored.</span>
+         </div>
        </form>
-     </div>
-     ${renderAudit(options.history ?? [])}
-     ${logoutForm(csrfToken)}`,
-    username,
+     </section>
+     ${renderAudit(options.history ?? [])}`,
   );
 }
 
@@ -994,9 +1092,9 @@ export function renderApiTokens(
      </div>
      <div class="panel"><h2>Issued tokens</h2>
        ${tokens.length === 0 ? `<p class="muted">No tokens have been issued for this server.</p>` : `<table><thead><tr><th>Name</th><th>Scopes</th><th>Status</th><th>Last used</th><th>Expires</th><th></th></tr></thead><tbody>${rows}</tbody></table>`}
-     </div>
-     ${logoutForm(csrfToken)}`,
+     </div>`,
     username,
+    guildLayout(guild, "tokens", csrfToken),
   );
 }
 
@@ -1078,9 +1176,9 @@ export function renderWebhooks(
      </div>
      <div class="panel"><h2>Delivery receipts</h2>
        ${deliveries.length === 0 ? `<p class="muted">No delivery has been attempted yet.</p>` : `<table><thead><tr><th>Event</th><th>State</th><th>Attempts</th><th>HTTP</th><th>Last error</th><th>Queued</th></tr></thead><tbody>${receipts}</tbody></table>`}
-     </div>
-     ${logoutForm(csrfToken)}`,
+     </div>`,
     username,
+    guildLayout(guild, "webhooks", csrfToken),
   );
 }
 
@@ -1150,15 +1248,204 @@ export function renderInstance(
          <div class="field"><label for="userId">Discord user id</label><input id="userId" name="userId" type="text" inputmode="numeric" autocomplete="off" required></div>
          <p><button type="submit">Sign out every session</button></p>
        </form>
-     </div>
-     ${logoutForm(csrfToken)}`,
+     </div>`,
     username,
   );
 }
 
-export function renderError(title: string, message: string): string {
+export function renderActivity(
+  username: string,
+  guild: DiscordGuild,
+  records: readonly AuditEventRecord[],
+  csrfToken: string,
+): string {
+  const base = `/dashboard/guilds/${encodePathSegment(guild.id)}`;
+  const rows = records
+    .map((record) => {
+      const data =
+        record.data && typeof record.data === "object" && !Array.isArray(record.data)
+          ? (record.data as Record<string, unknown>)
+          : {};
+      const moduleId = typeof data.moduleId === "string" ? data.moduleId : undefined;
+      const target = moduleId ?? record.targetId ?? "—";
+      const link = moduleId && /^[a-z][a-z0-9-]{1,31}$/.test(moduleId)
+        ? `<a href="${base}/settings/${encodePathSegment(moduleId)}"><code>${escapeHtml(moduleId)}</code></a>`
+        : `<code>${escapeHtml(target)}</code>`;
+      return `<tr>
+        <td class="nowrap">${escapeHtml(timestamp(record.createdAt, true))}</td>
+        <td><code>${escapeHtml(record.actorId ?? "system")}</code></td>
+        <td>${escapeHtml(auditAction(record))}</td>
+        <td>${link}</td>
+        <td class="muted">${escapeHtml(clip(auditChanges(record), 80))}</td>
+      </tr>`;
+    })
+    .join("");
+  const latest = records[0];
+  return renderShell(
+    {
+      title: "Activity",
+      eyebrow: guild.name,
+      lede: "Every accepted write, newest first. A rejected write leaves no row, so this is the honest record of what changed.",
+      username,
+      csrfToken,
+      guild,
+      section: "activity",
+      head: true,
+      actions: `<a class="btn small" href="${base}/activity">Refresh</a>`,
+    },
+    `<div class="facts">
+       <span class="fact"><span class="dot brand"></span><b>${records.length}</b> recent row${records.length === 1 ? "" : "s"}</span>
+       <span class="fact">Latest <b>${latest ? escapeHtml(timestamp(latest.createdAt)) : "none"}</b></span>
+       <span class="fact">Scope <code>${escapeHtml(guild.id)}</code></span>
+     </div>
+     ${
+       records.length === 0
+         ? `<div class="empty"><strong>No writes recorded for this server yet.</strong>
+             Open a module, save a setting, and the first row appears here with your Discord id and the exact paths that changed.
+             <a href="${base}#modules">Open the module catalog</a>.</div>`
+         : `<div class="table-wrap"><table><thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Module</th><th>Changed</th></tr></thead><tbody>${rows}</tbody></table></div>`
+     }
+     <section class="card" style="margin-top:16px">
+       <div class="card-head"><div><h2>What writes a row</h2><p>Settings changes, config imports, saved-template writes and API token issue/revoke. Reads never write.</p></div></div>
+       <div class="tool-grid">
+         <a class="tool" href="${base}/config/drift"><b>Config import</b><span>One row per accepted module write, bound to a preview fingerprint.</span></a>
+         <a class="tool" href="${base}/templates"><b>Templates</b><span>Create, update and delete rows carry the dashboard actor.</span></a>
+         <a class="tool" href="${base}/tokens"><b>API tokens</b><span>Issue and revoke are audited; the secret itself never is.</span></a>
+       </div>
+     </section>`,
+  );
+}
+
+function channelKindLabel(kind: DirectoryChannel["kind"]): string {
+  if (kind === "text") return "#";
+  if (kind === "voice") return "voice";
+  if (kind === "announcement") return "announce";
+  if (kind === "stage") return "stage";
+  if (kind === "forum") return "forum";
+  if (kind === "media") return "media";
+  if (kind === "category") return "category";
+  return "other";
+}
+
+function channelRow(channel: DirectoryChannel): string {
+  return `<div class="channel-row">
+    <span class="pill">${escapeHtml(channelKindLabel(channel.kind))}</span>
+    <span>${escapeHtml(channel.name)}</span>
+    <code class="id">${escapeHtml(channel.id)}</code>
+  </div>`;
+}
+
+function roleColor(color: number): string {
+  if (!Number.isInteger(color) || color <= 0) return "var(--line)";
+  return `#${color.toString(16).padStart(6, "0")}`;
+}
+
+function roleRow(role: DirectoryRole): string {
+  const tags = [
+    role.managed ? `<span class="pill">managed</span>` : "",
+    role.hoist ? `<span class="pill">hoisted</span>` : "",
+  ].join("");
+  return `<div class="channel-row">
+    <span class="role-dot" style="background:${roleColor(role.color)}" aria-hidden="true"></span>
+    <span>${escapeHtml(role.name)}</span>
+    ${tags}
+    <code class="id">${escapeHtml(role.id)}</code>
+  </div>`;
+}
+
+export interface DirectoryRenderState {
+  readonly directory?: GuildDirectory;
+  /** A reason the read failed; never a stack trace. */
+  readonly error?: string;
+}
+
+export function renderDirectory(
+  username: string,
+  guild: DiscordGuild,
+  csrfToken: string,
+  state: DirectoryRenderState,
+): string {
+  const base = `/dashboard/guilds/${encodePathSegment(guild.id)}/directory`;
+  const directory = state.directory;
+  const categories = directory?.channels.filter((channel) => channel.kind === "category") ?? [];
+  const uncategorized = directory
+    ? directory.channels.filter(
+        (channel) => channel.kind !== "category" && (channel.parentId === null || !categories.some((category) => category.id === channel.parentId)),
+      )
+    : [];
+  const channelGroups = directory
+    ? [
+        uncategorized.length > 0
+          ? `<div class="channel-group"><h3>Uncategorised</h3>${uncategorized
+              .map((channel) => channelRow(channel))
+              .join("")}</div>`
+          : "",
+        ...categories.map((category) => {
+          const children = directory.channels.filter(
+            (channel) => channel.kind !== "category" && channel.parentId === category.id,
+          );
+          return `<div class="channel-group"><h3>${escapeHtml(category.name)} <code>${escapeHtml(category.id)}</code></h3>${
+            children.length > 0
+              ? children.map((channel) => channelRow(channel)).join("")
+              : `<p class="small muted">No channels in this category.</p>`
+          }</div>`;
+        }),
+      ].join("")
+    : "";
+
+  const body = state.error
+    ? `<div class="form-error"><strong>The directory could not be read.</strong>${escapeHtml(state.error)}</div>
+       <div class="empty"><a href="${base}">Try again</a>. Nothing on this page changes a setting; you can keep using the rest of the dashboard.</div>`
+    : directory
+      ? `<div class="facts">
+           <span class="fact"><span class="dot ok"></span><b>${directory.channels.length}</b> channels</span>
+           <span class="fact"><b>${categories.length}</b> categories</span>
+           <span class="fact"><b>${directory.roles.length}</b> roles</span>
+           <span class="fact">Read <b>${escapeHtml(timestamp(directory.fetchedAt))}</b></span>
+         </div>
+         <div class="grid two">
+           <section class="card">
+             <div class="card-head"><div><h2>Channels</h2><p>Grouped by category and read with the bot token. The ids are the values settings fields expect.</p></div></div>
+             ${directory.channels.length === 0 ? `<div class="empty">No channels are visible to the bot. Check View Channels.</div>` : channelGroups}
+           </section>
+           <section class="card">
+             <div class="card-head"><div><h2>Roles</h2><p>Hierarchy order. Managed roles belong to bots or integrations and cannot be assigned.</p></div></div>
+             ${directory.roles.length === 0 ? `<div class="empty">No roles were returned.</div>` : directory.roles.map((role) => roleRow(role)).join("")}
+           </section>
+         </div>
+         <div class="card">
+           <h2>How to use an id</h2>
+           <p class="small muted" style="margin-top:6px">Paste it into the matching settings field, for example a logging channel or a welcome role. Pickers that fill these fields are the next pass on the <a href="/dashboard">web roadmap</a>; this page stays read-only.</p>
+         </div>`
+      : `<div class="empty"><strong>Directory reads are off.</strong>
+           This web process started without a bot token, so it cannot read channels or roles. Set <code>DISCORD_TOKEN</code> and restart the dashboard; the rest of the dashboard still works.</div>`;
+
+  return renderShell(
+    {
+      title: "Channels & roles",
+      eyebrow: guild.name,
+      lede: "The server as Discord sees it, with the ids settings use. Read-only; no Developer Mode required.",
+      username,
+      csrfToken,
+      guild,
+      section: "directory",
+      head: true,
+      actions: `<a class="btn small" href="${base}">Refresh</a>`,
+    },
+    body,
+  );
+}
+
+export function renderError(
+  title: string,
+  message: string,
+  session?: { readonly username?: string; readonly csrfToken?: string; readonly owner?: boolean },
+): string {
   return layout(
     title,
-    `<h1>${escapeHtml(title)}</h1><p>${escapeHtml(message)}</p><p><a href="/">Back to Keystone</a></p>`,
+    `<div class="page-head"><div><div class="eyebrow">Keystone</div><h1>${escapeHtml(title)}</h1><p class="lede">${escapeHtml(message)}</p></div></div>
+     <p><a href="/">Back to Keystone</a></p>`,
+    session?.username,
+    { csrfToken: session?.csrfToken, owner: session?.owner },
   );
 }

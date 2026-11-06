@@ -70,17 +70,32 @@ async function handle(
 
   if (await dispatchRoutes(ctx)) return;
 
+  // Error pages still know who is asking, so a signed-in user never sees a
+  // "Sign in with Discord" button on the page that just told them 404.
+  const errorSession = ctx.session
+    ? {
+        username: ctx.session.username,
+        csrfToken: ctx.csrfToken,
+        owner: deps.auth.isOwner(ctx.session),
+      }
+    : undefined;
+
   if (ctx.method !== "GET" && ctx.method !== "POST") {
     send(
       res,
       405,
-      renderError("Method not allowed", "That method is not supported here."),
+      renderError("Method not allowed", "That method is not supported here.", errorSession),
       "text/html; charset=utf-8",
     );
     return;
   }
 
-  send(res, 404, renderError("Not found", "That page does not exist."), "text/html; charset=utf-8");
+  send(
+    res,
+    404,
+    renderError("Not found", "That page does not exist.", errorSession),
+    "text/html; charset=utf-8",
+  );
 }
 
 function clientAddress(req: IncomingMessage): string {

@@ -106,7 +106,7 @@ P2 core shipped in pass 05 (2026-11-01).
 ## Verified
 
 ```
-pnpm test                                  # 743 tests / 101 files
+pnpm test                                  # 773 tests / 106 files
 pnpm vitest run modules/moderation         # 90 tests (including 11 member-timeline, 10 timeline-panel, 4 export, 7 temporary-expiry and 5 panic tests)
 pnpm test -- packages/db/src/cases.test.ts # 4 PGlite case-store tests, including listEvents and atomic expiry claims
 pnpm test -- packages/db/src/panic.test.ts # PGlite panic snapshot scope and clear

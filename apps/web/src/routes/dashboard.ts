@@ -18,8 +18,10 @@ import {
   type SettingsFormBody,
 } from "../http";
 import {
+  renderActivity,
   renderAnalytics,
   renderConfigDrift,
+  renderDirectory,
   renderConfigPreview,
   renderFleet,
   renderGuildList,
@@ -32,6 +34,7 @@ import {
 import { analyticsDays } from "../overview";
 import type { RouteContext } from "../request-context";
 import { SettingsValidationError, parseSettingsForm } from "../settings-form";
+import { DirectoryError } from "../directory";
 import { CONFIG_TEMPLATES, findTemplate } from "../templates";
 
 const MAX_FLEET_GUILDS = 25;
@@ -464,9 +467,120 @@ export async function guildOverview(
   const guildId = params[0] as string;
   const { session, guild } = await authorizeGuild(ctx.deps, ctx.session, guildId);
   const view = await ctx.deps.dashboard.view(guild);
-  send(ctx.res, 200, renderOverview(session.username, view, ctx.csrfToken), "text/html; charset=utf-8", {
-    "Cache-Control": "no-store",
+  const readiness = await ctx.deps.dashboard.readiness(guild, view);
+  const toggled = ctx.url.searchParams.get("toggled") ?? undefined;
+  send(
+    ctx.res,
+    200,
+    renderOverview(session.username, view, ctx.csrfToken, {
+      readiness,
+      ...(toggled
+        ? {
+            toggle: {
+              moduleId: toggled,
+              state: ctx.url.searchParams.get("state") === "on" ? ("on" as const) : ("off" as const),
+            },
+          }
+        : {}),
+    }),
+    "text/html; charset=utf-8",
+    { "Cache-Control": "no-store" },
+  );
+  return true;
+}
+
+/**
+ * One-click enable/disable. This is the dashboard form of the same
+ * `SettingsService.update` path every other surface uses: the module schema
+ * validates the patch, one audit row is appended, and the webhook outbox event
+ * fires. There is no second settings store.
+ */
+export async function moduleToggle(
+  ctx: RouteContext,
+  params: readonly string[],
+): Promise<boolean> {
+  const guildId = params[0] as string;
+  const moduleId = params[1] as string;
+  let body!: URLSearchParams;
+  const write = await requireSettingsWrite(ctx.deps, ctx.session, guildId, async () => {
+    body = new URLSearchParams(await parseBody(ctx.req));
+    return body.get("csrf") ?? undefined;
   });
+  const value = body.get("enabled");
+  if (value !== "0" && value !== "1") {
+    throw new HttpError(400, "Choose whether the module should be on or off.", "module_state_invalid");
+  }
+  const enabled = value === "1";
+  await ctx.deps.dashboard.update(
+    write.guild,
+    moduleId,
+    { enabled },
+    { actorId: write.session.userId, source: "dashboard" },
+  );
+  redirect(
+    ctx.res,
+    `/dashboard/guilds/${encodePathSegment(guildId)}?toggled=${encodePathSegment(moduleId)}&state=${
+      enabled ? "on" : "off"
+    }#modules`,
+  );
+  return true;
+}
+
+export async function activityPage(
+  ctx: RouteContext,
+  params: readonly string[],
+): Promise<boolean> {
+  const guildId = params[0] as string;
+  const { session, guild } = await authorizeGuild(ctx.deps, ctx.session, guildId);
+  const records = await ctx.deps.dashboard.activity(guild.id, 50);
+  send(
+    ctx.res,
+    200,
+    renderActivity(session.username, guild, records, ctx.csrfToken),
+    "text/html; charset=utf-8",
+    { "Cache-Control": "no-store" },
+  );
+  return true;
+}
+
+/**
+ * A read-only channel/role directory. It is the answer to Developer Mode: the
+ * ids are right there, grouped the way Discord groups them. A failed read is a
+ * named message, never an empty list that looks like an empty server.
+ */
+export async function directoryPage(
+  ctx: RouteContext,
+  params: readonly string[],
+): Promise<boolean> {
+  const guildId = params[0] as string;
+  const { session, guild } = await authorizeGuild(ctx.deps, ctx.session, guildId);
+  let state: Parameters<typeof renderDirectory>[3] = {};
+  if (!ctx.deps.directory) {
+    state = {};
+  } else {
+    try {
+      state = { directory: await ctx.deps.directory.guildResources(guild.id) };
+    } catch (error) {
+      const message =
+        error instanceof DirectoryError
+          ? error.message
+          : "Discord did not return the server directory. Nothing was changed; try again shortly.";
+      if (!(error instanceof DirectoryError) || !error.unavailable) {
+        ctx.deps.logger.warn("directory read failed", {
+          guildId: guild.id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+      state = { error: message };
+    }
+  }
+  send(
+    ctx.res,
+    200,
+    renderDirectory(session.username, guild, ctx.csrfToken, state),
+    "text/html; charset=utf-8",
+    { "Cache-Control": "no-store" },
+  );
   return true;
 }
 

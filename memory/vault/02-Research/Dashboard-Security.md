@@ -18,6 +18,27 @@
 5. **Scopes:** `identify guilds` only. Add `guilds.members.read` only if the
    dashboard needs the user's member object; add `email` only if truly needed.
 
+## Authorization freshness and the 30-second guild cache
+
+Every guild route asks two questions: may this OAuth user manage the guild, and
+is the bot still in it. Pass 78 added a 30-second cache of Discord's
+`GET /users/@me/guilds` response, keyed by a SHA-256 hash of the access token,
+with an in-flight read shared. The reason was operational: a save redirect made
+another per-request call, Discord answered `429`, and the operator saw
+"Request failed" after a write that had succeeded.
+
+The trade is explicit. A demoted manager can keep **reading** for at most 30
+seconds; every write still passes the same list plus the per-guild bot check,
+and the write path revalidates on the request that performs it. A failed read is
+never cached. If a deployment needs instant revocation on reads, remove the
+cache and handle `429` at the edge instead; the single-process map is not
+shared across replicas.
+
+The page CSP is `default-src 'none'; img-src https://cdn.discordapp.com data:`
+plus inline styles. Guild icons are the only external image; a guild without one
+renders an initials tile. There is no `script-src`, so no page can add client
+JavaScript without an explicit policy change.
+
 ## Sessions and tokens
 
 - **Postgres-backed opaque session IDs**, not a JWT-only session. A guild admin

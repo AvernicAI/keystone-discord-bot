@@ -2,6 +2,31 @@
 
 ## Now
 
+**Pass 78 made the dashboard usable and closed the live OAuth loop**
+(2026-11-05): one shell and one palette now cover every page, the guild overview
+is a goal-grouped module catalog with an audited enable/disable toggle and four
+computed readiness facts, `/activity` renders the same audit rows the API reads,
+and `/directory` reads channels and roles through a read-only `DirectoryPort` so
+nobody needs Developer Mode to find an id. A browser signed in through the real
+Discord OAuth server — not the probe's fake exchange — and the pass exercised the
+toggle, the activity row, the directory (7 channels / 2 categories / 3 roles)
+and the analytics window on Postgres. The browser runs found ten defects, from
+unsized SVG icons rendering as black silhouettes and a Discord 429 turning a
+successful save redirect into a 500, through six legacy pages that emitted a
+`.panel` class the new stylesheet never defined, to a toggle notice that landed
+off-screen and a signed-in 404 that still offered sign-in. All ten were fixed in
+the stylesheet or renderer and re-checked at 1280px and 390px.
+`GuildAccessService` now caches the OAuth guild list for 30 seconds per token
+hash, shares in-flight reads, never caches failures and still checks bot
+membership per guild. Market research corrected two assumptions before they
+became copy: Ticket Tool uses channel pickers, not raw ids, and Carl-bot issue
+#50 is about reaction roles with the "nothing happens" save quote in a 2025
+comment. `surfaces.json` now grades 25 surfaces, including thirteen web rows;
+`audit:visuals` scans every page renderer. Tests are **773 / 106 files**. P6 is
+complete: the only remaining proof gap is token refresh and revocation against
+real Discord credentials, which stay probe-only. See
+[pass 78](../../journal/2026-11-05-pass-78.md).
+
 **Pass 77 opened the visual mission and rebuilt its first panel** (2026-11-05):
 the goal "visually above the top bots" is now machinery, not a wish. Every
 visible surface has a row in `memory/machine/surfaces.json` with a grade for
@@ -891,9 +916,11 @@ logout revocation behind the OAuth port, per-route rate limits and the
 with per-token limits and a generated OpenAPI document. Pass 56 added signed
 webhook delivery with retries and receipts, and `Idempotency-Key` replay on
 token writes. Pass 57 added the idle session timeout and the sealed, rotating
-refresh-token path. The only remaining P6 exit item is the live Discord OAuth
-round trip with real credentials. See
-[[Dashboard]] and [[ADR-0016-dashboard-foundation]].
+refresh-token path. Pass 78 added the shared shell and palette, the module
+catalog with an audited toggle, computed readiness, the activity page and the
+read-only directory, and proved the real Discord OAuth login in a browser. P6 is
+complete; token refresh and revocation against real credentials remain
+probe-only. See [[Dashboard]] and [[ADR-0016-dashboard-foundation]].
 
 **P5 is complete in-repo** (pass 13, 2026-10-31): a versioned export bundle with
 checksum and counts, transactional restore with post-import verification, a
@@ -965,7 +992,7 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 743 tests / 101 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · visuals 12 surfaces · live 28/28 · memory current
+pnpm check        exit 0 · typecheck 0 · 773 tests / 106 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · visuals 25 surfaces · live 28/28 · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 20 roots / 138 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · /modmail open → reply → 2-message archive → duplicate close refused → stats 1/0/2 · /event create → open → rsvp 1/2 → reminder → decline → 1.2 KB export parsed with the same row · /form create → open → panel → submit → 1 pending → accepted → 1.5 KB export parsed with the same answers and decision · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)
@@ -973,7 +1000,8 @@ live commands     2026-11-01 · !ping · !about · !help commands · !help brows
 live slash harness 2026-11-01 · nested /mod ban through asInteractionLike + dispatch · case #1 + ban port · unknown subcommand rejected
 live member timeline 2026-11-05 UTC · signed-in Discord web client · /mod history user:@Mr Bubba returned the grammar panel with 2 real cases and 10/10 stores · /mod warn dry_run:false wrote case #1, the default still wrote nothing · ↻ Refresh edited the message in place · two stale bot processes stopped, one boot logged commands current
 live substrate  2026-11-03 UTC · Docker 29.9.2 · Postgres 16.15 with 17/17 migrations · Redis reachable · pnpm probe:live 20/20 · /healthz database=postgres · migration runner transaction defect fixed
-live web widgets 2026-11-03 UTC · real local HTTP login/session/CSRF · AI form generated from schema · saved 9 · one audit row actor live-probe-web-user source dashboard · 5000 rejected at 400 with field preserved · OAuth exchange fake, live Discord OAuth open
+live web oauth    2026-11-05 UTC · real Discord OAuth authorize → /auth/callback → /dashboard in Chromium on Postgres · guild overview, catalog toggle, activity row, directory 7 channels / 2 categories / 3 roles, analytics 30d / 5 sources · Discord 429 on the redirect caught and fixed with a 30s guild-list cache · refresh/revocation still probe-only
+live web widgets 2026-11-03 UTC · real local HTTP login/session/CSRF · AI form generated from schema · saved 9 · one audit row actor live-probe-web-user source dashboard · 5000 rejected at 400 with field preserved · OAuth exchange fake
 live fleet     2026-11-03 UTC · real local HTTP fleet page listed two Postgres-backed guilds · strict-moderation preview diff · wrong fingerprint 409 · apply 302 · one moderation write + one dashboard audit row per guild · OAuth exchange fake
 live config portability 2026-11-03 UTC · real local HTTP on Postgres · 12-module checksummed file export · multipart import preview with no write · edited checksum 400 · wrong fingerprint 409 · apply 302, one audited AI write, baseline stored · no drift, then one changed value after an out-of-band update · OAuth exchange fake
 live saved templates 2026-11-03 UTC · real local HTTP on Postgres · saved from one guild and listed · two-guild preview with no write · tampered and stale 409 · apply 302, one audited write per guild · invalid stored row reported and refused 400 · create/update/delete audited · OAuth exchange fake
@@ -1369,10 +1397,10 @@ remain open.
 | Container build | No | `docker compose up` on a machine with a daemon |
 | Live gateway login | Yes, 2026-11-01 as AI Team#5758 | Repeat on the production shard after P10 |
 | Slash-command execution | No | A human client, or a harness with interaction support |
-| Dashboard HTTP surface | Yes, real process in memory mode | Re-run with Postgres and a real OAuth client |
-| Dashboard login/session/CSRF/authz | Yes, real HTTP + fake OAuth | A live Discord OAuth round trip |
-| Dashboard settings writes | Yes, real HTTP + in-memory repository | A Postgres server and a browser form run |
-| Dashboard Postgres session | Yes, PGlite | A Postgres server |
+| Dashboard HTTP surface | Yes, real process on Postgres in a browser | — |
+| Dashboard login/session/CSRF/authz | Yes, real Discord OAuth login + Postgres (2026-11-05) | Token refresh and revocation against real credentials |
+| Dashboard settings writes | Yes, real HTTP on Postgres and a browser toggle producing its audit row | — |
+| Dashboard Postgres session | Yes, real Postgres (2026-11-05) | — |
 
 No document claims a live-server or live-gateway run for a row marked "not
 proven". The join-gate expiry job, temporary-ban/temp-role expiry, case export
@@ -1397,8 +1425,9 @@ revocation, per-route limits and the `owners[]` instance console, pass 55
 added hashed scoped tokens, per-token limits, audited issue/revoke and the
 generated OpenAPI document, and pass 56 added signed webhook delivery with
 retries and receipts plus `Idempotency-Key` replay. The carrier decision is
-recorded in [[ADR-0016-dashboard-foundation]]. P6 is complete in repo; the only
-remaining P6 item is the live Discord OAuth round trip (login, refresh and
-revocation against real credentials). Before
+recorded in [[ADR-0016-dashboard-foundation]]. P6 is complete: pass 78 proved
+the real Discord OAuth login in a browser and made the dashboard a product
+surface. Token refresh and revocation against real credentials remain
+probe-only. Before
 launch, close the pgvector ANN gate and run the live
 provider/Discord/Postgres/OAuth smoke in staging.

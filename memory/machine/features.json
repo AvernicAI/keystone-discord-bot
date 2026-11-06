@@ -1896,27 +1896,20 @@
             "wick-security": "✅"
           },
           "phase": "P6",
-          "status": "partial",
+          "status": "shipped-in-repo",
           "source": "memory/vault/01-Mission/Parity-Matrix.md",
-          "note": "Auth, schema-generated settings widgets, the audit trail, the fleet view, built-in and saved templates, config export/import/drift and read-only analytics aggregates are in repo; a live Discord OAuth round trip is pending",
+          "note": "OAuth2/PKCE with real Discord session proof, one shell and palette, schema-generated widgets, audited settings writes and module toggles, computed readiness, an audit activity page, a read-only channel/role directory, fleet and templates, config export/import/drift, analytics aggregates, scoped API tokens and signed webhooks",
           "evidence": [
             "apps/web/src/web.test.ts",
-            "apps/web/src/settings-form.test.ts",
-            "scripts/live-probe.ts"
+            "apps/web/src/shell.test.ts",
+            "apps/web/src/directory.test.ts",
+            "apps/web/src/readiness.test.ts",
+            "apps/web/src/access.test.ts",
+            "memory/vault/03-Architecture/Dashboard.md"
           ],
-          "shippedParts": [
-            "OAuth2/PKCE login and opaque Postgres sessions",
-            "schema-generated settings widgets and audited writes",
-            "fleet view, built-in and saved templates",
-            "config export/import/drift and analytics aggregates",
-            "scoped API tokens, signed webhooks and idempotent writes"
-          ],
-          "openParts": [
-            "a live Discord OAuth round trip (the probe uses a fake exchange)"
-          ],
-          "openReason": "Every dashboard surface is built and probe-proven over real local HTTP; only a live Discord OAuth round trip is missing.",
-          "liveVerified": false,
-          "liveScope": "none"
+          "liveVerified": true,
+          "liveScope": "manual",
+          "liveRecord": "memory/journal/2026-11-05-pass-78.md"
         },
         {
           "id": "operations.dashboard-auth-foundation",

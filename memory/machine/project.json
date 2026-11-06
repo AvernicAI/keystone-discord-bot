@@ -6,8 +6,8 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-05",
   "phase": "P7.5",
-  "lastPass": "journal/2026-11-05-pass-77.md",
-  "nextAction": "Keep the visual mission moving: the audit now names the weakest surface, so convert the next one (the case embed) onto the grammar and prove it in the client before opening new feature work.",
+  "lastPass": "journal/2026-11-05-pass-78.md",
+  "nextAction": "Take the visual audit's weakest surface (the moderation case embed) onto the grammar, then wire the directory port into the settings channel/role picker.",
   "live": {
     "report": "machine/live.json",
     "id": "live-2026-11-05"
@@ -19,7 +19,7 @@
     "contextMenus": 4,
     "commandLimit": 100,
     "modules": 12,
-    "tests": 743
+    "tests": 773
   },
   "modules": [
     {

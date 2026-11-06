@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-78",
+    date: "2026-11-05",
+    summary:
+      "Dashboard product pass: one shell and palette on every page, a goal-grouped module catalog with an audited enable/disable toggle, four computed readiness facts with fix links, a guild activity page over the real audit rows, and a read-only channels-and-roles directory so settings ids no longer need Developer Mode. Analytics names its sources and off switches. The real Discord OAuth login, toggle and directory are proven in a browser on Postgres; token refresh/revocation remain probe-only.",
+    journal: "memory/journal/2026-11-05-pass-78.md",
+  },
+  {
     pass: "pass-77",
     date: "2026-11-05",
     summary:

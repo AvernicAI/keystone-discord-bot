@@ -138,8 +138,8 @@ rate-limited register leaves the app with no commands.
 
 ## Current state (2026-11-05)
 
-- 12 modules, 20 global command roots, 141 subcommands, 4 context menus, 743 tests in 101 files.
-- **743 tests across 101 files**, all token-free.
+- 12 modules, 20 global command roots, 141 subcommands, 4 context menus, 773 tests in 106 files.
+- **773 tests across 106 files**, all token-free.
 - **Docker Desktop 29.9.2** runs the compose Postgres 16.15 and Redis;
   `pnpm probe:live` is 28/28.
 - 20/100 global roots are used.

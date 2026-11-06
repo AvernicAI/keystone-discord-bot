@@ -45,6 +45,7 @@ import { ApiTokenService } from "./api-tokens";
 import { AuthService } from "./auth";
 import { parseSessionSecret, SecretBox } from "./crypto";
 import { DiscordOAuthClient, type DiscordOAuth } from "./oauth";
+import { DiscordDirectoryClient, type DirectoryPort } from "./directory";
 import { DashboardService } from "./overview";
 import { createWebHandler, type WebServerDeps } from "./server";
 import { HttpError } from "./http-error";
@@ -192,6 +193,9 @@ export function createWebRuntime(env: Env): WebRuntime {
     analyticsStore,
     webhooks,
   );
+  const directory: DirectoryPort | undefined = env.DISCORD_TOKEN
+    ? new DiscordDirectoryClient({ token: env.DISCORD_TOKEN })
+    : undefined;
   const drainer = startWebhookDrainer(webhooks, logger);
   const handler = createWebHandler({
     auth,
@@ -205,6 +209,7 @@ export function createWebRuntime(env: Env): WebRuntime {
     audit: auditStore,
     webhooks,
     idempotency: idempotencyStore,
+    ...(directory ? { directory } : {}),
   });
 
   return {

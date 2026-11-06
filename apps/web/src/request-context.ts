@@ -7,6 +7,7 @@ import type {
   WebSession,
 } from "@keystone/kernel";
 import type { GuildAccessService } from "./access";
+import type { DirectoryPort } from "./directory";
 import type { ApiTokenService } from "./api-tokens";
 import type { AuthService } from "./auth";
 import { CSRF_COOKIE, SESSION_COOKIE, parseCookies, serializeCookie } from "./cookies";
@@ -28,6 +29,8 @@ export interface WebServerDeps {
   webhooks: WebhookService;
   /** Receipts for `Idempotency-Key` on a token write. */
   idempotency: IdempotencyStore;
+  /** Absent when the process has no bot token; the page says so. */
+  directory?: DirectoryPort;
 }
 
 export interface RouteContext {

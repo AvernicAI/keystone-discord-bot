@@ -381,6 +381,86 @@
       "confidence": "medium",
       "expiresAt": "2027-01-31",
       "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+    },
+    {
+      "id": "R-039",
+      "topic": "dashboard",
+      "claim": "MEE6's wiki states that Manage Server is enough to invite the bot but not to see the dashboard: you must have Administrator or be the server owner.",
+      "source": "https://wiki.mee6.xyz/getting-started",
+      "retrievedAt": "2026-11-05",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+    },
+    {
+      "id": "R-040",
+      "topic": "dashboard",
+      "claim": "MEE6's free-vs-premium comparison marks Reaction Role, Welcome & Goodbye and XP and Levels as unavailable on Free, and lists Moderation in the same gated table; the page states current gating only and does not say those features were formerly free.",
+      "source": "https://help.mee6.xyz/en/articles/710936-mee6-free-vs-premium-plans-comparison",
+      "retrievedAt": "2026-11-05",
+      "confidence": "high",
+      "expiresAt": "2027-01-31",
+      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+    },
+    {
+      "id": "R-041",
+      "topic": "dashboard",
+      "claim": "Dyno's module docs present 33 module cards across six categories and a dashboard where manager roles grant access; Dyno publishes no advertised total module count.",
+      "source": "https://docs.dyno.gg/en/modules",
+      "retrievedAt": "2026-11-05",
+      "confidence": "medium",
+      "expiresAt": "2027-01-31",
+      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+    },
+    {
+      "id": "R-042",
+      "topic": "dashboard",
+      "claim": "Carl-bot GitHub issue #50 ('Reaction roles on the website doesn't work') has been open since 2022-06-30; its newest comment, on 2025-12-15, says 'Every time I click save, nothing happens,' and no comment continues into 2026.",
+      "source": "https://github.com/CarlGroth/Carl-Bot/issues/50",
+      "retrievedAt": "2026-11-05",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+    },
+    {
+      "id": "R-043",
+      "topic": "dashboard",
+      "claim": "Ticket Tool's current docs configure panels through in-dashboard channel and category pickers and require Administrator to edit configuration; no page read mentions Developer Mode, so the 'raw ids' critique does not hold for its 2026 dashboard.",
+      "source": "https://docs.tickettool.xyz/general/setup",
+      "retrievedAt": "2026-11-05",
+      "confidence": "high",
+      "expiresAt": "2027-01-31",
+      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+    },
+    {
+      "id": "R-044",
+      "topic": "dashboard",
+      "claim": "ProBot's dashboard docs require Administrator permission to see a server: 'You need Administrator permission to see your server on the list.'",
+      "source": "https://docs.probot.io/docs/getting-started/dashboard",
+      "retrievedAt": "2026-11-05",
+      "confidence": "high",
+      "expiresAt": "2027-04-30",
+      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+    },
+    {
+      "id": "R-045",
+      "topic": "dashboard",
+      "claim": "Wick's dashboard overview gives a list of issues to fix, and its setup wizard accepts a channel mention, name or id rather than requiring a raw snowflake.",
+      "source": "https://docs.wickbot.com/faq",
+      "retrievedAt": "2026-11-05",
+      "confidence": "high",
+      "expiresAt": "2027-01-31",
+      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+    },
+    {
+      "id": "R-046",
+      "topic": "dashboard",
+      "claim": "Statbot never deletes data but free users can view at most 30 days back (14 days by default), and tracking begins at invite time rather than retroactively.",
+      "source": "https://docs.statbot.net/docs/faq/general/delete-data",
+      "retrievedAt": "2026-11-05",
+      "confidence": "high",
+      "expiresAt": "2027-01-31",
+      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
     }
   ]
 }

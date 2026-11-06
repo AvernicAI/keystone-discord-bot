@@ -29,12 +29,20 @@ https://github.com/RNGBubba/keystone-discord-bot
 | Know what can be imported | [[Import-Formats]] · [[Migration-Guides]] |
 | Export, restore or delete a guild | [[Portability]] · [[Portability-Runbook]] |
 | Know the dashboard security contract | [[Dashboard-Security]] · [[Dashboard]] |
+| Improve the dashboard | [[Dashboard-Roadmap]] · [[Web-Dashboard-Benchmark-2026]] |
 | Know the evidence | [[Claims]] · [[02-Research/OSS-2026\|OSS-2026]] · [[User-Voice-2026]] |
 | Teach or learn | [[Curriculum]] |
 | Operate it | [[Release]] · [[Incident]] · [[Token-Leak]] · [[Intent-Review]] |
 
 ## Current state
 
+- **The dashboard is a product now** (pass 78): one shell and one palette across
+  every page, a goal-grouped module catalog with an audited enable/disable
+  toggle, computed readiness facts with fix links, a guild activity ledger, a
+  read-only channels-and-roles directory behind a `DirectoryPort`, and analytics
+  coverage language. Manage Server is still enough; there is no paid tier and no
+  client JavaScript. See [[Dashboard-Roadmap]] and
+  [[Web-Dashboard-Benchmark-2026]].
 - **In-bot configuration** in repo and live-proven (pass 30): `/config list |
   get | set | export` reads and writes every registered module's per-guild
   settings through `SettingsService` and the owning Zod schema. One root, four

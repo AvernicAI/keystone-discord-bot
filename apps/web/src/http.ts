@@ -15,9 +15,11 @@ export function securityHeaders(res: ServerResponse): void {
   res.setHeader("Referrer-Policy", "no-referrer");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  // The only remote asset the dashboard loads is a guild icon from Discord's
+  // CDN. No scripts, no fonts, no telemetry.
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+    "default-src 'none'; img-src https://cdn.discordapp.com data:; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
   );
 }
 
