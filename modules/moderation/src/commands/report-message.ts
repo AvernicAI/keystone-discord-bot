@@ -5,7 +5,7 @@ import {
   requireGuild,
   type CommandContext,
 } from "@keystone/kernel";
-import { caseEmbed } from "../format";
+import { casePanel } from "../format";
 
 const EXCERPT_CHARS = 500;
 
@@ -48,7 +48,12 @@ export const reportMessage = defineCommand({
 
     await ctx.interaction.reply({
       ephemeral: true,
-      embeds: [caseEmbed(record, `Reported message · case #${record.caseNumber}`)],
+      v2: casePanel(record, {
+        title: `Reported message · case #${record.caseNumber}`,
+        context: `this server · reported by <@${ctx.userId}>`,
+        readAt: ctx.now(),
+        note: "Nothing was deleted or punished; a moderator reviews this case.",
+      }),
     });
   },
   help: {

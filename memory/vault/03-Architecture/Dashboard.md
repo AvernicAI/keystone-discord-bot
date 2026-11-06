@@ -30,7 +30,7 @@ remains a later option, not a requirement for the P6 settings surface.
 | `POST /dashboard/guilds/:id/modules/:module/toggle` | session + guild authz + CSRF | Enable or disable one module through its own settings schema; one audit row, redirect with a named notice |
 | `GET /dashboard/guilds/:id/activity` | session + guild authz | Newest 50 audit rows for the guild, the same ledger the API reads |
 | `GET /dashboard/guilds/:id/directory` | session + guild authz | Read-only channels and roles, or the reason the directory is not wired |
-| `GET /dashboard/guilds/:id/settings/:module` | session + guild authz | Schema-generated settings widgets plus the module audit trail |
+| `GET /dashboard/guilds/:id/settings/:module` | session + guild authz | Schema-generated settings widgets — channel/role ids become pickers when the directory is readable — plus the module audit trail |
 | `POST /dashboard/guilds/:id/settings/:module` | session + guild authz + CSRF | Parse named widgets, save through the module schema, re-render field errors on rejection |
 | `GET /dashboard/guilds/:id/config/export` | session + guild authz | Download the guild's effective module settings as a checksummed JSON file |
 | `GET /dashboard/guilds/:id/config/drift` | session + guild authz | Baseline vs live settings, plus the import form |
@@ -54,6 +54,32 @@ styles. The only external request a dashboard page can make is a guild icon from
 the Discord CDN; a guild without an icon gets an initials tile instead. There is
 no script source, so no page can add client JavaScript without changing the
 policy on purpose. Authenticated responses are `Cache-Control: no-store`.
+
+## Settings read the server
+
+The settings form is still generated from the module's Zod schema; the schema
+still validates ids as strings. What changed is where the widget gets its
+options. A key whose last segment is `ChannelId` or `RoleId` is marked as a
+**reference**, and if the process has the `DirectoryPort` the renderer asks it
+for this guild's channels and roles and draws a `<select>` grouped by category
+(`# general`, `🔊 Lounge`, `@Moderator`). The port caches a read for 60 seconds,
+so a page load costs two REST calls at most and a second manager inside a minute
+costs none.
+
+Three rules make the picker safe to ship:
+
+- **Managed roles are omitted.** Discord rejects assigning them, so a picker that
+offered one would submit a value that can never work.
+- **A stored id missing from the read stays selected and labelled**
+  (`⚠ <id> · not in this server`). Rendering `None` instead would make the next
+  unrelated save erase a real setting.
+- **A list is not a picker.** `djRoleIds` is comma-separated, so it stays a text
+  field; a single-value control would silently keep one entry of it.
+
+A missing port, or a read that fails with 403/404/429/5xx, is not a blank page:
+the field stays a text input and a sentence above the form names the reason and
+the Directory page. The submission path never calls Discord, so a settings save
+works while the directory read is down.
 
 ## One shell, one palette
 

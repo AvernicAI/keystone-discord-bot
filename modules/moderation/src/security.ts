@@ -8,7 +8,9 @@ import type {
   ModuleSettings,
   Logger,
 } from "@keystone/kernel";
-import { CaseService, appealButton, verifyButton } from "./cases";
+import { ACCENTS } from "@keystone/ui";
+import { CaseService, appealCustomId, verifyCustomId } from "./cases";
+import { casePanel } from "./format";
 import { moderationSettingsSchema, type ModerationSettings } from "./settings";
 
 /**
@@ -664,35 +666,30 @@ export class SecurityCoordinator {
     dryRun: boolean,
   ): Promise<void> {
     const now = this.options.now?.() ?? Date.now();
-    const components: import("@keystone/kernel").ActionRow[] = [];
-    if (settings.appealsEnabled && record.targetId) {
-      components.push(appealButton(record.id, this.options.signer, now));
-    }
-    if (
+    // The same card as /mod case, with the two signed controls a security alert
+    // can offer. The answer is an id, not a row: one panel owns its action row.
+    const appealId =
+      settings.appealsEnabled && record.targetId
+        ? appealCustomId(record.id, this.options.signer, now)
+        : undefined;
+    const verifyId =
       finding.kind === "quarantine" &&
       finding.rule.startsWith("join-gate.") &&
       record.targetId
-    ) {
-      components.push(verifyButton(record.guildId, record.targetId, this.options.signer, now));
-    }
+        ? verifyCustomId(record.guildId, record.targetId, this.options.signer, now)
+        : undefined;
 
     try {
       await this.options.actions.notify(guildId, settings.modLogChannelId, {
-        embeds: [
-          {
-            title: `${dryRun ? "Dry run" : "Security"} · ${finding.rule}`,
-            description: finding.reason,
-            color: dryRun ? 0xfee75c : 0xed4245,
-            fields: [
-              { name: "Case", value: `#${record.caseNumber}`, inline: true },
-              { name: "Target", value: record.targetId, inline: true },
-              { name: "Action", value: finding.kind, inline: true },
-              { name: "Review", value: dryRun ? "No punitive action was taken." : "Case is open for review." },
-            ],
-            footer: { text: "Use /mod case or /appeal. Every action has a case." },
-          },
-        ],
-        components,
+        v2: casePanel(record, {
+          title: `${dryRun ? "Dry run" : "Security"} · ${finding.rule}`,
+          context: `${dryRun ? "preview only, nothing enforced" : "enforcement recorded"} · ${finding.kind}`,
+          accent: dryRun ? ACCENTS.attention : ACCENTS.danger,
+          dryRun,
+          appealId,
+          verifyId,
+          readAt: now,
+        }),
       });
     } catch (error) {
       this.options.logger.error("security notification failed", {

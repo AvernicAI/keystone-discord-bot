@@ -60,7 +60,7 @@ pnpm vitest run modules/forms packages/db/src/form-store.test.ts
   ✓ modules/forms/src/forms.test.ts (12 tests)
   ✓ packages/db/src/form-store.test.ts (3 tests)
 pnpm test
-  828 tests / 112 files
+  850 tests / 115 files
 pnpm budget
   20/100 roots · 147 subcommands · 167 actions · 4 context menus, OK
 ```

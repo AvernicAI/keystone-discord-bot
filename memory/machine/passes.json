@@ -1114,6 +1114,22 @@
         "claims": "pass",
         "build": "not run (no build step changed)"
       }
+    },
+    {
+      "id": "pass-84",
+      "date": "2026-11-06",
+      "phase": "P7.5",
+      "summary": "Pass 84 puts the moderation case onto the shared grammar and makes the dashboard read the server. `modules/moderation/src/format.ts` is now three builders — `casePanel`, `caseListPanel`, `appealStatusPanel` — with no embeds and no raw hex: accent by state, one heading, one facts line, a clipped reason block, a footer with a read stamp and 'events are append-only', and exactly one action row with at most one primary (a join-gate case makes Verify primary and steps Appeal down). Fourteen call sites draw a case through them: `/mod case`, every `/mod` action reply, `/mod history`, `/mod review`, `/mod note`, the case-history user menu, both appeal subcommands, report-message, the security alert and the temporary-action release. `ModerationNotice` gained `v2`, and `apps/bot/src/adapt.ts` gained `toChannelMessage`, so the mod-log notice can be a card while the kernel still imports no discord.js; one test proves the V2 flag and that a V2 payload carries no content or embeds. The dashboard editor marks a single-id key (`…ChannelId`/`…RoleId`, but not a list such as `djRoleIds`) as a reference and, when the process can read the directory, renders a picker grouped by category with type glyphs, omits managed roles, keeps a stored id the read does not contain selected and labelled, and falls back to a text input naming the Directory page when the read is absent or fails. No schema, root, subcommand, action, table or migration changed. Tests: 850 in 115 files. Not proven: no case card was read back from a real Discord invocation (the MCP cannot run a slash command), so the surface stays graded B with no live proof.",
+      "journal": "journal/2026-11-06-pass-84.md",
+      "checks": {
+        "typecheck": "pass",
+        "tests": "850",
+        "budget": "20/100 roots · 147 subcommands · 167 actions · 4 context menus",
+        "live": "not run (no gateway interaction this pass; the card, the notice path and the pickers are unit- and web-route-tested only)",
+        "memory": "current",
+        "claims": "pass",
+        "build": "not run (no build step changed)"
+      }
     }
   ]
 }

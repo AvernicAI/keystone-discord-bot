@@ -2402,6 +2402,51 @@ describe("dashboard shell, module control and directory", () => {
       await test.close();
     }
   });
+
+  it("turns a channel id into a picker on the settings page and falls back to text", async () => {
+    const directory: DirectoryPort = {
+      async guildResources(guildId) {
+        return {
+          guildId,
+          channels: [
+            { id: "111111111111111201", name: "general", kind: "text", parentId: null, position: 1 },
+            { id: "111111111111111202", name: "Voice", kind: "voice", parentId: null, position: 2 },
+          ],
+          roles: [],
+          fetchedAt: new Date().toISOString(),
+        };
+      },
+    };
+    const test = await harness({ directory });
+    try {
+      const { cookie } = await login(test);
+      const page = await fetch(`${test.base}/dashboard/guilds/${GUILD_A}/settings/logging`, {
+        headers: { cookie },
+      });
+      expect(page.status).toBe(200);
+      const html = await page.text();
+      expect(html).toContain('<select id="f-channelId"');
+      expect(html).toContain('<optgroup label="No category">');
+      expect(html).toContain("# general");
+      expect(html).toContain("🔊 Voice");
+    } finally {
+      await test.close();
+    }
+
+    const without = await harness();
+    try {
+      const { cookie } = await login(without);
+      const page = await fetch(`${without.base}/dashboard/guilds/${GUILD_A}/settings/logging`, {
+        headers: { cookie },
+      });
+      expect(page.status).toBe(200);
+      const html = await page.text();
+      expect(html).toContain('<input type="text" id="f-channelId"');
+      expect(html).toContain("This process cannot read the server directory");
+    } finally {
+      await without.close();
+    }
+  });
 });
 
 describe("session storage", () => {

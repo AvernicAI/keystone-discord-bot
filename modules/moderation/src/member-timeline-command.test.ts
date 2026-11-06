@@ -215,11 +215,14 @@ describe("mod history member timeline", () => {
     expect(JSON.stringify(interaction.lastReply?.v2)).toContain(`Read <t:${seconds}:R>`);
   });
 
-  it("keeps the recent-case embed when no user is supplied", async () => {
+  it("keeps the recent-case list when no user is supplied", async () => {
     const { ctx, interaction } = await buildContext({});
     await mod.execute(ctx);
 
-    expect(interaction.lastReply?.v2).toBeUndefined();
-    expect(interaction.lastReply?.embeds?.[0]?.title).toBe("Recent cases");
+    expect(interaction.lastReply?.embeds).toBeUndefined();
+    const panel = JSON.stringify(interaction.lastReply?.v2);
+    expect(panel).toContain("Recent cases");
+    expect(panel).toContain("`cases`");
+    expect(panel).toContain(`Read <t:${Math.floor(ctx.now() / 1_000)}:R>`);
   });
 });

@@ -10,7 +10,7 @@ more than one file, or you have and it became unmaintainable.
 
 ## Lessons
 
-The curriculum has **16 lessons**, all written against code that exists now.
+The curriculum has **17 lessons**, all written against code that exists now.
 Every lesson is listed in `memory/machine/lessons.json`; `pnpm memory:check`
 verifies its source files, proof commands, required sections and Curriculum
 link. A taught count must name a machine source, so the gate recomputes it. If a
@@ -34,14 +34,16 @@ lesson and the code disagree, the gate fails rather than the prose winning.
 | 14 | [[14-self-host-quickstart]] | `README.md`, `compose.yaml`, `Dockerfile` | Memory mode, compose, explicit migrations, the probe boundary |
 | 15 | [[15-dashboard-as-a-product]] | `apps/web/src/shell.ts`, `directory.ts`, `readiness.ts` | One shell, audited toggles, computed readiness, read-only ports |
 | 16 | [[16-one-player-not-two]] | `apps/bot/src/music/playback.ts`, `shoukaku-node.ts` | Transport, queue and presentation as three problems; row-is-queue; edit budgets |
+| 17 | [[17-one-card-not-twelve-embeds]] | `modules/moderation/src/format.ts`, `apps/bot/src/adapt.ts`, `apps/web/src/settings-form.ts` | One builder per surface; the adapter owns the V2 flag; pickers read a port |
 
 ## Not written yet
 
-The Components V2 layer landed in pass 58, so a lesson on the signed component
-ids and the 40-slot budget can still be written against running code. Sharding
-has no lesson because the bot does not shard; writing one now would be a design
-essay pretending to be a lesson. Both belong here when there is a runnable
-change and a check to fail.
+The signed component ids and the 40/4,000 budget have no lesson of their own:
+lesson 17 shows the builder and the flag boundary, and the budget is proven by
+`packages/ui` tests rather than by a reader changing one thing. Sharding has no
+lesson because the bot does not shard; writing one now would be a design essay
+pretending to be a lesson. Both belong here when there is a runnable change and
+a check to fail.
 
 ## Each lesson has the same shape
 

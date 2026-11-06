@@ -21,7 +21,15 @@ export {
   moderationSettingsSchema,
   type ModerationSettings,
 } from "./settings";
-export { caseEmbed, caseListEmbed } from "./format";
+export {
+  appealStatusPanel,
+  caseAccent,
+  caseListPanel,
+  casePanel,
+  type AppealStatusEntry,
+  type CaseListOptions,
+  type CasePanelOptions,
+} from "./format";
 export {
   MemberTimelineService,
   TIMELINE_DISPLAY_LIMIT,

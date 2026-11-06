@@ -28,6 +28,7 @@ import {
   type InteractionReplyOptions,
   type InteractionUpdateOptions,
   type MessageContextMenuCommandInteraction,
+  type MessageCreateOptions,
   type ModalSubmitInteraction,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
   type RESTPostAPIContextMenuApplicationCommandsJSONBody,
@@ -42,6 +43,7 @@ import type {
   CommandOption,
   ComponentInteractionLike,
   InteractionLike,
+  ModerationNotice,
   ModalSpec,
   ReplyInput,
   V2ActionComponent,
@@ -225,6 +227,25 @@ function toFiles(files: NonNullable<ReplyInput["files"]>): AttachmentBuilder[] {
         description: file.description,
       }),
   );
+}
+
+/**
+ * A channel send has no interaction to reply to, but the same exclusivity rule
+ * applies: a V2 message carries layout and the flag, never content or embeds.
+ * Keeping this beside `toReplyOptions` is what lets the moderation port send a
+ * case card to the mod-log channel without learning a discord.js type.
+ */
+export function toChannelMessage(notice: ModerationNotice): MessageCreateOptions {
+  if (notice.v2) {
+    return {
+      components: toV2Components(notice.v2),
+      flags: MessageFlags.IsComponentsV2,
+    };
+  }
+  return {
+    embeds: notice.embeds as never,
+    components: notice.components ? toComponents(notice.components) : [],
+  };
 }
 
 /**

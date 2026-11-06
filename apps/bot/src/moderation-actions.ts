@@ -16,6 +16,7 @@ import type {
   ModerationNotice,
   RestoreLockdownResult,
 } from "@keystone/kernel";
+import { toChannelMessage } from "./adapt";
 import { fetchedChannels, resolveChannel } from "./channels";
 
 function failure(detail: string): ModerationActionResult {
@@ -358,10 +359,7 @@ export function createDiscordModerationActions(client: Client): ModerationAction
       if (resolved.status !== "ok") return;
       const channel = resolved.channel;
       if (!channel.isTextBased() || !("send" in channel)) return;
-      await channel.send({
-        embeds: notice.embeds as never,
-        components: notice.components ? toComponents(notice.components) : [],
-      });
+      await channel.send(toChannelMessage(notice));
     },
 
     async directMessage(userId, message) {

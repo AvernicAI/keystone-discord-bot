@@ -7,7 +7,7 @@ import {
   type CommandContext,
   type ModerationCase,
 } from "@keystone/kernel";
-import { appealStatusEmbed, caseEmbed, type AppealStatusEntry } from "../format";
+import { appealStatusPanel, casePanel, type AppealStatusEntry } from "../format";
 import { moderationSettingsSchema } from "../settings";
 
 function integerOption(ctx: CommandContext, name: string): number | undefined {
@@ -46,8 +46,11 @@ async function openAppeal(ctx: CommandContext): Promise<void> {
 
   await ctx.interaction.reply({
     ephemeral: true,
-    embeds: [caseEmbed(record, `Appeal opened · case #${record.caseNumber}`)],
-    content: "A moderator can now review the appeal in `/mod review`. Nothing was reversed automatically.",
+    v2: casePanel(record, {
+      title: `Appeal opened · case #${record.caseNumber}`,
+      readAt: ctx.now(),
+      note: "A moderator can now review the appeal in `/mod review`. Nothing was reversed automatically.",
+    }),
   });
 }
 
@@ -60,17 +63,6 @@ async function appealFor(
     record,
     appeals: events.filter((event) => event.type === "appealed"),
   };
-}
-
-function statusSummary(entries: readonly AppealStatusEntry[]): string {
-  if (entries.length === 0) return "No appeal events are on record for you.";
-  return entries
-    .map(
-      (entry) =>
-        `#${entry.record.caseNumber} · ${entry.record.action} · ${entry.record.state} · ${entry.appeals.length} appeal${entry.appeals.length === 1 ? "" : "s"}`,
-    )
-    .join("\n")
-    .slice(0, 2_000);
 }
 
 async function statusAppeal(ctx: CommandContext): Promise<void> {
@@ -87,8 +79,9 @@ async function statusAppeal(ctx: CommandContext): Promise<void> {
     const entry = await appealFor(cases, record);
     await ctx.interaction.reply({
       ephemeral: true,
-      content: statusSummary([entry]),
-      embeds: [appealStatusEmbed([entry], `Appeal status · case #${requested}`)],
+      v2: appealStatusPanel([entry], `Appeal status · case #${requested}`, {
+        readAt: ctx.now(),
+      }),
     });
     return;
   }
@@ -101,8 +94,7 @@ async function statusAppeal(ctx: CommandContext): Promise<void> {
 
   await ctx.interaction.reply({
     ephemeral: true,
-    content: statusSummary(entries),
-    embeds: [appealStatusEmbed(entries)],
+    v2: appealStatusPanel(entries, "Your appeals", { readAt: ctx.now() }),
   });
 }
 

@@ -41,6 +41,8 @@ export interface DirectoryRole {
 }
 
 export interface GuildDirectory {
+  /** The server this read belongs to; @everyone is the role with this id. */
+  readonly guildId: string;
   readonly channels: readonly DirectoryChannel[];
   readonly roles: readonly DirectoryRole[];
   readonly fetchedAt: string;
@@ -177,6 +179,7 @@ export class DiscordDirectoryClient implements DirectoryPort {
       .sort((a, b) => b.position - a.position || a.name.localeCompare(b.name));
 
     const value: GuildDirectory = {
+      guildId,
       channels,
       roles,
       fetchedAt: new Date(now).toISOString(),

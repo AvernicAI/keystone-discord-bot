@@ -32,7 +32,14 @@ import {
 import { groupModules } from "./module-groups";
 import type { GuildDirectory, DirectoryChannel, DirectoryRole } from "./directory";
 import type { Readiness } from "./readiness";
-import { labelFor, type SettingsField, type SettingsFormModel, type SettingsGroup } from "./settings-form";
+import {
+  labelFor,
+  referenceChoices,
+  type ReferenceChoice,
+  type SettingsField,
+  type SettingsFormModel,
+  type SettingsGroup,
+} from "./settings-form";
 import type { ConfigTemplate, TemplateGuildPlan, TemplatePlan } from "./templates";
 import type { RateLimitPolicies } from "./rate-limit";
 
@@ -835,11 +842,45 @@ function jsonText(value: unknown): string {
   }
 }
 
+function renderReferenceField(
+  field: SettingsField,
+  value: string,
+  choices: readonly ReferenceChoice[],
+  label: string,
+  common: string,
+  help: string,
+  errorText: string,
+): string {
+  const noun = field.reference === "role" ? "role" : "channel";
+  const blank = `<option value="">${field.nullable || field.optional ? "None" : `Choose a ${noun}`}</option>`;
+  // A stored id the current read does not contain is kept, selected and
+  // labelled: silently resetting it to None would erase a real setting.
+  const unknown =
+    value && !choices.some((choice) => choice.value === value)
+      ? `<option value="${escapeHtml(value)}" selected>⚠ ${escapeHtml(value)} · not in this server</option>`
+      : "";
+  let options = "";
+  let open: string | undefined;
+  for (const choice of choices) {
+    if (choice.group !== open) {
+      if (open !== undefined) options += "</optgroup>";
+      options += `<optgroup label="${escapeHtml(choice.group)}">`;
+      open = choice.group;
+    }
+    options += `<option value="${escapeHtml(choice.value)}"${
+      choice.value === value ? " selected" : ""
+    }>${escapeHtml(choice.label)}</option>`;
+  }
+  if (open !== undefined) options += "</optgroup>";
+  return `<div class="field">${label}<select ${common}>${blank}${unknown}${options}</select>${help}${errorText}</div>`;
+}
+
 function renderField(
   field: SettingsField,
   submitted: URLSearchParams | undefined,
   rendered: ReadonlySet<string> | undefined,
   errors: ReadonlyMap<string, string> | undefined,
+  directory: GuildDirectory | undefined,
 ): string {
   const id = fieldId(field.path);
   const value = displayValue(field, submitted, rendered);
@@ -894,6 +935,11 @@ function renderField(
     return `<div class="field">${label}<textarea ${common} rows="5" spellcheck="false" aria-label="${escapeHtml(field.label)} JSON">${escapeHtml(jsonText(value))}</textarea>${help}${errorText}</div>`;
   }
 
+  const choices = directory && field.reference ? referenceChoices(field, directory) : [];
+  if (directory && field.reference && choices.length > 0) {
+    return renderReferenceField(field, String(value ?? ""), choices, label, common, help, errorText);
+  }
+
   const maxLength = field.max !== undefined ? ` maxlength="${field.max}"` : "";
   return `<div class="field">${label}<input type="text" ${common}${maxLength} value="${escapeHtml(String(value ?? ""))}">${help}${errorText}</div>`;
 }
@@ -903,10 +949,13 @@ function renderGroup(
   submitted: URLSearchParams | undefined,
   rendered: ReadonlySet<string> | undefined,
   errors: ReadonlyMap<string, string> | undefined,
+  directory: GuildDirectory | undefined,
 ): string {
-  const fields = group.fields.map((field) => renderField(field, submitted, rendered, errors)).join("");
+  const fields = group.fields
+    .map((field) => renderField(field, submitted, rendered, errors, directory))
+    .join("");
   const groups = group.groups
-    .map((child) => renderGroup(child, submitted, rendered, errors))
+    .map((child) => renderGroup(child, submitted, rendered, errors, directory))
     .join("");
   if (!fields && !groups) return "";
   // The root group is the module itself, not a titled section. Rendering it
@@ -964,6 +1013,10 @@ export interface SettingsRenderOptions {
   readonly fieldErrors?: ReadonlyMap<string, string>;
   readonly formError?: string;
   readonly history?: readonly AuditEventRecord[];
+  /** A successful directory read turns channel/role ids into pickers. */
+  readonly directory?: GuildDirectory;
+  /** Why the pickers are off; the ids stay editable as text. */
+  readonly directoryError?: string;
 }
 
 export function renderSettingsEditor(
@@ -982,6 +1035,12 @@ export function renderSettingsEditor(
   const formError = options.formError
     ? `<div class="form-error">${escapeHtml(options.formError)}</div>`
     : "";
+  const hasReferences = form.fields.some((field) => field.reference);
+  const pickerNote = !hasReferences || options.directory
+    ? ""
+    : options.directoryError
+      ? `<p class="muted">Channel and role pickers are off this load: ${escapeHtml(options.directoryError)} The ids below stay editable as text; the <a href="${base}/directory">Directory</a> page lists the right ones.</p>`
+      : `<p class="muted">This process cannot read the server directory, so channel and role ids are text fields. The <a href="${base}/directory">Directory</a> page lists the ids when a bot token is configured.</p>`;
   const lastChange = options.history?.[0];
   const enabledPill = module.enabled
     ? `<span class="pill ok">Enabled</span>`
@@ -1016,10 +1075,11 @@ export function renderSettingsEditor(
        <div class="card-head">
          <div><h2>Settings</h2><p>Generated from this module's Zod schema. Saving applies immediately and appends one audit row; there is no draft state to forget.</p></div>
        </div>
+       ${pickerNote}
        <form method="post" action="${action}">
          <input type="hidden" name="csrf" value="${escapeHtml(csrfToken)}">
          <input type="hidden" name="__rendered" value="${escapeHtml(form.rendered.join(","))}">
-         ${form.groups.map((group) => renderGroup(group, options.submitted, options.rendered, options.fieldErrors)).join("")}
+         ${form.groups.map((group) => renderGroup(group, options.submitted, options.rendered, options.fieldErrors, options.directory)).join("")}
          <div class="form-actions">
            <button class="btn primary" type="submit">Save settings</button>
            <span class="hint">Invalid input is rejected by the same schema the bot uses, before anything is stored.</span>

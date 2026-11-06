@@ -93,21 +93,21 @@
     {
       "id": "moderation.case",
       "module": "moderation",
-      "where": "/mod case, /mod history (recent cases)",
+      "where": "/mod case, /mod history (recent cases), /mod review, /appeal open|status",
       "file": "modules/moderation/src/format.ts",
-      "component": "embed",
+      "component": "v2",
       "grades": {
-        "structure": "D",
-        "density": "C",
-        "honesty": "C",
-        "freshness": "F",
-        "action": "D",
-        "copy": "C"
+        "structure": "B",
+        "density": "B",
+        "honesty": "B",
+        "freshness": "B",
+        "action": "B",
+        "copy": "B"
       },
-      "hasFooter": false,
-      "tokens": "pending",
+      "hasFooter": true,
+      "tokens": "enforced",
       "proof": null,
-      "next": "Convert the case view to V2 with the appeal button already in its action row."
+      "next": "Read one /mod case card back from a real invocation and grade it A; the layout, read stamp and action row are unit-tested, the rendering is not seen."
     },
     {
       "id": "community.ticket",

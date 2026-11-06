@@ -6,7 +6,7 @@
   "northStar": "vault/01-Mission/North-Star.md",
   "updatedAt": "2026-11-06",
   "phase": "P7.5",
-  "lastPass": "journal/2026-11-06-pass-83.md",
+  "lastPass": "journal/2026-11-06-pass-84.md",
   "nextAction": "Have a human listener join the voice channel and confirm audible output, then click one card button from a real client; promote gap.music-playback to covered only after both.",
   "live": {
     "report": "machine/live.json",
@@ -19,7 +19,7 @@
     "contextMenus": 4,
     "commandLimit": 100,
     "modules": 12,
-    "tests": 828
+    "tests": 850
   },
   "modules": [
     {

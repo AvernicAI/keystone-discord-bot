@@ -23,6 +23,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    pass: "pass-84",
+    date: "2026-11-06",
+    summary:
+      "The moderation case is one card instead of three embeds: `/mod case`, every action reply, history, the review queue, the case-history menu and both appeal subcommands now share one builder with a state accent, one facts line, the reason, a read-stamped footer and one action row — so the appeal button sits inside the record it belongs to. A notice can carry that card to the mod-log channel, and the dashboard's channel and role ids become pickers grouped by category with a text fallback when Discord cannot be read.",
+    journal: "memory/journal/2026-11-06-pass-84.md",
+  },
+  {
     pass: "pass-83",
     date: "2026-11-06",
     summary:
