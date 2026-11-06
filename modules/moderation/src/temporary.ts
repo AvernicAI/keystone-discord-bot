@@ -4,7 +4,7 @@ import type {
   ModerationActions,
   ModerationCase,
 } from "@keystone/kernel";
-import { caseEmbed } from "./format";
+import { casePanel } from "./format";
 import type { ModerationSettings } from "./settings";
 
 export type ExpiryOutcome =
@@ -112,7 +112,12 @@ export class TemporaryActionService {
     const updated = await this.cases.expire(record.id, "expiry", reason);
     if (updated) {
       await this.actions.notify(record.guildId, this.settings.modLogChannelId, {
-        embeds: [caseEmbed(updated, `Case #${updated.caseNumber} expired`)],
+        v2: casePanel(updated, {
+          title: `Case #${updated.caseNumber} expired`,
+          context: "this server · temporary action released",
+          readAt: this.now(),
+          note: "The scheduled release ran. The case stays in the record.",
+        }),
       });
     }
     return { status: "expired", record: updated ?? record };

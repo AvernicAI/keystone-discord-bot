@@ -1,4 +1,5 @@
 import type { ZodTypeAny } from "zod";
+import type { DirectoryChannel, GuildDirectory } from "./directory";
 import { HttpError } from "./http-error";
 
 /**
@@ -32,6 +33,12 @@ export interface SettingsField {
   readonly path: string;
   readonly label: string;
   readonly kind: SettingsFieldKind;
+  /**
+   * A string that names another Discord object. The schema still validates it
+   * as a plain id; the renderer turns it into a picker when the page was able
+   * to read the server's channels or roles.
+   */
+  readonly reference?: "channel" | "role";
   readonly value: unknown;
   readonly options?: readonly string[];
   readonly min?: number;
@@ -193,6 +200,88 @@ function valueHelp(field: {
   return parts.join(" ");
 }
 
+/**
+ * A key that holds one channel or role id. Only the last segment counts, so
+ * `logging.channelId` and `community.ticket.panelChannelId` both match while
+ * `djRoleIds` (a comma-separated list) does not: a picker that replaced a list
+ * would silently drop every entry but one.
+ */
+export function referenceFor(key: string): "channel" | "role" | undefined {
+  if (/channelid$/i.test(key)) return "channel";
+  if (/roleid$/i.test(key)) return "role";
+  return undefined;
+}
+
+/** One option in a directory-backed picker. */
+export interface ReferenceChoice {
+  readonly value: string;
+  readonly label: string;
+  /** The `<optgroup>` heading; channels carry their category name. */
+  readonly group: string;
+}
+
+const CHANNEL_GLYPHS: Record<DirectoryChannel["kind"], string> = {
+  text: "#",
+  announcement: "#",
+  voice: "🔊",
+  stage: "🎙",
+  forum: "💬",
+  media: "💬",
+  category: "▸",
+  other: "#",
+};
+
+/**
+ * The picker's options, in the order an operator reads a server: uncategorised
+ * channels, then each category with its children, then roles from @everyone
+ * down. Managed roles are omitted because Discord rejects assigning them, so a
+ * picker must not offer a value the bot can never use.
+ */
+export function referenceChoices(
+  field: SettingsField,
+  directory: GuildDirectory,
+): readonly ReferenceChoice[] {
+  if (field.reference === "role") {
+    return directory.roles
+      .filter((role) => !role.managed)
+      .map((role) => ({
+        value: role.id,
+        label: role.id === directory.guildId ? "@everyone" : `@${role.name}`,
+        group: "Roles",
+      }));
+  }
+  if (field.reference !== "channel") return [];
+
+  const emitted = new Set<string>();
+  const choices: ReferenceChoice[] = [];
+  const push = (channel: DirectoryChannel, group: string): void => {
+    if (emitted.has(channel.id)) return;
+    emitted.add(channel.id);
+    choices.push({
+      value: channel.id,
+      label: `${CHANNEL_GLYPHS[channel.kind]} ${channel.name}`,
+      group,
+    });
+  };
+
+  const channels = directory.channels.filter((channel) => channel.kind !== "category");
+  // A channel with no parent, or a parent this read did not return, still has
+  // to be pickable; dropping it would look like the server lost the channel.
+  const categories = new Set(
+    directory.channels.filter((channel) => channel.kind === "category").map((channel) => channel.id),
+  );
+  for (const channel of channels) {
+    if (!channel.parentId || !categories.has(channel.parentId)) push(channel, "No category");
+  }
+  for (const category of directory.channels.filter((channel) => channel.kind === "category")) {
+    for (const channel of channels.filter((entry) => entry.parentId === category.id)) {
+      push(channel, category.name);
+    }
+  }
+  for (const channel of channels) push(channel, "No category");
+  return choices;
+}
+
 function makeField(
   schema: ZodTypeAny,
   key: string,
@@ -202,12 +291,14 @@ function makeField(
 ): SettingsField {
   const inner = unwrapped.schema;
   const type = definition(inner).typeName;
+  const reference = referenceFor(key);
   const base = {
     path,
     label: labelFor(key),
     value,
     optional: unwrapped.optional,
     nullable: unwrapped.nullable,
+    ...(reference ? { reference } : {}),
   };
 
   if (type === "ZodBoolean") {

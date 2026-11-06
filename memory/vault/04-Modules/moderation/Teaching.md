@@ -28,6 +28,8 @@
 11. `apps/bot/src/timers.ts` — the bot-side delayed consumer and the split
     between database jobs and gateway jobs.
 12. `apps/bot/src/moderation-events.ts` — the gateway-to-structural-event seam.
+13. `modules/moderation/src/format.ts` — the three case panels; then
+    `apps/bot/src/adapt.ts` for the one place the V2 flag is set.
 
 ## The idea to take away
 
@@ -128,6 +130,38 @@ Finally, the client is part of the test. Reading the panel live found a raw guil
 snowflake in the header, `Read: cases 2` where a noun phrase was meant, and a
 dry-run refusal that told the caller to pass an option `warn` did not have. Tests
 had passed for all three, because a unit test asserts what you thought to ask.
+
+## One card, and the picker that reads the server
+
+The case used to be drawn three times in `format.ts`, and the appeal button was
+an `ActionRow` **beside** the embed. Both are the same mistake: the presentation
+was written at the call site instead of once per surface. Pass 84 fixed it with
+one builder per shape — `casePanel`, `caseListPanel`, `appealStatusPanel` — and
+fourteen call sites that only pass a record and options. A forwarded screenshot
+now cannot separate the record from the action it offers, because the action row
+lives inside the container.
+
+The subtle rule is **one primary**. `actionRow` refuses two, so a join-gate case
+makes Verify primary and steps Appeal down to secondary. If both were primary,
+the card would answer "what do I do next?" with two answers, which is the same
+as none.
+
+A card is also a wire shape. Discord requires `IsComponentsV2` and rejects a
+payload that carries `content` or `embeds` too. That flag is discord.js-specific,
+so it lives in `adapt.ts` beside every other conversion:
+`toChannelMessage(notice)` returns the V2 shape for a notice with `v2` and the
+legacy embed shape otherwise. The kernel gains one optional field and keeps its
+no-discord.js rule. This is why the mod-log message can reuse the moderator's
+card without a second renderer in a second process.
+
+The dashboard half is the same lesson from the other direction. A settings
+schema stores `channelId` as a string, so the editor used to ask for Developer
+Mode. Now `referenceFor(key)` marks a single-id key, `referenceChoices` turns the
+cached directory read into grouped options, and the renderer keeps a stored id
+that is missing from the read **selected and labelled** rather than resetting it
+to `None`. A read that fails falls back to text and names the reason; a
+submission never depends on Discord being reachable. Lesson 17 develops both
+halves with an exercise.
 
 ## Temporary actions are a claim, not a countdown
 

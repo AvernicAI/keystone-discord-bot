@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "updatedAt": "2026-11-06",
-  "target": 16,
+  "target": 17,
   "lessons": [
     {
       "id": "01-the-module-contract",
@@ -251,6 +251,22 @@
           "text": "20 roots",
           "source": "roots"
         }
+      ]
+    },
+    {
+      "id": "17-one-card-not-twelve-embeds",
+      "order": 17,
+      "path": "vault/05-Learning/17-one-card-not-twelve-embeds.md",
+      "files": [
+        "modules/moderation/src/format.ts",
+        "apps/bot/src/adapt.ts",
+        "modules/moderation/src/case-panel.test.ts",
+        "apps/web/src/settings-form.ts",
+        "apps/web/src/pickers.test.ts"
+      ],
+      "proofCommands": [
+        "pnpm test -- modules/moderation/src/case-panel.test.ts apps/bot/src/channel-message.test.ts apps/web/src/pickers.test.ts",
+        "pnpm audit:visuals"
       ]
     }
   ]

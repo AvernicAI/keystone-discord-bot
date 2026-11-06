@@ -245,7 +245,8 @@ describe("moderation module", () => {
       state: "open",
     });
     expect(actions.notifications).toHaveLength(1);
-    expect(actions.notifications[0]?.components?.[0]?.components[0]?.customId).toBe(
+    // The appeal control lives inside the card's own action row, not beside it.
+    expect(JSON.stringify(actions.notifications[0]?.v2)).toContain(
       appealCustomId(records[0]!.id, ctx.componentSigner!, ctx.now()),
     );
   });
@@ -335,7 +336,9 @@ describe("moderation module", () => {
     await mod.execute(ctx);
 
     expect(ctx.interaction.lastReply?.files).toBeUndefined();
-    expect(ctx.interaction.lastReply?.embeds?.[0]?.title).toBe("Recent cases");
+    const panel = JSON.stringify(ctx.interaction.lastReply?.v2);
+    expect(panel).toContain("Recent cases");
+    expect(panel).toContain("#1 · warn · <@target-1> · **open** · spam");
   });
 
   it("records a temporary ban's expiry and schedules exactly one release", async () => {
@@ -634,11 +637,12 @@ describe("moderation module", () => {
       }),
     );
 
-    const field = status.lastReply?.embeds?.[0]?.fields?.[0];
-    expect(field?.name).toContain("reviewed");
-    expect(field?.value).toContain("Appeals on record: 1");
-    expect(field?.value).toContain("Please review the evidence.");
-    expect(status.lastReply?.content).toContain("#1 · warn · reviewed · 1 appeal");
+    const panel = JSON.stringify(status.lastReply?.v2);
+    expect(panel).toContain("#1 · warn · **reviewed** · 1 appeal");
+    expect(panel).toContain("Please review the evidence.");
+    expect(panel).toContain("`case_events`");
+    // The state changed after review; the appeal event did not.
+    expect(panel).toContain("read from the appeal events, not the state");
   });
 
   it("reports no appeals for a member with no appeal events", async () => {
@@ -657,8 +661,10 @@ describe("moderation module", () => {
         moderation: { cases, actions: new RecordingActions(), members: new InMemoryMemberStore() },
       }),
     );
-    expect(status.lastReply?.content).toContain("No appeal events are on record");
-    expect(status.lastReply?.embeds?.[0]?.description).toContain("No appeal events are on record");
+    const panel = JSON.stringify(status.lastReply?.v2);
+    expect(panel).toContain("No appeal events are on record for you.");
+    expect(panel).toContain("/appeal open case:<number>");
+    expect(status.lastReply?.content).toBeUndefined();
   });
 
   it("does not show one member another member's case status", async () => {

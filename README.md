@@ -11,7 +11,7 @@ tickets, economy and AI all stand on.
 > feature in an afternoon.
 
 **Current facts:** **20/100 roots** · **147 real subcommands** · **167 actions** ·
-**4 context menus** · **12 modules** · **828 tests across 112 files**. The full
+**4 context menus** · **12 modules** · **850 tests across 115 files**. The full
 gate is token-free.
 
 This repo is both the product and the course: every module has a spec, tests, a
@@ -161,8 +161,10 @@ See [`.env.example`](.env.example) for the complete list and
 
 The optional `apps/web` process is a security-first, framework-free Node app:
 Discord OAuth2/PKCE, opaque Postgres sessions, per-guild BigInt authorization,
-schema-generated settings widgets, audited writes, saved templates, bounded
-analytics, scoped API tokens, signed webhooks and `Idempotency-Key` replay.
+schema-generated settings widgets — channel and role ids become pickers when the
+bot can read the server, and stay text inputs with a reason when it cannot —
+audited writes, saved templates, bounded analytics, scoped API tokens, signed
+webhooks and `Idempotency-Key` replay.
 
 ```text
 GET  /healthz                               public, no secrets
@@ -182,8 +184,8 @@ See [Dashboard](memory/vault/03-Architecture/Dashboard.md).
 
 ## Proof
 
-- `pnpm check` covers **828 tests across 112 files**, 35/35 claim checks, the
-  visual-surface audit and 5,159 memory checks without a token, database or
+- `pnpm check` covers **850 tests across 115 files**, 36/36 claim checks, the
+  visual-surface audit and 5,289 memory checks without a token, database or
   network.
 - `pnpm probe:live` is **28/28** on the local stack: SQL, Redis, the queue,
   settings survival, temporary expiry, scheduled delivery, portability, web and

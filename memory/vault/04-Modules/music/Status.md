@@ -73,7 +73,7 @@ so instead of pretending the old second survived.
 
 ```text
 pnpm typecheck                         pass
-pnpm test                              828 tests / 112 files
+pnpm test                              850 tests / 115 files
 pnpm budget                            20/100 roots · 147 subcommands · 167 actions
 pnpm audit:claims                      35/35
 pnpm audit:visuals                     360 checks · 27 surfaces

@@ -35,7 +35,7 @@ import {
 import { analyticsDays } from "../overview";
 import type { RouteContext } from "../request-context";
 import { SettingsValidationError, parseSettingsForm } from "../settings-form";
-import { DirectoryError, type DirectoryChannel } from "../directory";
+import { DirectoryError, type DirectoryChannel, type GuildDirectory } from "../directory";
 import { CONFIG_TEMPLATES, findTemplate } from "../templates";
 import type { MusicControlAction } from "@keystone/kernel";
 
@@ -768,6 +768,32 @@ export async function analyticsPage(
   return true;
 }
 
+/**
+ * The settings editor's pickers need the same read the directory page uses. A
+ * failed read is not fatal: the fields stay text inputs and the page says why.
+ */
+async function settingsDirectory(
+  ctx: RouteContext,
+  guildId: string,
+): Promise<{ directory?: GuildDirectory; directoryError?: string }> {
+  if (!ctx.deps.directory) return {};
+  try {
+    return { directory: await ctx.deps.directory.guildResources(guildId) };
+  } catch (error) {
+    const message =
+      error instanceof DirectoryError
+        ? error.message
+        : "Discord did not return this server's directory. Nothing was changed.";
+    if (!(error instanceof DirectoryError) || !error.unavailable) {
+      ctx.deps.logger.warn("settings directory read failed", {
+        guildId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+    return { directoryError: message };
+  }
+}
+
 export async function settingsPage(
   ctx: RouteContext,
   params: readonly string[],
@@ -777,9 +803,10 @@ export async function settingsPage(
 
   if (ctx.method === "GET") {
     const { session, guild } = await authorizeGuild(ctx.deps, ctx.session, guildId);
-    const [{ module, form }, history] = await Promise.all([
+    const [{ module, form }, history, pickers] = await Promise.all([
       ctx.deps.dashboard.editor(guild, moduleId),
       ctx.deps.dashboard.history(guild.id, { moduleId }),
+      settingsDirectory(ctx, guild.id),
     ]);
     send(
       ctx.res,
@@ -787,6 +814,7 @@ export async function settingsPage(
       renderSettingsEditor(session.username, guild, module, form, ctx.csrfToken, {
         saved: ctx.url.searchParams.get("saved") === "1",
         history,
+        ...pickers,
       }),
       "text/html; charset=utf-8",
       { "Cache-Control": "no-store" },
@@ -803,9 +831,10 @@ export async function settingsPage(
       return body.csrf;
     });
 
-    const [{ module, form }, history] = await Promise.all([
+    const [{ module, form }, history, pickers] = await Promise.all([
       ctx.deps.dashboard.editor(write.guild, moduleId),
       ctx.deps.dashboard.history(write.guild.id, { moduleId }),
+      settingsDirectory(ctx, write.guild.id),
     ]);
     const parsed = parseSettingsForm(form, body.params);
 
@@ -819,6 +848,7 @@ export async function settingsPage(
           fieldErrors: parsed.errors,
           formError: "Fix the highlighted fields. Nothing was saved.",
           history,
+          ...pickers,
         }),
         "text/html; charset=utf-8",
         { "Cache-Control": "no-store" },
@@ -845,6 +875,7 @@ export async function settingsPage(
           fieldErrors,
           formError: error.message,
           history,
+          ...pickers,
         }),
         "text/html; charset=utf-8",
         { "Cache-Control": "no-store" },

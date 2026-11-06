@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ChatInputCommandInteraction } from "discord.js";
+import { MessageFlags, type ChatInputCommandInteraction } from "discord.js";
 import {
   InMemoryCooldownStore,
   InMemorySettingsRepository,
@@ -104,9 +104,9 @@ class RecordingModerationActions implements ModerationActions {
 
 function syntheticBanInteraction(): {
   interaction: ChatInputCommandInteraction;
-  replies: Array<{ content?: string; embeds?: unknown[] }>;
+  replies: Array<{ content?: string; embeds?: unknown[]; components?: unknown[]; flags?: number }>;
 } {
-  const replies: Array<{ content?: string; embeds?: unknown[] }> = [];
+  const replies: Array<{ content?: string; embeds?: unknown[]; components?: unknown[]; flags?: number }> = [];
   const interaction = {
     id: "synthetic-slash-1",
     commandName: "mod",
@@ -193,7 +193,14 @@ describe("synthetic slash interaction", () => {
       reason: "posting raid invites",
       state: "open",
     });
-    expect(replies.at(-1)?.content).toContain("Case #1 recorded and action applied.");
+    // Pass 84 made every /mod action reply a signed card, so the proof is the
+    // V2 payload and its flag, not a content string beside an embed.
+    const reply = replies.at(-1);
+    expect(reply?.content).toBeUndefined();
+    expect(reply?.flags).toBe(MessageFlags.IsComponentsV2);
+    const card = JSON.stringify(reply?.components);
+    expect(card).toContain("Case #1 · ban");
+    expect(card).toContain("The action was applied and recorded against this case.");
   });
 
   it("rejects an unknown subcommand before executing anything", async () => {

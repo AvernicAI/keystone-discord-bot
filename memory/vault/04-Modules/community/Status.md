@@ -102,7 +102,7 @@ the guild.
 ## Verified
 
 ```text
-pnpm check                            exit 0 · 828 tests / 112 files
+pnpm check                            exit 0 · 850 tests / 115 files
   responder.test.ts                   5 tests (auto-responder service)
   community.test.ts                  15 tests (including timer delivery, a concurrent claim and goodbye)
   extras.test.ts                      7 tests

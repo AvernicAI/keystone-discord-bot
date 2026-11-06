@@ -23,6 +23,11 @@ function signedFor(customId: string, namespace: string): boolean {
   return parsed.ok && parsed.namespace === namespace;
 }
 
+/** Every signed id inside a V2 card, in the order the tree carries them. */
+function signedIds(notice: ModerationNotice): string[] {
+  return [...JSON.stringify(notice.v2 ?? []).matchAll(/k1:[^"]+/g)].map((match) => match[0]);
+}
+
 class RecordingActions implements ModerationActions {
   readonly calls: string[] = [];
   readonly notifications: {
@@ -199,9 +204,7 @@ describe("scripted raid", () => {
     expect(await members.get("guild-raid", "attacker")).toBeUndefined();
     expect(
       actions.notifications.some((notification) =>
-        notification.notice.components?.some((row) =>
-          row.components.some((component) => signedFor(component.customId, "verify")),
-        ),
+        signedIds(notification.notice).some((id) => signedFor(id, "verify")),
       ),
     ).toBe(false);
     expect(actions.calls.filter((call) => call === "delete-message")).toHaveLength(5);
@@ -217,10 +220,9 @@ describe("scripted raid", () => {
     // Every alert/action has the same appeal affordance.
     expect(actions.notifications).toHaveLength(20);
     expect(
-      actions.notifications.every((notification) => {
-        const row = notification.notice.components?.[0];
-        return signedFor(row?.components[0]?.customId ?? "", "appeal");
-      }),
+      actions.notifications.every((notification) =>
+        signedIds(notification.notice).some((id) => signedFor(id, "appeal")),
+      ),
     ).toBe(true);
   });
 
@@ -276,9 +278,7 @@ describe("scripted raid", () => {
     expect(await members.get("guild-gate", "old-enough")).toBeUndefined();
     expect(
       actions.notifications.some((notification) =>
-        notification.notice.components?.some((row) =>
-          row.components.some((component) => signedFor(component.customId, "verify")),
-        ),
+        signedIds(notification.notice).some((id) => signedFor(id, "verify")),
       ),
     ).toBe(true);
   });

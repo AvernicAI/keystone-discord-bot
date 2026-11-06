@@ -2,6 +2,26 @@
 
 ## Now
 
+**Pass 84 put the moderation case card on the shared grammar** (2026-11-06): the
+three hand-written embeds in `modules/moderation/src/format.ts` are replaced by
+`casePanel`, `caseListPanel` and `appealStatusPanel` — a state accent, one facts
+line, the reason, a read-stamped footer and one action row *inside* the card, so
+the appeal button cannot be separated from the record it belongs to. Fourteen
+call sites draw through them, from `/mod case` and every action reply to the
+security alert, the temporary release and both appeal subcommands; a join-gate
+case makes Verify primary and Appeal secondary, and the grammar refuses two
+primaries. `ModerationNotice` can now carry a `v2` layout and the adapter owns
+`toChannelMessage` and the `IsComponentsV2` flag, so the mod-log message can be
+the same card while the kernel still imports no discord.js. The visual ledger
+moves the surface from 1.33 (D/C/C/F/D/C) to **B on all six criteria** with
+tokens enforced; it is not an A because no card has been read back from a real
+invocation. On the dashboard, a `…ChannelId`/`…RoleId` setting is now a picker
+over the cached directory read, grouped by category, with managed roles omitted,
+a stored-but-missing id kept selected and labelled, and a text fallback that
+names the reason when Discord cannot be read. No root, subcommand, action, table
+or migration changed; 850 tests in 115 files. See
+[pass 84](../../journal/2026-11-06-pass-84.md).
+
 **Pass 83 made music play** (2026-11-06): a Lavalink 4.2.2 node from
 `compose.yaml` now owns the voice socket and DAVE behind the unchanged
 `MusicPlayback` port, so the durable `community_records` row is the play queue
@@ -19,7 +39,7 @@ of the card confirmed what the page claimed. Four defects the run exposed were
 fixed at their cause: a paused player's Resume restarted the queue instead of
 unpausing, controls rendered a page up to 5 s stale, an append claimed it had
 started playback, and a dead session's head was labelled `now`. The tests now
-cover 828 across 112 files, and the one proof this pass cannot produce is stated
+cover 850 across 115 files, and the one proof this pass cannot produce is stated
 plainly on the module page: nobody listened, so `playingPlayers: 1` proves frames
 were sent, not that a person heard them.
 
@@ -43,7 +63,7 @@ membership per guild. Market research corrected two assumptions before they
 became copy: Ticket Tool uses channel pickers, not raw ids, and Carl-bot issue
 #50 is about reaction roles with the "nothing happens" save quote in a 2025
 comment. `surfaces.json` now grades 25 surfaces, including thirteen web rows;
-`audit:visuals` scans every page renderer. Tests are **828 / 112 files**. P6 is
+`audit:visuals` scans every page renderer. Tests are **850 / 115 files**. P6 is
 complete: the only remaining proof gap is token refresh and revocation against
 real Discord credentials, which stay probe-only. See
 [pass 78](../../journal/2026-11-05-pass-78.md).
@@ -1013,7 +1033,7 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 828 tests / 112 files · budget 20/100 roots (147 subcommands · 167 actions · 4 context menus) · claims current · visuals 25 surfaces · live 28/28 · memory current
+pnpm check        exit 0 · typecheck 0 · 850 tests / 115 files · budget 20/100 roots (147 subcommands · 167 actions · 4 context menus) · claims current · visuals 27 surfaces · live 28/28 · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 20 roots / 138 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · /modmail open → reply → 2-message archive → duplicate close refused → stats 1/0/2 · /event create → open → rsvp 1/2 → reminder → decline → 1.2 KB export parsed with the same row · /form create → open → panel → submit → 1 pending → accepted → 1.5 KB export parsed with the same answers and decision · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)

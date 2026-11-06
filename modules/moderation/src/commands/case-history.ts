@@ -6,7 +6,7 @@ import {
   requirePermissions,
   type CommandContext,
 } from "@keystone/kernel";
-import { caseListEmbed } from "../format";
+import { caseListPanel } from "../format";
 
 /**
  * The user menu is the compact version of `/mod history user:@member`; it
@@ -28,7 +28,7 @@ export const caseHistory = defineCommand({
     });
     await ctx.interaction.reply({
       ephemeral: true,
-      embeds: [caseListEmbed(records, `Cases for <@${target}>`)],
+      v2: caseListPanel(records, `Cases for <@${target}>`, { readAt: ctx.now() }),
     });
   },
   help: {

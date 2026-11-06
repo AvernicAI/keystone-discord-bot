@@ -46,7 +46,7 @@ pnpm vitest run modules/events packages/db/src/event-store.test.ts \
   ✓ packages/db/src/event-store.test.ts (4 tests)
   Test Files 4 passed · Tests 36 passed
 
-pnpm test                          # 828 tests / 112 files
+pnpm test                          # 850 tests / 115 files
 pnpm budget                        # 20/100 roots · 147 subcommands · 167 actions · 4 context menus
 pnpm commands:doctor               # Registry 20 roots · 147 subcommands · 4 context menus
 ```

@@ -664,8 +664,15 @@ export interface PanicStore {
 }
 
 export interface ModerationNotice {
-  readonly embeds: EmbedPayload[];
+  readonly embeds?: EmbedPayload[];
   readonly components?: ActionRow[];
+  /**
+   * Components V2 layout. Mutually exclusive with `embeds` and the legacy
+   * `components` rows: Discord rejects a V2 message that carries either. The
+   * Discord adapter sets `MessageFlags.IsComponentsV2` for this shape, so the
+   * mod-log notice can be the same card a moderator sees in `/mod case`.
+   */
+  readonly v2?: readonly V2Component[];
 }
 
 /** The narrow direct-message shape moderation owns, without the community port. */

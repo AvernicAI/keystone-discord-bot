@@ -168,6 +168,15 @@ describe("temporary moderation", () => {
       "expired",
     ]);
     expect(actions.notices).toHaveLength(1);
+    // The release notice is the same case card a moderator sees in /mod case.
+    expect(actions.notices[0]?.v2).toBeDefined();
+    expect(actions.notices[0]?.embeds).toBeUndefined();
+    expect(JSON.stringify(actions.notices[0]?.v2)).toContain(
+      `Case #${record.caseNumber} expired`,
+    );
+    expect(JSON.stringify(actions.notices[0]?.v2)).toContain(
+      "The scheduled release ran. The case stays in the record.",
+    );
 
     expect(await service.expire(record.id)).toMatchObject({ status: "already-final" });
     expect(actions.calls.filter((call) => call.startsWith("unban:"))).toHaveLength(1);

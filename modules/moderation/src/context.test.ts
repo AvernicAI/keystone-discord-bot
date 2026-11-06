@@ -49,7 +49,9 @@ describe("moderation context menus", () => {
       channelId: "channel-a",
     });
     expect(records[0]?.reason).toContain("spam.test");
-    expect(interaction.lastReply?.embeds?.[0]?.title).toContain("case #1");
+    const panel = JSON.stringify(interaction.lastReply?.v2);
+    expect(panel).toContain("Reported message · case #1");
+    expect(panel).toContain("reported by <@reporter>");
   });
 
   it("Report message records an honest placeholder without MessageContent", async () => {
@@ -89,7 +91,9 @@ describe("moderation context menus", () => {
       moderation: { cases, actions, members: new InMemoryMemberStore() },
     });
     await caseHistory.execute(ctx);
-    expect(interaction.lastReply?.embeds?.[0]?.title).toContain("<@author-1>");
-    expect(interaction.lastReply?.embeds?.[0]?.description).toContain("spam");
+    const panel = JSON.stringify(interaction.lastReply?.v2);
+    expect(panel).toContain("Cases for <@author-1>");
+    expect(panel).toContain("spam");
+    expect(panel).toContain("`cases`");
   });
 });

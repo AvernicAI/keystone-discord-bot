@@ -4,7 +4,6 @@ import {
   requireGuild,
   requirePanelSigner,
   requirePermissions,
-  type ActionRow,
   type CommandContext,
   type CommandOption,
   type ModerationActions,
@@ -13,11 +12,11 @@ import {
   type ModerationPort,
   type PanicStore,
 } from "@keystone/kernel";
-import { caseEmbed, caseListEmbed } from "../format";
+import { caseListPanel, casePanel } from "../format";
 import { CaseExportService, type CaseExportResult } from "../case-export";
 import { memberTimelineLoader } from "../member-timeline";
 import { memberTimelinePanel, timelineRefreshCustomId } from "../member-timeline-panel";
-import { appealButton } from "../cases";
+import { appealCustomId } from "../cases";
 import { PanicService } from "../panic";
 import { TemporaryActionService } from "../temporary";
 import { moderationSettingsSchema, type ModerationSettings } from "../settings";
@@ -179,14 +178,19 @@ async function replyExport(
   });
 }
 
-function appealComponents(
+/**
+ * The signed appeal id for a card. A composition built without a signer
+ * refuses here, exactly as it refused to ship an unsigned button before: an
+ * appeal control that cannot be verified is worse than no control.
+ */
+function appealIdFor(
   ctx: CommandContext,
   settings: ModerationSettings,
   record: ModerationCase,
-): ActionRow[] {
-  if (!settings.appealsEnabled) return [];
+): string | undefined {
+  if (!settings.appealsEnabled) return undefined;
   const signer = requirePanelSigner(ctx.componentSigner);
-  return [appealButton(record.id, signer, ctx.now())];
+  return appealCustomId(record.id, signer, ctx.now());
 }
 
 async function notify(
@@ -196,8 +200,7 @@ async function notify(
   record: ModerationCase,
 ): Promise<void> {
   await actions.notify(ctx.guildId!, settings.modLogChannelId, {
-    embeds: [caseEmbed(record)],
-    components: appealComponents(ctx, settings, record),
+    v2: casePanel(record, { appealId: appealIdFor(ctx, settings, record), readAt: ctx.now() }),
   });
 }
 
@@ -343,8 +346,10 @@ export const mod = defineCommand({
       if (!record) throw new UserError(`Case #${number} does not exist.`);
       await ctx.interaction.reply({
         ephemeral: true,
-        embeds: [caseEmbed(record)],
-        components: appealComponents(ctx, settings, record),
+        v2: casePanel(record, {
+          appealId: appealIdFor(ctx, settings, record),
+          readAt: ctx.now(),
+        }),
       });
       return;
     }
@@ -394,7 +399,9 @@ export const mod = defineCommand({
       const records = await ports.cases.list(guildId, { targetId: target, limit: 10 });
       await ctx.interaction.reply({
         ephemeral: true,
-        embeds: [caseListEmbed(records, target ? `Cases for ${target}` : "Recent cases")],
+        v2: caseListPanel(records, target ? `Cases for <@${target}>` : "Recent cases", {
+          readAt: ctx.now(),
+        }),
       });
       return;
     }
@@ -431,7 +438,14 @@ export const mod = defineCommand({
         const record = await ports.cases.get(guildId, number);
         if (!record) throw new UserError(`Case #${number} does not exist.`);
         const reviewed = await ports.cases.review(record.id, ctx.userId);
-        await ctx.interaction.reply({ ephemeral: true, embeds: [caseEmbed(reviewed)] });
+        await ctx.interaction.reply({
+          ephemeral: true,
+          v2: casePanel(reviewed, {
+            appealId: appealIdFor(ctx, settings, reviewed),
+            readAt: ctx.now(),
+            note: `Reviewed by <@${ctx.userId}>. The case stays in the record.`,
+          }),
+        });
         return;
       }
       const [open, alerted] = await Promise.all([
@@ -443,7 +457,10 @@ export const mod = defineCommand({
         .slice(0, 10);
       await ctx.interaction.reply({
         ephemeral: true,
-        embeds: [caseListEmbed(records, "Review queue — open cases")],
+        v2: caseListPanel(records, "Review queue — open cases", {
+          readAt: ctx.now(),
+          emptyNext: "Nothing is open or alerted. A new case lands here as soon as it is opened.",
+        }),
       });
       return;
     }
@@ -532,7 +549,14 @@ export const mod = defineCommand({
         state: "open",
       });
       await notify(ctx, ports.actions, settings, record);
-      await ctx.interaction.reply({ ephemeral: true, embeds: [caseEmbed(record)] });
+      await ctx.interaction.reply({
+        ephemeral: true,
+        v2: casePanel(record, {
+          appealId: appealIdFor(ctx, settings, record),
+          readAt: ctx.now(),
+          note: "The warning is a case, not a timeout; nothing was sent to the member.",
+        }),
+      });
       return;
     }
 
@@ -546,7 +570,7 @@ export const mod = defineCommand({
         reason,
         run: () => ports.actions.purge(guildId, channelId, limit, reason),
       });
-      await replyResult(ctx, record, result);
+      await replyResult(ctx, settings, record, result);
       return;
     }
 
@@ -559,7 +583,7 @@ export const mod = defineCommand({
         reason,
         run: () => ports.actions.lock(guildId, channelId, action === "lock", reason),
       });
-      await replyResult(ctx, record, result);
+      await replyResult(ctx, settings, record, result);
       return;
     }
 
@@ -573,7 +597,7 @@ export const mod = defineCommand({
         reason,
         run: () => ports.actions.slowmode(guildId, channelId, seconds, reason),
       });
-      await replyResult(ctx, record, result);
+      await replyResult(ctx, settings, record, result);
       return;
     }
 
@@ -594,7 +618,7 @@ export const mod = defineCommand({
         run: () => ports.actions.addRole(guildId, target, roleId, reason),
       });
       if (result.ok) await scheduleExpiry(ctx, ports, settings, record);
-      await replyResult(ctx, record, result);
+      await replyResult(ctx, settings, record, result);
       return;
     }
 
@@ -622,7 +646,7 @@ export const mod = defineCommand({
     if (result.ok && record.expiresAt) {
       await scheduleExpiry(ctx, ports, settings, record);
     }
-    await replyResult(ctx, record, result);
+    await replyResult(ctx, settings, record, result);
   },
   notes:
     "One hub command for manual moderation. Every enforced action creates a case before the external call, so a failed ban still leaves a reviewable record. `history user:@member` reads one timeline from cases, tickets, levels, economy, invites, forms, events, modmail and the member row; every row names its source and a missing store is named rather than shown as empty. `links` and `filters` read the newest local content-filter findings without widening the command budget. `case format:json|csv` and `history format:json|csv` export the same case rows as a private attachment with a content checksum, so a case can leave the bot without a new root or subcommand.",
@@ -648,14 +672,18 @@ function describeAction(ctx: CommandContext, action: ModAction): string {
 
 async function replyResult(
   ctx: CommandContext,
+  settings: ModerationSettings,
   record: ModerationCase,
   result: ModerationActionResult,
 ): Promise<void> {
   await ctx.interaction.reply({
     ephemeral: true,
-    embeds: [caseEmbed(record)],
-    content: result.ok
-      ? `Case #${record.caseNumber} recorded and action applied.`
-      : `Case #${record.caseNumber} recorded; the action failed: ${result.detail ?? "unknown error"}`,
+    v2: casePanel(record, {
+      appealId: appealIdFor(ctx, settings, record),
+      readAt: ctx.now(),
+      note: result.ok
+        ? "The action was applied and recorded against this case."
+        : `The action failed: ${result.detail ?? "unknown error"}. The case is still the record.`,
+    }),
   });
 }

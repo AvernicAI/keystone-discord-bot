@@ -2,6 +2,26 @@
 
 ## Now
 
+Pass 84 put the **case card on the shared grammar** and taught the dashboard to
+read the server. The three hand-written embeds are gone: `format.ts` is three
+builders (`casePanel`, `caseListPanel`, `appealStatusPanel`) with a state accent,
+one facts line, the reason, a read-stamped footer and one action row *inside* the
+card, so the appeal button can no longer be separated from the record it belongs
+to. Fourteen call sites draw a case through them — `/mod case`, every action
+reply, history, review, note, the case-history menu, both appeal subcommands,
+report-message, the security alert and the temporary release. A join-gate case
+makes Verify primary and Appeal secondary; no card shows two primaries. The
+mod-log notice can carry the same card: `ModerationNotice` gained `v2` and the
+adapter owns `toChannelMessage` and the `IsComponentsV2` flag, so the kernel
+still imports no discord.js. The surface moves from 1.33 (D/C/C/F/D/C) to **B on
+all six criteria** with `tokens: enforced`; it is not graded A because no case
+card has been read back from a real invocation. In the dashboard, `channelId`
+and `roleId` settings are now pickers over the cached directory read — grouped by
+category, `@everyone` separated from assignable roles, a stored id missing from
+the read kept selected and labelled, and a text fallback with the reason when the
+read is unavailable. No schema, root, subcommand or migration changed. See
+[pass 84](../../../journal/2026-11-06-pass-84.md).
+
 Pass 77 rebuilt the **member timeline** on the shared visual grammar and proved
 it in a real client. The panel now opens with `## 🧭 <@member> · Member timeline`
 and a context line naming the server, then facts, one section of source-tagged
@@ -106,7 +126,7 @@ P2 core shipped in pass 05 (2026-11-01).
 ## Verified
 
 ```
-pnpm test                                  # 828 tests / 112 files
+pnpm test                                  # 850 tests / 115 files
 pnpm vitest run modules/moderation         # 90 tests (including 11 member-timeline, 10 timeline-panel, 4 export, 7 temporary-expiry and 5 panic tests)
 pnpm test -- packages/db/src/cases.test.ts # 4 PGlite case-store tests, including listEvents and atomic expiry claims
 pnpm test -- packages/db/src/panic.test.ts # PGlite panic snapshot scope and clear
@@ -280,6 +300,7 @@ P7 appeal-hub evidence (pass 35):
 | --- | --- | --- |
 | Scripted raid is contained | Yes, policy engine + coordinator | Replay in a staging guild with a real token |
 | Every action has a case/reason/appeal | Yes, fake action recorder and case store; `/appeal status` survives a state change | Same |
+| Case card is a signed V2 panel | Yes, panel and adapter tests: state accent, one facts line, reason, read stamp, one action row, the flag and no content/embeds | Open `/mod case` once in a staging guild and read the message back |
 | Dry-run makes no punitive call | Yes | Same |
 | Postgres case numbering/events | Yes, PGlite | Run against a Postgres server |
 | Discord ban/kick/timeout/purge/lock | No | A live guild with the bot's permissions |
@@ -309,8 +330,9 @@ No document claims a live Discord run for the unproven rows.
 - Temporary bans and temporary roles now have a release job. The gateway half
   (a live unban or role removal) is not claimed; the live probe used a recording
   port. Join-gate timeout expiry is still not wired to this timer.
-- Case export (JSON/CSV) is not built; the ledger is queryable and P5 owns the
-  full export surface.
+- Case export (JSON/CSV) content and its checksum are tested end to end, but no
+  attachment has been downloaded from a real Discord message; the MCP cannot
+  fetch a file.
 - Panic mode has no automatic expiry and does not touch threads, voice or
   channel-specific allow/deny rules beyond `@everyone` SendMessages. Its
   Discord calls are unobserved; a live `/mod panic` is the missing proof.
