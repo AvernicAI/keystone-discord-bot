@@ -1,7 +1,14 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-05",
-  "criteria": ["structure", "density", "honesty", "freshness", "action", "copy"],
+  "updatedAt": "2026-11-06",
+  "criteria": [
+    "structure",
+    "density",
+    "honesty",
+    "freshness",
+    "action",
+    "copy"
+  ],
   "surfaces": [
     {
       "id": "moderation.timeline",
@@ -234,6 +241,350 @@
       "tokens": "pending",
       "proof": null,
       "next": "Convert the checklist to V2 so each module has one line and one fix link."
+    },
+    {
+      "id": "web.shell",
+      "module": "web",
+      "where": "/dashboard/* — topbar, sidebar, heading, footer",
+      "file": "apps/web/src/shell.ts",
+      "component": "web",
+      "entries": [
+        "renderShell",
+        "renderLegacyLayout"
+      ],
+      "grades": {
+        "structure": "A",
+        "density": "A",
+        "honesty": "A",
+        "freshness": "A",
+        "action": "B",
+        "copy": "A"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "A signed-in Chromium session walked the landing page, server list, overview, module settings, analytics, activity, directory, config and drift, templates, fleet, API tokens, webhooks, instance, 404 at 1280px and 390px (the 405 method path was exercised by request and a regression test) over Postgres and a real Discord OAuth session. The run found the legacy pages still emitting an undefined .panel class, a guild chip whose two spans shared one line, analytics source labels colliding with their bars, and a root \"General\" fieldset around every setting; all four were fixed in the stylesheet or renderer and re-checked. No dashboard console errors and no Discord 429 appeared on the final pass."
+      },
+      "next": "A command-palette search over modules and pages, so a moderator never has to learn the sidebar."
+    },
+    {
+      "id": "web.landing",
+      "module": "web",
+      "where": "/",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderLanding"
+      ],
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "B",
+        "freshness": "B",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "Signed-in Chromium at 1280px and 390px: the hero, both CTAs and the three feature cards render without horizontal overflow; the Start here copy now switches from \"Sign in\" to \"Pick a server\" for the signed-in user. The page still asserts rather than showing counts."
+      },
+      "next": "Replace the three feature cards with counts read from the repo (commands, modules, tests) so the landing proves instead of asserts."
+    },
+    {
+      "id": "web.servers",
+      "module": "web",
+      "where": "/dashboard",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderGuildList"
+      ],
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "B",
+        "freshness": "B",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "Signed-in Chromium at 1280px and 390px: all five manageable servers rendered with real CDN icons and initials fallback; the role label no longer wraps mid-phrase inside a card. No health line exists yet."
+      },
+      "next": "Show a health line per server (modules on, cases open, last write) so the list answers which server needs attention."
+    },
+    {
+      "id": "web.catalog",
+      "module": "web",
+      "where": "/dashboard/guilds/:id — readiness, module gallery, toggle",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderOverview"
+      ],
+      "grades": {
+        "structure": "A",
+        "density": "A",
+        "honesty": "A",
+        "freshness": "A",
+        "action": "B",
+        "copy": "A"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "The same signed-in session enabled Audit logging from its card and the redirect now lands with the \"Audit logging is now enabled\" banner visible under the MODULE CATALOG heading; 10/12 modules on. Disabling it again wrote a second settings.update row and restored 9/12. The activity page showed the row at 02:24:10 UTC; the anchor offset now clears the sticky topbar."
+      },
+      "next": "A per-module switch that reports what it changed, with an inline preview of the panel the module will post."
+    },
+    {
+      "id": "web.analytics",
+      "module": "web",
+      "where": "/dashboard/guilds/:id/analytics",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderAnalytics"
+      ],
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "A",
+        "freshness": "B",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "Signed-in Chromium at 1280px: the 7-day window over 5 sources rendered 2 cases and 9 command runs; each source row shows a human label above its table name, and zero rows draw no bar after the min-width fix. The Members and invites card is content-height rather than stretched."
+      },
+      "next": "A coverage strip that names which logging switches are off, because zero rows and zero activity look identical today."
+    },
+    {
+      "id": "web.activity",
+      "module": "web",
+      "where": "/dashboard/guilds/:id/activity",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderActivity"
+      ],
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "A",
+        "freshness": "B",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "Signed-in Chromium: the activity page listed four real settings.update rows produced by the toggles, newest first, with actor id, action, module and changed path, plus the latest read stamp. The page still shows raw Discord ids because audit rows store no username."
+      },
+      "next": "Human-readable diffs for settings rows instead of the JSON value string."
+    },
+    {
+      "id": "web.directory",
+      "module": "web",
+      "where": "/dashboard/guilds/:id/directory",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderDirectory"
+      ],
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "A",
+        "freshness": "B",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "Signed-in Chromium at 1280px: the directory read 7 channels, 2 categories and 3 roles from the live guild with the bot token, grouped text and voice channels, showed category ids beside their headings, marked managed roles, and stamped 02:29 UTC. No Developer Mode was used."
+      },
+      "next": "A copy-to-clipboard button per channel and role, with a visible copied state and a no-JavaScript fallback."
+    },
+    {
+      "id": "web.settings",
+      "module": "web",
+      "where": "/dashboard/guilds/:id/settings/:module",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderSettingsEditor"
+      ],
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "B",
+        "freshness": "B",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "Signed-in Chromium at 1280px and 390px: the Community editor at 55 fields renders its root Enabled switch without the former \"General\" box around every group, with XP and the other groups as separate fieldsets. Number hints and the audit sentence are present. A save was not exercised in this pass."
+      },
+      "next": "Replace channel and role id fields with the directory picker, which is the market's largest configuration friction."
+    },
+    {
+      "id": "web.portability",
+      "module": "web",
+      "where": "/dashboard/guilds/:id/config/* and /templates/*",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderConfigPreview",
+        "renderConfigDrift",
+        "renderSavedTemplates",
+        "renderSavedTemplateEditor"
+      ],
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "B",
+        "freshness": "B",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "Signed-in Chromium at 1280px: config and drift, templates and the saved-template editor now render as cards with a styled file picker and buttons; before this pass the .panel class did not exist in the stylesheet and the pages fell back to raw text. Empty baseline and drift states name the action that creates the first row."
+      },
+      "next": "One portability page: export, diff, restore and rollback in a single receipt-shaped flow."
+    },
+    {
+      "id": "web.automation",
+      "module": "web",
+      "where": "/dashboard/guilds/:id/tokens and /webhooks",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderApiTokens",
+        "renderWebhooks"
+      ],
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "B",
+        "freshness": "B",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "Signed-in Chromium at 1280px: API tokens and webhooks now render as cards with styled scope/event fieldsets and buttons. Empty token and subscription states are honest, but neither page offers a delivery or usage history of its own."
+      },
+      "next": "A delivery log with retry, so a failing endpoint is diagnosable from the page that created it."
+    },
+    {
+      "id": "web.instance",
+      "module": "web",
+      "where": "/dashboard/instance",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderInstance"
+      ],
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "B",
+        "freshness": "B",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "Signed-in owner Chromium at 1280px and 390px: deployment facts, owners and five rate-limit classes render in cards and fit without horizontal scroll at 390px. The page is read-mostly and still has no per-session revoke control."
+      },
+      "next": "Session revoke buttons and a lockout counter, so an owner can act instead of only reading."
+    },
+    {
+      "id": "web.fleet",
+      "module": "web",
+      "where": "/dashboard/fleet and its preview",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderFleet",
+        "renderTemplatePreview"
+      ],
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "B",
+        "freshness": "B",
+        "action": "B",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "Signed-in Chromium at 1280px: the fleet page lists five manageable servers, the three built-in templates and their descriptions inside cards; the table header aligns with its rows and the preview/apply action is styled. No apply was exercised in this pass."
+      },
+      "next": "A diff per server before apply, not a count, so an operator sees which keys change."
+    },
+    {
+      "id": "web.errors",
+      "module": "web",
+      "where": "/404, /405, /500",
+      "file": "apps/web/src/render.ts",
+      "component": "web",
+      "entries": [
+        "renderError"
+      ],
+      "grades": {
+        "structure": "B",
+        "density": "B",
+        "honesty": "B",
+        "freshness": "F",
+        "action": "C",
+        "copy": "B"
+      },
+      "hasFooter": true,
+      "tokens": "enforced",
+      "proof": {
+        "class": "browser",
+        "date": "2026-11-06",
+        "note": "Signed-in Chromium: /does-not-exist returned 404 with the Keystone eyebrow, title, message, back link and the signed-in account menu instead of a \"Sign in with Discord\" button; PUT /dashboard returned 405. A regression test now asserts both."
+      },
+      "next": "Name the likely cause and one safe next step per status code instead of one generic sentence."
     }
   ]
 }

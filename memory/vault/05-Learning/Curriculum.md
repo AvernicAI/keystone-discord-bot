@@ -10,7 +10,7 @@ more than one file, or you have and it became unmaintainable.
 
 ## Lessons
 
-The curriculum has **14 lessons**, all written against code that exists now.
+The curriculum has **15 lessons**, all written against code that exists now.
 Every lesson is listed in `memory/machine/lessons.json`; `pnpm memory:check`
 verifies its source files, proof commands, required sections and Curriculum
 link. A taught count must name a machine source, so the gate recomputes it. If a
@@ -32,14 +32,15 @@ lesson and the code disagree, the gate fails rather than the prose winning.
 | 12 | [[12-goodbye]] | `modules/community/src/engagement.ts`, `apps/bot/src/community-events.ts` | Reuse settings and services; omit branches that cannot work |
 | 13 | [[13-portability-and-receipts]] | `packages/importer`, `packages/db/src/portability-store.ts` | Checksums, dry runs, transactional restore, rollback receipts |
 | 14 | [[14-self-host-quickstart]] | `README.md`, `compose.yaml`, `Dockerfile` | Memory mode, compose, explicit migrations, the probe boundary |
+| 15 | [[15-dashboard-as-a-product]] | `apps/web/src/shell.ts`, `directory.ts`, `readiness.ts` | One shell, audited toggles, computed readiness, read-only ports |
 
 ## Not written yet
 
-Two topics from the original plan have no lesson yet. The Components V2 layer
-landed in pass 58, so a lesson on the signed component ids and the 40-slot
-budget can be written against running code. Sharding has no lesson because the
-bot does not shard; writing one now would be a design essay pretending to be a
-lesson. Both belong here when there is a runnable change and a check to fail.
+The Components V2 layer landed in pass 58, so a lesson on the signed component
+ids and the 40-slot budget can still be written against running code. Sharding
+has no lesson because the bot does not shard; writing one now would be a design
+essay pretending to be a lesson. Both belong here when there is a runnable
+change and a check to fail.
 
 ## Each lesson has the same shape
 

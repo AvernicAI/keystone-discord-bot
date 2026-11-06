@@ -157,8 +157,8 @@ before a UI framework was added; settings writes followed through the same gate.
   minutes, minimum 1) that refuses and deletes a stale row without extending the
   absolute lifetime, and a sealed, rotating Discord refresh token with one
   in-flight refresh per session; logout revokes the refresh grant. Migration
-  0020 adds the columns (pass 57). The live Discord OAuth round trip remains
-  blocked on real credentials and a human browser.
+  0020 adds the columns (pass 57). The real Discord OAuth login was proven in a
+  browser on Postgres in pass 78; token refresh and revocation remain probe-only.
 
 **Exit demo:** two guilds and two users; user A cannot read/write guild B through
 the UI or API. Every setting is editable. A template applies with a preview. A

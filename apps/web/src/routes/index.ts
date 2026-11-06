@@ -74,6 +74,21 @@ export const ROUTES: readonly Route[] = [
     handler: dashboard.guildOverview,
   },
   {
+    pattern: exact(`/dashboard/guilds/${GUILD_ID}/modules/${MODULE_ID}/toggle`),
+    methods: ["POST"],
+    handler: dashboard.moduleToggle,
+  },
+  {
+    pattern: exact(`/dashboard/guilds/${GUILD_ID}/activity`),
+    methods: ["GET"],
+    handler: dashboard.activityPage,
+  },
+  {
+    pattern: exact(`/dashboard/guilds/${GUILD_ID}/directory`),
+    methods: ["GET"],
+    handler: dashboard.directoryPage,
+  },
+  {
     pattern: exact(`/dashboard/guilds/${GUILD_ID}/analytics`),
     methods: ["GET"],
     handler: dashboard.analyticsPage,

@@ -30,6 +30,7 @@ import { createWebHandler } from "./server";
 import { DashboardService } from "./overview";
 import { DEFAULT_RATE_LIMITS, RateLimiter, type RateLimitPolicies } from "./rate-limit";
 import type { ConfigBundle } from "./config-bundle";
+import type { DirectoryPort } from "./directory";
 import {
   OAuthRefreshRejected,
   type DiscordGuild,
@@ -196,6 +197,7 @@ interface HarnessOptions {
   owners?: readonly string[];
   rateLimiter?: RateLimiter;
   now?: () => number;
+  directory?: DirectoryPort;
 }
 
 interface Harness {
@@ -273,6 +275,7 @@ async function harness(options: HarnessOptions = {}): Promise<Harness> {
     audit,
     webhooks,
     idempotency,
+    ...(options.directory ? { directory: options.directory } : {}),
   });
   const server = createServer(handler);
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -471,6 +474,26 @@ describe("P6 web auth and authorization", () => {
       );
       expect(wrongState.status).toBe(400);
       expect(test.oauth.exchanges).toBe(0);
+    } finally {
+      await test.close();
+    }
+  });
+
+  it("keeps the signed-in account on an error page", async () => {
+    const test = await harness();
+    try {
+      const { cookie } = await login(test);
+
+      const missing = await fetch(`${test.base}/dashboard/does-not-exist`, { headers: { cookie } });
+      expect(missing.status).toBe(404);
+      const missingHtml = await missing.text();
+      expect(missingHtml).toContain("Not found");
+      expect(missingHtml).toContain("Admin");
+      expect(missingHtml).not.toContain("Sign in with Discord");
+
+      const wrongMethod = await fetch(`${test.base}/dashboard`, { method: "PUT", headers: { cookie } });
+      expect(wrongMethod.status).toBe(405);
+      expect(await wrongMethod.text()).not.toContain("Sign in with Discord");
     } finally {
       await test.close();
     }
@@ -2203,6 +2226,178 @@ describe("P6 webhooks and Idempotency-Key", () => {
       const invalid = await patch(JSON.stringify({ monthlyBudgetUsd: 12 }), "short");
       expect(invalid.status).toBe(400);
       expect(await invalid.json()).toMatchObject({ error: { code: "idempotency_key_invalid" } });
+    } finally {
+      await test.close();
+    }
+  });
+});
+
+describe("dashboard shell, module control and directory", () => {
+  it("renders the module catalog, readiness checklist and shell instead of a settings dump", async () => {
+    const test = await harness();
+    try {
+      const { cookie } = await login(test);
+      const response = await fetch(`${test.base}/dashboard/guilds/${GUILD_A}`, {
+        headers: { cookie },
+      });
+      expect(response.status).toBe(200);
+      const html = await response.text();
+      expect(html).toContain("Get this server ready");
+      expect(html).toContain("Module catalog");
+      expect(html).toContain("Send the event ledger somewhere");
+      expect(html).toContain("Configure");
+      expect(html).toContain('aria-label="Server sections"');
+      expect(html).toContain("Channels &amp; roles");
+      expect(html).not.toContain('"monthlyBudgetUsd"');
+      expect(html).not.toContain(ACCESS_TOKEN);
+      expect(html).toContain("&lt;script&gt;");
+    } finally {
+      await test.close();
+    }
+  });
+
+  it("toggles a module through the audited settings path and shows the row in activity", async () => {
+    const test = await harness();
+    try {
+      const { cookie, csrf } = await login(test);
+      const denied = await fetch(
+        `${test.base}/dashboard/guilds/${GUILD_A}/modules/logging/toggle`,
+        {
+          method: "POST",
+          redirect: "manual",
+          headers: { cookie, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ enabled: "1" }),
+        },
+      );
+      expect(denied.status).toBe(403);
+
+      const toggled = await fetch(
+        `${test.base}/dashboard/guilds/${GUILD_A}/modules/logging/toggle`,
+        {
+          method: "POST",
+          redirect: "manual",
+          headers: { cookie, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ csrf, enabled: "1" }),
+        },
+      );
+      expect(toggled.status).toBe(302);
+      expect(toggled.headers.get("location")).toContain("toggled=logging");
+      expect(toggled.headers.get("location")).toContain("state=on");
+      expect(await test.settings.get(GUILD_A, "logging")).toMatchObject({ enabled: true });
+      expect(test.audit.records(GUILD_A)).toMatchObject([
+        {
+          actorId: USER,
+          action: "settings.update",
+          targetId: "logging",
+          data: {
+            moduleId: "logging",
+            source: "dashboard",
+            changes: { enabled: { from: false, to: true } },
+          },
+        },
+      ]);
+
+      const overview = await fetch(
+        `${test.base}/dashboard/guilds/${GUILD_A}?toggled=logging&state=on`,
+        { headers: { cookie } },
+      );
+      expect(await overview.text()).toContain("is now enabled");
+
+      const activity = await fetch(`${test.base}/dashboard/guilds/${GUILD_A}/activity`, {
+        headers: { cookie },
+      });
+      expect(activity.status).toBe(200);
+      const activityHtml = await activity.text();
+      expect(activityHtml).toContain("Activity");
+      expect(activityHtml).toContain("Settings update");
+      expect(activityHtml).toContain(USER);
+      expect(activityHtml).toContain("logging");
+
+      const invalid = await fetch(
+        `${test.base}/dashboard/guilds/${GUILD_A}/modules/logging/toggle`,
+        {
+          method: "POST",
+          redirect: "manual",
+          headers: { cookie, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ csrf, enabled: "yes" }),
+        },
+      );
+      expect(invalid.status).toBe(400);
+    } finally {
+      await test.close();
+    }
+  });
+
+  it("reads the real directory through the port and explains when it is not configured", async () => {
+    const directory: DirectoryPort = {
+      async guildResources(guildId) {
+        return {
+          channels: [
+            { id: "111111111111111101", name: "general", kind: "text", parentId: null, position: 1 },
+            { id: "111111111111111102", name: "Voice", kind: "voice", parentId: null, position: 2 },
+          ],
+          roles: [
+            {
+              id: "111111111111111103",
+              name: "Moderator",
+              color: 0x5865f2,
+              position: 3,
+              managed: true,
+              hoist: true,
+            },
+          ],
+          fetchedAt: new Date().toISOString(),
+          guildId,
+        } as Awaited<ReturnType<DirectoryPort["guildResources"]>>;
+      },
+    };
+    const test = await harness({ directory });
+    try {
+      const { cookie } = await login(test);
+      const page = await fetch(`${test.base}/dashboard/guilds/${GUILD_A}/directory`, {
+        headers: { cookie },
+      });
+      expect(page.status).toBe(200);
+      const html = await page.text();
+      expect(html).toContain("Channels &amp; roles");
+      expect(html).toContain("general");
+      expect(html).toContain("111111111111111101");
+      expect(html).toContain("Moderator");
+      expect(html).toContain("managed");
+      expect(html).not.toContain(ACCESS_TOKEN);
+    } finally {
+      await test.close();
+    }
+
+    const without = await harness();
+    try {
+      const { cookie } = await login(without);
+      const page = await fetch(`${without.base}/dashboard/guilds/${GUILD_A}/directory`, {
+        headers: { cookie },
+      });
+      expect(page.status).toBe(200);
+      expect(await page.text()).toContain("Directory reads are off");
+    } finally {
+      await without.close();
+    }
+  });
+
+  it("shows the directory error instead of an empty server", async () => {
+    const directory: DirectoryPort = {
+      async guildResources() {
+        throw new Error("Discord returned HTTP 503 while reading this server.");
+      },
+    };
+    const test = await harness({ directory });
+    try {
+      const { cookie } = await login(test);
+      const page = await fetch(`${test.base}/dashboard/guilds/${GUILD_A}/directory`, {
+        headers: { cookie },
+      });
+      expect(page.status).toBe(200);
+      const html = await page.text();
+      expect(html).toContain("The directory could not be read");
+      expect(html).toContain("Nothing was changed");
     } finally {
       await test.close();
     }

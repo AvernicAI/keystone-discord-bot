@@ -5,7 +5,7 @@
 > Machine truth: [`features.json`](../../machine/features.json). This page is generated.
 > The competitor columns stay in [[Parity-Matrix]]; this page is the implementation status.
 
-**136 features** across 17 domains: **120 in repo**, **3 partial**, **4 open**, **5 planned**. Live behaviour is marked 
+**136 features** across 17 domains: **121 in repo**, **2 partial**, **4 open**, **5 planned**. Live behaviour is marked 
 separately; a box means the code and its tests exist, not that a live guild has run it.
 
 `partial` means the foundation ships with evidence and a named visible capability is
@@ -26,7 +26,7 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 | Content | 7 | 6 | 0 | 0 | 0 |
 | Music | 4 | 1 | 0 | 1 | 0 |
 | AI | 7 | 6 | 0 | 1 | 0 |
-| Operations | 18 | 16 | 1 | 0 | 1 |
+| Operations | 18 | 17 | 0 | 0 | 1 |
 | Portability | 12 | 12 | 0 | 0 | 0 |
 | Invites | 3 | 3 | 0 | 0 | 0 |
 | Forms and applications | 4 | 4 | 0 | 0 | 0 |
@@ -174,7 +174,7 @@ names the written record in `liveRecord`; no row claims a gateway click it did n
 | Real subcommand surface | P7 | ✅ in repo | `packages/kernel/src/registry.test.ts`, `apps/bot/src/adapt.test.ts`, `apps/bot/src/command-sync.test.ts`, `apps/bot/src/interaction-harness.test.ts`, `modules/diagnostics/src/diagnostics.test.ts`, `modules/diagnostics/src/help/panel.test.ts`, `apps/bot/src/help-interactions.test.ts` · live: manual run |
 | In-Discord help hub | P7 | ✅ in repo | `modules/diagnostics/src/help/facts.ts`, `modules/diagnostics/src/help/panel.ts`, `modules/diagnostics/src/help/panel.test.ts`, `apps/bot/src/help-interactions.ts`, `apps/bot/src/help-interactions.test.ts` · live unverified |
 | In-bot configuration | P7 | ✅ in repo | `modules/setup/src/config.test.ts`, `modules/setup/src/commands/config.ts`, `packages/kernel/src/config.ts` · live: probe check |
-| Web dashboard | P6 | 🟡 partial | shipped: OAuth2/PKCE login and opaque Postgres sessions; schema-generated settings widgets and audited writes; fleet view, built-in and saved templates; config export/import/drift and analytics aggregates; scoped API tokens, signed webhooks and idempotent writes · open: a live Discord OAuth round trip (the probe uses a fake exchange) · `apps/web/src/web.test.ts`, `apps/web/src/settings-form.test.ts`, `scripts/live-probe.ts` · live unverified |
+| Web dashboard | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `apps/web/src/shell.test.ts`, `apps/web/src/directory.test.ts`, `apps/web/src/readiness.test.ts`, `apps/web/src/access.test.ts`, `memory/vault/03-Architecture/Dashboard.md` · live: manual run |
 | Dashboard auth foundation | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `packages/db/src/web-store.test.ts`, `memory/vault/03-Architecture/Dashboard.md` · live unverified |
 | Dashboard session hardening | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `apps/web/src/auth.ts`, `apps/web/src/oauth.ts`, `apps/web/src/rate-limit.ts`, `packages/db/src/web-store.test.ts`, `packages/db/src/migrations/0020-session-refresh.ts`, `memory/vault/03-Architecture/Dashboard.md` · live: probe check |
 | Dashboard settings writes | P6 | ✅ in repo | `apps/web/src/web.test.ts`, `apps/web/src/overview.ts`, `memory/vault/03-Architecture/Dashboard.md` · live: probe check |

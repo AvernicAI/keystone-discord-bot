@@ -34,8 +34,10 @@ mission closes, and it is measurable — which is the point.
 | `pnpm audit:visuals` | Fails coverage, evidence, palette and footer rules; prints the weakest surface. |
 | This page | The grammar, the rubric, and the rule for converting a surface. |
 
-A surface is anything a human sees: a V2 panel, an embed, a button row. If it has
-no ledger row, `audit:visuals` fails, so a new screen cannot ship invisible.
+A surface is anything a human sees: a V2 panel, an embed, a button row, a
+dashboard page. If it has no ledger row, `audit:visuals` fails, so a new screen
+cannot ship invisible. Dashboard rows use `component: "web"`, name the route and
+the page renderer they cover, and are graded on the same six criteria.
 
 ## The grammar
 
@@ -87,8 +89,9 @@ Each criterion is graded A–F in the ledger, and an **A requires live proof**.
 | Copy | Second person, specific, no jargon? | "operation completed" |
 
 Self-grading runs generous. Two rules keep it honest: an A needs a recorded live
-class (`probe`, `mcp`, `gateway`), and legacy surfaces start at **C or below**
-until a pass actually converts them.
+class (`probe`, `mcp`, `gateway` for Discord; `browser` for a real Chromium
+session against the running dashboard), and legacy surfaces start at **C or
+below** until a pass actually converts them.
 
 ## Converting one surface (the loop)
 
@@ -114,6 +117,15 @@ The audit prints this order live; today it starts with the case embed, then the
 community and analytics embeds, then the help hub and the three older V2 panels.
 The converted `moderation.timeline` is the reference implementation: copy its
 structure, not its copy.
+
+**Pass 78 put the dashboard on the ledger.** Every `render…` export in
+`apps/web/src/render.ts` now needs a `web` row, so the browser half of the
+product is graded by the same gate as the Discord half. The shell, catalog,
+activity, directory and analytics rows carry the strongest grades; the older
+portability, automation, fleet and instance pages are honest C rows with their
+next fix named. The dashboard's own version of the grammar is structural rather
+than markdown: one shell with a skip link, breadcrumbs, guild sidebar, read-time
+footer and no client JavaScript.
 
 **First conversion, proven live (2026-11-05, gateway).** A signed-in Discord web
 client ran `/mod history user:@Mr Bubba` in the development guild. The panel

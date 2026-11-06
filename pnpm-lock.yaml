@@ -303,6 +303,9 @@ importers:
       '@keystone/module-catalog':
         specifier: workspace:*
         version: link:../../packages/module-catalog
+      '@keystone/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       dotenv:
         specifier: ^16.4.0
         version: 16.6.1

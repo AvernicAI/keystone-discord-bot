@@ -26,7 +26,10 @@ remains a later option, not a requirement for the P6 settings surface.
 | `POST /dashboard/fleet/apply` | session + CSRF + per-guild authz | Apply the previewed plan; one audited settings write per module |
 | `GET /dashboard/instance` | session + owner | Deployment mode, session rotation, rate budgets, owner ids |
 | `POST /dashboard/instance/sessions/revoke` | session + owner + CSRF | Delete every dashboard session for a user id |
-| `GET /dashboard/guilds/:id` | session + guild authz | Overview page |
+| `GET /dashboard/guilds/:id` | session + guild authz | Overview: readiness checklist, goal-grouped module catalog, recent data links |
+| `POST /dashboard/guilds/:id/modules/:module/toggle` | session + guild authz + CSRF | Enable or disable one module through its own settings schema; one audit row, redirect with a named notice |
+| `GET /dashboard/guilds/:id/activity` | session + guild authz | Newest 50 audit rows for the guild, the same ledger the API reads |
+| `GET /dashboard/guilds/:id/directory` | session + guild authz | Read-only channels and roles, or the reason the directory is not wired |
 | `GET /dashboard/guilds/:id/settings/:module` | session + guild authz | Schema-generated settings widgets plus the module audit trail |
 | `POST /dashboard/guilds/:id/settings/:module` | session + guild authz + CSRF | Parse named widgets, save through the module schema, re-render field errors on rejection |
 | `GET /dashboard/guilds/:id/config/export` | session + guild authz | Download the guild's effective module settings as a checksummed JSON file |
@@ -45,8 +48,43 @@ remains a later option, not a requirement for the P6 settings surface.
 | `PATCH /api/v1/guilds/:id/settings/:module` | session + guild authz + CSRF, or bearer + `settings:write` | Update one module; JSON body |
 
 Every response carries `X-Content-Type-Options`, `Referrer-Policy`,
-`X-Frame-Options`, `Cross-Origin-Opener-Policy` and a restrictive CSP.
-Authenticated responses are `Cache-Control: no-store`.
+`X-Frame-Options`, `Cross-Origin-Opener-Policy` and a restrictive CSP:
+`default-src 'none'; img-src https://cdn.discordapp.com data:` plus inline
+styles. The only external request a dashboard page can make is a guild icon from
+the Discord CDN; a guild without an icon gets an initials tile instead. There is
+no script source, so no page can add client JavaScript without changing the
+policy on purpose. Authenticated responses are `Cache-Control: no-store`.
+
+## One shell, one palette
+
+`apps/web/src/shell.ts` owns the document every page shares: skip link, top bar,
+account menu with sign-out, breadcrumbs, an optional guild sidebar, the heading
+block and the footer that stamps the read time, the storage mode and the audit
+promise. `renderShell` escapes every value except the trusted `actions` HTML the
+page builder composed; `renderLegacyLayout` remains only for pages that keep
+their own `<h1>`.
+
+`apps/web/src/theme.ts` imports `ACCENTS` from `@keystone/ui` and derives the
+CSS variables from it, so a state colour means the same thing in a Discord panel
+and on a web page. `scripts/audit-visuals.ts` fails when a web surface writes a
+raw hex colour, and every page renderer must have a row in
+`memory/machine/surfaces.json`.
+
+The guild overview is a product surface, not a list of links:
+`apps/web/src/readiness.ts` computes four setup facts from the settings the bot
+actually reads and links each unfinished fact to its editor;
+`apps/web/src/module-groups.ts` groups the catalog by job (Safety, Community,
+Support, Operations); each module card has one Configure link and one toggle
+form. The toggle writes through `SettingsService`, appends the usual audit row
+and redirects with a notice that names the module and its new state.
+
+`apps/web/src/directory.ts` is the only new outbound Discord call in `apps/web`.
+`DirectoryPort` has two read methods, `DiscordDirectoryClient` implements them
+with the bot token, and `runtime.ts` only constructs it when `DISCORD_TOKEN` is
+present. The page reports a missing port or a failed read by name; it never
+renders an empty list as if the server had no channels. The port is deliberately
+read-only: turning it into a settings picker is a later pass that changes the
+form, not this read model.
 
 ## Sessions and limits
 

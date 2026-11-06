@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { HttpError } from "./http-error";
 import type { DiscordGuild, DiscordOAuth } from "./oauth";
 
@@ -15,23 +16,52 @@ export function canManageGuild(guild: Pick<DiscordGuild, "owner" | "permissions"
   }
 }
 
+/** A burst of page loads and redirects must not spend one Discord call each. */
+const GUILD_CACHE_MS = 30_000;
+
+interface CachedGuilds {
+  readonly expiresAt: number;
+  readonly guilds: Promise<readonly DiscordGuild[]>;
+}
+
 /**
  * Two checks, not one:
  * 1. the OAuth user may manage this guild;
  * 2. the bot is actually in the guild.
  *
- * The guild list is fetched fresh on each request, so a demotion or a guild
- * removal takes effect immediately. A browser-held permission cache is never
- * trusted.
+ * The OAuth guild list is cached for 30 seconds per access token (keyed by a
+ * hash, never the token itself) and an in-flight read is shared. Discord rate
+ * limits `/users/@me/guilds` per user, and a save-then-redirect sequence used to
+ * turn that limit into a 500 on a page the operator had just been sent to. A
+ * failed read is never cached. Thirty seconds is the freshness trade: a revoked
+ * manager can read for at most that long, while every write still revalidates
+ * against this same list. The bot-membership check is not cached, because it is
+ * one cheap guild read and the security-relevant half.
  */
 export class GuildAccessService {
+  private readonly cache = new Map<string, CachedGuilds>();
+
   constructor(
     private readonly oauth: Pick<DiscordOAuth, "fetchGuilds" | "botInGuild">,
+    private readonly now: () => number = Date.now,
+    private readonly ttlMs: number = GUILD_CACHE_MS,
   ) {}
 
+  private cachedGuilds(accessToken: string): Promise<readonly DiscordGuild[]> {
+    const key = createHash("sha256").update(accessToken).digest("hex");
+    const cached = this.cache.get(key);
+    if (cached && cached.expiresAt > this.now()) return cached.guilds;
+    const guilds = this.oauth.fetchGuilds(accessToken).catch((error: unknown) => {
+      this.cache.delete(key);
+      throw error;
+    });
+    this.cache.set(key, { expiresAt: this.now() + this.ttlMs, guilds });
+    return guilds;
+  }
+
   async manageableGuilds(accessToken: string): Promise<DiscordGuild[]> {
-    const guilds = await this.oauth.fetchGuilds(accessToken);
-    return guilds.filter(canManageGuild);
+    const guilds = await this.cachedGuilds(accessToken);
+    return [...guilds].filter(canManageGuild);
   }
 
   /**
@@ -42,7 +72,7 @@ export class GuildAccessService {
    * per guild. This is the one place a multi-guild selection is authorized.
    */
   async authorizeMany(accessToken: string, guildIds: readonly string[]): Promise<DiscordGuild[]> {
-    const guilds = await this.oauth.fetchGuilds(accessToken);
+    const guilds = await this.cachedGuilds(accessToken);
     const selected: DiscordGuild[] = [];
     for (const guildId of guildIds) {
       const guild = guilds.find((candidate) => candidate.id === guildId);

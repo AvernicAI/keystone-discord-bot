@@ -28,6 +28,7 @@ import {
 import { HttpError } from "./http-error";
 import { planFingerprint, type SettingsPlanModule } from "./settings-plan";
 import type { DiscordGuild } from "./oauth";
+import { buildReadiness, type Readiness } from "./readiness";
 import {
   SECRET_SETTING_KEY,
   SettingsValidationError,
@@ -50,6 +51,7 @@ export interface DashboardModule {
   description: string;
   version: string;
   enabled: boolean;
+  commandCount: number;
   settings: Record<string, unknown>;
 }
 
@@ -215,6 +217,7 @@ export class DashboardService {
       description: module.description,
       version: module.version,
       enabled: settings.enabled !== false,
+      commandCount: module.commands.length,
       settings,
     };
   }
@@ -236,6 +239,47 @@ export class DashboardService {
       latestImport: overview.latestImport,
       modules,
     };
+  }
+
+  /**
+   * The setup checklist, computed from the same read model the page already
+   * loaded plus the two destination settings a new server must fill in. A
+   * stored value that no longer parses makes its item "not done" rather than
+   * taking the whole overview down.
+   */
+  async readiness(guild: DiscordGuild, view: DashboardView): Promise<Readiness> {
+    const [logging, community] = await Promise.all([
+      this.settings.get(guild.id, "logging").catch(() => null),
+      this.settings.get(guild.id, "community").catch(() => null),
+    ]);
+    const loggingReady =
+      Boolean(logging) && typeof logging?.channelId === "string" && logging.channelId.length > 0;
+    const welcome = community?.welcome;
+    const welcomeReady =
+      Boolean(welcome) &&
+      typeof welcome === "object" &&
+      (welcome as Record<string, unknown>).enabled === true &&
+      typeof (welcome as Record<string, unknown>).channelId === "string" &&
+      String((welcome as Record<string, unknown>).channelId).length > 0;
+
+    return buildReadiness({
+      guildId: guild.id,
+      modulesEnabled: view.modules.filter((module) => module.enabled).length,
+      modulesTotal: view.modules.length,
+      loggingReady,
+      welcomeReady,
+      hasImport: view.latestImport !== null,
+    });
+  }
+
+  /**
+   * Newest-first audit rows for the guild activity page. The audit store owns
+   * the ordering and the cap; this returns a browser-sized slice.
+   */
+  async activity(guildId: string, limit = 50): Promise<readonly AuditEventRecord[]> {
+    if (!this.audit) return [];
+    const rows = await this.audit.list(guildId, 100);
+    return rows.slice(0, Math.min(Math.max(limit, 1), 100));
   }
 
   /**

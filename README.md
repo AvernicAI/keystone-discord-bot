@@ -11,7 +11,7 @@ tickets, economy and AI all stand on.
 > feature in an afternoon.
 
 **Current facts:** **20/100 roots** · **141 real subcommands** · **161 actions** ·
-**4 context menus** · **12 modules** · **743 tests across 101 files**. The full
+**4 context menus** · **12 modules** · **773 tests across 106 files**. The full
 gate is token-free.
 
 This repo is both the product and the course: every module has a spec, tests, a
@@ -168,19 +168,22 @@ analytics, scoped API tokens, signed webhooks and `Idempotency-Key` replay.
 GET  /healthz                               public, no secrets
 GET  /login, /auth/callback                 OAuth2 code + PKCE, state and iss checks
 GET  /dashboard, /dashboard/fleet           manageable servers and fleet templates
-GET  /dashboard/guilds/:id                  overview, settings, analytics, drift
+GET  /dashboard/guilds/:id                  overview: readiness, module catalog, toggle
+GET  /dashboard/guilds/:id/{analytics,activity,directory}
+GET  /dashboard/guilds/:id/{settings,config,templates}
 GET  /api/v1/...                            reads and a schema-validated settings PATCH
 ```
 
 Every guild route checks both the OAuth user and the bot's membership. The
-`:guildId` in a URL is never trusted. A live Discord OAuth round trip is still
-open; the read/write path is proven over real local HTTP and Postgres. See
-[Dashboard](memory/vault/03-Architecture/Dashboard.md).
+`:guildId` in a URL is never trusted. A real Discord OAuth login, the module
+toggle and its audit row, the activity page and the channel/role directory are
+proven in a browser on Postgres; token refresh and revocation remain probe-only.
+See [Dashboard](memory/vault/03-Architecture/Dashboard.md).
 
 ## Proof
 
-- `pnpm check` covers **743 tests across 101 files**, 35/35 claim checks, the
-  visual-surface audit and 5,025 memory checks without a token, database or
+- `pnpm check` covers **773 tests across 106 files**, 35/35 claim checks, the
+  visual-surface audit and 5,159 memory checks without a token, database or
   network.
 - `pnpm probe:live` is **28/28** on the local stack: SQL, Redis, the queue,
   settings survival, temporary expiry, scheduled delivery, portability, web and
@@ -188,8 +191,8 @@ open; the read/write path is proven over real local HTTP and Postgres. See
 - **Docker Desktop 29.9.2** runs the repo's compose Postgres 16.15 and Redis.
   Machine evidence lives in [`live.json`](memory/machine/live.json).
 - What is not proven live is named in [Status.md](memory/vault/01-Mission/Status.md):
-  a human slash invocation, right-click, member join/leave and a live Discord
-  OAuth round trip still need a real client.
+  a human slash invocation, right-click, member join/leave and live Discord token
+  refresh/revocation still need a real client.
 
 No feature is claimed live because it has a test. The evidence rules are in
 [Memory-Audit-2026-11-03.md](memory/vault/01-Mission/Memory-Audit-2026-11-03.md).

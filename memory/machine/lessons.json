@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-03",
-  "target": 14,
+  "updatedAt": "2026-11-05",
+  "target": 15,
   "lessons": [
     {
       "id": "01-the-module-contract",
@@ -214,6 +214,22 @@
           "text": "12 modules",
           "source": "modules"
         }
+      ]
+    },
+    {
+      "id": "15-dashboard-as-a-product",
+      "order": 15,
+      "path": "vault/05-Learning/15-dashboard-as-a-product.md",
+      "files": [
+        "apps/web/src/shell.ts",
+        "apps/web/src/theme.ts",
+        "apps/web/src/directory.ts",
+        "apps/web/src/readiness.ts",
+        "apps/web/src/routes/dashboard.ts"
+      ],
+      "proofCommands": [
+        "pnpm test -- apps/web/src/shell.test.ts apps/web/src/directory.test.ts apps/web/src/readiness.test.ts",
+        "pnpm audit:visuals"
       ]
     }
   ]
