@@ -1,0 +1,41 @@
+server:
+  port: 2333
+  address: 0.0.0.0
+
+lavalink:
+  server:
+    # Local development default; override with LAVALINK_PASSWORD in .env and in
+    # the bot's environment. Never commit a production password.
+    password: "${LAVALINK_PASSWORD:keystone-lavalink}"
+    sources:
+      # Direct http(s) audio URLs need no source plugin and no scraper. Add a
+      # source plugin only after checking its licence and the platform's terms.
+      http: true
+    bufferDurationMs: 400
+    frameBufferDurationMs: 5000
+    opusEncodingQuality: 10
+    resamplingQuality: HIGH
+    trackStuckThresholdMs: 10000
+    useSeekGhosting: true
+    youtubePlaylistLoadLimit: 6
+    playerUpdateInterval: 5
+    youtubeSearchEnabled: false
+    soundcloudSearchEnabled: false
+    gc-warnings: true
+
+plugins:
+  # Empty on purpose: a plugin is an operator choice, not a bundled scraper.
+
+metrics:
+  prometheus:
+    enabled: false
+    endpoint: /metrics
+
+logging:
+  file:
+    max-history: 7
+    max-size: 10MB
+  path: ./logs/
+  level:
+    root: INFO
+    lavalink: INFO

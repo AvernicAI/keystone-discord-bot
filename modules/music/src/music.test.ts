@@ -44,6 +44,7 @@ function context(
     userId: USER,
     subcommand,
     options,
+    voiceChannelId: "voice-1",
     permissions: overrides.permissions ?? ["ManageGuild"],
   });
   const ctx = createTestContext({
@@ -56,21 +57,27 @@ function context(
 }
 
 describe("/music command", () => {
-  it("registers one root with eight subcommands inside the budget", () => {
+  it("registers one root with fourteen subcommands inside the budget", () => {
     const registry = new ModuleRegistry().register(musicModule);
     expect(registry.getCommand("music")?.moduleId).toBe("music");
     expect(registry.getCommand("music")?.definition.subcommands?.map((entry) => entry.name)).toEqual([
       "play",
+      "resume",
+      "pause",
+      "skip",
+      "stop",
       "queue",
       "add",
       "remove",
       "clear",
-      "skip",
-      "stop",
+      "volume",
+      "loop",
+      "shuffle",
+      "jump",
       "status",
     ]);
     expect(auditBudget(registry).commands).toBe(1);
-    expect(auditBudget(registry).subcommands).toBe(8);
+    expect(auditBudget(registry).subcommands).toBe(14);
   });
 
   it("saves a real row and reports the count from the store", async () => {
@@ -88,10 +95,10 @@ describe("/music command", () => {
       requestedBy: USER,
     });
     expect(interaction.lastReply?.content).toContain("position 1/2");
-    expect(interaction.lastReply?.content).toContain("Nothing is playing");
+    expect(interaction.lastReply?.content).toContain("Use `/music play` with no query");
   });
 
-  it("lists a saved queue as saved-only and never claims audio is playing", async () => {
+  it("lists the play queue with the current track at its head", async () => {
     const { ctx, interaction, store } = context("queue");
     await store.add(
       GUILD,
@@ -105,9 +112,9 @@ describe("/music command", () => {
     );
     await music.execute(ctx);
 
-    expect(interaction.lastReply?.content).toContain("Saved queue · 1/2 · nothing is playing");
+    expect(interaction.lastReply?.content).toContain("Play queue · 1/2 · no player");
     expect(interaction.lastReply?.content).toContain("**Tone**");
-    expect(interaction.lastReply?.content).toContain("no audio is played");
+    expect(interaction.lastReply?.content).toContain("The head is the current track");
   });
 
   it("removes one track by position and clears the rest", async () => {
@@ -128,13 +135,10 @@ describe("/music command", () => {
       2,
     );
     await music.execute(cleared.ctx);
-    expect(cleared.interaction.lastReply?.content).toContain("Cleared 1 saved track(s)");
+    expect(cleared.interaction.lastReply?.content).toContain("Cleared 1 track(s)");
   });
 
-  it("refuses remove and clear for a caller without ManageGuild", async () => {
-    const remove = context("remove", { position: 1 }, { permissions: ["SendMessages"] });
-    await expect(music.execute(remove.ctx)).rejects.toThrow(/ManageGuild/);
-
+  it("refuses clear for a caller without ManageGuild", async () => {
     const clear = context("clear", {}, { permissions: ["SendMessages"] });
     await expect(music.execute(clear.ctx)).rejects.toThrow(/ManageGuild/);
   });
@@ -159,7 +163,7 @@ describe("/music command", () => {
     expect(interaction.lastReply?.content).toContain("Music is disabled");
     expect(interaction.lastReply?.content).toContain("playback UNAVAILABLE");
     expect(interaction.lastReply?.content).toContain("/config set module=music key=enabled value=true");
-    expect(interaction.lastReply?.content).toContain("Queue record: 0 saved track(s)");
+    expect(interaction.lastReply?.content).toContain("Queue record: 0 track(s)");
     expect(interaction.lastReply?.content).toContain("community_records` in SQL mode");
   });
 });
@@ -188,9 +192,14 @@ describe("music service", () => {
       MUSIC_DISABLED_MESSAGE,
     );
     await expect(musicService.list(GUILD)).rejects.toThrow(MUSIC_DISABLED_MESSAGE);
-    await expect(musicService.play(GUILD, USER, "https://example.com/a.mp3")).rejects.toThrow(
-      MUSIC_DISABLED_MESSAGE,
-    );
+    await expect(
+      musicService.play({
+        guildId: GUILD,
+        userId: USER,
+        query: "https://example.com/a.mp3",
+        voiceChannelId: "voice-1",
+      }),
+    ).rejects.toThrow(MUSIC_DISABLED_MESSAGE);
     await expect(musicService.status(GUILD)).resolves.toMatchObject({
       tracks: 0,
       settings: { enabled: false, maxTracks: 2 },
@@ -267,7 +276,7 @@ describe("music dispatch", () => {
 
     expect(outcome.status).toBe("ok");
     expect(interaction.lastReply?.content).toContain("Saved");
-    expect(interaction.lastReply?.content).toContain("Nothing is playing");
+    expect(interaction.lastReply?.content).toContain("position 1/2");
     expect((await store.list(GUILD)).tracks).toHaveLength(1);
   });
 });

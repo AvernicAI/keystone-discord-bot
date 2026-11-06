@@ -400,29 +400,49 @@ const commandCopyDe: Record<string, () => string> = {
   "command.analytics.option.days.description": () =>
     `Zeitraum in Tagen (1–90); Standard ist die Moduleinstellung oder 7`,
   "command.music.description": () =>
-    `Speichert Titel in einer dauerhaften Warteschlange und prüft die Wiedergabebereitschaft.`,
+    `Eine dauerhafte Warteschlange und ein echter Lavalink-Player.`,
   "command.music.play.description": () =>
-    `Fordert die Wiedergabe an; verweigert, wenn keine installiert ist.`,
-  "command.music.queue.description": () =>
-    `Zeigt die gespeicherte Warteschlange und ob Audio wirklich läuft.`,
-  "command.music.add.description": () =>
-    `Speichert einen Titel für später; dies spielt nie Audio ab.`,
-  "command.music.remove.description": () =>
-    `Entfernt einen gespeicherten Titel nach Position.`,
-  "command.music.clear.description": () =>
-    `Leert alle gespeicherten Titel. Es bleibt nichts am Laufen.`,
+    `Tritt deinem Sprachkanal bei und spielt eine URL oder die Warteschlange.`,
+  "command.music.resume.description": () =>
+    `Setzt die Warteschlange oder den pausierten Titel fort.`,
+  "command.music.pause.description": () =>
+    `Pausiert den aktuellen Titel und behält die Warteschlange.`,
   "command.music.skip.description": () =>
-    `Überspringt den aktuellen Titel; verweigert, wenn kein Player läuft.`,
+    `Überspringt den aktuellen Titel und spielt den nächsten.`,
   "command.music.stop.description": () =>
-    `Stoppt die Wiedergabe; verweigert, wenn kein Player läuft.`,
+    `Stoppt die Wiedergabe, leert die Warteschlange und verlässt den Kanal.`,
+  "command.music.queue.description": () =>
+    `Zeigt aktuellen Titel, die nächsten Titel und den Loop-Zustand.`,
+  "command.music.add.description": () =>
+    `Speichert eine URL am Ende der Warteschlange, ohne Audio zu starten.`,
+  "command.music.remove.description": () =>
+    `Entfernt einen Titel nach Position; Position 1 wird übersprungen.`,
+  "command.music.clear.description": () =>
+    `Stoppt die Wiedergabe und leert die Warteschlange, bleibt im Kanal.`,
+  "command.music.volume.description": () =>
+    `Setzt die Lautstärke von 0 bis 200 Prozent.`,
+  "command.music.loop.description": () =>
+    `Wiederholung aus, ein Titel oder die ganze Warteschlange.`,
+  "command.music.shuffle.description": () =>
+    `Mischt die kommenden Titel; der aktuelle bleibt vorn.`,
+  "command.music.jump.description": () =>
+    `Springt zu einer Position und verwirft die Titel davor.`,
   "command.music.status.description": () =>
-    `Zeigt Modulstatus, Warteschlangenlänge und den genauen Wiedergabeblocker.`,
-  "command.music.option.query.description": () =>
-    `Audio-URL zum Speichern; Wiedergabe ist in diesem Build nicht verfügbar`,
+    `Zeigt Node, Latenz, Player und den genauen Wiedergabestatus.`,
+  "command.music.play.option.query.description": () =>
+    `http(s)-Audio-URL; leer lassen, um die Warteschlange fortzusetzen`,
+  "command.music.add.option.query.description": () =>
+    `http(s)-Audio-URL, die ohne Abspielen gespeichert wird`,
   "command.music.option.title.description": () =>
     `Optionale Bezeichnung für den gespeicherten Titel`,
   "command.music.option.position.description": () =>
-    `1-basierte Position in der gespeicherten Warteschlange`,
+    `1-basierte Position; 1 ist der aktuelle Titel`,
+  "command.music.option.percent.description": () =>
+    `Lautstärke von 0 bis 200`,
+  "command.music.option.mode.description": () =>
+    `Was am Titelende wiederholt werden soll`,
+  "command.music.option.next.description": () =>
+    `Diesen Titel direkt nach dem aktuellen einsortieren`,
   "command.form.description": () =>
     `Erstellt Bewerbungsformulare, veröffentlicht ein Panel und prüft Einsendungen.`,
   "command.form.create.description": () =>

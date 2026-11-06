@@ -226,7 +226,28 @@ legend{padding:0 7px;font-weight:650;font-size:13px}
 .footer a{color:var(--muted)}
 hr.sep{border:0;border-top:1px solid var(--line-soft);margin:18px 0}
 .kbd{font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;color:var(--muted);background:var(--panel-2)}
+.music-stage{display:grid;grid-template-columns:minmax(220px,320px) minmax(0,1fr);gap:18px;align-items:stretch;margin:0 0 16px}
+.music-art{min-height:280px;border-radius:16px;border:1px solid var(--line);background:radial-gradient(120% 120% at 20% 10%,rgba(88,101,242,.55),rgba(15,18,26,.9) 60%),var(--panel);background-size:cover;background-position:center;display:grid;place-items:center;overflow:hidden;position:relative}
+.music-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(8,10,15,.72));pointer-events:none}
+.music-art span{font-size:64px;color:rgba(255,255,255,.5);z-index:1}
+.music-now{display:flex;flex-direction:column;justify-content:center;padding:24px}
+.music-eyebrow{display:flex;align-items:center;gap:10px;font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--faint);font-weight:700}
+.music-title{font-size:clamp(22px,3vw,32px);letter-spacing:-.025em;line-height:1.15;margin:10px 0 4px;overflow-wrap:anywhere}
+.music-artist{color:var(--muted);margin:0 0 14px;font-size:13.5px}
+.music-progress{height:8px;border-radius:999px;background:var(--panel-3);overflow:hidden}
+.music-progress span{display:block;height:100%;background:linear-gradient(90deg,var(--ok),#8ce7ff);border-radius:999px;min-width:0}
+.music-time{display:flex;justify-content:space-between;color:var(--faint);font-size:11.5px;font-variant-numeric:tabular-nums;margin:5px 0 16px}
+.music-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 9px}
+.music-controls:last-child{margin-bottom:0}
+.music-action{display:inline;margin:0}
+.music-start-form{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.music-start-form label{display:grid;gap:5px;font-size:12px;color:var(--muted);font-weight:600}
+.music-start-form label.grow{flex:1;min-width:240px}
+.music-start-form select,.music-start-form input[type=url]{background:#0a0e15;border:1px solid var(--line);border-radius:8px;padding:9px 11px;color:var(--text);font:inherit;min-width:170px;width:100%}
+.queue-current{background:rgba(88,101,242,.07)}
 @media (max-width:900px){
+  .music-stage{grid-template-columns:1fr}
+  .music-art{min-height:180px}
   .layout{grid-template-columns:1fr;gap:18px;padding:18px 16px 48px}
   .sidebar{position:static;gap:10px}
   .nav{display:flex;overflow-x:auto;gap:4px;padding-bottom:4px}

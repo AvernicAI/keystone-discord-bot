@@ -30,7 +30,7 @@ cannot right-click, so it is covered by a command test rather than a live click.
 ## Verified
 
 ```text
-pnpm check                            exit 0 · 773 tests / 106 files
+pnpm check                            exit 0 · 828 tests / 112 files
   modules/ai/src/provider.test.ts     4 tests (incl. think:false opt-in)
   apps/bot/src/ai-events.test.ts      4 tests (bot gate + dev guild seam)
   apps/bot/src/prefix.test.ts         8 tests (parse, dispatch, guild gate)
@@ -39,7 +39,7 @@ pnpm check                            exit 0 · 773 tests / 106 files
   modules/ai/src/context.test.ts      3 tests (Explain with AI menu)
   modules/community/src/commands.test.ts 10 tests (incl. /ticket summary and stats)
   packages/db/src/ai.test.ts          2 tests
-pnpm budget                           20/100 roots · 141 subcommands · 161 actions · 4 context menus, status OK
+pnpm budget                           20/100 roots · 147 subcommands · 167 actions · 4 context menus, status OK
 pnpm memory:check                     current (pass 33)
 ```
 

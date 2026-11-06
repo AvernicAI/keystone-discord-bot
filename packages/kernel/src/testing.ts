@@ -26,6 +26,8 @@ export interface FakeInteractionInit {
   channelId?: string | null;
   options?: Record<string, string | number | boolean | null>;
   permissions?: string[];
+  voiceChannelId?: string | null;
+  roleIds?: string[];
   subcommand?: string;
   subcommandGroup?: string;
 }
@@ -49,6 +51,8 @@ export class FakeInteraction implements InteractionLike {
   readonly subcommand?: string;
   readonly subcommandGroup?: string;
   readonly permissions: readonly string[];
+  readonly voiceChannelId?: string | null;
+  readonly roleIds: readonly string[];
   readonly replies: ReplyInput[] = [];
 
   #replied = false;
@@ -68,6 +72,8 @@ export class FakeInteraction implements InteractionLike {
     this.subcommand = init.subcommand;
     this.subcommandGroup = init.subcommandGroup;
     this.permissions = init.permissions ?? [];
+    this.voiceChannelId = init.voiceChannelId ?? null;
+    this.roleIds = init.roleIds ?? [];
   }
 
   get replied(): boolean {

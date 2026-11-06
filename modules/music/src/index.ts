@@ -7,11 +7,22 @@ export {
 } from "./settings";
 export { InMemoryMusicStore } from "./store";
 export {
-  MusicService,
+  DJ_REFUSAL,
   MUSIC_DISABLED_MESSAGE,
+  MusicService,
+  isDj,
   parseTrack,
+  type MusicPlayInput,
   type MusicStatus,
 } from "./music";
+export {
+  MUSIC_PANEL_TTL_MS,
+  formatDuration,
+  musicCustomId,
+  musicPanel,
+  type MusicPanelAction,
+  type MusicPanelOptions,
+} from "./panel";
 export {
   PLAYBACK_MISSING,
   PLAYBACK_UNAVAILABLE_REASON,

@@ -7,7 +7,9 @@ import {
   type MusicQueue,
   type MusicQueueAddResult,
   type MusicQueueClearResult,
+  type MusicQueueInsertResult,
   type MusicQueueRemoveResult,
+  type MusicQueueShiftResult,
   type MusicStore,
   type MusicTrack,
 } from "@keystone/kernel";
@@ -48,10 +50,11 @@ function toQueue(row: RecordRow | undefined, guildId: string): MusicQueue {
 }
 
 /**
- * Postgres saved queue. It reuses `community_records` rather than adding a
+ * Postgres play queue. It reuses `community_records` rather than adding a
  * `music_queue` table: the row is `(guild, music_queue, default)` and its JSON
- * payload is the ordered track list. The guild row lock serializes concurrent
- * adds so the cap cannot be exceeded by a lost update.
+ * payload is the ordered track list, with the current track at the head. The
+ * guild row lock serializes concurrent writes so the cap cannot be exceeded by
+ * a lost update.
  */
 export class DrizzleMusicStore implements MusicStore {
   constructor(private readonly db: PgDatabase<any, typeof schema>) {}
@@ -74,22 +77,10 @@ export class DrizzleMusicStore implements MusicStore {
   async add(guildId: string, track: MusicTrack, maxTracks: number): Promise<MusicQueueAddResult> {
     return this.db.transaction(async (tx) => {
       await this.#lockGuild(tx, guildId);
-      const [row] = await tx
-        .select()
-        .from(communityRecords)
-        .where(
-          and(
-            eq(communityRecords.guildId, guildId),
-            eq(communityRecords.kind, MUSIC_QUEUE_KIND),
-            eq(communityRecords.key, MUSIC_QUEUE_KEY),
-          ),
-        )
-        .limit(1);
-      const current = toQueue(row, guildId);
+      const current = toQueue(await this.#read(tx, guildId), guildId);
       if (current.tracks.length >= maxTracks) {
         return { queue: current, added: false };
       }
-
       const next: MusicQueue = {
         ...current,
         tracks: [...current.tracks, track],
@@ -100,38 +91,68 @@ export class DrizzleMusicStore implements MusicStore {
     });
   }
 
-  async remove(guildId: string, position: number): Promise<MusicQueueRemoveResult> {
+  async insertAt(
+    guildId: string,
+    index: number,
+    track: MusicTrack,
+    maxTracks: number,
+  ): Promise<MusicQueueInsertResult> {
     return this.db.transaction(async (tx) => {
       await this.#lockGuild(tx, guildId);
-      const [row] = await tx
-        .select()
-        .from(communityRecords)
-        .where(
-          and(
-            eq(communityRecords.guildId, guildId),
-            eq(communityRecords.kind, MUSIC_QUEUE_KIND),
-            eq(communityRecords.key, MUSIC_QUEUE_KEY),
-          ),
-        )
-        .limit(1);
-      const current = toQueue(row, guildId);
-      if (!Number.isInteger(position) || position < 1 || position > current.tracks.length) {
-        return { queue: current };
+      const current = toQueue(await this.#read(tx, guildId), guildId);
+      if (current.tracks.length >= maxTracks) {
+        return { queue: current, added: false };
       }
-
       const tracks = [...current.tracks];
-      const [removed] = tracks.splice(position - 1, 1);
+      const at = Math.max(0, Math.min(Number.isInteger(index) ? index : tracks.length, tracks.length));
+      tracks.splice(at, 0, track);
+      const next = { ...current, tracks, updatedAt: nowIso() };
+      await this.#save(tx, guildId, next.tracks);
+      return { queue: next, added: true };
+    });
+  }
+
+  async replace(guildId: string, tracks: readonly MusicTrack[]): Promise<MusicQueue> {
+    return this.db.transaction(async (tx) => {
+      await this.#lockGuild(tx, guildId);
       if (tracks.length === 0) {
         await this.#delete(tx, guildId);
       } else {
         await this.#save(tx, guildId, tracks);
       }
+      return { guildId, tracks: tracks.map((track) => ({ ...track })), updatedAt: nowIso() };
+    });
+  }
+
+  async remove(guildId: string, position: number): Promise<MusicQueueRemoveResult> {
+    return this.db.transaction(async (tx) => {
+      await this.#lockGuild(tx, guildId);
+      const current = toQueue(await this.#read(tx, guildId), guildId);
+      if (!Number.isInteger(position) || position < 1 || position > current.tracks.length) {
+        return { queue: current };
+      }
+      const tracks = [...current.tracks];
+      const [removed] = tracks.splice(position - 1, 1);
+      if (tracks.length === 0) await this.#delete(tx, guildId);
+      else await this.#save(tx, guildId, tracks);
       return {
-        queue: {
-          guildId,
-          tracks,
-          updatedAt: nowIso(),
-        },
+        queue: { guildId, tracks, updatedAt: nowIso() },
+        removed,
+      };
+    });
+  }
+
+  async shift(guildId: string): Promise<MusicQueueShiftResult> {
+    return this.db.transaction(async (tx) => {
+      await this.#lockGuild(tx, guildId);
+      const current = toQueue(await this.#read(tx, guildId), guildId);
+      if (current.tracks.length === 0) return { queue: current };
+      const tracks = [...current.tracks];
+      const removed = tracks.shift();
+      if (tracks.length === 0) await this.#delete(tx, guildId);
+      else await this.#save(tx, guildId, tracks);
+      return {
+        queue: { guildId, tracks, updatedAt: nowIso() },
         removed,
       };
     });
@@ -140,21 +161,28 @@ export class DrizzleMusicStore implements MusicStore {
   async clear(guildId: string): Promise<MusicQueueClearResult> {
     return this.db.transaction(async (tx) => {
       await this.#lockGuild(tx, guildId);
-      const [row] = await tx
-        .select()
-        .from(communityRecords)
-        .where(
-          and(
-            eq(communityRecords.guildId, guildId),
-            eq(communityRecords.kind, MUSIC_QUEUE_KIND),
-            eq(communityRecords.key, MUSIC_QUEUE_KEY),
-          ),
-        )
-        .limit(1);
-      const removed = tracksFrom(row).length;
+      const removed = tracksFrom(await this.#read(tx, guildId)).length;
       await this.#delete(tx, guildId);
       return { queue: emptyMusicQueue(guildId, nowIso()), removed };
     });
+  }
+
+  async #read(
+    tx: PgDatabase<any, typeof schema>,
+    guildId: string,
+  ): Promise<RecordRow | undefined> {
+    const [row] = await tx
+      .select()
+      .from(communityRecords)
+      .where(
+        and(
+          eq(communityRecords.guildId, guildId),
+          eq(communityRecords.kind, MUSIC_QUEUE_KIND),
+          eq(communityRecords.key, MUSIC_QUEUE_KEY),
+        ),
+      )
+      .limit(1);
+    return row;
   }
 
   async #save(

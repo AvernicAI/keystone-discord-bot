@@ -5,7 +5,7 @@
 > Generated from the live `ModuleRegistry`. This is the list Discord receives.
 > Run `pnpm commands:catalog` after changing a command definition.
 
-**20 roots · 141 subcommands · 161 total actions · 4 context menus · 20/100 global roots used.**
+**20 roots · 147 subcommands · 167 total actions · 4 context menus · 20/100 global roots used.**
 
 A root is one of Discord's 100 global chat-input commands. Subcommands live
 inside that root and do not spend another slot. Type `/` in Discord, choose a
@@ -30,7 +30,7 @@ and appear under right-click → Apps.
 | `/invites` | `invites` | 3 |
 | `/logging` | `logging` | 7 |
 | `/analytics` | `analytics` | 6 |
-| `/music` | `music` | 8 |
+| `/music` | `music` | 14 |
 | `/form` | `forms` | 8 |
 | `/event` | `events` | 7 |
 | `/modmail` | `modmail` | 6 |
@@ -259,18 +259,24 @@ Read-only guild analytics from the bot's own logs, cases, invites, tickets and c
 
 ## `/music`
 
-Save tracks in a durable queue and inspect playback readiness.
+Play, queue and control audio through a real Lavalink player.
 
 | Subcommand | Description | Options |
 | --- | --- | --- |
-| `/music play` | Ask the playback backend to play; refuses when none is installed. | `query` |
-| `/music queue` | Show the saved queue and whether audio is actually playing. | — |
-| `/music add` | Save a track for later; this never plays audio. | `query`, `title` |
-| `/music remove` | Remove one saved track by position. | `position` |
-| `/music clear` | Clear every saved track. Nothing is left playing. | — |
-| `/music skip` | Skip the current track; refuses when there is no player. | — |
-| `/music stop` | Stop playback; refuses when there is no player. | — |
-| `/music status` | Show module state, queue count and the exact playback blocker. | — |
+| `/music play` | Join your voice channel and play a URL, or resume the saved queue. | `query`, `next` |
+| `/music resume` | Resume the saved queue or unpause the current track. | — |
+| `/music pause` | Pause the current track and keep the queue. | — |
+| `/music skip` | Skip the current track and play the next one. | — |
+| `/music stop` | Stop playback, empty the queue and leave the voice channel. | — |
+| `/music queue` | Show the current track, the next tracks and the loop state. | — |
+| `/music add` | Save a URL at the end of the play queue without starting audio. | `query`, `title` |
+| `/music remove` | Remove one track by position; removing 1 skips it. | `position` |
+| `/music clear` | Stop playback and empty the queue but stay in voice. | — |
+| `/music volume` | Set the player volume from 0 to 200 percent. | `percent` |
+| `/music loop` | Repeat off, one track or the whole queue. | `mode` |
+| `/music shuffle` | Shuffle the upcoming tracks and keep the current one at the head. | — |
+| `/music jump` | Jump to a position in the queue and drop the tracks before it. | `position` |
+| `/music status` | Show node identity, latency, players and the exact playback state. | — |
 
 ## `/form`
 

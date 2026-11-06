@@ -3,6 +3,9 @@ import {
   type AnalyticsSnapshot,
   type ApiTokenRecord,
   type AuditEventRecord,
+  type MusicControlState,
+  type MusicLoopMode,
+  type MusicQueue,
   type WebhookDelivery,
   type WebhookSubscription,
 } from "@keystone/kernel";
@@ -1429,6 +1432,248 @@ export function renderDirectory(
       csrfToken,
       guild,
       section: "directory",
+      head: true,
+      actions: `<a class="btn small" href="${base}">Refresh</a>`,
+    },
+    body,
+  );
+}
+
+export interface MusicDashboardView {
+  readonly state?: MusicControlState;
+  /** The durable row, read directly; it exists even when no bot is reporting. */
+  readonly queue?: MusicQueue;
+  readonly available: boolean;
+  /** False when the bot is online but its last player report is older than 20s. */
+  readonly fresh?: boolean;
+  readonly enabled: boolean;
+  readonly channels: readonly DirectoryChannel[];
+  readonly notice?: { readonly kind: "ok" | "error"; readonly text: string };
+  readonly unavailableReason?: string;
+}
+
+function ago(at: string | undefined): string {
+  if (!at) return "never";
+  const parsed = Date.parse(at);
+  if (!Number.isFinite(parsed)) return "never";
+  const seconds = Math.max(0, Math.round((Date.now() - parsed) / 1_000));
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  return `${hours}h ago`;
+}
+
+function clock(ms: number | undefined): string {
+  if (ms === undefined || !Number.isFinite(ms) || ms < 0) return "0:00";
+  const total = Math.floor(ms / 1_000);
+  const hours = Math.floor(total / 3_600);
+  const minutes = Math.floor((total % 3_600) / 60);
+  const seconds = total % 60;
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+    : `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+/**
+ * The music page is a remote, not a second player. Every control is one POST
+ * through Redis to the bot that owns voice; the page renders only state the bot
+ * reported, including the node's last position. With no bus it says exactly
+ * which process is missing instead of showing a dead button.
+ */
+export function renderMusic(
+  username: string,
+  guild: DiscordGuild,
+  csrfToken: string,
+  view: MusicDashboardView,
+): string {
+  const base = `/dashboard/guilds/${encodePathSegment(guild.id)}/music`;
+  const control = `${base}/control`;
+  const player = view.state?.player;
+  const track = player?.track;
+  const queue = view.queue?.tracks ?? view.state?.queue.tracks ?? [];
+  const live = view.available && (view.fresh ?? true);
+  // Idle is a terminal state: the bot stops reporting it, so age alone is not
+  // evidence that it is wrong. Playing and paused reports are live claims.
+  const stale =
+    view.available &&
+    !live &&
+    view.state?.player !== undefined &&
+    view.state.player.state !== "idle";
+  const voiceChannels = view.channels.filter(
+    (channel) => channel.kind === "voice" || channel.kind === "stage",
+  );
+  const textChannels = view.channels.filter(
+    (channel) => channel.kind === "text" || channel.kind === "announcement",
+  );
+  const statePill = !view.available
+    ? `<span class="pill danger">bot not reporting</span>`
+    : stale
+      ? `<span class="pill warn">last report ${escapeHtml(ago(view.state?.reportedAt))}</span>`
+      : !player
+        ? `<span class="pill warn">idle</span>`
+        : player.state === "playing"
+          ? `<span class="pill ok">playing</span>`
+          : player.state === "paused"
+            ? `<span class="pill warn">paused</span>`
+            : `<span class="pill off">${escapeHtml(player.state)}</span>`;
+
+  const form = (
+    action: string,
+    label: string,
+    options: { readonly value?: string | number; readonly variant?: "primary" | "secondary" } = {},
+  ): string => `<form method="post" action="${control}" class="music-action">
+    <input type="hidden" name="csrf" value="${escapeHtml(csrfToken)}">
+    <input type="hidden" name="action" value="${escapeHtml(action)}">
+    ${options.value === undefined ? "" : `<input type="hidden" name="value" value="${escapeHtml(String(options.value))}">`}
+    <button type="submit" class="btn small${options.variant === "primary" ? " primary" : ""}">${escapeHtml(label)}</button>
+  </form>`;
+
+  const now = live && player && track && player.state !== "idle" ? { player, track } : undefined;
+  const nextLoop: MusicLoopMode =
+    player?.loop === "off" ? "track" : player?.loop === "track" ? "queue" : "off";
+  const controls = now
+    ? `<div class="music-controls">
+        ${form("pause", now.player.state === "paused" ? "▶ Resume" : "⏸ Pause", {
+          variant: "primary",
+          ...(now.player.state === "paused" ? { value: "false" } : {}),
+        })}
+        ${form("skip", "⏭ Skip")}
+        ${form("shuffle", "🔀 Shuffle")}
+        ${form("loop", `🔁 Loop ${nextLoop}`, { value: nextLoop })}
+        ${form("stop", "⏹ Stop")}
+      </div>
+      <div class="music-controls">
+        ${form("volume", "🔉 −10", { value: Math.max(0, now.player.volume - 10) })}
+        ${form("volume", "🔊 +10", { value: Math.min(200, now.player.volume + 10) })}
+        <span class="small faint">Volume ${now.player.volume}% · loop ${escapeHtml(now.player.loop)} · ${queue.length} queued</span>
+      </div>`
+    : stale
+      ? `<p class="muted small">Controls are disabled because this is the last state the bot reported. Resume starts the durable queue from its head; Play appends a new track.</p>`
+      : `<p class="muted small">No track is playing. Choose a voice channel and paste an http(s) audio URL to start.</p>`;
+
+  const percent =
+    track?.durationMs && player && track.durationMs > 0
+      ? Math.min(100, Math.max(0, Math.round((player.positionMs / track.durationMs) * 100)))
+      : 0;
+  const duration = track?.isStream ? "LIVE" : clock(track?.durationMs);
+  const staleNotice = stale
+    ? `<div class="notice"><strong>Last known state, not live.</strong>The bot is online, but its last player report was ${escapeHtml(ago(view.state?.reportedAt))}. The queue below is the durable row; a restart resumes from its head, not from this position.</div>`
+    : "";
+  const stage = `${staleNotice}<div class="music-stage">
+    <div class="music-art"${track?.artworkUrl && /^https:\/\//.test(track.artworkUrl) ? ` style="background-image:url('${escapeHtml(track.artworkUrl)}')"` : ""} role="img" aria-label="${track ? escapeHtml(track.title) : "No artwork"}">
+      ${track?.artworkUrl ? "" : `<span aria-hidden="true">♪</span>`}
+    </div>
+    <section class="card music-now">
+      <div class="music-eyebrow">${track ? (stale ? "Last known" : "Now playing") : "Player"} ${statePill}</div>
+      <h2 class="music-title">${track ? escapeHtml(track.title) : "Nothing playing"}</h2>
+      <p class="music-artist">${track?.artist ? escapeHtml(track.artist) : "The bot's voice session is the source of every value on this page."}</p>
+      <div class="music-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}" aria-label="Track progress">
+        <span style="width:${percent}%"></span>
+      </div>
+      <div class="music-time"><span>${clock(player?.positionMs)}</span><span>${duration}</span></div>
+      ${controls}
+      <div class="facts" style="margin:14px 0 0">
+        <span class="fact"><span class="dot ${view.state?.node.available ? "ok" : "warn"}"></span>Node <b>${escapeHtml(view.state?.node.name ?? "unknown")}</b>${view.state?.node.version ? ` · ${escapeHtml(view.state.node.version)}` : ""}</span>
+        ${view.state?.node.pingMs === undefined ? "" : `<span class="fact">${view.state.node.pingMs}ms</span>`}
+        ${player?.voiceChannelId ? `<span class="fact">Voice <b>&lt;#${escapeHtml(player.voiceChannelId)}&gt;</b></span>` : ""}
+        <span class="fact">Reported <b>${view.state ? escapeHtml(timestamp(new Date(view.state.reportedAt))) : "never"}</b></span>
+      </div>
+    </section>
+  </div>`;
+
+  const savedQueue = queue.length > 0 && !now;
+  const selectedVoice = player?.voiceChannelId;
+  const selectedText = player?.textChannelId;
+  const defaultText = selectedText ?? textChannels[0]?.id;
+  const startForm = `<section class="card music-start">
+    <div class="card-head"><div><h2>Start or resume</h2><p>The bot joins the voice channel you choose and posts its signed player card in the text channel.</p></div>${statePill}</div>
+    ${
+      !view.available || !view.enabled || voiceChannels.length === 0
+        ? `<div class="notice">${
+            !view.available
+              ? "Dashboard control needs the bot and the web process to share REDIS_URL. The page is read-only until the bot reports."
+              : !view.enabled
+                ? "Music is disabled in this server. Enable it in Module settings before starting a player."
+                : "No voice channel is visible. Set DISCORD_TOKEN on the web process so this page can read the server's channels."
+          }</div>`
+        : `<form method="post" action="${control}" class="music-start-form">
+            <input type="hidden" name="csrf" value="${escapeHtml(csrfToken)}">
+            <label>Voice channel
+              <select name="voiceChannelId" required>${voiceChannels
+                .map(
+                  (channel) =>
+                    `<option value="${escapeHtml(channel.id)}"${channel.id === selectedVoice ? " selected" : ""}>${escapeHtml(channel.name)}</option>`,
+                )
+                .join("")}</select>
+            </label>
+            <label>Player card channel
+              <select name="textChannelId"><option value=""${defaultText === undefined ? " selected" : ""}>None</option>${textChannels
+                .map(
+                  (channel) =>
+                    `<option value="${escapeHtml(channel.id)}"${channel.id === defaultText ? " selected" : ""}>${escapeHtml(channel.name)}</option>`,
+                )
+                .join("")}</select>
+            </label>
+            <label class="grow">http(s) audio URL
+              <input type="url" name="query" placeholder="https://example.com/audio.mp3" maxlength="2048" autocomplete="off">
+            </label>
+            <button type="submit" name="action" value="play" class="btn primary">▶ Play</button>
+            ${
+              savedQueue
+                ? `<button type="submit" name="action" value="resume" class="btn small">↻ Resume saved queue</button>`
+                : ""
+            }
+          </form>
+          <p class="small faint">Resume starts the durable queue from its head; it does not return to the previous second. Choose None for the card channel to play without posting a card.</p>`
+    }
+  </section>`;
+
+  const queueTable =
+    queue.length === 0
+      ? `<div class="empty"><strong>The queue is empty.</strong>Add a URL above, or use <code>/music add</code> in Discord. The queue survives a bot restart; a restart resumes from the head, not from the old second.</div>`
+      : `<div class="table-wrap"><table>
+          <thead><tr><th>#</th><th>Track</th><th>Length</th><th>Asked by</th><th></th></tr></thead>
+          <tbody>${queue
+            .map(
+              (entry, index) => `<tr${index === 0 && now ? ' class="queue-current"' : ""}>
+                <td>${index + 1}${index === 0 && now ? ` <span class="pill brand">now</span>` : ""}</td>
+                <td><strong>${escapeHtml(entry.title)}</strong>${entry.artist ? `<br><span class="faint small">${escapeHtml(entry.artist)}</span>` : ""}</td>
+                <td>${escapeHtml(entry.isStream ? "LIVE" : clock(entry.durationMs))}</td>
+                <td><code>${escapeHtml(entry.requestedBy)}</code></td>
+                <td>${form("remove", "Remove", { value: index + 1 })}</td>
+              </tr>`,
+            )
+            .join("")}</tbody>
+        </table></div>`;
+
+  const notice = view.notice
+    ? `<div class="${view.notice.kind === "ok" ? "notice" : "form-error"}">${escapeHtml(view.notice.text)}</div>`
+    : "";
+
+  const body = `${notice}
+    ${
+      view.available
+        ? stage
+        : `<div class="form-error"><strong>No bot is reporting.</strong>${escapeHtml(view.unavailableReason ?? "The dashboard needs REDIS_URL, and the bot must be running with the same Redis, to control playback. Nothing here can start audio by itself; no command was sent.")}</div>
+           <div class="empty"><strong>The page is honest about it.</strong>Set <code>REDIS_URL</code> on both processes, start the bot, then reload. You can still read the bot's player state here when it reports.</div>`
+    }
+    ${startForm}
+    <section class="card" style="margin-top:16px">
+      <div class="card-head"><div><h2>Queue</h2><p>The same durable row the commands read; the current track is position 1 and is removed only when it ends or is skipped.</p></div><span class="pill">${queue.length} track${queue.length === 1 ? "" : "s"}</span></div>
+      ${queueTable}
+    </section>
+    <p class="small faint">Every accepted control is a signed, audited session write in the web process and one Redis request to the bot. The browser never holds a Discord token. Position is the node's last report, not a browser timer.</p>`;
+
+  return renderShell(
+    {
+      title: "Music",
+      eyebrow: guild.name,
+      lede: "One Lavalink player, one durable queue and one signed card. Start and control the same session from the dashboard or from /music.",
+      username,
+      csrfToken,
+      guild,
+      section: "music",
       head: true,
       actions: `<a class="btn small" href="${base}">Refresh</a>`,
     },

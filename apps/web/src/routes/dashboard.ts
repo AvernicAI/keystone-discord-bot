@@ -25,6 +25,7 @@ import {
   renderConfigPreview,
   renderFleet,
   renderGuildList,
+  renderMusic,
   renderOverview,
   renderSavedTemplateEditor,
   renderSavedTemplates,
@@ -34,8 +35,9 @@ import {
 import { analyticsDays } from "../overview";
 import type { RouteContext } from "../request-context";
 import { SettingsValidationError, parseSettingsForm } from "../settings-form";
-import { DirectoryError } from "../directory";
+import { DirectoryError, type DirectoryChannel } from "../directory";
 import { CONFIG_TEMPLATES, findTemplate } from "../templates";
+import type { MusicControlAction } from "@keystone/kernel";
 
 const MAX_FLEET_GUILDS = 25;
 
@@ -486,6 +488,170 @@ export async function guildOverview(
     "text/html; charset=utf-8",
     { "Cache-Control": "no-store" },
   );
+  return true;
+}
+
+const MUSIC_ACTIONS: readonly MusicControlAction[] = [
+  "play",
+  "resume",
+  "pause",
+  "skip",
+  "stop",
+  "shuffle",
+  "loop",
+  "volume",
+  "remove",
+];
+
+function heartbeatFresh(at: string | undefined): boolean {
+  if (!at) return false;
+  const parsed = Date.parse(at);
+  return Number.isFinite(parsed) && Date.now() - parsed < 20_000;
+}
+
+/**
+ * The music remote. The page reads a bot-published state and a 15-second
+ * heartbeat; it never reads the queue directly, because the bot owns which
+ * track is current. Every write is a control request, not a second player.
+ */
+export async function musicPage(
+  ctx: RouteContext,
+  params: readonly string[],
+): Promise<boolean> {
+  const guildId = params[0] as string;
+  const { session, guild } = await authorizeGuild(ctx.deps, ctx.session, guildId);
+  const editor = await ctx.deps.dashboard.editor(guild, "music");
+
+  let channels: readonly DirectoryChannel[] = [];
+  if (ctx.deps.directory) {
+    try {
+      channels = (await ctx.deps.directory.guildResources(guild.id)).channels;
+    } catch (error) {
+      ctx.deps.logger.warn("music page directory read failed", {
+        guildId: guild.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  const state = ctx.deps.music ? await ctx.deps.music.readState(guild.id) : undefined;
+  const beat = ctx.deps.music ? await ctx.deps.music.readHeartbeat() : undefined;
+  const online = Boolean(ctx.deps.music) && heartbeatFresh(beat);
+  let durable = state?.queue;
+  if (ctx.deps.musicStore) {
+    try {
+      durable = await ctx.deps.musicStore.list(guild.id);
+    } catch (error) {
+      ctx.deps.logger.warn("music page queue read failed", {
+        guildId: guild.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  // The heartbeat proves the bot is alive; it does not prove this guild's
+  // player state is recent. Presenting a dead session as "playing" after a
+  // restart is exactly the kind of fake the page must never show.
+  const fresh = state !== undefined && heartbeatFresh(state.reportedAt);
+  const ok = ctx.url.searchParams.get("ok");
+  const error = ctx.url.searchParams.get("error");
+
+  send(
+    ctx.res,
+    200,
+    renderMusic(session.username, guild, ctx.csrfToken, {
+      ...(state ? { state } : {}),
+      ...(durable ? { queue: durable } : {}),
+      available: online,
+      fresh,
+      enabled: editor.module.enabled,
+      channels,
+      ...(ok ? { notice: { kind: "ok" as const, text: ok.slice(0, 300) } } : {}),
+      ...(error ? { notice: { kind: "error" as const, text: error.slice(0, 300) } } : {}),
+      ...(online
+        ? {}
+        : {
+            unavailableReason: ctx.deps.music
+              ? `No heartbeat from the bot in the last 20 seconds${beat ? ` (last seen ${beat})` : ""}. Start the bot with the same REDIS_URL; the music page is read-only until it reports.`
+              : "REDIS_URL is not set on this web process, so there is no bus to the bot. Nothing was sent and no player was started.",
+          }),
+    }),
+    "text/html; charset=utf-8",
+    { "Cache-Control": "no-store" },
+  );
+  return true;
+}
+
+export async function musicControl(
+  ctx: RouteContext,
+  params: readonly string[],
+): Promise<boolean> {
+  const guildId = params[0] as string;
+  let body!: URLSearchParams;
+  const write = await requireSettingsWrite(ctx.deps, ctx.session, guildId, async () => {
+    body = new URLSearchParams(await parseBody(ctx.req));
+    return body.get("csrf") ?? undefined;
+  });
+  const base = `/dashboard/guilds/${encodePathSegment(guildId)}/music`;
+  const action = (body.get("action") ?? "") as MusicControlAction;
+  if (!MUSIC_ACTIONS.includes(action)) {
+    throw new HttpError(400, "That music control is not supported.", "music_action_invalid");
+  }
+  if (!ctx.deps.music) {
+    throw new HttpError(503, "Dashboard music control needs REDIS_URL on both processes.", "music_bus_unconfigured");
+  }
+
+  const query = (body.get("query") ?? "").trim();
+  if (query.length > 2_048) {
+    throw new HttpError(400, "That URL is longer than 2048 characters.", "music_query_too_long");
+  }
+  const voiceChannelId = (body.get("voiceChannelId") ?? "").trim();
+  const textChannelId = (body.get("textChannelId") ?? "").trim();
+  const value = body.get("value") ?? undefined;
+
+  try {
+    const reply = await ctx.deps.music.request({
+      id: globalThis.crypto.randomUUID(),
+      guildId,
+      actorId: write.session.userId,
+      source: "web",
+      action,
+      ...(query ? { query } : {}),
+      ...(voiceChannelId ? { voiceChannelId } : {}),
+      ...(textChannelId ? { textChannelId } : {}),
+      ...(value !== undefined ? { value } : {}),
+      requestedAt: new Date().toISOString(),
+    });
+    await ctx.deps.audit.append({
+      guildId,
+      actorId: write.session.userId,
+      action: "music.control",
+      targetId: action,
+      data: {
+        action,
+        value,
+        ok: reply.ok,
+        ...(reply.code ? { code: reply.code } : {}),
+        ...(voiceChannelId ? { voiceChannelId } : {}),
+      },
+    });
+    const message = reply.message.slice(0, 240);
+    redirect(
+      ctx.res,
+      `${base}?${reply.ok ? "ok" : "error"}=${encodeURIComponent(message)}`,
+    );
+  } catch (error) {
+    ctx.deps.logger.warn("music control request failed", {
+      guildId,
+      action,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    redirect(
+      ctx.res,
+      `${base}?error=${encodeURIComponent(
+        error instanceof Error ? error.message.slice(0, 240) : "The bot did not answer.",
+      )}`,
+    );
+  }
   return true;
 }
 

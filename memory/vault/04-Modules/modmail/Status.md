@@ -6,7 +6,7 @@ P7 modmail is in repo and live-proven for its command surface. It is the twelfth
 module and the last root named by the approved plan.
 
 - `/modmail setup | open | reply | close | transcript | stats` is registered
-  through the shared catalog. The ledger is **20 roots / 141 subcommands / 161
+  through the shared catalog. The ledger is **20 roots / 147 subcommands / 161
   actions / 4 context menus**.
 - A thread belongs to the member who opened it. Only the owner or staff may read
   it, reply to it or close it; a foreign thread and a missing thread return the
@@ -30,9 +30,9 @@ pnpm vitest run modules/modmail packages/db/src/modmail-store.test.ts
   ✓ modules/modmail/src/modmail.test.ts (6 tests)
   ✓ packages/db/src/modmail-store.test.ts (4 tests)
 
-pnpm test                          # 773 tests / 106 files
-pnpm budget                        # 20/100 roots · 141 subcommands · 161 actions · 4 context menus
-pnpm commands:doctor               # Registry 20 roots · 141 subcommands · 4 context menus
+pnpm test                          # 828 tests / 112 files
+pnpm budget                        # 20/100 roots · 147 subcommands · 167 actions · 4 context menus
+pnpm commands:doctor               # Registry 20 roots · 147 subcommands · 4 context menus
 ```
 
 Focused coverage:

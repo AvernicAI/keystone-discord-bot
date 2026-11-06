@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-05",
+  "updatedAt": "2026-11-06",
   "source": "packages/kernel ModuleRegistry catalog()",
   "roots": 20,
-  "subcommands": 141,
-  "actions": 161,
+  "subcommands": 147,
+  "actions": 167,
   "contextMenus": 4,
   "userContextMenus": 2,
   "messageContextMenus": 2,
@@ -968,24 +968,45 @@
     {
       "name": "music",
       "moduleId": "music",
-      "description": "Save tracks in a durable queue and inspect playback readiness.",
+      "description": "Play, queue and control audio through a real Lavalink player.",
       "options": [],
       "subcommands": [
         {
           "name": "play",
-          "description": "Ask the playback backend to play; refuses when none is installed.",
+          "description": "Join your voice channel and play a URL, or resume the saved queue.",
           "options": [
-            "query"
+            "query",
+            "next"
           ]
         },
         {
+          "name": "resume",
+          "description": "Resume the saved queue or unpause the current track.",
+          "options": []
+        },
+        {
+          "name": "pause",
+          "description": "Pause the current track and keep the queue.",
+          "options": []
+        },
+        {
+          "name": "skip",
+          "description": "Skip the current track and play the next one.",
+          "options": []
+        },
+        {
+          "name": "stop",
+          "description": "Stop playback, empty the queue and leave the voice channel.",
+          "options": []
+        },
+        {
           "name": "queue",
-          "description": "Show the saved queue and whether audio is actually playing.",
+          "description": "Show the current track, the next tracks and the loop state.",
           "options": []
         },
         {
           "name": "add",
-          "description": "Save a track for later; this never plays audio.",
+          "description": "Save a URL at the end of the play queue without starting audio.",
           "options": [
             "query",
             "title"
@@ -993,29 +1014,45 @@
         },
         {
           "name": "remove",
-          "description": "Remove one saved track by position.",
+          "description": "Remove one track by position; removing 1 skips it.",
           "options": [
             "position"
           ]
         },
         {
           "name": "clear",
-          "description": "Clear every saved track. Nothing is left playing.",
+          "description": "Stop playback and empty the queue but stay in voice.",
           "options": []
         },
         {
-          "name": "skip",
-          "description": "Skip the current track; refuses when there is no player.",
+          "name": "volume",
+          "description": "Set the player volume from 0 to 200 percent.",
+          "options": [
+            "percent"
+          ]
+        },
+        {
+          "name": "loop",
+          "description": "Repeat off, one track or the whole queue.",
+          "options": [
+            "mode"
+          ]
+        },
+        {
+          "name": "shuffle",
+          "description": "Shuffle the upcoming tracks and keep the current one at the head.",
           "options": []
         },
         {
-          "name": "stop",
-          "description": "Stop playback; refuses when there is no player.",
-          "options": []
+          "name": "jump",
+          "description": "Jump to a position in the queue and drop the tracks before it.",
+          "options": [
+            "position"
+          ]
         },
         {
           "name": "status",
-          "description": "Show module state, queue count and the exact playback blocker.",
+          "description": "Show node identity, latency, players and the exact playback state.",
           "options": []
         }
       ]

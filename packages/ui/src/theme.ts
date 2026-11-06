@@ -41,6 +41,7 @@ export const GLYPHS = {
   events: "📅",
   modmail: "✉️",
   member: "🪪",
+  music: "🎵",
   ok: "✅",
   warn: "⚠️",
   block: "⛔",

@@ -78,6 +78,8 @@ import {
 } from "@keystone/module-analytics";
 import { AiService, InMemoryAiStore, createAiProvider } from "@keystone/module-ai";
 import { InMemoryMusicStore, UnavailableMusicPlayback } from "@keystone/module-music";
+import { QueueMusicPlayback, type MusicPanelPort } from "./music/playback";
+import type { VoiceNode } from "./music/voice";
 import { InMemoryFormStore } from "@keystone/module-forms";
 import { InMemoryEventStore } from "@keystone/module-events";
 import { InMemoryModmailStore } from "@keystone/module-modmail";
@@ -146,6 +148,15 @@ export interface RuntimePorts {
   readonly logging: LoggingActions;
   /** Mints signed component ids; the same secret the interaction router verifies. */
   readonly signer: ComponentSigner;
+  /**
+   * A configured Lavalink node and the Discord card publisher. Absent means the
+   * operator did not configure audio; status says so and every sound operation
+   * refuses rather than pretending.
+   */
+  readonly music?: {
+    readonly node?: VoiceNode;
+    readonly panel?: MusicPanelPort;
+  };
 }
 
 /**
@@ -308,7 +319,15 @@ export async function createRuntime(
   const musicStore: MusicStore = database ? createMusicStore(database) : new InMemoryMusicStore();
   const music: MusicPort = {
     store: musicStore,
-    playback: new UnavailableMusicPlayback(),
+    playback: ports.music?.node
+      ? new QueueMusicPlayback(
+          ports.music.node,
+          musicStore,
+          settings.forModule("music"),
+          logger.child("music"),
+          ports.music.panel,
+        )
+      : new UnavailableMusicPlayback(),
   };
   const formStore: FormStore = database ? createFormStore(database) : new InMemoryFormStore();
   const eventStore: EventStore = database ? createEventStore(database) : new InMemoryEventStore();
@@ -389,6 +408,7 @@ export async function createRuntime(
       queue: env.REDIS_URL ? "bullmq" : "in-process",
     },
     async close() {
+      if (ports.music?.node) await ports.music.node.close().catch(() => undefined);
       await timerRuntime.close();
       await queue.close();
       await cache.close();

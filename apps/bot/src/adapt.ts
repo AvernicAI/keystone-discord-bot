@@ -90,6 +90,30 @@ type AnyCommandInteraction =
   | MessageContextMenuCommandInteraction;
 
 /**
+ * Voice channel and roles live on the guild member, not on the interaction
+ * options. The music DJ gate needs both, so the adapter reads them once here
+ * instead of every handler reaching into discord.js.
+ */
+function memberFacts(member: unknown): {
+  readonly voiceChannelId: string | null;
+  readonly roleIds: readonly string[];
+} {
+  if (!member || typeof member !== "object") return { voiceChannelId: null, roleIds: [] };
+  const record = member as {
+    voice?: { channelId?: string | null };
+    roles?: unknown;
+  };
+  const roles = record.roles;
+  let roleIds: string[] = [];
+  if (Array.isArray(roles)) roleIds = roles.filter((role): role is string => typeof role === "string");
+  else if (roles && typeof roles === "object" && "cache" in roles) {
+    const cache = (roles as { cache: Map<string, unknown> }).cache;
+    roleIds = [...cache.keys()];
+  }
+  return { voiceChannelId: record.voice?.channelId ?? null, roleIds };
+}
+
+/**
  * One structural adapter for all three application-command kinds. A context
  * menu has no options or subcommands; its target is exposed as `targetId` plus
  * the message author/content when Discord provides them.
@@ -102,6 +126,7 @@ export function asInteractionLike(interaction: AnyCommandInteraction): Interacti
     channelId: interaction.channelId ?? null,
     userId: interaction.user.id,
     permissions: interaction.memberPermissions ? interaction.memberPermissions.toArray() : [],
+    ...memberFacts(interaction.member),
     get replied() {
       return interaction.replied;
     },
@@ -448,6 +473,7 @@ export function asComponentInteraction(
     channelId: interaction.channelId ?? null,
     userId: interaction.user.id,
     permissions: interaction.memberPermissions ? interaction.memberPermissions.toArray() : [],
+    ...memberFacts(interaction.member),
     get replied() {
       return interaction.replied || interaction.deferred;
     },

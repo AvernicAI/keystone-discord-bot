@@ -10,8 +10,8 @@ tickets, economy and AI all stand on.
 > Keystone ships the union — free, documented, and built so a stranger can add a
 > feature in an afternoon.
 
-**Current facts:** **20/100 roots** · **141 real subcommands** · **161 actions** ·
-**4 context menus** · **12 modules** · **773 tests across 106 files**. The full
+**Current facts:** **20/100 roots** · **147 real subcommands** · **167 actions** ·
+**4 context menus** · **12 modules** · **828 tests across 112 files**. The full
 gate is token-free.
 
 This repo is both the product and the course: every module has a spec, tests, a
@@ -105,7 +105,7 @@ is generated in [Feature-Status.md](memory/vault/01-Mission/Feature-Status.md).
 ## Commands
 
 Discord allows 100 global chat-input commands and 15 + 15 context menus.
-Keystone uses **20 roots** and **141 subcommands**, so a subcommand costs no
+Keystone uses **20 roots** and **147 subcommands**, so a subcommand costs no
 global slot. Four context menus — `Report message`, `Case history`, `Rank card`
 and `Explain with AI` — sit on the separate menu budget.
 
@@ -182,7 +182,7 @@ See [Dashboard](memory/vault/03-Architecture/Dashboard.md).
 
 ## Proof
 
-- `pnpm check` covers **773 tests across 106 files**, 35/35 claim checks, the
+- `pnpm check` covers **828 tests across 112 files**, 35/35 claim checks, the
   visual-surface audit and 5,159 memory checks without a token, database or
   network.
 - `pnpm probe:live` is **28/28** on the local stack: SQL, Redis, the queue,

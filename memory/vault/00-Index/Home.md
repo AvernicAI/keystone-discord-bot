@@ -98,12 +98,16 @@ https://github.com/RNGBubba/keystone-discord-bot
   through the case observer, and `!logging status | events | retention | export`
   ran through the real bridge. Member events are adapter-tested only. See
   [[04-Modules/logging/Spec|Logging spec]].
-- **Music queue** in repo (pass 32): `/music play | queue | add | remove |
-  clear | skip | stop | status` stores a durable queue in `community_records`,
-  with a guild row lock in SQL and a per-guild lock in memory. Playback is a
-  port with one explicit unavailable adapter: `play`, `skip` and `stop` refuse
-  with the exact missing pieces instead of pretending audio. The queue is
-  disabled by default. See [[04-Modules/music/Spec|Music spec]].
+- **Music plays** (pass 83): a Lavalink 4.2.2 node from `compose.yaml` owns the
+  voice socket and DAVE behind the `MusicPlayback` port, and `/music` has
+  fourteen subcommands over the durable `community_records` queue whose head is
+  the current track. One signed V2 card carries progress, up next, a jump select
+  and five buttons; the dashboard is a remote that writes through Redis and
+  audits each control. Without a node the refusal names the exact fix and the
+  saved queue still works. Music stays disabled per guild by default. Live proof
+  covers the dashboard path only — nobody has heard the audio yet, and no
+  Discord button has been clicked. See [[04-Modules/music/Spec|Music spec]] and
+  [[04-Modules/music/Status|Music status]].
 - **Context menus** in repo and registered (pass 33): four right-click commands
   reuse the existing services — **Report message** (opens a real case with the
   message id and a capped excerpt), **Case history** (same case rows as

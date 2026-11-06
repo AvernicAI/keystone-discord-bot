@@ -11,37 +11,37 @@ refuses to boot when it fails.
 
 ```text
 20/100 global roots used (80 left)
-141 subcommands · 161 total actions
-4 context menus (2 user · 2 message; 15 each)
-status: OK
+  147 subcommands · 167 total actions
+  4 context menus (2 user · 2 message; 15 each)
+  status: OK
 
   /command    module       subs  opts  chars
   /ai         ai             11     2   1954
   /analytics  analytics       6     1   1539
   /rank       community      12     2   2108
   /ticket     community       8     2   1450
-  /tools      community      25     5   7485
+  /tools      community      25     6   7648
   /about      diagnostics     0     0    131
   /help       diagnostics     5     1    816
   /ping       diagnostics     0     0    103
-  /event      events          7     8   2899
+  /event      events          7     8   2927
   /form       forms           8     5   2709
   /invites    invites         3     1    672
   /logging    logging         7     2   1606
   /appeal     moderation      2     2    575
-  /mod        moderation     16     5   5243
+  /mod        moderation     16     5   5803
   /verify     moderation      2     0    306
   /modmail    modmail         6     2   1614
-  /music      music           8     2   1322
+  /music      music          14     2   2482
   /config     setup           4     3   1106
   /export     setup           6     3   1445
   /setup      setup           5     2   1151
 
   Context menus (separate 15 + 15 budget)
   Explain with AI  ai           message
-  Rank card        community    user
-  Case history     moderation   user
-  Report message   moderation   message
+  Rank card   community    user
+  Case history  moderation   user
+  Report message  moderation   message
 ```
 
 `pnpm budget` prints the live table. It is the source of truth; this page only
@@ -102,8 +102,10 @@ context menus do not consume them. `/help`, `/setup`, `/logging`, `/analytics`,
 `/config`, `/export` and `/music` are roots. `/config` landed in pass 30 with four
 subcommands and no new settings store; `/export` landed in pass 31 with six
 subcommands and reuses the P5 portability service; `/music` landed in pass 32
-with eight subcommands over the existing `community_records` table, and its
-playback seam refuses because no voice/Lavalink client is installed. Pass 33
+with eight subcommands over the existing `community_records` table, and pass 83
+grew it to fourteen (play, resume, pause, volume, loop, shuffle, jump) while
+wiring the playback seam to a Lavalink node — still one root and still no new
+table. Pass 33
 added four context menus over existing services; none needed a root or a table.
 Pass 34 split `/setup` into five subcommands (`status`, `module`, `verify`,
 `import`, `reset`), so the root now spends five more free slots and no new root.

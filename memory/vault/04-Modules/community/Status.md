@@ -102,7 +102,7 @@ the guild.
 ## Verified
 
 ```text
-pnpm check                            exit 0 · 773 tests / 106 files
+pnpm check                            exit 0 · 828 tests / 112 files
   responder.test.ts                   5 tests (auto-responder service)
   community.test.ts                  15 tests (including timer delivery, a concurrent claim and goodbye)
   extras.test.ts                      7 tests
@@ -114,7 +114,7 @@ pnpm check                            exit 0 · 773 tests / 106 files
   context.test.ts                     2 tests (Rank card menu)
   packages/db/src/community.test.ts   6 tests (incl. responder reopen and delivery claim)
   packages/db/src/economy.test.ts     2 tests
-pnpm budget                           20/100 roots · 141 subcommands · 161 actions · 4 context menus, status OK
+pnpm budget                           20/100 roots · 147 subcommands · 167 actions · 4 context menus, status OK
 pnpm memory:check                     current (pass 62)
 ```
 

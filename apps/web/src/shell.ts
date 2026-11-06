@@ -10,6 +10,7 @@ export interface ShellGuild {
 
 export type GuildSection =
   | "overview"
+  | "music"
   | "analytics"
   | "activity"
   | "directory"
@@ -55,6 +56,7 @@ export type IconName =
   | "layers"
   | "key"
   | "webhook"
+  | "music"
   | "server"
   | "shield"
   | "spark"
@@ -72,6 +74,7 @@ const ICON_PATHS: Record<IconName, string> = {
   layers: '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/><path d="m3 17 9 5 9-5"/>',
   key: '<circle cx="8" cy="15" r="4"/><path d="m11 12 8-8M17 6l2 2M14 9l2 2"/>',
   webhook: '<path d="M9 9a4 4 0 1 1 6 3.4"/><path d="M15 15a4 4 0 1 1-6-3.4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/>',
+  music: '<path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/>',
   server: '<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/>',
   shield: '<path d="M12 3 20 6v6c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6l8-3Z"/><path d="m9 12 2 2 4-4"/>',
   spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>',
@@ -109,6 +112,7 @@ const NAV_GROUPS: ReadonlyArray<{
     label: "Observe",
     links: [
       { section: "overview", label: "Overview", icon: "home", path: "" },
+      { section: "music", label: "Music", icon: "music", path: "/music" },
       { section: "analytics", label: "Analytics", icon: "chart", path: "/analytics" },
       { section: "activity", label: "Activity", icon: "activity", path: "/activity" },
       { section: "directory", label: "Channels & roles", icon: "hash", path: "/directory" },

@@ -718,7 +718,7 @@ async function main(): Promise<void> {
   });
 
   // --- Web health with a real database --------------------------------------
-  const web = createWebRuntime(env);
+  const web = await createWebRuntime(env);
   assert(web.mode.database === "postgres", "the web runtime did not use Postgres");
   const server = createServer(web.handler);
   await new Promise<void>((resolve, reject) => {

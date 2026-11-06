@@ -275,6 +275,9 @@ importers:
       dotenv:
         specifier: ^16.4.0
         version: 16.6.1
+      shoukaku:
+        specifier: 4.3.0
+        version: 4.3.0
     devDependencies:
       '@keystone/testing':
         specifier: workspace:*
@@ -288,6 +291,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@keystone/cache':
+        specifier: workspace:*
+        version: link:../../packages/cache
       '@keystone/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -493,6 +499,9 @@ importers:
       '@keystone/kernel':
         specifier: workspace:*
         version: link:../../packages/kernel
+      '@keystone/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       zod:
         specifier: ^3.25.0
         version: 3.25.76
@@ -1571,6 +1580,10 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  shoukaku@4.3.0:
+    resolution: {integrity: sha512-jMEqVKvquGEqysnOL7a1hmnOAEJO47kTLoS7cGJLbIya3olSlFkMq7jbrrENijnx8fujXvMgUmQqwEdQk/Rkug==}
+    engines: {node: '>=18.0.0', npm: '>=7.0.0'}
+
   siginfo@2.0.0:
     resolution: {integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==}
 
@@ -2472,6 +2485,13 @@ snapshots:
       fsevents: 2.3.3
 
   semver@7.8.5: {}
+
+  shoukaku@4.3.0:
+    dependencies:
+      ws: 8.22.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   siginfo@2.0.0: {}
 

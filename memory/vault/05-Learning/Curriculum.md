@@ -10,7 +10,7 @@ more than one file, or you have and it became unmaintainable.
 
 ## Lessons
 
-The curriculum has **15 lessons**, all written against code that exists now.
+The curriculum has **16 lessons**, all written against code that exists now.
 Every lesson is listed in `memory/machine/lessons.json`; `pnpm memory:check`
 verifies its source files, proof commands, required sections and Curriculum
 link. A taught count must name a machine source, so the gate recomputes it. If a
@@ -33,6 +33,7 @@ lesson and the code disagree, the gate fails rather than the prose winning.
 | 13 | [[13-portability-and-receipts]] | `packages/importer`, `packages/db/src/portability-store.ts` | Checksums, dry runs, transactional restore, rollback receipts |
 | 14 | [[14-self-host-quickstart]] | `README.md`, `compose.yaml`, `Dockerfile` | Memory mode, compose, explicit migrations, the probe boundary |
 | 15 | [[15-dashboard-as-a-product]] | `apps/web/src/shell.ts`, `directory.ts`, `readiness.ts` | One shell, audited toggles, computed readiness, read-only ports |
+| 16 | [[16-one-player-not-two]] | `apps/bot/src/music/playback.ts`, `shoukaku-node.ts` | Transport, queue and presentation as three problems; row-is-queue; edit budgets |
 
 ## Not written yet
 

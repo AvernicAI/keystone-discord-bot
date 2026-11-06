@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-05",
+  "updatedAt": "2026-11-06",
   "claims": [
     {
       "id": "R-001",
@@ -10,7 +10,10 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Platform-2026.md", "memory/vault/06-Operations/Intent-Review.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Platform-2026.md",
+        "memory/vault/06-Operations/Intent-Review.md"
+      ]
     },
     {
       "id": "R-002",
@@ -20,7 +23,10 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2026-12-31",
-      "usedIn": ["memory/vault/02-Research/Platform-2026.md", "apps/bot/src/channels.ts"]
+      "usedIn": [
+        "memory/vault/02-Research/Platform-2026.md",
+        "apps/bot/src/channels.ts"
+      ]
     },
     {
       "id": "R-003",
@@ -30,7 +36,10 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Platform-2026.md", "memory/vault/03-Architecture/Command-Budget.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Platform-2026.md",
+        "memory/vault/03-Architecture/Command-Budget.md"
+      ]
     },
     {
       "id": "R-004",
@@ -40,7 +49,9 @@
       "retrievedAt": "2026-10-31",
       "confidence": "medium",
       "expiresAt": "2027-01-31",
-      "usedIn": ["memory/vault/02-Research/Platform-2026.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Platform-2026.md"
+      ]
     },
     {
       "id": "R-005",
@@ -50,7 +61,9 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/03-Architecture/Command-Budget.md"]
+      "usedIn": [
+        "memory/vault/03-Architecture/Command-Budget.md"
+      ]
     },
     {
       "id": "R-006",
@@ -60,7 +73,9 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Platform-2026.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Platform-2026.md"
+      ]
     },
     {
       "id": "R-007",
@@ -70,7 +85,10 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Platform-2026.md", "memory/vault/01-Mission/Master-Plan.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Platform-2026.md",
+        "memory/vault/01-Mission/Master-Plan.md"
+      ]
     },
     {
       "id": "R-008",
@@ -80,7 +98,9 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/07-OpenSource/Governance.md"]
+      "usedIn": [
+        "memory/vault/07-OpenSource/Governance.md"
+      ]
     },
     {
       "id": "R-009",
@@ -90,7 +110,10 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Import-Formats.md", "memory/vault/01-Mission/Master-Plan.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Import-Formats.md",
+        "memory/vault/01-Mission/Master-Plan.md"
+      ]
     },
     {
       "id": "R-010",
@@ -100,7 +123,9 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Import-Formats.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Import-Formats.md"
+      ]
     },
     {
       "id": "R-011",
@@ -110,7 +135,9 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Import-Formats.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Import-Formats.md"
+      ]
     },
     {
       "id": "R-012",
@@ -120,7 +147,9 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Import-Formats.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Import-Formats.md"
+      ]
     },
     {
       "id": "R-013",
@@ -130,7 +159,9 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Import-Formats.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Import-Formats.md"
+      ]
     },
     {
       "id": "R-014",
@@ -140,7 +171,10 @@
       "retrievedAt": "2026-10-31",
       "confidence": "medium",
       "expiresAt": "2027-01-31",
-      "usedIn": ["memory/vault/02-Research/Competitive-2026.md", "memory/vault/02-Research/Pain-Points.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitive-2026.md",
+        "memory/vault/02-Research/Pain-Points.md"
+      ]
     },
     {
       "id": "R-015",
@@ -150,7 +184,9 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitive-2026.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitive-2026.md"
+      ]
     },
     {
       "id": "R-016",
@@ -160,7 +196,9 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/OSS-2026.md"]
+      "usedIn": [
+        "memory/vault/02-Research/OSS-2026.md"
+      ]
     },
     {
       "id": "R-017",
@@ -170,7 +208,10 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/OSS-2026.md", "memory/vault/07-OpenSource/Governance.md"]
+      "usedIn": [
+        "memory/vault/02-Research/OSS-2026.md",
+        "memory/vault/07-OpenSource/Governance.md"
+      ]
     },
     {
       "id": "R-018",
@@ -180,7 +221,9 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Dashboard-Security.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Dashboard-Security.md"
+      ]
     },
     {
       "id": "R-019",
@@ -190,7 +233,9 @@
       "retrievedAt": "2026-10-31",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Dashboard-Security.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Dashboard-Security.md"
+      ]
     },
     {
       "id": "R-020",
@@ -200,7 +245,10 @@
       "retrievedAt": "2026-10-31",
       "confidence": "medium",
       "expiresAt": "2027-01-31",
-      "usedIn": ["memory/vault/02-Research/User-Voice-2026.md", "memory/vault/02-Research/Pain-Points.md"]
+      "usedIn": [
+        "memory/vault/02-Research/User-Voice-2026.md",
+        "memory/vault/02-Research/Pain-Points.md"
+      ]
     },
     {
       "id": "R-021",
@@ -210,7 +258,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-022",
@@ -220,7 +271,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-023",
@@ -230,7 +284,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-024",
@@ -240,7 +297,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-025",
@@ -250,7 +310,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-026",
@@ -260,7 +323,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-027",
@@ -270,7 +336,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-028",
@@ -280,7 +349,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-029",
@@ -290,7 +362,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "medium",
       "expiresAt": "2027-01-31",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-030",
@@ -300,7 +375,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-031",
@@ -310,7 +388,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-032",
@@ -320,7 +401,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-033",
@@ -330,7 +414,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-034",
@@ -340,7 +427,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "medium",
       "expiresAt": "2027-01-31",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-035",
@@ -350,7 +440,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-036",
@@ -360,7 +453,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-037",
@@ -370,7 +466,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-038",
@@ -380,7 +479,10 @@
       "retrievedAt": "2026-11-05",
       "confidence": "medium",
       "expiresAt": "2027-01-31",
-      "usedIn": ["memory/vault/02-Research/Competitor-Index.md", "memory/machine/competitors.json"]
+      "usedIn": [
+        "memory/vault/02-Research/Competitor-Index.md",
+        "memory/machine/competitors.json"
+      ]
     },
     {
       "id": "R-039",
@@ -390,7 +492,9 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"
+      ]
     },
     {
       "id": "R-040",
@@ -400,7 +504,9 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-01-31",
-      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"
+      ]
     },
     {
       "id": "R-041",
@@ -410,7 +516,9 @@
       "retrievedAt": "2026-11-05",
       "confidence": "medium",
       "expiresAt": "2027-01-31",
-      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"
+      ]
     },
     {
       "id": "R-042",
@@ -420,7 +528,9 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"
+      ]
     },
     {
       "id": "R-043",
@@ -430,7 +540,9 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-01-31",
-      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"
+      ]
     },
     {
       "id": "R-044",
@@ -440,7 +552,9 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-04-30",
-      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"
+      ]
     },
     {
       "id": "R-045",
@@ -450,7 +564,9 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-01-31",
-      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"
+      ]
     },
     {
       "id": "R-046",
@@ -460,7 +576,45 @@
       "retrievedAt": "2026-11-05",
       "confidence": "high",
       "expiresAt": "2027-01-31",
-      "usedIn": ["memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"]
+      "usedIn": [
+        "memory/vault/02-Research/Web-Dashboard-Benchmark-2026.md"
+      ]
+    },
+    {
+      "id": "R-047",
+      "topic": "platform",
+      "claim": "Lavalink 4.2.0 added support for Discord DAVE, and the official client table marks Shoukaku as DAVE-capable, so a Lavalink v4 node owns the voice encryption handshake instead of the bot library.",
+      "source": "https://lavalink.dev/clients",
+      "retrievedAt": "2026-11-06",
+      "confidence": "high",
+      "expiresAt": "2027-05-06",
+      "usedIn": [
+        "memory/vault/04-Modules/music/Teaching.md"
+      ]
+    },
+    {
+      "id": "R-048",
+      "topic": "platform",
+      "claim": "Discord enforces end-to-end encryption (DAVE) for DMs, group DMs, server voice channels and Go Live from 2026-03-01, so a music bot that owns the voice socket itself must implement DAVE.",
+      "source": "https://discord.com/blog/bringing-dave-to-all-discord-platforms",
+      "retrievedAt": "2026-11-06",
+      "confidence": "high",
+      "expiresAt": "2027-05-06",
+      "usedIn": [
+        "memory/vault/04-Modules/music/Teaching.md"
+      ]
+    },
+    {
+      "id": "R-049",
+      "topic": "platform",
+      "claim": "The Lavalink v4 REST API resolves tracks through `/v4/loadtracks` and reports node totals through `/v4/stats`, whose `players` and `playingPlayers` counters are what a headless run can use to distinguish a connected node from one actually sending audio.",
+      "source": "https://lavalink.dev/api/rest",
+      "retrievedAt": "2026-11-06",
+      "confidence": "high",
+      "expiresAt": "2027-05-06",
+      "usedIn": [
+        "memory/vault/04-Modules/music/Status.md"
+      ]
     }
   ]
 }

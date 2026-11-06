@@ -4,22 +4,22 @@
   "tagline": "An open-source, teach-by-default all-in-one Discord bot.",
   "mission": "vault/01-Mission/Mission.md",
   "northStar": "vault/01-Mission/North-Star.md",
-  "updatedAt": "2026-11-05",
+  "updatedAt": "2026-11-06",
   "phase": "P7.5",
-  "lastPass": "journal/2026-11-05-pass-78.md",
-  "nextAction": "Take the visual audit's weakest surface (the moderation case embed) onto the grammar, then wire the directory port into the settings channel/role picker.",
+  "lastPass": "journal/2026-11-06-pass-83.md",
+  "nextAction": "Have a human listener join the voice channel and confirm audible output, then click one card button from a real client; promote gap.music-playback to covered only after both.",
   "live": {
     "report": "machine/live.json",
     "id": "live-2026-11-05"
   },
   "metrics": {
     "commands": 20,
-    "subcommands": 141,
-    "actions": 161,
+    "subcommands": 147,
+    "actions": 167,
     "contextMenus": 4,
     "commandLimit": 100,
     "modules": 12,
-    "tests": 773
+    "tests": 828
   },
   "modules": [
     {
@@ -394,14 +394,6 @@
       "recommendation": "Moderation + tickets + logging first; grow in public.",
       "status": "answered",
       "answer": "The P2+P3 block shipped; the approved roadmap now sequences P4.5–P10."
-    },
-    {
-      "id": "Q-3",
-      "question": "Music: bring-your-own Lavalink only?",
-      "blocks": "P6",
-      "recommendation": "Yes. No bundled streamer, disabled by default.",
-      "status": "answered",
-      "answer": "BYO Lavalink only, disabled by default, P8. No bundled streamer."
     }
   ],
   "phaseStatus": "in-progress",

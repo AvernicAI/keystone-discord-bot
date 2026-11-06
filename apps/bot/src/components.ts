@@ -13,6 +13,7 @@ import {
   type Logger,
   type ModerationPort,
   type ModuleSettings,
+  type MusicPlayback,
 } from "@keystone/kernel";
 import { DEFAULT_LOCALE, guildLocale, t } from "@keystone/i18n";
 import { asComponentInteraction } from "./adapt";
@@ -21,6 +22,7 @@ import { registerEventRoutes } from "./event-interactions";
 import { registerFormRoutes } from "./form-interactions";
 import { registerHelpRoutes } from "./help-interactions";
 import { registerModerationRoutes, type MemberTimelineLoader } from "./moderation-buttons";
+import { registerMusicRoutes } from "./music-interactions";
 
 export interface ComponentRuntimeDeps {
   /** Signs every button and modal id; only the composition root holds it. */
@@ -45,6 +47,11 @@ export interface ComponentRuntimeDeps {
   /** Event RSVP buttons call the same service `/event rsvp` uses. */
   readonly events: {
     readonly store: EventStore;
+    readonly settings: ModuleSettings;
+  };
+  /** The real player and its per-guild settings; absent means no audio. */
+  readonly music?: {
+    readonly playback: MusicPlayback;
     readonly settings: ModuleSettings;
   };
   /** Reads the setup module's per-guild locale; absent means English. */
@@ -89,6 +96,9 @@ export function createComponentRouter(deps: ComponentRuntimeDeps): ComponentRout
     signer: deps.signer,
     timeline: deps.timeline,
   });
+  if (deps.music) {
+    registerMusicRoutes(router, deps.music);
+  }
   // The help hub reads the catalog and health the bot already has, rather than
   // a second copy of either. Its routes are guild-only and signed like every
   // other panel.

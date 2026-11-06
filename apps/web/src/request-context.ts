@@ -4,6 +4,8 @@ import type {
   AuditStore,
   IdempotencyStore,
   Logger,
+  MusicControlBus,
+  MusicStore,
   WebSession,
 } from "@keystone/kernel";
 import type { GuildAccessService } from "./access";
@@ -31,6 +33,10 @@ export interface WebServerDeps {
   idempotency: IdempotencyStore;
   /** Absent when the process has no bot token; the page says so. */
   directory?: DirectoryPort;
+  /** Absent without REDIS_URL; the music page says remote control is off. */
+  music?: MusicControlBus;
+  /** Reads the durable play row directly so a saved queue survives a restart. */
+  musicStore?: MusicStore;
 }
 
 export interface RouteContext {

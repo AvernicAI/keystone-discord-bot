@@ -2,6 +2,27 @@
 
 ## Now
 
+**Pass 83 made music play** (2026-11-06): a Lavalink 4.2.2 node from
+`compose.yaml` now owns the voice socket and DAVE behind the unchanged
+`MusicPlayback` port, so the durable `community_records` row is the play queue
+(`tracks[0]` is the current track) rather than a planning list. One signed
+Components V2 card carries progress, the next up to five tracks, a jump select,
+five buttons and volume, edited in place behind a 1.5 s throttle; the dashboard
+is a remote that writes each control through Redis and audits it, and marks a
+report older than 20 s as last-known with controls disabled. A real browser run
+drove nine controls against the running node and Postgres row — play, pause,
+unpause continuing at `0:06`, a bot restart showing last-known state, resume
+from the durable head at `0:00`, append (`Queued at position 3.`), skip, loop
+track plus skip still advancing, shuffle keeping the head, remove, and stop
+deleting the row and the player — while `/v4/stats` and a Discord REST read-back
+of the card confirmed what the page claimed. Four defects the run exposed were
+fixed at their cause: a paused player's Resume restarted the queue instead of
+unpausing, controls rendered a page up to 5 s stale, an append claimed it had
+started playback, and a dead session's head was labelled `now`. The tests now
+cover 828 across 112 files, and the one proof this pass cannot produce is stated
+plainly on the module page: nobody listened, so `playingPlayers: 1` proves frames
+were sent, not that a person heard them.
+
 **Pass 78 made the dashboard usable and closed the live OAuth loop**
 (2026-11-05): one shell and one palette now cover every page, the guild overview
 is a goal-grouped module catalog with an audited enable/disable toggle and four
@@ -22,7 +43,7 @@ membership per guild. Market research corrected two assumptions before they
 became copy: Ticket Tool uses channel pickers, not raw ids, and Carl-bot issue
 #50 is about reaction roles with the "nothing happens" save quote in a 2025
 comment. `surfaces.json` now grades 25 surfaces, including thirteen web rows;
-`audit:visuals` scans every page renderer. Tests are **773 / 106 files**. P6 is
+`audit:visuals` scans every page renderer. Tests are **828 / 112 files**. P6 is
 complete: the only remaining proof gap is token refresh and revocation against
 real Discord credentials, which stay probe-only. See
 [pass 78](../../journal/2026-11-05-pass-78.md).
@@ -626,7 +647,7 @@ wrote a draft, `edit` opened it, `panel` posted, `submit` wrote
 `delete` was refused while the history exists, and `export` produced a **1.5 KB**
 file that downloaded (HTTP 200, 1540 bytes) and parsed as **1 form / 1
 submission** with the same answers, reviewer and note and a checksum that
-recomputes. `commands:doctor` now reports **20 roots / 141 subcommands / 4
+recomputes. `commands:doctor` now reports **20 roots / 147 subcommands / 4
 context menus** with no drift. See [[04-Modules/forms/Status|Forms status]].
 
 **P7 `/verify` is a real two-subcommand hub with a complete persisted join gate**
@@ -647,7 +668,7 @@ cannot make a member join, receive the DM or click the button, so the join and
 completion paths are covered by security, command and PGlite tests, not claimed
 live. Pass 39 moved the DM itself onto `ModerationActions.directMessage`, so the
 join gate no longer borrows the community adapter; the body, button and refusal
-text are unchanged. `commands:doctor` now reports **20 roots / 141 subcommands /
+text are unchanged. `commands:doctor` now reports **20 roots / 147 subcommands /
 4 context menus** with no drift. See [[04-Modules/moderation/Status|Moderation
 status]].
 
@@ -699,19 +720,19 @@ cover each path. See [[04-Modules/moderation/Status|Moderation status]],
 [[04-Modules/community/Status|Community status]] and
 [[04-Modules/ai/Status|AI status]].
 
-**P8 music is in repo and live-proven for the saved queue; playback is explicitly
-not shipped** (pass 32, 2026-11-01): `/music play | queue | add | remove | clear |
-skip | stop | status` is the ninth module and the last named v1.0 root. The saved
-queue is a real `community_records` row per guild (kind `music_queue`, key
+**At pass 32, P8 music shipped the saved queue and refused playback** (2026-11-01;
+playback landed in pass 83, above): `/music play | queue | add | remove | clear |
+skip | stop | status` was the ninth module and the last named v1.0 root. The saved
+queue was a real `community_records` row per guild (kind `music_queue`, key
 `default`); the SQL adapter locks the guild row so concurrent adds hold the cap,
-and the in-memory adapter serializes per guild. Playback is a separate port with
-one adapter that refuses: this build has no Discord voice client, no Lavalink
-client and no `LAVALINK_URL`, so `play`, `skip` and `stop` return that exact
-reason and `/music status` prints `playback UNAVAILABLE`. The queue is disabled by
+and the in-memory adapter serializes per guild. Playback was a separate port with
+one adapter that refused: that build had no Discord voice client, no Lavalink
+client and no `LAVALINK_URL`, so `play`, `skip` and `stop` returned that exact
+reason and `/music status` printed `playback UNAVAILABLE`. The queue is disabled by
 default; `status` still works while disabled. Live in `#ai-chat`: status showed
 disabled 0/25, `/config set music.enabled=true` enabled it, two adds reached
 2/25, `queue` listed both tracks, `play` and `skip` refused, `remove position=1`
-left 1/25, and after disabling, `add` was refused. The root adds one slot and
+left 1/25, and after disabling, `add` was refused. The root added one slot and
 eight subcommands; no migration, no new intent, no paid service. See
 [[04-Modules/music/Spec|Music spec]] and [[04-Modules/music/Status|Music status]].
 
@@ -746,7 +767,7 @@ read-back after each write; `bogus` returned `automod.links: Invalid enum value`
 and the next read still returned `"alert"`. Pass 31 added `/export` and pass 32 added
 `/music`, pass 35 split `/appeal` into two, pass 36 split `/verify` into two and
 pass 42 added `/modmail` with six, so Discord now reports **20 roots / 141
-subcommands / 161 actions** including `config`, `export`, `form`, `modmail`,
+subcommands / 167 actions** including `config`, `export`, `form`, `modmail`,
 `music`, the five `/setup` actions, the two `/appeal` actions and the two
 `/verify` actions. The MCP cannot invoke slash
 commands or render embeds, so the live proof is the message bridge with
@@ -850,13 +871,13 @@ that point. Pass 29 added `/analytics` with six subcommands, pass 30 added
 with eight, pass 34 split `/setup` into five, pass 35 split `/appeal` into two,
 pass 36 split `/verify` into two, pass 40 added `/form` with eight, pass 41
 added `/event` with seven and pass 42 added `/modmail` with six; the current
-ledger, after pass 45's `temp-role`, is **20 roots · 141 subcommands · 161
+ledger, after pass 45's `temp-role`, is **20 roots · 147 subcommands · 161
 actions**. After pass 30 the boot found
 `config` missing, cleared the global set once and re-registered it; pass 31's
 boot found only `export` missing and did the same. Pass 33 now models context
 menus as application commands with their own type and budget, and its boot found
 all four menus missing and re-registered 21 commands. `commands:doctor` now
-reports 20 roots / 141 subcommands plus 2 user and 2 message menus, including
+reports 20 roots / 147 subcommands plus 2 user and 2 message menus, including
 `analytics`, `logging`, `config`, `event`, `export`, `form`, `modmail`, `music`,
 the five `/setup` actions, the two `/appeal` actions and the two `/verify`
 actions. See
@@ -949,7 +970,7 @@ hub, pass 40's `/form`, pass 41's `/event` and pass 42's `/modmail`, so Discord'
 fetched shape at pass 42 reported **20 roots / 138 subcommands** with no missing,
 extra or changed roots.
 
-The registry now has 141 subcommands.
+The registry now has 147 subcommands.
 The bridge
 added `!help commands`, `!help browse`, `!help search query=ban`, `!mod history`,
 `!ai status`, `!logging status`, `!logging events`, `!logging retention`,
@@ -992,7 +1013,7 @@ public packaging pass also added the README and `AGENTS.md` read paths.
 ## Gate
 
 ```
-pnpm check        exit 0 · typecheck 0 · 773 tests / 106 files · budget 20/100 roots (141 subcommands · 161 actions · 4 context menus) · claims current · visuals 25 surfaces · live 28/28 · memory current
+pnpm check        exit 0 · typecheck 0 · 828 tests / 112 files · budget 20/100 roots (147 subcommands · 167 actions · 4 context menus) · claims current · visuals 25 surfaces · live 28/28 · memory current
 pnpm build        exit 0 · bot, worker, web, migrate and portability artefacts
 live              2026-11-01 · AI Team#5758 · 2 guilds · 20 roots / 138 subcommands / 2 user menus / 2 message menus · one bot process · qwen3:8b reply in #ai-chat · /modmail open → reply → 2-message archive → duplicate close refused → stats 1/0/2 · /event create → open → rsvp 1/2 → reminder → decline → 1.2 KB export parsed with the same row · /form create → open → panel → submit → 1 pending → accepted → 1.5 KB export parsed with the same answers and decision · logging edit/delete/case embeds delivered · /config alert→delete→alert read back · /export 12.8 KB bundle parsed · /music 2/25 saved → 1/25 after remove, playback refused · /setup 9 modules, music enable → reset → disabled read-back · /appeal case #1 appealed → reviewed with the event retained, other member's case refused · /verify status no record → start refused with no quarantine → no row written
 live menus        2026-11-01 · boot found Report message / Case history / Rank card / Explain with AI missing · one clear + re-register · 21 application commands · doctor reports 2 user + 2 message menus, no drift · right-click invocation not performed (MCP cannot)

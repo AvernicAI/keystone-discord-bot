@@ -69,6 +69,16 @@ export const ROUTES: readonly Route[] = [
     handler: dashboard.configImportApply,
   },
   {
+    pattern: exact(`/dashboard/guilds/${GUILD_ID}/music`),
+    methods: ["GET"],
+    handler: dashboard.musicPage,
+  },
+  {
+    pattern: exact(`/dashboard/guilds/${GUILD_ID}/music/control`),
+    methods: ["POST"],
+    handler: dashboard.musicControl,
+  },
+  {
     pattern: exact(`/dashboard/guilds/${GUILD_ID}`),
     methods: ["GET"],
     handler: dashboard.guildOverview,

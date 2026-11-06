@@ -14,6 +14,10 @@ export interface ComponentInteractionLike {
   readonly channelId: string | null;
   readonly userId: string;
   readonly permissions: readonly string[];
+  /** The clicker's current voice channel; absent when the adapter cannot see it. */
+  readonly voiceChannelId?: string | null;
+  /** Role snowflakes the clicker holds; the music card uses this for its DJ gate. */
+  readonly roleIds?: readonly string[];
   /** Selected values for a string select; undefined otherwise. */
   readonly values?: readonly string[];
   /** Text input values for a modal submit, keyed by input custom id. */

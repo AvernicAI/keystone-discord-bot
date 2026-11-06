@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-05",
-  "target": 15,
+  "updatedAt": "2026-11-06",
+  "target": 16,
   "lessons": [
     {
       "id": "01-the-module-contract",
@@ -149,13 +149,13 @@
       ],
       "facts": [
         {
-      "text": "21 migrations",
-      "source": "migrations"
-    },
-    {
-      "text": "28 live checks",
-      "source": "liveChecks"
-    }
+          "text": "21 migrations",
+          "source": "migrations"
+        },
+        {
+          "text": "28 live checks",
+          "source": "liveChecks"
+        }
       ]
     },
     {
@@ -230,6 +230,27 @@
       "proofCommands": [
         "pnpm test -- apps/web/src/shell.test.ts apps/web/src/directory.test.ts apps/web/src/readiness.test.ts",
         "pnpm audit:visuals"
+      ]
+    },
+    {
+      "id": "16-one-player-not-two",
+      "order": 16,
+      "path": "vault/05-Learning/16-one-player-not-two.md",
+      "files": [
+        "apps/bot/src/music/playback.ts",
+        "apps/bot/src/music/shoukaku-node.ts",
+        "modules/music/src/panel.ts",
+        "apps/web/src/render.ts"
+      ],
+      "proofCommands": [
+        "pnpm test -- apps/bot/src/music/playback.test.ts apps/bot/src/music-interactions.test.ts",
+        "pnpm audit:visuals"
+      ],
+      "facts": [
+        {
+          "text": "20 roots",
+          "source": "roots"
+        }
       ]
     }
   ]

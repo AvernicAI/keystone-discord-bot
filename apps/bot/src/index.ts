@@ -30,6 +30,15 @@ import { registerPrefixCommands } from "./prefix";
 import { createDiscordAttachmentReader, createDiscordExportFacts } from "./export-discord";
 import { LoggingService } from "@keystone/module-logging";
 import { registerComponentInteractions } from "./components";
+import { ShoukakuNode } from "./music/shoukaku-node";
+import { createMusicPanelPublisher } from "./music/panel";
+import {
+  createMusicControlHandler,
+  publishMusicState,
+  startMusicStateReporter,
+  type MusicReporter,
+} from "./music-control";
+import { createMusicControlBus, type MusicControlHandle } from "@keystone/cache";
 import {
   TemporaryActionService,
   buildNativeAutoModPlan,
@@ -80,14 +89,85 @@ async function main(): Promise<void> {
     disabledFeatures: capabilities.disabledFeatures,
   });
   const client = createClient(intentNames);
+  if (env.LAVALINK_URL && !env.LAVALINK_PASSWORD) {
+    logger.warn(
+      "LAVALINK_URL is set without LAVALINK_PASSWORD — audio stays unavailable until both are set.",
+    );
+  }
+  const musicNode =
+    env.LAVALINK_URL && env.LAVALINK_PASSWORD
+      ? new ShoukakuNode({
+          client,
+          url: env.LAVALINK_URL,
+          password: env.LAVALINK_PASSWORD,
+          name: env.LAVALINK_NAME,
+          secure: env.LAVALINK_SECURE,
+          logger: logger.child("lavalink"),
+        })
+      : undefined;
   const runtime = await createRuntime(env, registry, logger, {
     moderation: createDiscordModerationActions(client),
     community: createDiscordCommunityActions(client),
     invites: createDiscordInviteActions(client, logger.child("invites")),
     logging: createDiscordLoggingActions(client, logger.child("logging")),
     signer: componentSigner,
+    ...(musicNode
+      ? {
+          music: {
+            node: musicNode,
+            panel: createMusicPanelPublisher({
+              client,
+              signer: componentSigner,
+              logger: logger.child("music-card"),
+            }),
+          },
+        }
+      : {}),
   });
   logger.info("runtime ready", runtime.mode);
+
+  const musicControlDeps = {
+    playback: runtime.music.playback,
+    store: runtime.music.store,
+    settings: runtime.settings.forModule("music"),
+    logger: logger.child("music-control"),
+  };
+  let musicControl: MusicControlHandle | undefined;
+  let musicReporter: MusicReporter | undefined;
+  if (env.REDIS_URL) {
+    musicControl = await createMusicControlBus({
+      redisUrl: env.REDIS_URL,
+      logger: logger.child("music-control"),
+    });
+    if (musicControl) {
+      const { bus } = musicControl;
+      const handler = createMusicControlHandler(musicControlDeps);
+      // Publish before replying. The web redirect renders the page the moment
+      // it reads the reply, so a 5-second-old snapshot would show the state
+      // *before* the click (a paused player still labelled PLAYING).
+      bus.serve(async (request) => {
+        const reply = await handler(request);
+        if (reply.ok) {
+          await publishMusicState(musicControlDeps, bus, request.guildId).catch(
+            (error: unknown) => {
+              logger.warn("music state publish after control failed", {
+                guildId: request.guildId,
+                error: error instanceof Error ? error.message : String(error),
+              });
+            },
+          );
+        }
+        return reply;
+      });
+      musicReporter = startMusicStateReporter({
+        bus,
+        deps: musicControlDeps,
+      });
+      logger.info("music dashboard control: redis");
+    }
+  } else {
+    logger.warn("REDIS_URL is not set — dashboard music control is unavailable.");
+  }
 
   const dispatchDeps: DispatchDeps = {
     registry,
@@ -253,6 +333,10 @@ async function main(): Promise<void> {
       store: runtime.events,
       settings: runtime.settings.forModule("events"),
     },
+    music: {
+      playback: runtime.music.playback,
+      settings: runtime.settings.forModule("music"),
+    },
     config: runtime.settings,
     catalog: registry.catalog(),
     health: runtime.health,
@@ -331,6 +415,8 @@ async function main(): Promise<void> {
     stopLogging();
     stopPrefix();
     stopAi();
+    musicReporter?.stop();
+    await musicControl?.close();
     await client.destroy();
     await runtime.close();
     process.exit(0);
